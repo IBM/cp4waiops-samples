@@ -1,14 +1,7 @@
-#******************************************************************************
-# Licensed Materials - Property of IBM
-# (c) Copyright IBM Corporation 2021. All Rights Reserved.
 #
-# Note to U.S. Government Users Restricted Rights:
-# Use, duplication or disclosure restricted by GSA ADP Schedule
-# Contract with IBM Corp.
-#******************************************************************************
-
-#This file contains teh list of resources that the uninstall script will try to uninstall
-
+# Copyright 2020- IBM Inc. All rights reserved
+# SPDX-License-Identifier: Apache2.0
+#
 CP4AIOPS_CONFIGMAPS=("configmap/64fae646.ibm.com"
             "configmap/9efbc0e4.aiops.ibm.com"
             "configmap/evtmanager-trusted-cas"
@@ -33,21 +26,22 @@ CP4AIOPS_PVCS=("persistentvolumeclaim/back-evtmanager-cassandra-0"
                "persistentvolumeclaim/space-evtmanager-nciserver-0"
                "persistentvolumeclaim/stolon-data-aimanager-postgres-keeper-0")
 
-CP4AIOPS_SECRETS=("secret/evtmanager-cassandra-auth-secret"
-            "secret/evtmanager-cem-brokers-cred-secret"
+CP4AIOPS_PVC_SECRETS=("secret/evtmanager-couchdb-secret"
+                      "secret/evtmanager-cem-couchdb-cred-secret"
+                      "secret/evtmanager-cassandra-auth-secret"
+                      "secret/evtmanager-cem-model-secret"
+                      "secret/evtmanager-cem-ibm-redis-cred-secret"
+                      "secret/evtmanager-cem-intctl-hmac-secret")
+
+CP4AIOPS_SECRETS=("secret/evtmanager-cem-brokers-cred-secret"
             "secret/evtmanager-cem-cemusers-cred-secret"
             "secret/evtmanager-cem-channelservices-cred-secret"
-            "secret/evtmanager-cem-couchdb-cred-secret"
             "secret/evtmanager-cem-download-secret"
             "secret/evtmanager-cem-email-auth-secret"
             "secret/evtmanager-cem-event-analytics-ui-session-secret"
-            "secret/evtmanager-cem-ibm-redis-cred-secret"
-            "secret/evtmanager-cem-intctl-hmac-secret"
             "secret/evtmanager-cem-integrationcontroller-cred-secret"
-            "secret/evtmanager-cem-model-secret"
             "secret/evtmanager-cem-nexmo-auth-secret"
             "secret/evtmanager-cem-service-secret"
-            "secret/evtmanager-couchdb-secret"
             "secret/evtmanager-ibm-hdm-app-kat-ui-session-secret"
             "secret/evtmanager-ibm-hdm-common-ui-session-secret"
             "secret/evtmanager-ibm-redis-authsecret"

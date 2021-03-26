@@ -1,14 +1,8 @@
 #!/bin/bash
-
-#******************************************************************************
-# Licensed Materials - Property of IBM
-# (c) Copyright IBM Corporation 2021. All Rights Reserved.
 #
-# Note to U.S. Government Users Restricted Rights:
-# Use, duplication or disclosure restricted by GSA ADP Schedule
-# Contract with IBM Corp.
-#******************************************************************************
-
+# Copyright 2020- IBM Inc. All rights reserved
+# SPDX-License-Identifier: Apache2.0
+#
 . ./uninstall-cp4waiops-props.sh
 
 export OPERATORS_NAMESPACE=openshift-operators
@@ -273,10 +267,11 @@ delete_iaf_bedrock () {
     unsubscribe "ibm-common-service-operator-beta-opencloud-operators-openshift-marketplace" $OPERATORS_NAMESPACE
     unsubscribe "ibm-common-service-operator-v3-opencloud-operators-openshift-marketplace" $OPERATORS_NAMESPACE 
 
+    # TODO: should not be required I think if we delete the operators first but 2 operandrequests are left behind; check with IAF
     oc delete operandrequest iaf-operator -n openshift-operators --ignore-not-found
     oc delete operandrequest iaf-core-operator -n openshift-operators --ignore-not-found
 
-    # Note: Verify there are no operandrequests & operandbindinfo at this point before proceeding.  It may take a few minutes for them to go away.
+    # Note :  Verify there are no operandrequests & operandbindinfo at this point before proceeding.  It may take a few minutes for them to go away.
     log $INFO "Checking if operandrequests are all deleted "
     while [ `oc get operandrequests -A --ignore-not-found --no-headers|  wc -l` -gt 0 ]
     do
@@ -378,34 +373,34 @@ fi
 
 display_script_properties(){
 
-    echo "##### Properties in uninstall-cp4waiops-props.sh #####"
-    echo
-    if [[ $DELETE_ALL == "true" ]]; then
-        echo "The script uninstall-cp4waiops-props.sh has 'DELETE_ALL=true', hence the script will execute wih below values: "
-    else
-        echo "The script uninstall-cp4waiops-props.sh has the properties with below values: "
-    fi
-    echo "AIOPS_PROJECT=$AIOPS_PROJECT"
-    echo "INSTALLATION_CR_NAME=$INSTALLATION_CR_NAME"
-    echo "DELETE_PVCS=$DELETE_PVCS"
-    echo "DELETE_SECRETS=$DELETE_SECRETS"
-    echo "DELETE_CONFIGMAPS=$DELETE_CONFIGMAPS"
-    echo "DELETE_KONG_CRDS=$DELETE_KONG_CRDS"
-    echo "DELETE_CAMELK_CRDS=$DELETE_CAMELK_CRDS"
-    echo "DELETE_ZENSERVICE=$DELETE_ZENSERVICE"
-    echo "DELETE_AIOPS_PROJECT=$DELETE_AIOPS_PROJECT"
-    echo "DELETE_IAF=$DELETE_IAF"
-    echo
-    echo "##### Properties in uninstall-cp4waiops-props.sh #####"
+log $INFO "##### Properties in uninstall-cp4waiops-props.sh #####"
+log $INFO
+if [[ $DELETE_ALL == "true" ]]; then
+	log $INFO "The script uninstall-cp4waiops-props.sh has 'DELETE_ALL=true', hence the script will execute wih below values: "
+else
+    log $INFO "The script uninstall-cp4waiops-props.sh has the properties with below values: "
+fi
+log $INFO "AIOPS_PROJECT=$AIOPS_PROJECT"
+log $INFO "INSTALLATION_CR_NAME=$INSTALLATION_CR_NAME"
+log $INFO "DELETE_PVCS=$DELETE_PVCS"
+log $INFO "DELETE_SECRETS=$DELETE_SECRETS"
+log $INFO "DELETE_CONFIGMAPS=$DELETE_CONFIGMAPS"
+log $INFO "DELETE_KONG_CRDS=$DELETE_KONG_CRDS"
+log $INFO "DELETE_CAMELK_CRDS=$DELETE_CAMELK_CRDS"
+log $INFO "DELETE_ZENSERVICE=$DELETE_ZENSERVICE"
+log $INFO "DELETE_AIOPS_PROJECT=$DELETE_AIOPS_PROJECT"
+log $INFO "DELETE_IAF=$DELETE_IAF"
+log $INFO
+log $INFO "##### Properties in uninstall-cp4waiops-props.sh #####"
 }
 
 check_additional_installation_exists(){
 
-  log $INFO "Checking if any additional installation resources exist in the cluster."
+  log $INFO "Checking if any additional installation resources found in the cluster."
   installation_returned_value=$(oc get installation -A)
   if [[ ! -z $installation_returned_value  ]] ; then
-     log $ERROR "Additional installation CRs found in the cluster, please delete all the installation CR's and try again."
-     log $ERROR "Installation CRs found: "
+     log $ERROR "Some additional installation cr found in the cluster, please delete the installation cr's and try again."
+     log $ERROR "Remaining installation cr found : "
      oc get installation -A
      exit 1
   else

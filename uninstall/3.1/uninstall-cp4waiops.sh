@@ -1,14 +1,8 @@
 #!/bin/sh
-
-#******************************************************************************
-# Licensed Materials - Property of IBM
-# (c) Copyright IBM Corporation 2021. All Rights Reserved.
 #
-# Note to U.S. Government Users Restricted Rights:
-# Use, duplication or disclosure restricted by GSA ADP Schedule
-# Contract with IBM Corp.
-#******************************************************************************
-
+# Copyright 2020- IBM Inc. All rights reserved
+# SPDX-License-Identifier: Apache2.0
+#
 # This script can be used to uninstall the Cloud Pak for Watson AIOps product and
 # cleanup resources created by the product.  Please configure what you want to uninstall
 # in the uninstall-cp4waiops-props.sh file first before running this script.
@@ -42,23 +36,28 @@ analyze_script_properties
 
 # Confirm we really want to uninstall 
 if [[ $SKIP_CONFIRM != "true" ]]; then
-  echo
-  echo "This script will uninstall IBM Cloud Pak for AIOps. Please ensure you have deleted any CRs you created before running this script."
-  echo ""
-  echo "##### IMPORTANT ######"
-  echo ""
-  echo "Please review and update the contents of uninstall-cp4waiops-props.sh carefully to configure what you want to delete before proceeding."
-  echo "Data loss is possible if uninstall-cp4waiops-props.sh is not reviewed and configured carefully."
-  echo ""
-  echo "Cluster context: $(oc config current-context)"
-  echo ""
+  log $INFO
+  log $INFO "This script will uninstall IBM Cloud Pak for AIOps. Please ensure you have deleted any CRs you created before running this script."
+  log $INFO ""
+  log $INFO "##### IMPORTANT ######"
+  log $INFO ""
+  log $INFO "Please review and update the contents of uninstall-cp4waiops-props.sh carefully to configure what you want to delete before proceeding."
+  log $INFO "Data loss is possible if uninstall-cp4waiops-props.sh is not reviewed and configured carefully."
+  log $INFO ""
+  log $INFO "Cluster context: $(oc config current-context)"
+  log $INFO ""
   display_script_properties
   read -p "Please confirm you have reviewed and configured uninstall-cp4waiops-props.sh and would like to proceed with install. Y or y to continue: " -n 1 -r
-  echo
+  log $INFO
   if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-    echo "Cancelling uninstall of IBM Cloud Pak for AIOps."
+    log $INFO "Cancelling uninstall of IBM Cloud Pak for AIOps."
     exit 0
   fi
+else
+  log $INFO
+  log $INFO "This script will uninstall IBM Cloud Pak for AIOps."
+  display_script_properties
+  log $INFO ""
 fi 
 
 # Verify prereqs: oc is installed & we are logged into the cluster already
@@ -191,6 +190,15 @@ if [[ ! -z "$AIOPS_PROJECT"  ]]; then
    if [[ $DELETE_SECRETS == "true" ]]; then
       log $INFO "Deleting secrets in $AIOPS_PROJECT"
       for SECRET in ${CP4AIOPS_SECRETS[@]}; do
+            log $INFO "Deleting secret $SECRET.."
+            oc delete $SECRET -n $AIOPS_PROJECT --ignore-not-found
+      done
+   fi
+
+   # If both DELETE_PVCS=true and DELETE_SECRETS=true then only delete these secrets category
+   if [[ ( $DELETE_SECRETS == "true" ) && ( $DELETE_PVCS == "true" ) ]]; then
+       log $INFO "Deleting secrets from group CP4AIOPS_PVC_SECRETS in $AIOPS_PROJECT"
+       for SECRET in ${CP4AIOPS_PVC_SECRETS[@]}; do
             log $INFO "Deleting secret $SECRET.."
             oc delete $SECRET -n $AIOPS_PROJECT --ignore-not-found
       done
