@@ -1,0 +1,39 @@
+#
+#   The following example data demonstrates an example of DNS forward job using Google Public DNS (IPv4) service
+#
+#   In general, resources observed by the DNS observer in a forward job consists of:
+#
+#   1)Service Access Point
+#   2)IP Address
+#   3)UDP Port
+#   4)DNS Service
+#   5)Process executed by DNS Service
+#   6)FQDN
+#
+#
+#   a) Service Access Point is the entry point for IP Address, UDP Port and the DNS Service
+#   b) All the 3 resources are accessedVia the Service Access Point
+#   c) The IP address is bounded to the UDP Port
+#   d) DNS Service runs a Process which resolves a FQDN
+#
+#   To illustrate the above:
+#
+#   a) Service Access Point '8.8.8.8#53' provides access to '8.8.8.8', 'UDP 53' and 'DNS 8.8.8.8#53 (A(1) / ibm.com / NoRecurse / 8.8.8.8)'
+#   b) IP address '8.8.8.8', UDP Port 'UDP 53' and DNS Service 'DNS 8.8.8.8#53 (A(1) / ibm.com / NoRecurse / 8.8.8.8)' are accessedVia '8.8.8.8#53'
+#   c) IP address '8.8.8.8' bindsTo UDP Port 'UDP 53'
+#   d) DNS Service 'DNS 8.8.8.8#53 (A(1) / ibm.com / NoRecurse / 8.8.8.8)' runs Process 'A(1) / ibm.com / NoRecurse / 8.8.8.8' which resolves FQDN 'ibm.com'
+#
+W:339 milliseconds
+V:{"_operation":"InsertReplace","uniqueId":"DNS 8.8.8.8#53 (A(1) / ibm.com / NoRecurse / 8.8.8.8)","entityTypes":["service"],"observedTime":1589787460662,"_status":[],"_references":[],"matchTokens":["dns 8.8.8.8#53"],"name":"DNS 8.8.8.8#53 (A(1) / ibm.com / NoRecurse / 8.8.8.8)","dnsServer":"8.8.8.8","tags":["DNS 8.8.8.8#53"]}
+W:11 milliseconds
+V:{"_operation":"InsertReplace","uniqueId":"8.8.8.8#53","entityTypes":["serviceaccesspoint"],"observedTime":1589787460674,"_status":[],"_references":[{"_edgeType":"accessedVia","_fromUniqueId":"DNS 8.8.8.8#53 (A(1) / ibm.com / NoRecurse / 8.8.8.8)"},{"_edgeType":"accessedVia","_toUniqueId":"8.8.8.8"},{"_edgeType":"accessedVia","_toUniqueId":"UDP 53"}],"matchTokens":["8.8.8.8#53"],"name":"8.8.8.8#53","tags":["8.8.8.8#53"]}
+W:14 milliseconds
+V:{"_operation":"InsertReplace","uniqueId":"8.8.8.8","entityTypes":["ipaddress"],"observedTime":1589787460688,"_status":[],"_references":[{"_edgeType":"bindsTo","_toUniqueId":"UDP 53"}],"ipNumber":134744072,"matchTokens":["8.8.8.8","ipv4:134744072"],"name":"8.8.8.8","version":"IPv4","tags":["8.8.8.8"]}
+W:14 milliseconds
+V:{"_operation":"InsertReplace","uniqueId":"UDP 53","entityTypes":["tcpudpport"],"observedTime":1589787460703,"_status":[],"_references":[],"protocol":"UDP","matchTokens":["udp 53"],"name":"UDP 53","portNumber":53,"tags":["UDP 53"]}
+W:16 milliseconds
+V:{"_operation":"InsertUpdate","uniqueId":"A(1) / ibm.com / NoRecurse / 8.8.8.8","entityTypes":["command"],"observedTime":1589787460720,"_status":[],"_references":[{"_edgeType":"runsOn","_toUniqueId":"DNS 8.8.8.8#53 (A(1) / ibm.com / NoRecurse / 8.8.8.8)"}],"addressType":"IPV4_ONLY","matchTokens":["a(1) / ibm.com / norecurse / 8.8.8.8"],"domainName":"ibm.com","name":"A(1) / ibm.com / NoRecurse / 8.8.8.8","lookupType":"FORWARD","dnsRecordTypes":"A(1)","dnsServer":"8.8.8.8","isRecurse":false,"tags":["A(1) / ibm.com / NoRecurse / 8.8.8.8"]}
+W:13 milliseconds
+V:{"_operation":"InsertReplace","uniqueId":"ibm.com","entityTypes":["fqdn"],"observedTime":1589787460734,"_status":[],"_references":[{"_edgeType":"resolvesTo","_toUniqueId":"129.42.38.10","ttl":18335},{"_edgeType":"resolved","_fromUniqueId":"A(1) / ibm.com / NoRecurse / 8.8.8.8","isTruncated":false,"lookup":"ibm.com","code":"NoError(0)","isRecursionDesired":true,"numAnswers":1,"seqNo":1,"isAuthoritative":false,"dnsRecordType":"A","dnsClass":"IN","lookupTimeMs":14,"queryId":4489,"isRecursionAvailable":true,"questionSection":"ibm.com. IN A","dnsServer":"8.8.8.8"}],"matchTokens":["ibm","ibm.com"],"name":"ibm.com","tags":["ibm","ibm.com"]}
+W:16 milliseconds
+V:{"_operation":"InsertReplace","uniqueId":"129.42.38.10","entityTypes":["ipaddress"],"observedTime":1589787460750,"_status":[],"_references":[],"ipNumber":2167023114,"matchTokens":["129.42.38.10","ipv4:2167023114"],"name":"129.42.38.10","version":"IPv4","tags":["129.42.38.10"]}
