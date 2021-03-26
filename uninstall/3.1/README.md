@@ -10,8 +10,8 @@ The scripts provided here can be used to uninstall Cloud Pak of Watson AIOps and
 
 Clone this repo.
 ```
-  git clone https://github.ibm.com/katamari/katamari-util.git 
-  cd katamari-util/uninstall/<version to uninstall>
+  git clone https://github.com/IBM/cp4waiops-samples.git 
+  cd uninstall/<version to uninstall>
 ```
 
 ## Preparing for uninstall
