@@ -5,10 +5,10 @@
 ##################################################################################################
 
 # Set the name of project when Cloud Pak for Watson AIOps is installed.
-AIOPS_PROJECT="katamari"
+AIOPS_PROJECT=""
 
 # Set the name of installation CR to delete.
-INSTALLATION_CR_NAME="aiops-installation"
+INSTALLATION_CR_NAME=""
 
 #################################################################################################################################
 ##  NOTE: CAREFULLY READ AND REVIEW EACH ITEM BELOW AND SELECT WHICH RESOURCES TO CLEANUP BY SETTING VALUE TO 'true' to DELETE ##
