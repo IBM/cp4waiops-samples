@@ -1,0 +1,92 @@
+#
+#   The following example data demonstrates an example of AppDynamics environment.
+#
+#   In general, resources observed by the  AppDynamics observer consists of:
+#
+#   1)Application
+#   2)Tier
+#   3)Node
+#   4)Agent
+#   5)Host
+#   6)Host Operating System
+#   7)IP Address
+#
+#   a) An application contains a Tier where it may contain one or more Nodes
+#   b) A Node may be monitored by one or more Agent
+#   c) One or more node runsOn a Host Machine
+#   d) A Host Machine uses an Operating System and can be accessedVia IP Address
+#
+#   To illustrate the above, let's choose a specific example:
+#
+#   a) Application 'nodejsapp' contains the Tier 'nodejsTier' where it contains the Node 'process-0'
+#   b) Node 'process-0' is monitored by Agent 'NODEJS_APP_AGENT'
+#   c) Node 'process-0' runsOn Host 'DESKTOP-NG8HG9H'
+#   d) Host 'DESKTOP-NG8HG9H' uses Operating System 'Linux' and can be accessedVia several IP Addresses. One of them is "172.17.36.65" which is an IPv4 and "2620:1f7:38e4:1441:0:0:31:1ad%wifi0" which is an IPv6
+#
+#
+W:1500 milliseconds
+V:{"_operation":"InsertReplace","uniqueId":"172.17.36.65-32121183","entityTypes":["ipaddress"],"observedTime":1592994968821,"_references":[{"_edgeType":"accessedVia","_fromUniqueId":"machine-32121183"}],"matchTokens":["172.17.36.65-32121183","172.17.36.65","brown654321"],"name":"172.17.36.65","tags":["app-43762","nodejsapp","DESKTOP-NG8HG9H","process-0","nodejstier"]}
+W:13 milliseconds
+V:{"_operation":"InsertReplace","uniqueId":"fe80:0:0:0:a14c:d251:d96f:b314%wifi2-32121183","entityTypes":["ipaddress"],"observedTime":1592994968835,"_references":[{"_edgeType":"accessedVia","_fromUniqueId":"machine-32121183"}],"matchTokens":["fe80:0:0:0:a14c:d251:d96f:b314%wifi2","fe80:0:0:0:a14c:d251:d96f:b314%wifi2-32121183","brown654321"],"name":"fe80:0:0:0:a14c:d251:d96f:b314%wifi2","tags":["app-43762","nodejsapp","DESKTOP-NG8HG9H","process-0","nodejstier"]}
+W:14 milliseconds
+V:{"_operation":"InsertReplace","uniqueId":"fe80:0:0:0:9d13:6454:141b:3040%eth0-32121183","entityTypes":["ipaddress"],"observedTime":1592994968849,"_references":[{"_edgeType":"accessedVia","_fromUniqueId":"machine-32121183"}],"matchTokens":["fe80:0:0:0:9d13:6454:141b:3040%eth0-32121183","fe80:0:0:0:9d13:6454:141b:3040%eth0","brown654321"],"name":"fe80:0:0:0:9d13:6454:141b:3040%eth0","tags":["app-43762","nodejsapp","DESKTOP-NG8HG9H","process-0","nodejstier"]}
+W:16 milliseconds
+V:{"_operation":"InsertReplace","uniqueId":"2620:1f7:38e4:1441:0:0:31:1ad%wifi0-32121183","entityTypes":["ipaddress"],"observedTime":1592994968866,"_references":[{"_edgeType":"accessedVia","_fromUniqueId":"machine-32121183"}],"matchTokens":["2620:1f7:38e4:1441:0:0:31:1ad%wifi0-32121183","2620:1f7:38e4:1441:0:0:31:1ad%wifi0","brown654321"],"name":"2620:1f7:38e4:1441:0:0:31:1ad%wifi0","tags":["app-43762","nodejsapp","DESKTOP-NG8HG9H","process-0","nodejstier"]}
+W:14 milliseconds
+V:{"_operation":"InsertReplace","uniqueId":"tier-83294","entityTypes":["tier"],"observedTime":1592994968880,"_references":[{"_edgeType":"contains","_fromUniqueId":"app-43762"}],"matchTokens":["tier-83294","brown654321","nodejstier"],"name":"nodejstier","description":"","numberOfNodes":"1","type":"Node.JS Server","tags":["app-43762","nodejsapp"]}
+W:19 milliseconds
+V:{"_operation":"InsertReplace","uniqueId":"10.0.75.1-32121183","entityTypes":["ipaddress"],"observedTime":1592994968899,"_references":[{"_edgeType":"accessedVia","_fromUniqueId":"machine-32121183"}],"matchTokens":["10.0.75.1-32121183","10.0.75.1","brown654321"],"name":"10.0.75.1","tags":["app-43762","nodejsapp","DESKTOP-NG8HG9H","process-0","nodejstier"]}
+W:14 milliseconds
+V:{"_operation":"InsertReplace","uniqueId":"Windows-32120922","entityTypes":["operatingsystem"],"observedTime":1592994968914,"_references":[{"_edgeType":"uses","_fromUniqueId":"machine-32120922"}],"matchTokens":["windows-32120922","windows","brown654321"],"name":"Windows","tags":["MyApp","DESKTOP-92Q1VI3","app-43484"]}
+W:21 milliseconds
+V:{"_operation":"InsertReplace","uniqueId":"Linux-32121183","entityTypes":["operatingsystem"],"observedTime":1592994968935,"_references":[{"_edgeType":"uses","_fromUniqueId":"machine-32121183"}],"matchTokens":["linux-32121183","linux","brown654321"],"name":"Linux","tags":["app-43762","nodejsapp","DESKTOP-NG8HG9H"]}
+W:17 milliseconds
+V:{"_operation":"InsertReplace","uniqueId":"fe80:0:0:0:a155:f413:e388:c638%wlan1-32120922","entityTypes":["ipaddress"],"observedTime":1592994968952,"_references":[{"_edgeType":"accessedVia","_fromUniqueId":"machine-32120922"}],"matchTokens":["fe80:0:0:0:a155:f413:e388:c638%wlan1","fe80:0:0:0:a155:f413:e388:c638%wlan1-32120922","brown654321"],"name":"fe80:0:0:0:a155:f413:e388:c638%wlan1","tags":["MyApp","DESKTOP-92Q1VI3:9148","DESKTOP-92Q1VI3","MyTier","app-43484"]}
+W:20 milliseconds
+V:{"_operation":"InsertReplace","uniqueId":"fe80:0:0:0:adcd:5d1b:38e4:4881%wlan2-32120922","entityTypes":["ipaddress"],"observedTime":1592994968972,"_references":[{"_edgeType":"accessedVia","_fromUniqueId":"machine-32120922"}],"matchTokens":["fe80:0:0:0:adcd:5d1b:38e4:4881%wlan2","fe80:0:0:0:adcd:5d1b:38e4:4881%wlan2-32120922","brown654321"],"name":"fe80:0:0:0:adcd:5d1b:38e4:4881%wlan2","tags":["MyApp","DESKTOP-92Q1VI3:9148","DESKTOP-92Q1VI3","MyTier","app-43484"]}
+W:22 milliseconds
+V:{"_operation":"InsertReplace","uniqueId":"169.254.179.20-32121183","entityTypes":["ipaddress"],"observedTime":1592994968994,"_references":[{"_edgeType":"accessedVia","_fromUniqueId":"machine-32121183"}],"matchTokens":["169.254.179.20","brown654321","169.254.179.20-32121183"],"name":"169.254.179.20","tags":["app-43762","nodejsapp","DESKTOP-NG8HG9H","process-0","nodejstier"]}
+W:15 milliseconds
+V:{"_operation":"InsertReplace","uniqueId":"fe80:0:0:0:556e:3fb3:b2fc:fade%eth2-32120922","entityTypes":["ipaddress"],"observedTime":1592994969009,"_references":[{"_edgeType":"accessedVia","_fromUniqueId":"machine-32120922"}],"matchTokens":["fe80:0:0:0:556e:3fb3:b2fc:fade%eth2","brown654321","fe80:0:0:0:556e:3fb3:b2fc:fade%eth2-32120922"],"name":"fe80:0:0:0:556e:3fb3:b2fc:fade%eth2","tags":["MyApp","DESKTOP-92Q1VI3:9148","DESKTOP-92Q1VI3","MyTier","app-43484"]}
+W:71 milliseconds
+V:{"_operation":"InsertReplace","uniqueId":"node-18959678","entityTypes":["service"],"observedTime":1592994969081,"_references":[{"_edgeType":"has","_fromUniqueId":"tier-82887"}],"nodeUniqueLocalId":"","tierId":"tier-82887","tierName":"MyTier","matchTokens":["node-18959678","brown654321","desktop-92q1vi3:9148"],"name":"DESKTOP-92Q1VI3:9148","type":"Other","tags":["MyApp","app-43484"]}
+W:32 milliseconds
+V:{"_operation":"InsertReplace","uniqueId":"app-43762","entityTypes":["container"],"observedTime":1592994969114,"matchTokens":["app-43762","nodejsapp","brown654321"],"name":"nodejsapp","description":"","accountGuid":"e4e2e92d-41b1-479e-aeb9-7268e6ef5bf3","tags":["app-43762"]}
+W:15 milliseconds
+V:{"_operation":"InsertReplace","uniqueId":"NODEJS_APP_AGENT-18960258","entityTypes":["application"],"observedTime":1592994969129,"_references":[{"_edgeType":"monitors","_toUniqueId":"node-18960258"}],"appAgentPresent":"true","tierId":"tier-83294","matchTokens":["nodejs_app_agent","brown654321","nodejs_app_agent-18960258"],"machineAgentPresent":"false","name":"NODEJS_APP_AGENT","tags":["app-43762","nodejsapp"]}
+W:17 milliseconds
+V:{"_operation":"InsertReplace","uniqueId":"169.254.6.113-32121183","entityTypes":["ipaddress"],"observedTime":1592994969146,"_references":[{"_edgeType":"accessedVia","_fromUniqueId":"machine-32121183"}],"matchTokens":["169.254.6.113-32121183","169.254.6.113","brown654321"],"name":"169.254.6.113","tags":["app-43762","nodejsapp","DESKTOP-NG8HG9H","process-0","nodejstier"]}
+W:20 milliseconds
+V:{"_operation":"InsertReplace","uniqueId":"9.194.220.31-32120922","entityTypes":["ipaddress"],"observedTime":1592994969166,"_references":[{"_edgeType":"accessedVia","_fromUniqueId":"machine-32120922"}],"matchTokens":["9.194.220.31","9.194.220.31-32120922","brown654321"],"name":"9.194.220.31","tags":["MyApp","DESKTOP-92Q1VI3:9148","DESKTOP-92Q1VI3","MyTier","app-43484"]}
+W:15 milliseconds
+V:{"_operation":"InsertReplace","uniqueId":"fe80:0:0:0:c441:dfe6:d077:7faf%wlan0-32120922","entityTypes":["ipaddress"],"observedTime":1592994969181,"_references":[{"_edgeType":"accessedVia","_fromUniqueId":"machine-32120922"}],"matchTokens":["fe80:0:0:0:c441:dfe6:d077:7faf%wlan0","fe80:0:0:0:c441:dfe6:d077:7faf%wlan0-32120922","brown654321"],"name":"fe80:0:0:0:c441:dfe6:d077:7faf%wlan0","tags":["MyApp","DESKTOP-92Q1VI3:9148","DESKTOP-92Q1VI3","MyTier","app-43484"]}
+W:11 milliseconds
+V:{"_operation":"InsertReplace","uniqueId":"APP_AGENT-18959678","entityTypes":["application"],"observedTime":1592994969192,"_references":[{"_edgeType":"monitors","_toUniqueId":"node-18959678"}],"appAgentPresent":"true","tierId":"tier-82887","matchTokens":["app_agent-18959678","app_agent","brown654321"],"machineAgentPresent":"false","name":"APP_AGENT","tags":["MyApp","app-43484"]}
+W:13 milliseconds
+V:{"_operation":"InsertReplace","uniqueId":"169.254.48.64-32121183","entityTypes":["ipaddress"],"observedTime":1592994969204,"_references":[{"_edgeType":"accessedVia","_fromUniqueId":"machine-32121183"}],"matchTokens":["169.254.48.64","169.254.48.64-32121183","brown654321"],"name":"169.254.48.64","tags":["app-43762","nodejsapp","DESKTOP-NG8HG9H","process-0","nodejstier"]}
+W:11 milliseconds
+V:{"_operation":"InsertReplace","uniqueId":"fe80:0:0:0:9f6:10e4:916d:2d90%eth3-32120922","entityTypes":["ipaddress"],"observedTime":1592994969216,"_references":[{"_edgeType":"accessedVia","_fromUniqueId":"machine-32120922"}],"matchTokens":["fe80:0:0:0:9f6:10e4:916d:2d90%eth3","brown654321","fe80:0:0:0:9f6:10e4:916d:2d90%eth3-32120922"],"name":"fe80:0:0:0:9f6:10e4:916d:2d90%eth3","tags":["MyApp","DESKTOP-92Q1VI3:9148","DESKTOP-92Q1VI3","MyTier","app-43484"]}
+W:11 milliseconds
+V:{"_operation":"InsertReplace","uniqueId":"fe80:0:0:0:18a2:6351:a95d:4d00%eth2-32121183","entityTypes":["ipaddress"],"observedTime":1592994969227,"_references":[{"_edgeType":"accessedVia","_fromUniqueId":"machine-32121183"}],"matchTokens":["fe80:0:0:0:18a2:6351:a95d:4d00%eth2-32121183","fe80:0:0:0:18a2:6351:a95d:4d00%eth2","brown654321"],"name":"fe80:0:0:0:18a2:6351:a95d:4d00%eth2","tags":["app-43762","nodejsapp","DESKTOP-NG8HG9H","process-0","nodejstier"]}
+W:12 milliseconds
+V:{"_operation":"InsertReplace","uniqueId":"fe80:0:0:0:e496:ef54:cef4:671%wifi1-32121183","entityTypes":["ipaddress"],"observedTime":1592994969239,"_references":[{"_edgeType":"accessedVia","_fromUniqueId":"machine-32121183"}],"matchTokens":["fe80:0:0:0:e496:ef54:cef4:671%wifi1-32121183","fe80:0:0:0:e496:ef54:cef4:671%wifi1","brown654321"],"name":"fe80:0:0:0:e496:ef54:cef4:671%wifi1","tags":["app-43762","nodejsapp","DESKTOP-NG8HG9H","process-0","nodejstier"]}
+W:10 milliseconds
+V:{"_operation":"InsertReplace","uniqueId":"tier-82887","entityTypes":["tier"],"observedTime":1592994969249,"_references":[{"_edgeType":"contains","_fromUniqueId":"app-43484"}],"matchTokens":["mytier","brown654321","tier-82887"],"name":"MyTier","description":"","numberOfNodes":"1","type":"Application Server","tags":["MyApp","app-43484"]}
+W:10 milliseconds
+V:{"_operation":"InsertReplace","uniqueId":"9.194.194.193-32121183","entityTypes":["ipaddress"],"observedTime":1592994969259,"_references":[{"_edgeType":"accessedVia","_fromUniqueId":"machine-32121183"}],"matchTokens":["9.194.194.193-32121183","brown654321","9.194.194.193"],"name":"9.194.194.193","tags":["app-43762","nodejsapp","DESKTOP-NG8HG9H","process-0","nodejstier"]}
+W:11 milliseconds
+V:{"_operation":"InsertReplace","uniqueId":"machine-32121183","entityTypes":["server"],"observedTime":1592994969270,"_references":[{"_edgeType":"runsOn","_fromUniqueId":"node-18960258"}],"tierId":"tier-83294","machineOSType":"Linux","matchTokens":["machine-32121183","desktop-ng8hg9h","brown654321"],"name":"DESKTOP-NG8HG9H","tags":["app-43762","nodejsapp"]}
+W:10 milliseconds
+V:{"_operation":"InsertReplace","uniqueId":"node-18960258","entityTypes":["service"],"observedTime":1592994969280,"_references":[{"_edgeType":"has","_fromUniqueId":"tier-83294"}],"nodeUniqueLocalId":"","tierId":"tier-83294","tierName":"nodejstier","matchTokens":["node-18960258","brown654321","process-0"],"name":"process-0","type":"Other","tags":["app-43762","nodejsapp"]}
+W:10 milliseconds
+V:{"_operation":"InsertReplace","uniqueId":"fe80:0:0:0:9daa:9b87:309c:e619%eth1-32121183","entityTypes":["ipaddress"],"observedTime":1592994969290,"_references":[{"_edgeType":"accessedVia","_fromUniqueId":"machine-32121183"}],"matchTokens":["fe80:0:0:0:9daa:9b87:309c:e619%eth1-32121183","brown654321","fe80:0:0:0:9daa:9b87:309c:e619%eth1"],"name":"fe80:0:0:0:9daa:9b87:309c:e619%eth1","tags":["app-43762","nodejsapp","DESKTOP-NG8HG9H","process-0","nodejstier"]}
+W:10 milliseconds
+V:{"_operation":"InsertReplace","uniqueId":"machine-32120922","entityTypes":["server"],"observedTime":1592994969300,"_references":[{"_edgeType":"runsOn","_fromUniqueId":"node-18959678"}],"tierId":"tier-82887","machineOSType":"Windows","matchTokens":["desktop-92q1vi3","machine-32120922","brown654321"],"name":"DESKTOP-92Q1VI3","tags":["MyApp","app-43484"]}
+W:12 milliseconds
+V:{"_operation":"InsertReplace","uniqueId":"fe80:0:0:0:4588:f561:c928:ec2%eth7-32120922","entityTypes":["ipaddress"],"observedTime":1592994969311,"_references":[{"_edgeType":"accessedVia","_fromUniqueId":"machine-32120922"}],"matchTokens":["fe80:0:0:0:4588:f561:c928:ec2%eth7-32120922","fe80:0:0:0:4588:f561:c928:ec2%eth7","brown654321"],"name":"fe80:0:0:0:4588:f561:c928:ec2%eth7","tags":["MyApp","DESKTOP-92Q1VI3:9148","DESKTOP-92Q1VI3","MyTier","app-43484"]}
+W:11 milliseconds
+V:{"_operation":"InsertReplace","uniqueId":"2620:1f7:38e4:1440:0:0:31:b1-32120922","entityTypes":["ipaddress"],"observedTime":1592994969323,"_references":[{"_edgeType":"accessedVia","_fromUniqueId":"machine-32120922"}],"matchTokens":["2620:1f7:38e4:1440:0:0:31:b1","2620:1f7:38e4:1440:0:0:31:b1-32120922","brown654321"],"name":"2620:1f7:38e4:1440:0:0:31:b1","tags":["MyApp","DESKTOP-92Q1VI3:9148","DESKTOP-92Q1VI3","MyTier","app-43484"]}
+W:10 milliseconds
+V:{"_operation":"InsertReplace","uniqueId":"fe80:0:0:0:58a9:67:99ee:da23%wifi0-32121183","entityTypes":["ipaddress"],"observedTime":1592994969334,"_references":[{"_edgeType":"accessedVia","_fromUniqueId":"machine-32121183"}],"matchTokens":["fe80:0:0:0:58a9:67:99ee:da23%wifi0","fe80:0:0:0:58a9:67:99ee:da23%wifi0-32121183","brown654321"],"name":"fe80:0:0:0:58a9:67:99ee:da23%wifi0","tags":["app-43762","nodejsapp","DESKTOP-NG8HG9H","process-0","nodejstier"]}
+W:11 milliseconds
+V:{"_operation":"InsertReplace","uniqueId":"app-43484","entityTypes":["container"],"observedTime":1592994969345,"matchTokens":["brown654321","myapp","app-43484"],"name":"MyApp","description":"","accountGuid":"e4e2e92d-41b1-479e-aeb9-7268e6ef5bf3","tags":["app-43484"]}
