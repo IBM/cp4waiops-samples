@@ -115,7 +115,13 @@ if [[ ! -z "$AIOPS_PROJECT"  ]]; then
    # Now verify from user input that there are no other cloud paks in this project
    # If there aren't and user confirms they want to delete zenservice, start that process
    if [[ $DELETE_ZENSERVICE == "true" ]]; then
-      # First delete the zenservice instance
+    #First delete the AutomationUIConfig / AutomationBase if present, that were created by users.
+    log $INFO "Deleting the AutomationUIConfig if present"
+    oc delete AutomationUIConfig --all -n $AIOPS_PROJECT --ignore-not-found
+    log $INFO "Deleting the AutomationBase if present"
+    oc delete AutomationBase --all -n $AIOPS_PROJECT --ignore-not-found
+    
+    # Then delete the zenservice instance
    	log $INFO "Deleting the zenservice CR..."
    	delete_zenservice_instance $ZENSERVICE_CR_NAME $AIOPS_PROJECT
 
@@ -180,9 +186,9 @@ if [[ ! -z "$AIOPS_PROJECT"  ]]; then
    # Confirm with user we want to delete PVCs
    if [[ $DELETE_PVCS == "true" ]]; then
       log $INFO "Deleting PVCs in $AIOPS_PROJECT"
-      for PVC in ${CP4AIOPS_PVCS[@]}; do
-            log $INFO "Deleting PVC $PVC.."
-            oc delete $PVC -n $AIOPS_PROJECT --ignore-not-found
+      for PVC in ${CP4AIOPS_PVC_LABEL[@]}; do
+            log $INFO "Deleting PVCs with label $PVC.."
+            oc delete pvc -l $PVC -n $AIOPS_PROJECT --ignore-not-found
       done
    fi
 

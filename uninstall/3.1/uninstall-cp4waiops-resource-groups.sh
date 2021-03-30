@@ -26,6 +26,10 @@ CP4AIOPS_PVCS=("persistentvolumeclaim/back-evtmanager-cassandra-0"
                "persistentvolumeclaim/space-evtmanager-nciserver-0"
                "persistentvolumeclaim/stolon-data-aimanager-postgres-keeper-0")
 
+CP4AIOPS_PVC_LABEL=("app.kubernetes.io/instance=evtmanager"
+               "app.kubernetes.io/instance=aimanager"
+               "app.kubernetes.io/instance=strimzi-cluster")
+
 CP4AIOPS_PVC_SECRETS=("secret/evtmanager-couchdb-secret"
                       "secret/evtmanager-cem-couchdb-cred-secret"
                       "secret/evtmanager-cassandra-auth-secret"
