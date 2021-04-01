@@ -119,7 +119,7 @@ KONG_CRDS=("kongs.management.ibm.com"
             "kongingresses.configuration.konghq.com"
             "kongplugins.configuration.konghq.com"
             "tcpingresses.configuration.konghq.com")
-
+#### IBM Automation Foundation ####
 IAF_OPERATORS=("ibm-automation"
                "ibm-automation-ai-v1.0-iaf-operators-openshift-marketplace"
                "ibm-automation-core-v1.0-iaf-core-operators-openshift-marketplace"
@@ -127,13 +127,13 @@ IAF_OPERATORS=("ibm-automation"
                "ibm-automation-eventprocessing-v1.0-iaf-operators-openshift-marketplace"
                "ibm-automation-flink-v1.0-iaf-operators-openshift-marketplace"
                "ibm-common-service-operator-beta-opencloud-operators-openshift-marketplace")
-
+#### IBM Automation Foundation ####
 IAF_CERTMANAGER=("certificate.certmanager.k8s.io/iaf-system-automationui-aui-zen-ca"
              "certificate.certmanager.k8s.io/iaf-system-automationui-aui-zen-cert"
              "issuer.certmanager.k8s.io/iaf-system-automationui-aui-zen-issuer"
              "issuer.certmanager.k8s.io/iaf-system-automationui-aui-zen-ss-issuer"
 )
-
+#### IBM Automation Foundation ####
 IAF_SECRETS=("secret/external-tls-secret"
             "secret/internal-nginx-svc-tls"
             "secret/internal-tls"
@@ -150,9 +150,9 @@ IAF_SECRETS=("secret/external-tls-secret"
             "secret/zen-service-broker-secret"
             "secret/iaf-system-automationui-aui-zen-ca"
             "secret/iaf-system-automationui-aui-zen-cert")
-
+#### IBM Automation Foundation ####
 IAF_CONFIGMAPS=("configmap/ibm-elasticsearch-operator")
-
+#### IBM Automation Foundation ####
 IAF_PVCS=("persistentvolumeclaim/data-iaf-system-elasticsearch-es-aiops-0"
           "persistentvolumeclaim/data-iaf-system-elasticsearch-es-aiops-1"
           "persistentvolumeclaim/data-iaf-system-elasticsearch-es-aiops-2"
@@ -160,11 +160,11 @@ IAF_PVCS=("persistentvolumeclaim/data-iaf-system-elasticsearch-es-aiops-0"
           "persistentvolumeclaim/datadir-zen-metastoredb-1"
           "persistentvolumeclaim/datadir-zen-metastoredb-2"
           "persistentvolumeclaim/elasticsearch-ibm-elasticsearch-ibm-elasticsearch-data-elasticsea-cd98-ib-6fb9-es-server-all-0")
-
+#### IBM Automation Foundation ####
 IAF_MISC=("client.oidc.security.ibm.com/zenclient-cp4waiops"
           "operatorgroup.operators.coreos.com/operand-deployment-lifecycle-manager-operatorgroup"
           "automationuiconfig.core.automation.ibm.com/iaf-system")
-
+#### IBM Automation Foundation ####
 IAF_CRDS=("aideployments.ai.automation.ibm.com"
             "aimodels.ai.automation.ibm.com"
             "airuntimes.ai.automation.ibm.com"
