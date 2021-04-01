@@ -253,7 +253,6 @@ delete_iaf_bedrock () {
     oc patch -n ibm-common-services rolebinding/admin -p '{"metadata": {"finalizers":null}}'
     oc delete rolebinding admin -n ibm-common-services --ignore-not-found
 
-    # TODO: Figure out what this name should be
     unsubscribe "ibm-automation" $OPERATORS_NAMESPACE
     unsubscribe "ibm-automation-v1.0-iaf-operators-openshift-marketplace" $OPERATORS_NAMESPACE
 
@@ -263,11 +262,8 @@ delete_iaf_bedrock () {
     unsubscribe "ibm-automation-eventprocessing-v1.0-iaf-operators-openshift-marketplace" $OPERATORS_NAMESPACE 
     unsubscribe "ibm-automation-flink-v1.0-iaf-operators-openshift-marketplace" $OPERATORS_NAMESPACE
 
-    # TODO: Figure out what this name should be
-    unsubscribe "ibm-common-service-operator-beta-opencloud-operators-openshift-marketplace" $OPERATORS_NAMESPACE
     unsubscribe "ibm-common-service-operator-v3-opencloud-operators-openshift-marketplace" $OPERATORS_NAMESPACE 
 
-    # TODO: should not be required I think if we delete the operators first but 2 operandrequests are left behind; check with IAF
     oc delete operandrequest iaf-operator -n openshift-operators --ignore-not-found
     oc delete operandrequest iaf-core-operator -n openshift-operators --ignore-not-found
 
@@ -321,7 +317,6 @@ delete_iaf_bedrock () {
 delete_crd_group () {
     local crd_group=$1
 
-    #TODO: Check if there are any resources left first
     case "$crd_group" in
     "CP4WAIOPS_CRDS") 
         for CRD in ${CP4WAIOPS_CRDS[@]}; do

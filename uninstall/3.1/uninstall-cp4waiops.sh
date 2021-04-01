@@ -78,9 +78,6 @@ echo
 
 # Check if the project configured in the props file exists
 if [[ ! -z "$AIOPS_PROJECT"  ]]; then 
-
-   #TODO: Check there are no user created CRs left behind
-
    # Delete the installation CR
 	log $INFO "Deleting the installation CR..."
 	delete_installation_instance $INSTALLATION_CR_NAME $AIOPS_PROJECT
@@ -126,7 +123,6 @@ if [[ ! -z "$AIOPS_PROJECT"  ]]; then
    	delete_zenservice_instance $ZENSERVICE_CR_NAME $AIOPS_PROJECT
 
       # Then go cleanup the rest of the leftover pieces related to zen & IAF in the project
-      # TODO: Confirm we don't need confirmation from user for these PVCs and secrets
       log $INFO "Deleting IAF PVCs in $AIOPS_PROJECT"
       for PVC in ${IAF_PVCS[@]}; do
             log $INFO "Deleting PVC $PVC.."
