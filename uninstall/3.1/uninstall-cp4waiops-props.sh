@@ -6,6 +6,9 @@
 ##### This is the configuration file associated with the uninstall-cp4waiops.sh script that  #####
 ##### can be used to uninstall Cloud Pak for Watson AIOps from your cluster.  Please review  #####
 ##### and update each of the properties below to indicate what you want to uninstall.        #####
+##### IAF and zenservice below refer to the IBM Automation Foundation resources. They are    #####
+##### shared by Cloud Paks and should only be removed if there are no other Cloud Paks in    #####
+##### the project or the cluster.                                                            #####
 ##################################################################################################
 
 # Set the name of project when Cloud Pak for Watson AIOps is installed.
@@ -41,7 +44,7 @@ DELETE_ZENSERVICE="false"
 # If you do not have any other cloud paks installed in the project specified above, you can choose to delete the project after uninstalling Cloud Pak for Watson AIOps.
 DELETE_AIOPS_PROJECT="false"
 
-# If you do not have any other cloud paks installed in your cluster and want to completly clean up everything installed by Cloud Pak for Watson AIOps, you can set this option to true.
+# This will uninstall IBM Automation Foundation (IAF) from the cluster. If you do not have any other cloud paks installed in your cluster and want to completly clean up everything installed by Cloud Pak for Watson AIOps, you can set this option to true.
 DELETE_IAF="false"
 
 # USE WITH CAUTION!! Set to true if you want to delete ALL the resources in uninstall-cp4waiops-resource-groups
