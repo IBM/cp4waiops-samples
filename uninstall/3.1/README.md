@@ -1,6 +1,6 @@
 # Uninstall Cloud Pak for Watson AIOps
 
-The scripts provided here can be used to uninstall Cloud Pak of Watson AIOps and delete resources created by it.
+The scripts provided here can be used to uninstall Cloud Pak for Watson AIOps and delete resources created by it.  This includes optionally uninstalling the IBM Automation Foundation (IAF).  IAF is the common layer shared by multiple Cloud Paks.
 
 ## Prereqs
 - You need to have OC CLI installed
@@ -16,9 +16,9 @@ Clone this repo.
 
 ## Preparing for uninstall
 
-There are resources created by Cloud Pak of Watson AIOps that you should review before deleting.  These include PVCs, secrets, CRDs, and config maps.  You might want to save some of these or consider not deleting them if you plan to reinstall.  You can check the [`uninstall-cp4waiops-resource-groups.sh`](uninstall-cp4waiops-resource-groups.sh) file for a list of resources that the script will delete.  You can update this list with resources you don't want to delete.
+There are resources created by Cloud Pak for Watson AIOps that you should review before deleting.  These include PVCs, secrets, CRDs, and config maps.  You might want to save some of these or consider not deleting them if you plan to reinstall.  You can check the [`uninstall-cp4waiops-resource-groups.sh`](uninstall-cp4waiops-resource-groups.sh) file for a list of resources that the script will delete.  You can update this list with resources you don't want to delete.
 
-There are also resources that are shared by multiple Cloud Paks that Cloud Pak of Watson AIOps might install if it was not already created by a differnt Cloud Pak.  You want to make sure those are not deleted if you are using other Cloud Paks on your cluster.  
+There are also resources that are shared by multiple Cloud Paks that Cloud Pak for Watson AIOps might install if it was not already created by a different Cloud Pak.  You want to make sure those are not deleted if you are using other Cloud Paks on your cluster.  
 
 Once you have carefully reviewed and decided on what to delete, you can move forward to the next step and update the [`uninstall-cp4waiops-props.sh`](uninstall-cp4waiops-props.sh) file with your preferences.
 
