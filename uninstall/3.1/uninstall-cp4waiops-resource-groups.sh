@@ -119,14 +119,7 @@ KONG_CRDS=("kongs.management.ibm.com"
             "kongingresses.configuration.konghq.com"
             "kongplugins.configuration.konghq.com"
             "tcpingresses.configuration.konghq.com")
-#### IBM Automation Foundation ####
-IAF_OPERATORS=("ibm-automation"
-               "ibm-automation-ai-v1.0-iaf-operators-openshift-marketplace"
-               "ibm-automation-core-v1.0-iaf-core-operators-openshift-marketplace"
-               "ibm-automation-elastic-v1.0-iaf-operators-openshift-marketplace"
-               "ibm-automation-eventprocessing-v1.0-iaf-operators-openshift-marketplace"
-               "ibm-automation-flink-v1.0-iaf-operators-openshift-marketplace"
-               "ibm-common-service-operator-beta-opencloud-operators-openshift-marketplace")
+
 #### IBM Automation Foundation ####
 IAF_CERTMANAGER=("certificate.certmanager.k8s.io/iaf-system-automationui-aui-zen-ca"
              "certificate.certmanager.k8s.io/iaf-system-automationui-aui-zen-cert"

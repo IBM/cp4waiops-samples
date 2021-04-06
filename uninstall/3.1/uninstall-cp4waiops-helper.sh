@@ -67,17 +67,35 @@ check_oc_resource_exists() {
 unsubscribe () {
     local operator_name=$1	
     local dest_namespace=$2
-
-    operator_exists=$( check_oc_resource_exists "subscription.operators.coreos.com" $operator_name $dest_namespace )
-
+    local operator_label=$3
+    
+    if [[ ( -z "$operator_name" ) && ( ! -z  "$operator_label" ) ]]; then
+       operator_name=$(oc get subscription.operators.coreos.com -n $dest_namespace -l $operator_label -o name)
+       if [[ ! -z "$operator_name" ]]; then
+          operator_exists="true"
+       else
+          operator_exists="false"
+       fi
+    elif [[ ( ! -z "$operator_name" ) ]]; then
+       operator_exists=$( check_oc_resource_exists "subscription.operators.coreos.com" $operator_name $dest_namespace )
+    else
+       log $ERROR "operator_name and operator_label are empty, please provide one of them and try again"
+       exit 1
+    fi
+    
     if [[ "$operator_exists" == "true" ]]; then
+            
+       if [[ "$operator_name" != "subscription.operators.coreos.com"*  ]]; then
+          operator_name="subscription.operators.coreos.com/"$operator_name
+       fi
         
         # Get CluserServiceVersion
-        CSV=$(oc get subscription.operators.coreos.com $operator_name -n $dest_namespace --ignore-not-found --output=jsonpath={.status.installedCSV})
+        CSV=$(oc get $operator_name -n $dest_namespace --ignore-not-found --output=jsonpath={.status.installedCSV})
         
         # Delete Subscription
         log $INFO "Deleting the subscription $operator_name"
-        oc delete subscription.operators.coreos.com $operator_name -n $dest_namespace
+        #oc delete subscription.operators.coreos.com $operator_name -n $dest_namespace
+        oc delete $operator_name -n $dest_namespace
 
         # Delete the Installed ClusterServiceVersion
         if [[ ! -z "$CSV"  ]]; then
@@ -108,7 +126,6 @@ unsubscribe () {
         log $WARNING "The subscription for the operator $operator_name does not exists, skipping the unsubscription of the operator $operator_name"
     fi
 }
-
 
 delete_installation_instance () {
     local installation_name=$1
@@ -253,16 +270,15 @@ delete_iaf_bedrock () {
     oc patch -n ibm-common-services rolebinding/admin -p '{"metadata": {"finalizers":null}}'
     oc delete rolebinding admin -n ibm-common-services --ignore-not-found
 
-    unsubscribe "ibm-automation" $OPERATORS_NAMESPACE
-    unsubscribe "ibm-automation-v1.0-iaf-operators-openshift-marketplace" $OPERATORS_NAMESPACE
-
-    unsubscribe "ibm-automation-ai-v1.0-iaf-operators-openshift-marketplace" $OPERATORS_NAMESPACE 
-    unsubscribe "ibm-automation-core-v1.0-iaf-core-operators-openshift-marketplace" $OPERATORS_NAMESPACE 
-    unsubscribe "ibm-automation-elastic-v1.0-iaf-operators-openshift-marketplace" $OPERATORS_NAMESPACE 
-    unsubscribe "ibm-automation-eventprocessing-v1.0-iaf-operators-openshift-marketplace" $OPERATORS_NAMESPACE 
-    unsubscribe "ibm-automation-flink-v1.0-iaf-operators-openshift-marketplace" $OPERATORS_NAMESPACE
-
-    unsubscribe "ibm-common-service-operator-v3-opencloud-operators-openshift-marketplace" $OPERATORS_NAMESPACE 
+    unsubscribe "" $OPERATORS_NAMESPACE "operators.coreos.com/ibm-automation.openshift-operators"
+    unsubscribe "" $OPERATORS_NAMESPACE "operators.coreos.com/ibm-automation-ai.openshift-operators"
+    unsubscribe "" $OPERATORS_NAMESPACE "operators.coreos.com/ibm-automation-core.openshift-operators"
+    unsubscribe "" $OPERATORS_NAMESPACE "operators.coreos.com/ibm-automation-elastic.openshift-operators"
+    unsubscribe "" $OPERATORS_NAMESPACE "operators.coreos.com/ibm-automation-eventprocessing.openshift-operators"
+    unsubscribe "" $OPERATORS_NAMESPACE "operators.coreos.com/ibm-automation-flink.openshift-operators"
+    unsubscribe "" $OPERATORS_NAMESPACE "operators.coreos.com/ibm-automation.openshift-operators"
+    unsubscribe "" $OPERATORS_NAMESPACE "operators.coreos.com/ibm-common-service-operator.openshift-operators"
+                   
 
     oc delete operandrequest iaf-operator -n openshift-operators --ignore-not-found
     oc delete operandrequest iaf-core-operator -n openshift-operators --ignore-not-found
@@ -286,9 +302,9 @@ delete_iaf_bedrock () {
     oc delete namespacescopes common-service -n ibm-common-services --ignore-not-found
     oc delete namespacescopes nss-managedby-odlm -n ibm-common-services --ignore-not-found
 
-    unsubscribe "ibm-cert-manager-operator" $IBM_COMMON_SERVICES_NAMESPACE
-    unsubscribe "ibm-namespace-scope-operator" $IBM_COMMON_SERVICES_NAMESPACE
-    unsubscribe "operand-deployment-lifecycle-manager-app" $IBM_COMMON_SERVICES_NAMESPACE
+    unsubscribe "ibm-cert-manager-operator" $IBM_COMMON_SERVICES_NAMESPACE ""
+    unsubscribe "ibm-namespace-scope-operator" $IBM_COMMON_SERVICES_NAMESPACE ""
+    unsubscribe "operand-deployment-lifecycle-manager-app" $IBM_COMMON_SERVICES_NAMESPACE ""
 
     oc delete deployment cert-manager-cainjector -n ibm-common-services --ignore-not-found
     oc delete deployment cert-manager-controller -n ibm-common-services --ignore-not-found
