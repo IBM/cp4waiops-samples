@@ -107,7 +107,7 @@ if [[ ! -z "$AIOPS_PROJECT"  ]]; then
 
    # Finally uninstall the CP4WAIOps operator by deleting the subscription & CSV
    log $INFO "Uninstalling the CP4WAIOps operator..."
-	unsubscribe "ibm-aiops-orchestrator" $OPERATORS_NAMESPACE 
+	unsubscribe "ibm-aiops-orchestrator" $OPERATORS_NAMESPACE ""
 
    # Now verify from user input that there are no other cloud paks in this project
    # If there aren't and user confirms they want to delete zenservice, start that process
