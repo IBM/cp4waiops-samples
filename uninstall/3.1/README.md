@@ -1,6 +1,6 @@
 # Uninstall Cloud Pak for Watson AIOps
 
-The scripts provided here can be used to uninstall Cloud Pak for Watson AIOps and delete resources created by it.
+The scripts provided here can be used to uninstall Cloud Pak for Watson AIOps and delete resources created by it.  This includes optionally uninstalling the IBM Automation Foundation (IAF).  IAF is the common layer shared by multiple Cloud Paks.
 
 ## Prereqs
 - You need to have OC CLI installed
