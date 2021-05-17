@@ -131,14 +131,14 @@ delete_installation_instance () {
     local installation_name=$1
     local project=$2
 
-    if  [ `oc get installation $installation_name -n $project --ignore-not-found | wc -l` -gt 0 ] ; then
+    if  [ `oc get installations.orchestrator.aiops.ibm.com $installation_name -n $project --ignore-not-found | wc -l` -gt 0 ] ; then
         log $INFO "Found installation CR $installation_name to delete."
         log $INFO "Waiting for $resource instances to be deleted.  This will take a while...."
 
-        oc delete installation $installation_name -n $project --ignore-not-found;
+        oc delete installations.orchestrator.aiops.ibm.com $installation_name -n $project --ignore-not-found;
     
         LOOP_COUNT=0
-        while [ `oc get installation $installation_name -n $project --ignore-not-found | wc -l` -gt 0 ]
+        while [ `oc get installations.orchestrator.aiops.ibm.com $installation_name -n $project --ignore-not-found | wc -l` -gt 0 ]
         do
         sleep $SLEEP_EXTRA_LONG_LOOP
         LOOP_COUNT=`expr $LOOP_COUNT + 1`
@@ -163,7 +163,8 @@ delete_installation_instance () {
             log $ERROR "Timed out waiting for operandrequests to be deleted"
             exit 1
         else
-            log $INFO "Found following operandrequests in the project: $(oc get operandrequests -n $project --no-headers)"
+            log $INFO "Found following operandrequests in the project: "
+            log $INFO "$(oc get operandrequests -n $project --no-headers)"
             log $INFO "Waiting for operandrequests instances to get deleted... Checking again in $SLEEP_LONG_LOOP seconds"
         fi
         done
@@ -213,7 +214,8 @@ delete_zenservice_instance () {
             log $ERROR "Timed out waiting for operandrequests to be deleted"
             exit 1
         else
-            log $INFO "Found following operandrequests in the project: $(oc get operandrequests -n ibm-common-services --no-headers)"
+            log $INFO "Found following operandrequests in the project: "
+            log $INFO "$(oc get operandrequests -n ibm-common-services --no-headers)"
             log $INFO "Waiting for zenservice related operandrequests instances to get deleted... Checking again in $SLEEP_LONG_LOOP seconds"
         fi
         done
