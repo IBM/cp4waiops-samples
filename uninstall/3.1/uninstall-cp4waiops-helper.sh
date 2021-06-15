@@ -303,6 +303,8 @@ delete_iaf_bedrock () {
 
     oc delete namespacescopes common-service -n ibm-common-services --ignore-not-found
     oc delete namespacescopes nss-managedby-odlm -n ibm-common-services --ignore-not-found
+    oc delete namespacescopes odlm-scope-managedby-odlm -n ibm-common-services --ignore-not-found
+    oc delete namespacescopes nss-odlm-scope -n ibm-common-services --ignore-not-found
 
     unsubscribe "ibm-cert-manager-operator" $IBM_COMMON_SERVICES_NAMESPACE ""
     unsubscribe "ibm-namespace-scope-operator" $IBM_COMMON_SERVICES_NAMESPACE ""
@@ -410,11 +412,11 @@ log $INFO "##### Properties in uninstall-cp4waiops-props.sh #####"
 check_additional_installation_exists(){
 
   log $INFO "Checking if any additional installation resources found in the cluster."
-  installation_returned_value=$(oc get installations.orchestrator.aiops.ibm.com -A)
+  installation_returned_value=$(oc get installation -A)
   if [[ ! -z $installation_returned_value  ]] ; then
      log $ERROR "Some additional installation cr found in the cluster, please delete the installation cr's and try again."
      log $ERROR "Remaining installation cr found : "
-     oc get installations.orchestrator.aiops.ibm.com -A
+     oc get installation -A
      exit 1
   else
      log $INFO "No additional installation resources found in the cluster."

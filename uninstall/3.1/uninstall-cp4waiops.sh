@@ -122,13 +122,6 @@ if [[ ! -z "$AIOPS_PROJECT"  ]]; then
    	log $INFO "Deleting the zenservice CR..."
    	delete_zenservice_instance $ZENSERVICE_CR_NAME $AIOPS_PROJECT
 
-      # Then go cleanup the rest of the leftover pieces related to zen & IAF in the project
-      log $INFO "Deleting IAF PVCs in $AIOPS_PROJECT"
-      for PVC in ${IAF_PVCS[@]}; do
-            log $INFO "Deleting PVC $PVC.."
-            oc delete $PVC -n $AIOPS_PROJECT --ignore-not-found
-      done
-
       log $INFO "Deleting IAF configmaps in $AIOPS_PROJECT"
       for CONFIGMAP in ${IAF_CONFIGMAPS[@]}; do
             log $INFO "Deleting configmap $CONFIGMAP.."
@@ -221,6 +214,13 @@ if [[ ! -z "$AIOPS_PROJECT"  ]]; then
    if [[ $DELETE_IAF == "true" ]]; then
       log $INFO "Deleting IAF"
       delete_iaf_bedrock
+
+      log $INFO "Deleting IAF PVCs in $AIOPS_PROJECT"
+      for PVC in ${IAF_PVCS[@]}; do
+            log $INFO "Deleting PVC $PVC.."
+            oc delete $PVC -n $AIOPS_PROJECT --ignore-not-found
+      done
+
    else
       log $INFO "Skipping delete of IAF based on configuration in uninstall-cp4waiops-props.sh"
    fi
