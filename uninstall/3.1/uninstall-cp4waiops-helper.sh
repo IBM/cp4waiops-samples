@@ -412,11 +412,11 @@ log $INFO "##### Properties in uninstall-cp4waiops-props.sh #####"
 check_additional_installation_exists(){
 
   log $INFO "Checking if any additional installation resources found in the cluster."
-  installation_returned_value=$(oc get installation -A)
+  installation_returned_value=$(oc get installations.orchestrator.aiops.ibm.com -A)
   if [[ ! -z $installation_returned_value  ]] ; then
      log $ERROR "Some additional installation cr found in the cluster, please delete the installation cr's and try again."
      log $ERROR "Remaining installation cr found : "
-     oc get installation -A
+     oc get installations.orchestrator.aiops.ibm.com -A
      exit 1
   else
      log $INFO "No additional installation resources found in the cluster."
