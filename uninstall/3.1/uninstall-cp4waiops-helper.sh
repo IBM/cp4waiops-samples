@@ -303,6 +303,8 @@ delete_iaf_bedrock () {
 
     oc delete namespacescopes common-service -n ibm-common-services --ignore-not-found
     oc delete namespacescopes nss-managedby-odlm -n ibm-common-services --ignore-not-found
+    oc delete namespacescopes odlm-scope-managedby-odlm -n ibm-common-services --ignore-not-found
+    oc delete namespacescopes nss-odlm-scope -n ibm-common-services --ignore-not-found
 
     unsubscribe "ibm-cert-manager-operator" $IBM_COMMON_SERVICES_NAMESPACE ""
     unsubscribe "ibm-namespace-scope-operator" $IBM_COMMON_SERVICES_NAMESPACE ""
