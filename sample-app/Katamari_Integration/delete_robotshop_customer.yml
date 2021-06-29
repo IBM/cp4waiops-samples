@@ -1,0 +1,13 @@
+---
+- name: "Deleting Robotshop for {{ CUSTOMER }}"
+  hosts: localhost
+
+  vars_files:
+    - "/data/all_vars.yaml"
+
+  tasks:
+  - set_fact: RS_NAMESPACE="robotshop-{{ CUSTOMER }}"
+ 
+  - import_tasks: ./tasks/robotshop-login.yaml
+  - import_tasks: ./tasks/use-robotshop-cluster.yaml 
+  - import_tasks: ./tasks/remove-robotshop-ns.yaml

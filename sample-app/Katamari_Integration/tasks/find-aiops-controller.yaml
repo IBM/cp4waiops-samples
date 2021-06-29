@@ -1,0 +1,7 @@
+---
+- name: Find aiops controller pod
+  command: "oc get po -l app.kubernetes.io/component=controller -o jsonpath='{.items[].metadata.name}'"
+  register: output
+
+- set_fact: aiops_controller_pod="{{ output.stdout }}"
+

@@ -1,0 +1,28 @@
+---
+- set_fact: broker="strimzi-cluster-kafka-bootstrap:9092"
+
+- set_fact: kafka_pod="strimzi-cluster-kafka-0"
+
+- name: Get kafkatopic 
+  shell: "oc get kafkatopics | grep ^alerts- | grep -v 1000-1000 | awk '{print $1}'"
+  register: koutput
+  failed_when: koutput.rc != 0
+
+- set_fact: kafkatopic="{{ koutput.stdout }}"
+
+- name: debug 
+  ansible.builtin.debug:
+    msg: "{{ broker }}, {{ kafka_pod }}, {{ kafkatopic }}"
+
+
+- name: Copy shipping_event.json to pod
+  shell: "kubectl cp ./shipping_event.json {{ AIOPS_NAMESPACE }}/{{ kafka_pod }}:/tmp/shipping_event.json"
+  register: soutput
+  failed_when: soutput.rc != 0
+
+# TODO: This is cheating, revise this to run inline instead of file.
+- name: Run producer on the kafka pod
+  command: "./shell-scripts/publish.sh {{ kafka_pod }} {{ broker }} {{ kafkatopic }}"
+  register: poutput
+  failed_when: poutput.rc != 0
+

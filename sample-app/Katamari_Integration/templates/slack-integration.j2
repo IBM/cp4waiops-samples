@@ -1,0 +1,19 @@
+{
+    "connection_type": "slack",
+	"connection_config": {
+		"connection_type": "slack",
+		"display_name": "field-help-slack-connection",
+		"creator_user_name": "Integration Automation",
+		"bot_token": "{{ BOT_TOKEN | b64decode }}",
+		"secret": "{{ SIGNING_SECRET | b64decode }}", 
+		"description": "",
+        "proactive_channel": "{{ PROACTIVE_CHANNEL }}", 
+		"reactive_channel": "{{ REACTIVE_CHANNEL }}"
+    },
+	"mapping": {
+		"codec": "slack"
+	},
+    "connection_updated_at":"2020-08-29T18:56:28",
+	"datasource_type": "slack", 
+	"source_query_url": null	
+}

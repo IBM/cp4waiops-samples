@@ -1,0 +1,60 @@
+---
+# Local vars
+# before running the automation, update this all_vars.yaml file with required information
+# then copy this file to local folder "/data", /data/all_vars.yaml 
+ROKS_CLUSTER: false
+#----- ailab 
+CLUSTER_PASS: ""
+CLUSTER_API: ""
+CLUSTER_USER: ""
+#---
+BASEDIR: "/usr/local/automation_work"
+ROBOTSHOP_SECRET_TOKEN: "robotshop-token.txt"
+ROBOTSHOP_CERT: "robotshop-cert.crt"
+KUBE_CERT_NAME: "kubecluster.crt"
+
+# Humio vars
+# value should be base64 encoded
+HUMIO_API_KEY: ""
+HUMIO_IP_ADDRESS: ""
+HUMIO_COLLECTION_START: "4/15/2021"
+HUMIO_COLLECTION_END: "4/16/2021"
+
+# IBMCloud MCM Account vars
+# Robotshop cluster
+ROBOTSHOP_API_KEY: ""
+ROBOTSHOP_REGION: "us-south"
+ROBOTSHOP_CLUSTER_ID: ""
+
+# Robotshop Cluster on non-ROKS
+ROBOTSHOP_CLUSTER_PASS: ""
+ROBOTSHOP_CLUSTER_API: ""
+ROBOTSHOP_CLUSTER_USER: ""
+# AIOps cluster - default is Cloudrock Production
+KATAMARI_API_KEY: ""
+KATAMARI_REGION: "us-east"
+KATAMARI_CLUSTER_ID: ""
+
+# AIOPS vars , "cp4aiops"
+AIOPS_NAMESPACE: "cp4waiops"
+HUMIO_CURL_PAYLOAD: "humio-2-aiops-integration"
+AUTOMATION_DIR: "/usr/local/automation"
+
+# Slack Vars
+BOT_TOKEN: ""
+SIGNING_SECRET: ""
+PROACTIVE_CHANNEL: ""
+REACTIVE_CHANNEL: ""
+
+# ServiceNow Vars
+SERVICENOW_URL: ""
+SERVICENOW_USERNAME: "aiops_admin"
+# Encrypted
+SERVICENOW_PASSWORD: ""
+SERVICENOW_MAXREC: "100000"
+
+# Encrypted (not base64)
+SERVICENOW_ENCPASS: ""
+
+# MODEL_DATA:
+MODEL_DATA: "model-data"

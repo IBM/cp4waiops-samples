@@ -1,0 +1,3 @@
+---
+- name: Deploy Robotshop(Can take up to 15 minutes, be patient)
+  command: "./shell-scripts/deploy_robot_shop.sh {{ CUSTOMER }} {{ ROBOTSHOP_CLUSTER_ID }}"

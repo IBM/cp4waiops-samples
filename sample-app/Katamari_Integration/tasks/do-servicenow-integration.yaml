@@ -1,0 +1,12 @@
+---
+- name: Process curl payload template for ServiceNow integration
+  template:
+    src: "../templates/servicenow-integration.j2"
+    dest: "{{ WORKDIR }}/servicenow-integration.json" 
+
+- name: Copy processed json to target container
+  command: "oc cp {{ WORKDIR }}/servicenow-integration.json {{ aiops_controller_pod }}:/tmp/servicenow-integration.json"
+
+- name: Run curl command to complete integration
+  command: "oc exec -it {{ aiops_controller_pod }} -- curl -v -i -k https://localhost:9443/v3/connections -d @/tmp/servicenow-integration.json --header 'Content-Type: application/json'"
+  

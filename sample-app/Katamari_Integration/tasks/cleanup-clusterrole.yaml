@@ -1,0 +1,11 @@
+---
+- name: Delete clusterrole binding
+  command: "/usr/local/bin/kubectl delete clusterrolebinding {{ AIOPS_NAMESPACE }}-k8s-binding"
+
+- name: Delete ServiceAccount
+  command: "/usr/local/bin/kubectl delete serviceaccount {{ AIOPS_NAMESPACE }}-k8s-account"
+
+- name: Delete Clusterrole
+  command: "/usr/local/bin/oc delete -f templates/robotshop-clusterrole.yaml"
+
+

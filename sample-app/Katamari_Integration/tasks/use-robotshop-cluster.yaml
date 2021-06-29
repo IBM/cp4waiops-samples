@@ -1,0 +1,5 @@
+---
+- name: Switch context to Robotshop cluster
+  command: "ibmcloud ks cluster config --cluster {{ ROBOTSHOP_CLUSTER_ID }}"
+  register: output
+  failed_when: output.rc != 0

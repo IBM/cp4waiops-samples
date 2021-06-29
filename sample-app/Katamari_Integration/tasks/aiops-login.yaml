@@ -1,0 +1,6 @@
+---
+- name: Logging in to AIOps cluster
+  command: "oc login {{ CLUSTER_API | b64decode }} -u {{ CLUSTER_USER | b64decode }} -p {{ CLUSTER_PASS | b64decode }}"
+  register: output
+  failed_when: output.rc != 0
+

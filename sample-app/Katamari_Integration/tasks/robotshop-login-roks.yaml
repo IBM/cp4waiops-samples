@@ -1,0 +1,5 @@
+---
+- name: Logging in to IBMCloud(IKS robotshop)
+  command: "/usr/local/bin/ibmcloud login --apikey {{ ROBOTSHOP_API_KEY | b64decode }} -r {{ ROBOTSHOP_REGION }}"
+  register: output
+  failed_when: output.rc != 0

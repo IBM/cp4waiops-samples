@@ -1,0 +1,12 @@
+---
+- name: "Lists robotshop customers"
+  hosts: localhost
+
+  vars_files:
+    - /data/all_vars.yaml
+
+  tasks:
+
+  - import_tasks: ./tasks/robotshop-login.yaml
+  - import_tasks: ./tasks/use-robotshop-cluster.yaml
+  - import_tasks: ./tasks/list-robotshop-customers.yaml 

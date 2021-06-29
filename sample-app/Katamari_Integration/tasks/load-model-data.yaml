@@ -1,0 +1,31 @@
+---
+- name: Get username
+  shell: "oc get secret $(oc get secrets | grep aimanager-ibm-elasticsearch-secret | awk '!/-min/' | awk '{print $1;}') -o jsonpath='{.data.username}'| base64 -d"
+  register: userData
+
+- set_fact: username="{{ userData.stdout }}"
+
+- name: Get password
+  shell: "oc get secret $(oc get secrets | grep aimanager-ibm-elasticsearch-secret | awk '!/-min/' | awk '{print $1;}') -o jsonpath='{.data.password}'| base64 -d"
+  register: pwData
+
+- set_fact: password="{{ pwData.stdout }}"
+
+- name: Setup Port-Forwarding
+  shell: "screen -dmS PortForward bash -c \"oc port-forward $(oc get pod | awk '/elastic.*all-0/ {print $1}') 9200:9200\"" 
+
+- name: Create Model Data working directory
+  file:
+    path: "{{ WORKING_DIR }}/{{ MODEL_DATA }}"
+    state: directory
+
+- name: Load the data
+  shell: "for index in $(ls -1 | grep \"1000-1000-2021\\|log_models_latest\" | cut -f 1 -d '.'); do elasticdump --input=\"$index.json\" --output=https://{{ username }}:{{ password }}@localhost:9200/$index --type=data;done" 
+  args:
+          chdir: "{{ WORKING_DIR }}/{{ MODEL_DATA }}"
+  environment:
+          NODE_TLS_REJECT_UNAUTHORIZED: 0
+
+- name: Stop Port-Fowarding
+  shell: "screen -X -S PortForward quit"
+

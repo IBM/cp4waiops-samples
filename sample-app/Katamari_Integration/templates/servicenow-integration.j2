@@ -1,0 +1,35 @@
+{
+    "connection_type": "servicenow",
+	"connection_config": {
+		"connection_type": "servicenow",
+		"connect_timeout": 5000,
+		"read_timeout": 5000,
+		"proxy_host": "test",
+		"proxy_port": 8080,
+		"collection_mode": "inference",
+		"display_name": "servicenow-connection",
+		"description": "servicenow-connection",
+		"fetch_records" : "{{ SERVICENOW_MAXREC }}",
+		"password_observer": "{{ SERVICENOW_ENCPASS }}",
+		"url": "{{ SERVICENOW_URL }}",
+		"username": "{{ SERVICENOW_USERNAME }}",
+		"password": "{{ SERVICENOW_PASSWORD | b64decode }}",
+		"entity_type_mapping": [
+			"test"
+		 ],
+		"discoverable_ci_types": [
+		    "test"
+		 ],
+		"schedule": {
+			"interval": "0",
+			"units": "Hours"
+		}
+    },
+	"mapping": {
+		"codec": "servicenow"
+	},
+	"connection_updated_at":"2020-08-29T18:56:28",
+	"datasource_type": "incidents",
+	"request_action": "create",
+	"source_query_url": null	
+}

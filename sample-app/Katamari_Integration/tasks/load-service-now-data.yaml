@@ -1,0 +1,47 @@
+---
+- set_fact: WORKING_DIR="{{ WORKDIR }}/aiops_integration"
+
+- name: Create our working directory
+  file:
+    path: "{{ WORKING_DIR }}"
+    state: directory
+
+- name: Clone the change-risk github
+  command: "git clone -b push_data_to_elastic_scripts git@github.ibm.com:katamari/change-risk.git"
+  args:
+    chdir: "{{ WORKING_DIR }}"
+
+- name: Get token
+  shell: "oc whoami -t"
+  register: ctoken
+
+- name: Set cluster token
+  set_fact: cluster_token="{{ ctoken.stdout }}"
+
+- name: Get the cluster name 
+  shell: "oc whoami -c | awk -F/ '{print $2}'"
+  register: c_url
+
+- name: Set the cluster name 
+  set_fact: cluster_name="{{ c_url.stdout }}"
+
+- name: Run make dev-env
+  command: "make dev-env"
+  args:
+    chdir: "{{ WORKING_DIR }}/change-risk/"
+  environment:
+    ENVIRONMENT: "dev"
+    OS_PROJECT: "{{ AIOPS_NAMESPACE }}"
+    OS_CLUSTER_NAME: "{{ cluster_name }}"
+    OS_CLUSTER_TOKEN: "{{ cluster_token }}"
+    
+- name: Load the data
+  command: "python3.6 scripts/data_loading/load.py"
+  args:
+    chdir: "{{ WORKING_DIR }}/change-risk/"
+  environment:
+    PYTHONPATH: "{{ WORKING_DIR }}/change-risk/"
+    ENVIRONMENT: "dev"
+    OS_PROJECT: "{{ AIOPS_NAMESPACE }}"
+    OS_CLUSTER_NAME: "{{ cluster_name }}"
+    OS_CLUSTER_TOKEN: "{{ cluster_token }}"

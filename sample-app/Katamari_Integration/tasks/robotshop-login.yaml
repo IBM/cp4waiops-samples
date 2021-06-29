@@ -1,0 +1,5 @@
+---
+- name: Logging in to robotshop cluster
+  command: "oc login {{ ROBOTSHOP_CLUSTER_API | b64decode }} -u {{ ROBOTSHOP_CLUSTER_USER | b64decode }} -p {{ ROBOTSHOP_CLUSTER_PASS | b64decode }}"
+  register: output
+  failed_when: output.rc != 0

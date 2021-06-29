@@ -1,0 +1,29 @@
+{
+  "connection_type": "kubernetes_observer",
+  "connection_config":  {
+      "job_type":"load",
+      "observer_parameters": {
+                            "type": "string",
+                            "description": "job description",
+                            "parameters": {
+                                "data_center": "DataCenter 1",
+                                "token": "{{ observer_pw }}",
+                                "master_ip": "{{ kube_api_server }}",
+                                "api_port": "{{ kube_api_port }}",
+                                "certificate": "{{ KUBE_CERT_NAME }}",
+                                "namespace": "{{ RS_NAMESPACE }}",
+                                "connect_read_timeout_ms": 5000,
+                                "namespaceGroupParameters": {"correlate": true},
+								"ssl_hostname_validation": false,
+								"trust_all_certificate": true,
+                                "hide_terminated_pods": false
+                            },
+                            "schedule": {
+                            "interval": 1,
+                            "units": "Hours"
+                            },
+                        "scheduleRequest": true
+                    }
+        },
+  "datasource_type": "topology"
+}

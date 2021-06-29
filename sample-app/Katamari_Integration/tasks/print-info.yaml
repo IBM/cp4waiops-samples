@@ -1,0 +1,5 @@
+---
+- name: Display robotshop info 
+  ansible.builtin.debug:
+    msg: "Robotshop URL: {{ robotshop_url }}"
+  when: robotshop_url is defined

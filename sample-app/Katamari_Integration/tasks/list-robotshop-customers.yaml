@@ -1,0 +1,8 @@
+---
+- name: List Robotshop namespaces
+  shell: "/usr/local/bin/kubectl get ns | /usr/bin/grep robotshop | /usr/bin/awk '{print $1}' | /usr/bin/cut -c 11-"
+  register: output
+  failed_when: output.rc != 0
+
+- debug:
+        msg: "{{ output.stdout_lines }}"

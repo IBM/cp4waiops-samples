@@ -1,0 +1,64 @@
+---
+- name: "Create Katamari integrations for {{ CUSTOMER }} Environment"
+  hosts: localhost
+
+  vars_files:
+    - /data/all_vars.yaml
+
+  tasks:
+  - set_fact: RS_NAMESPACE="robotshop-{{ CUSTOMER }}"
+  - set_fact: WORKDIR="{{ BASEDIR }}/{{ RS_NAMESPACE }}-data"
+
+  - name: Create working directory
+    file:
+      path: "{{ WORKDIR }}"
+      state: directory
+  
+  # Login to robotshop cluster
+  - import_tasks: ./tasks/robotshop-login.yaml
+    when: not ROKS_CLUSTER
+  # Login to IBMCloud and switch to robotshop cluster and namespace
+  - import_tasks: ./tasks/robotshop-login-roks.yaml
+    when: ROKS_CLUSTER
+  - import_tasks: ./tasks/use-robotshop-cluster.yaml
+    when: ROKS_CLUSTER
+  - import_tasks: ./tasks/set-robotshop-context.yaml
+  - import_tasks: ./tasks/deploy-robotshop.yaml
+  - import_tasks: ./tasks/get-robotshop-url.yaml
+
+  # Returns "kube_master" as <host>:<port>
+  #         "kube_api_server" is <host>
+  #         "kube_api_port" is <port> 
+  #         "kube_certificate" is master certificate(txt)
+  - import_tasks: ./tasks/get-robotshop-cert.yaml
+    when: not ROKS_CLUSTER
+  # ROKS cluster
+  - import_tasks: ./tasks/get-robotshop-cert-roks.yaml
+    when: ROKS_CLUSTER
+  - import_tasks: ./tasks/configure-clusterrole.yaml
+  
+  # Returns secret_token 
+  - import_tasks: ./tasks/get-secret-token.yaml
+
+  # Move to AIOps Cluster
+  - import_tasks: ./tasks/aiops-login.yaml
+    when: not ROKS_CLUSTER
+  # Move to ROKS AIOps Cluster  
+  - import_tasks: ./tasks/aiops-login-roks.yaml
+    when: ROKS_CLUSTER
+
+  - import_tasks: ./tasks/set-aiops-context.yaml
+  
+  # Returns aiops_controller_pod
+  - import_tasks: ./tasks/find-aiops-controller.yaml
+  
+  # Returns encrypted observer_pw(from secret_token)
+  - import_tasks: ./tasks/encrypt-observer-password.yaml
+  - import_tasks: ./tasks/update-topology-manager-secret.yaml
+  - import_tasks: ./tasks/do-slack-integration.yaml
+  - import_tasks: ./tasks/create-k8s-connection-to-aiops.yaml
+  - import_tasks: ./tasks/humio-logsteam-to-aiops.yaml
+  #- import_tasks: ./tasks/do-servicenow-integration.yaml
+  - import_tasks: ./tasks/load-service-now-data.yaml
+  - import_tasks: ./tasks/load-model-data.yaml
+  - import_tasks: ./tasks/print-info.yaml

@@ -1,0 +1,3 @@
+---
+- name: "Swap to correct namespace({{ RS_NAMESPACE }})"
+  command: "/usr/local/bin/kubectl config set-context --current --namespace={{ RS_NAMESPACE }}"

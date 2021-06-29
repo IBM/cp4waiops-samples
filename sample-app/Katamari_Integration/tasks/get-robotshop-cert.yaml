@@ -1,0 +1,17 @@
+---
+- name: Find kubernetes master server
+  shell: kubectl cluster-info | grep master |awk -F 'https://' '{print $2}' | sed -r "s/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]//g"
+  register: output
+  failed_when: output.rc != 0
+
+- set_fact: kube_master="{{ output.stdout }}"
+- set_fact: kube_api_server='{{ kube_master | regex_replace("^(.*):\d*", "\\1") }}'
+- set_fact: kube_api_port='{{ kube_master | regex_replace("^.*:(\d*)", "\\1") }}'
+
+- name: Store kubernetes certificate
+  shell: "echo -n | openssl s_client -connect {{ kube_master }} | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' | base64 | tr -d '\\n'"
+  register: certdata
+  failed_when: certdata.rc != 0
+
+- set_fact: kube_certificate="{{ certdata.stdout }}"
+- local_action: copy content="{{ kube_certificate }}" dest="{{ WORKDIR }}/{{ ROBOTSHOP_CERT }}"

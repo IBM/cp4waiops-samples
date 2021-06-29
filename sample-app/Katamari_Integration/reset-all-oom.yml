@@ -1,0 +1,14 @@
+---
+- name: "Reset OutofMemory Scenario"
+  hosts: localhost
+
+  vars_files:
+    - /data/all_vars.yaml
+
+  tasks:
+  - set_fact: RS_NAMESPACE="robotshop-{{ CUSTOMER }}"
+
+  - name: Run reset-all script to reset OOM scenario
+    command: "./shell-scripts/reset_all.sh {{ AIOPS_NAMESPACE }} {{ RS_NAMESPACE }} {{ KATAMARI_API_KEY | b64decode }} {{ ROBOTSHOP_API_KEY | b64decode }} {{ KATAMARI_CLUSTER_ID }} {{ ROBOTSHOP_CLUSTER_ID }}"
+    register: soutput
+    failed_when: soutput.rc != 0

@@ -1,0 +1,14 @@
+---
+- name: Process ClusterRole template
+  template:
+    src: "../templates/robotshop-clusterrole.j2"
+    dest: "{{ WORKDIR }}/robotshop-clusterrole.yaml"
+
+- name: Create Clusterrole using generated yaml
+  command: "/usr/local/bin/oc create -f -n {{ RS_NAMESPACE }} -f {{ WORKDIR }}/robotshop-clusterrole.yaml"
+
+- name: Create ServiceAccount
+  command: "/usr/local/bin/kubectl create -f serviceaccount -n {{ RS_NAMESPACE }} {{ AIOPS_NAMESPACE }}-{{ CUSTOMER }}-k8s-account"
+
+- name: Bind Clusterrole to ServiceAccount
+  command: "/usr/local/bin/kubectl create -f clusterrolebinding {{ AIOPS_NAMESPACE }}-{{ CUSTOMER }}-k8s-binding --clusterrole={{ AIOPS_NAMESPACE }}-{{ CUSTOMER }}:kubernetes-integration --serviceaccount={{ RS_NAMESPACE}}:{{ AIOPS_NAMESPACE }}-{{ CUSTOMER }}-k8s-account -n {{ RS_NAMESPACE }} "

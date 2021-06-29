@@ -1,0 +1,22 @@
+---
+- name: "Trigger OutofMemory Scenario"
+  hosts: localhost
+
+  vars_files:
+    - /data/all_vars.yaml
+
+  tasks:
+  - set_fact: RS_NAMESPACE="robotshop-{{ CUSTOMER }}"
+
+  # Robotshop cluster  
+  - import_tasks: ./tasks/robotshop-login.yaml
+  - import_tasks: ./tasks/use-robotshop-cluster.yaml
+  - import_tasks: ./tasks/set-robotshop-context.yaml
+  - import_tasks: ./tasks/get-robotshop-url.yaml
+  - import_tasks: ./tasks/inject-oom-error.yaml
+  - import_tasks: ./tasks/update-event-json.yaml
+ 
+  # AIOps cluster
+  - import_tasks: ./tasks/aiops-login.yaml
+  - import_tasks: ./tasks/set-aiops-context.yaml
+  - import_tasks: ./tasks/produce-kafka-msg.yaml

@@ -1,0 +1,29 @@
+---
+- name: Get the shipping pod 
+  shell: "oc get pods | grep shipping | awk '{print $1}'"
+  register: soutput
+  failed_when: soutput.rc != 0
+
+- set_fact: shipping_pod="{{ soutput.stdout }}"
+
+- name: Get the timestamp
+  shell: "oc logs {{ shipping_pod }} | grep -m 1 \"nested exception is java.lang.OutOfMemoryError\" | cut -f1,2 -d\" \"|tr \" \" T"
+  register: toutput
+  failed_when: toutput.rc != 0
+
+- set_fact: timestamp="{{ toutput.stdout }}"
+
+- name: Process curl payload template for ServiceNow integration
+  template:
+    src: "../templates/shipping_event.j2"
+    dest: "./shipping_event.json" 
+
+    #- name: Deleting pod
+    #shell: "oc delete pod {{shipping_pod }}"
+    #register: doutput
+    #failed_when: doutput.rc != 0
+
+- name: Waiting 5 minutes... 
+  wait_for:
+    timeout: 300 
+  delegate_to: localhost

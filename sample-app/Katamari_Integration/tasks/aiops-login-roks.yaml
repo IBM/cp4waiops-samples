@@ -1,0 +1,15 @@
+---
+- name: Logging in to IBMCloud(AIOps cluster)
+  command: "/usr/local/bin/ibmcloud login --apikey {{ KATAMARI_API_KEY | b64decode }} -r {{ KATAMARI_REGION }}"
+  register: output
+  failed_when: output.rc != 0
+
+- name: Changing cluster context
+  command: "/usr/local/bin/ibmcloud ks cluster config --cluster {{ KATAMARI_CLUSTER_ID }}"
+  register: output
+  failed_when: output.rc != 0
+
+- name: Logging in to OpenShift Cluster
+  command: "/usr/local/bin/oc login -u apikey -p {{ KATAMARI_API_KEY | b64decode }}"
+  register: output
+  failed_when: output.rc != 0

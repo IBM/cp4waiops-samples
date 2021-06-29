@@ -1,0 +1,17 @@
+---
+- name: Process curl payload template(kube observer)
+  template:
+    src: "../templates/kubernetes-observer-payload.j2"
+    dest: "{{ WORKDIR }}/kubernetes-observer-payload.json" 
+
+- name: Copy processed json to target container(kube observer)
+  command: "oc cp {{ WORKDIR }}/kubernetes-observer-payload.json {{ aiops_controller_pod }}:/tmp/kubernetes-observer-payload.json"
+
+- name: Get target for curl command(kube observer)
+  command: "oc get svc aimanager-aio-controller -o=jsonpath='{.spec.clusterIP}:{.spec.ports[0].port}'"
+  register: controller_data
+
+- name: Run curl command to complete integration(kube observer)
+  command: "oc exec -it {{ aiops_controller_pod }} -- curl -ivk https://{{ controller_data.stdout }}/v1/observer/connections?connection_id={{ RS_NAMESPACE }}-observer -d @/tmp/kubernetes-observer-payload.json -H 'accept: application/json' -H 'Content-Type: application/json'"
+
+  

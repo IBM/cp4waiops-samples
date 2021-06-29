@@ -1,0 +1,12 @@
+---
+- name: Process curl payload template(slack integration)
+  template:
+    src: "../templates/slack-integration.j2"
+    dest: "{{ WORKDIR }}/slack-integration.json" 
+
+- name: Copy processed json to target container(slack integration)
+  command: "oc cp {{ WORKDIR }}/slack-integration.json {{ aiops_controller_pod }}:/tmp/slack-integration.json"
+
+- name: Run curl command to complete slack integration(slack integration)
+  command: "oc exec -it {{ aiops_controller_pod }} -- curl -v -i -k https://localhost:9443/v3/connections -d @/tmp/slack-integration.json --header 'Content-Type: application/json'"
+  

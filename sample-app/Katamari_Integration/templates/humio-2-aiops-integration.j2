@@ -1,0 +1,25 @@
+{
+	"connection_updated_at":"2021-01-29T03:37:43Z",
+	"connection_config":{
+		"sampling_rate":60000,
+		"connection_type":"humio",
+		"api_key":"{{ HUMIO_API_KEY }}",
+		"description":"humio-{{ RS_NAMESPACE }}",
+		"base_parallelism":1,
+		"display_name":"humio-{{ RS_NAMESPACE }}",
+		"url":"http://{{ HUMIO_IP_ADDRESS }}:8080/api/v1/repositories/robot-shop/query/",
+		"filters":"kubernetes.namespace_name={{ RS_NAMESPACE }} and kubernetes.container_name!=ratings"
+	},
+	"connection_type":"humio",
+	"datasource_type":"logs",
+	"mapping":{
+		"codec":"humio",
+		"message_field":"@rawstring",
+		"log_entity_types":"clusterName, kubernetes.container_image_id, kubernetes.host, kubernetes.container_name, kubernetes.pod_name",
+		"instance_id_field":"kubernetes.container_name",
+		"rolling_time":10,
+		"timestamp_field":"@timestamp"
+	},
+	"source_query_url":null,
+	"request_action":"create"
+}

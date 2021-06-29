@@ -1,0 +1,8 @@
+---
+#- name: Get the Robotshop public URL
+#  shell: "/usr/local/bin/kubectl get service web -o=jsonpath='{.status.loadBalancer.ingress[0].ip}'"
+#  register: output
+#  failed_when: output.rc != 0
+
+#- set_fact: robotshop_url="http://{{ output.stdout }}:8080"
+- set_fact: robotshop_url="http://172.30.96.238:8080"

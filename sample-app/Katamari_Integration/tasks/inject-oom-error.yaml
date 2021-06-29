@@ -1,0 +1,13 @@
+---
+- name: Set-up memory case
+  uri:
+    url: "{{ robotshop_url }}/api/shipping/free"
+
+- name: Repeat until failure 
+  uri:
+    url: "{{ robotshop_url }}/api/shipping/memory"
+    status_code: [500]
+  register: _result
+  until: _result.status == 500
+  retries: 35
+  delay: 2

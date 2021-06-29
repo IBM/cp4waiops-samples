@@ -1,0 +1,13 @@
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  annotations:
+    rbac.authorization.kubernetes.io/autoupdate: "true"
+  name: "{{ AIOPS_NAMESPACE }}-{{ CUSTOMER }}:kubernetes-integration"
+rules:
+- apiGroups: [""]
+  resources: [ "pods", "namespaces", "nodes", "services", "endpoints", "persistentvolumes", "persistentvolumeclaims"]
+  verbs: ["get", "list"]
+- apiGroups: ["apps"]
+  resources: ["replicasets", "deployments", "statefulsets", "daemonsets"]
+  verbs: ["get", "list"]

@@ -1,0 +1,7 @@
+---
+- name: "Swap to correct namespace({{ AIOPS_NAMESPACE }})"
+  command: "/usr/local/bin/oc project {{ AIOPS_NAMESPACE }}"
+  retries: 3
+  delay: 3
+  register: result
+  until: result.rc == 0

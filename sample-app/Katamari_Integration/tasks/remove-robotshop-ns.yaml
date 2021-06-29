@@ -1,0 +1,5 @@
+---
+- name: Delete Robotshop namespaces
+  shell: "/usr/local/bin/kubectl delete ns {{ RS_NAMESPACE }} --cascade"
+  register: output
+  failed_when: output.rc != 0

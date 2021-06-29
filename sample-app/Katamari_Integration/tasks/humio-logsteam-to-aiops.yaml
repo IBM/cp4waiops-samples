@@ -1,0 +1,13 @@
+---
+- name: Process json template(humio integration)
+  template: 
+    src: "../templates/{{ HUMIO_CURL_PAYLOAD }}.j2"
+    dest: "{{ WORKDIR }}/{{ HUMIO_CURL_PAYLOAD }}.json"
+    mode: 0644
+
+- name: Copy processed json to target container(humio integration)
+  command: "oc cp {{ WORKDIR }}/{{ HUMIO_CURL_PAYLOAD }}.json {{ aiops_controller_pod }}:/tmp/{{ HUMIO_CURL_PAYLOAD }}.json"
+
+- name: Run curl command for humio(humio integration)
+  command: "oc exec -it {{ aiops_controller_pod }} -- curl -v -i -k https://localhost:9443/v3/connections -d @/tmp/{{ HUMIO_CURL_PAYLOAD }}.json --header 'Content-Type: application/json'"
+
