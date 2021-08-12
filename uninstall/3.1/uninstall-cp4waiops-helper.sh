@@ -301,6 +301,8 @@ delete_iaf_bedrock () {
     done
     log $INFO "Expected operandrequests got deleted successfully!"
 
+    # Deleting operandbindinfo before namespacescopes as seen in iaf internal uninstall script
+    oc delete operandbindinfo --all -n ibm-common-services --ignore-not-found
     oc delete namespacescopes common-service -n ibm-common-services --ignore-not-found
     oc delete namespacescopes nss-managedby-odlm -n ibm-common-services --ignore-not-found
     oc delete namespacescopes odlm-scope-managedby-odlm -n ibm-common-services --ignore-not-found
