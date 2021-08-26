@@ -17,7 +17,9 @@ original_registry="docker.io"
 strimzi_release_artifact="https://github.com/strimzi/strimzi-kafka-operator/releases/download/0.19.0/strimzi-0.19.0.tar.gz"
 
 #Namespace where strimzi operator will be installed.
-strimzi_operator_namespace="openshift-operators"
+#export NAMESPACE=openshift-operators
+strimzi_operator_namespace="${NAMESPACE:=openshift-operators}"
+
 
 # This is your mirror registry where you want to mirror the strimzi images
 #export LOCAL_DOCKER_REGISTRY=
