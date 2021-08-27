@@ -1,17 +1,16 @@
-# Install Strimzi version 0.19.0 pre-requisite for Watson AIOps in airgap cluster Bastion mode
+# Install Strimzi for an IBM Cloud Pak Watson AIOps air-gapped installation that uses a Bastion host
 
-This script can be used to install Strimzi version 0.19.0 as a pre-requisite for installing Watson AIOps in airgap cluster
+This script can be used to install Strimzi version 0.19.0 as a prerequisite for installing IBM Cloud Pak Watson AIOps in an air-gapped environment.
 
-## Pre-requisite
+## Prerequisite
 
 * Podman
 * Skopeo
 * Wget
 
-## Steps
+## Procedure
 
-1. Make sure you have set these environment variables for the local docker registry where all the strimzi images will be mirrored by the script.
-
+1. Ensure that you set the following environment variables for the local docker registry that you will use with the script to mirror the Strimzi images.
 ```
 export LOCAL_DOCKER_REGISTRY_HOST=<IP_or_FQDN_of_local_docker_registry>
 export LOCAL_DOCKER_REGISTRY_PORT=443
@@ -20,7 +19,7 @@ export LOCAL_DOCKER_REGISTRY_USER=<username>
 export LOCAL_DOCKER_REGISTRY_PASSWORD=<password>
 ```
 
-2. Export the namespace where Strimzi operator will be installed
+2. Export the namespace where you will be installing the Strimzi operator.
 
 ```
 export NAMESPACE=openshift-operators
@@ -34,7 +33,7 @@ export NAMESPACE=openshift-operators
 
 4. Verify that the Strimzi operator is running.
 
-Run the following command on your air-gap cluster, and verify that 'strimzi-cluster-operator-xxx' is returned.
+Run the following command on your air-gapped cluster. Verify that 'strimzi-cluster-operator-xxx' is returned.
 
 ```
 oc get pods -n openshift-operators

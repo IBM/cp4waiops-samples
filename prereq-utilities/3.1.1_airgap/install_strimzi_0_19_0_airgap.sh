@@ -11,7 +11,7 @@ images_url=("$strimzi_kafka_image:0.19.0-kafka-2.4.0"
             "$strimzi_kafka_bridge_image:0.18.0"
             "$strimzi_kafka_jmxtrans_image:0.19.0")
 
-# This is your mirror registry details where you want to mirror the strimzi images
+# This is the details for the mirror registry where you want to mirror the Strimzi images
 # These environment variables needs to be exported before executing the script.           
 #export LOCAL_DOCKER_REGISTRY_HOST=<IP_or_FQDN_of_local_docker_registry>
 #export LOCAL_DOCKER_REGISTRY_PORT=443
@@ -19,12 +19,12 @@ images_url=("$strimzi_kafka_image:0.19.0-kafka-2.4.0"
 #export LOCAL_DOCKER_REGISTRY_USER=<username>
 #export LOCAL_DOCKER_REGISTRY_PASSWORD=<password>
 
-#This is the original registry for strimzi images
+# This is the original registry for strimzi images
 original_registry="docker.io"
 
 strimzi_release_artifact="https://github.com/strimzi/strimzi-kafka-operator/releases/download/0.19.0/strimzi-0.19.0.tar.gz"
 
-#Namespace where strimzi operator will be installed.
+# The namespace where you will be installing the Strimzi operator.
 #export NAMESPACE=openshift-operators
 strimzi_operator_namespace="${NAMESPACE:=openshift-operators}"
 
@@ -141,12 +141,12 @@ else
 fi
 
 
-#Create ClusterRoleBindings
+# Create ClusterRoleBindings
 oc create clusterrolebinding strimzi-cluster-operator-namespaced --clusterrole=strimzi-cluster-operator-namespaced --serviceaccount $strimzi_operator_namespace:strimzi-cluster-operator
 oc create clusterrolebinding strimzi-cluster-operator-entity-operator-delegation --clusterrole=strimzi-entity-operator --serviceaccount $strimzi_operator_namespace:strimzi-cluster-operator
 oc create clusterrolebinding strimzi-cluster-operator-topic-operator-delegation --clusterrole=strimzi-topic-operator --serviceaccount $strimzi_operator_namespace:strimzi-cluster-operator
 
-#Deploy the Cluster Operator t
+# Deploy the cluster operator
 oc apply -f install/cluster-operator -n $strimzi_operator_namespace
 if [ $? -gt 0 ]; then
    echo "[ERROR] Some issue occured while running oc apply command, please check if you are logged in your openshift cluster"
