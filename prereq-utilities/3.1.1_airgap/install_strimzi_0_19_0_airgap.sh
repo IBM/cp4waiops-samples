@@ -11,6 +11,14 @@ images_url=("$strimzi_kafka_image:0.19.0-kafka-2.4.0"
             "$strimzi_kafka_bridge_image:0.18.0"
             "$strimzi_kafka_jmxtrans_image:0.19.0")
 
+# This is your mirror registry details where you want to mirror the strimzi images
+# These environment variables needs to be exported before executing the script.           
+#export LOCAL_DOCKER_REGISTRY_HOST=<IP_or_FQDN_of_local_docker_registry>
+#export LOCAL_DOCKER_REGISTRY_PORT=443
+#export LOCAL_DOCKER_REGISTRY=$LOCAL_DOCKER_REGISTRY_HOST:$LOCAL_DOCKER_REGISTRY_PORT
+#export LOCAL_DOCKER_REGISTRY_USER=<username>
+#export LOCAL_DOCKER_REGISTRY_PASSWORD=<password>
+
 #This is the original registry for strimzi images
 original_registry="docker.io"
 
@@ -19,14 +27,6 @@ strimzi_release_artifact="https://github.com/strimzi/strimzi-kafka-operator/rele
 #Namespace where strimzi operator will be installed.
 #export NAMESPACE=openshift-operators
 strimzi_operator_namespace="${NAMESPACE:=openshift-operators}"
-
-
-# This is your mirror registry where you want to mirror the strimzi images
-#export LOCAL_DOCKER_REGISTRY=
-
-#Provide the creds for your mirror registry
-#export LOCAL_DOCKER_REGISTRY_USER=
-#export LOCAL_DOCKER_REGISTRY_PASSWORD=
 
 
 echo "[INFO] Checking Pre-requisites['podman','skopeo','wget']:"
@@ -115,17 +115,31 @@ else
    exit 1
 fi
 
+if [[ "$OSTYPE" == "darwin"* ]]; then
+   sed -i '' 's/namespace: .*/namespace: '"$strimzi_operator_namespace"'/' install/cluster-operator/*RoleBinding*.yaml
+   sed -i '' '/fieldPath: metadata.namespace/d' install/cluster-operator/050-Deployment-strimzi-cluster-operator.yaml
+   sed -i '' '/fieldRef:/d' install/cluster-operator/050-Deployment-strimzi-cluster-operator.yaml
+   sed -i '' 's/valueFrom:/value: "*"/' install/cluster-operator/050-Deployment-strimzi-cluster-operator.yaml
 
-sed -i 's/namespace: .*/namespace: '"$strimzi_operator_namespace"'/' install/cluster-operator/*RoleBinding*.yaml
-sed -i '/fieldPath: metadata.namespace/d' install/cluster-operator/050-Deployment-strimzi-cluster-operator.yaml
-sed -i '/fieldRef:/d' install/cluster-operator/050-Deployment-strimzi-cluster-operator.yaml
-sed -i 's/valueFrom:/value: "*"/' install/cluster-operator/050-Deployment-strimzi-cluster-operator.yaml
+   echo "Updating the image url registry url in the deployment.yaml"
+   sed -i '' 's|'"$strimzi_kafka_bridge_image"':|'"$LOCAL_DOCKER_REGISTRY"'/'"$strimzi_kafka_bridge_image"':|g' install/cluster-operator/050-Deployment-strimzi-cluster-operator.yaml
+   sed -i '' 's|'"$strimzi_kafka_image"':|'"$LOCAL_DOCKER_REGISTRY"'/'"$strimzi_kafka_image"':|g' install/cluster-operator/050-Deployment-strimzi-cluster-operator.yaml
+   sed -i '' 's|'"$strimzi_operator_image"':|'"$LOCAL_DOCKER_REGISTRY"'/'"$strimzi_operator_image"':|g' install/cluster-operator/050-Deployment-strimzi-cluster-operator.yaml
+   sed -i '' 's|'"$strimzi_kafka_jmxtrans_image"':|'"$LOCAL_DOCKER_REGISTRY"'/'"$strimzi_kafka_jmxtrans_image"':|g' install/cluster-operator/050-Deployment-strimzi-cluster-operator.yaml  
+else
+   sed -i 's/namespace: .*/namespace: '"$strimzi_operator_namespace"'/' install/cluster-operator/*RoleBinding*.yaml
+   sed -i '/fieldPath: metadata.namespace/d' install/cluster-operator/050-Deployment-strimzi-cluster-operator.yaml
+   sed -i '/fieldRef:/d' install/cluster-operator/050-Deployment-strimzi-cluster-operator.yaml
+   sed -i 's/valueFrom:/value: "*"/' install/cluster-operator/050-Deployment-strimzi-cluster-operator.yaml
 
-echo "Updating the image url registry url in the deployment.yaml"
-sed -i 's|'"$strimzi_kafka_bridge_image"':|'"$LOCAL_DOCKER_REGISTRY"'/'"$strimzi_kafka_bridge_image"':|g' install/cluster-operator/050-Deployment-strimzi-cluster-operator.yaml
-sed -i 's|'"$strimzi_kafka_image"':|'"$LOCAL_DOCKER_REGISTRY"'/'"$strimzi_kafka_image"':|g' install/cluster-operator/050-Deployment-strimzi-cluster-operator.yaml
-sed -i 's|'"$strimzi_operator_image"':|'"$LOCAL_DOCKER_REGISTRY"'/'"$strimzi_operator_image"':|g' install/cluster-operator/050-Deployment-strimzi-cluster-operator.yaml
-sed -i 's|'"$strimzi_kafka_jmxtrans_image"':|'"$LOCAL_DOCKER_REGISTRY"'/'"$strimzi_kafka_jmxtrans_image"':|g' install/cluster-operator/050-Deployment-strimzi-cluster-operator.yaml
+   echo "Updating the image url registry url in the deployment.yaml"
+   sed -i 's|'"$strimzi_kafka_bridge_image"':|'"$LOCAL_DOCKER_REGISTRY"'/'"$strimzi_kafka_bridge_image"':|g' install/cluster-operator/050-Deployment-strimzi-cluster-operator.yaml
+   sed -i 's|'"$strimzi_kafka_image"':|'"$LOCAL_DOCKER_REGISTRY"'/'"$strimzi_kafka_image"':|g' install/cluster-operator/050-Deployment-strimzi-cluster-operator.yaml
+   sed -i 's|'"$strimzi_operator_image"':|'"$LOCAL_DOCKER_REGISTRY"'/'"$strimzi_operator_image"':|g' install/cluster-operator/050-Deployment-strimzi-cluster-operator.yaml
+   sed -i 's|'"$strimzi_kafka_jmxtrans_image"':|'"$LOCAL_DOCKER_REGISTRY"'/'"$strimzi_kafka_jmxtrans_image"':|g' install/cluster-operator/050-Deployment-strimzi-cluster-operator.yaml
+   
+fi
+
 
 #Create ClusterRoleBindings
 oc create clusterrolebinding strimzi-cluster-operator-namespaced --clusterrole=strimzi-cluster-operator-namespaced --serviceaccount $strimzi_operator_namespace:strimzi-cluster-operator
