@@ -2,7 +2,7 @@
 
 This script can be used to install Strimzi version 0.19.0 as a prerequisite for installing IBM Cloud Pak Watson AIOps in an air-gapped environment.
 
-## Prerequisite
+## Prerequisites
 
 * Podman
 * Skopeo
@@ -25,7 +25,7 @@ export LOCAL_DOCKER_REGISTRY_PASSWORD=<password>
 export NAMESPACE=openshift-operators
 ```
 
-3. Execute the script to install the Strimzi operator
+3. Execute the script to install the Strimzi operator.
 
 ```
 ./scripts/install_strimzi_0_19_0.sh
