@@ -28,7 +28,7 @@ export NAMESPACE=openshift-operators
 3. Execute the script to install the Strimzi operator.
 
 ```
-./scripts/install_strimzi_0_19_0.sh
+./install_strimzi_0_19_0.sh
 ```
 
 4. Verify that the Strimzi operator is running.
