@@ -271,8 +271,8 @@ checkOCPversion() {
     local clusterVersion=`oc get clusterversion | grep "version" | awk '{ print $2 }'`
     local major=`echo $clusterVersion | awk -F"[.]" '{ print $1}'`
     local minor=`echo $clusterVersion | awk -F"[.]" '{ print $2}'`
-    if [[ "${major}" != "4" || "${minor}" != "6" ]]; then
-	echo "ERROR: OCP version $clusterVersion is not a supported release for IBM Infrastructure Automation; the only supported release is OCP 4.6.x" | tee -a "$logpath"
+    if [[ "${major}" != "4" || "${minor}" != "8" ]]; then
+	echo "ERROR: OCP version $clusterVersion is not a supported release for IBM Infrastructure Automation; the only supported release is OCP 4.8.x" | tee -a "$logpath"
 	echo "" | tee -a "$logpath"
 	exit 1
     fi
@@ -378,7 +378,7 @@ spec:
   displayName: IBMCS Operators
   publisher: IBM
   sourceType: grpc
-  image: docker.io/ibmcom/ibm-common-service-catalog:3.6.5
+  image: docker.io/ibmcom/ibm-common-service-catalog:3.12.0
   updateStrategy:
     registryPoll:
       interval: 45m
@@ -391,7 +391,7 @@ metadata:
   name: ibm-common-service-operator
   namespace: openshift-operators
 spec:
-  channel: stable-v1
+  channel: v3
   installPlanApproval: Automatic
   name: ibm-common-service-operator
   source: opencloud-operators
@@ -426,467 +426,7 @@ metadata:
   name: common-service
   namespace: ibm-common-services
 spec:
-  services:
-  - name: ibm-cert-manager-operator
-    spec:
-      certManager:
-        certManagerCAInjector:
-          resources:
-            limits:
-              cpu: 500m
-              memory: 525Mi
-            requests:
-              cpu: 100m
-              memory: 315Mi
-        certManagerController:
-          resources:
-            limits:
-              cpu: 500m
-              memory: 525Mi
-            requests:
-              cpu: 100m
-              memory: 315Mi
-        certManagerWebhook:
-          resources:
-            limits:
-              cpu: 500m
-              memory: 525Mi
-            requests:
-              cpu: 100m
-              memory: 315Mi
-        configMapWatcher:
-          resources:
-            limits:
-              cpu: 500m
-              memory: 525Mi
-            requests:
-              cpu: 100m
-              memory: 315Mi
-  - name: ibm-mongodb-operator
-    spec:
-      mongoDB:
-        replicas: 3
-        resources:
-          limits:
-            cpu: 2000m
-            memory: 5368Mi
-          requests:
-            cpu: 1500m
-            memory: 5368Mi
-  - name: ibm-iam-operator
-    spec:
-      authentication:
-        replicas: 1
-        auditService:
-          resources:
-            limits:
-              cpu: 100m
-              memory: 134Mi
-            requests:
-              cpu: 10m
-              memory: 104Mi
-        authService:
-          resources:
-            limits:
-              cpu: 1000m
-              memory: 1073Mi
-            requests:
-              cpu: 100m
-              memory: 367Mi
-        clientRegistration:
-          resources:
-            limits:
-              cpu: 1000m
-              memory: 1073Mi
-            requests:
-              cpu: 100m
-              memory: 134Mi
-        identityManager:
-          resources:
-            limits:
-              cpu: 1000m
-              memory: 1073Mi
-            requests:
-              cpu: 50m
-              memory: 157Mi
-        identityProvider:
-          resources:
-            limits:
-              cpu: 1000m
-              memory: 1073Mi
-            requests:
-              cpu: 50m
-              memory: 157Mi
-      oidcclientwatcher:
-        replicas: 1
-        resources:
-          limits:
-            cpu: 200m
-            memory: 268Mi
-          requests:
-            cpu: 10m
-            memory: 17Mi
-      pap:
-        auditService:
-          resources:
-            limits:
-              cpu: 200m
-              memory: 209Mi
-            requests:
-              cpu: 20m
-              memory: 20Mi
-        papService:
-          resources:
-            limits:
-              cpu: 1000m
-              memory: 1073Mi
-            requests:
-              cpu: 50m
-              memory: 209Mi
-        replicas: 1
-      policycontroller:
-        replicas: 1
-        resources:
-          limits:
-            cpu: 200m
-            memory: 402Mi
-          requests:
-            cpu: 100m
-            memory: 134Mi
-      policydecision:
-        auditService:
-          resources:
-            limits:
-              cpu: 200m
-              memory: 268Mi
-            requests:
-              cpu: 10m
-              memory: 104Mi
-        resources:
-          limits:
-            cpu: 200m
-            memory: 268Mi
-          requests:
-            cpu: 20m
-            memory: 104Mi
-        replicas: 1
-      secretwatcher:
-        resources:
-          limits:
-            cpu: 200m
-            memory: 536Mi
-          requests:
-            cpu: 50m
-            memory: 67Mi
-        replicas: 1
-      securityonboarding:
-        replicas: 1
-        resources:
-          limits:
-            cpu: 200m
-            memory: 536Mi
-          requests:
-            cpu: 20m
-            memory: 67Mi
-        iamOnboarding:
-          resources:
-            limits:
-              cpu: 200m
-              memory: 1073Mi
-            requests:
-              cpu: 20m
-              memory: 67Mi
-  - name: ibm-management-ingress-operator
-    spec:
-      managementIngress:
-        replicas: 1
-        resources:
-          requests:
-            cpu: 50m
-            memory: 314Mi
-          limits:
-            cpu: 200m
-            memory: 536Mi
-  - name: ibm-ingress-nginx-operator
-    spec:
-      nginxIngress:
-        ingress:
-          replicas: 1
-          resources:
-            requests:
-              cpu: 50m
-              memory: 157Mi
-            limits:
-              cpu: 200m
-              memory: 536Mi
-        defaultBackend:
-          replicas: 1
-          resources:
-            requests:
-              cpu: 20m
-              memory: 67Mi
-            limits:
-              cpu: 50m
-              memory: 134Mi
-        kubectl:
-          resources:
-            requests:
-              memory: 150Mi
-              cpu: 30m
-            limits:
-              memory: 256Mi
-              cpu: 100m
-  - name: ibm-metering-operator
-    spec:
-      metering:
-        dataManager:
-          dm:
-            resources:
-              limits:
-                cpu: 1000m
-                memory: 2684Mi
-              requests:
-                cpu: 100m
-                memory: 268Mi
-        reader:
-          rdr:
-            resources:
-              limits:
-                cpu: 500m
-                memory: 536Mi
-              requests:
-                cpu: 100m
-                memory: 134Mi
-      meteringReportServer:
-        reportServer:
-          resources:
-            limits:
-              cpu: 100m
-              memory: 90Mi
-            requests:
-              cpu: 50m
-              memory: 65Mi
-      meteringUI:
-        replicas: 1
-        ui:
-          resources:
-            limits:
-              cpu: 500m
-              memory: 536Mi
-            requests:
-              cpu: 100m
-              memory: 134Mi
-  - name: ibm-licensing-operator
-    spec:
-      IBMLicensing:
-        resources:
-          requests:
-            cpu: 200m
-            memory: 268Mi
-          limits:
-            cpu: 500m
-            memory: 536Mi
-      IBMLicenseServiceReporter:
-        databaseContainer:
-          resources:
-            requests:
-              cpu: 200m
-              memory: 256Mi
-            limits:
-              cpu: 300m
-              memory: 300Mi
-        receiverContainer:
-          resources:
-            requests:
-              cpu: 200m
-              memory: 256Mi
-            limits:
-              cpu: 300m
-              memory: 300Mi
-  - name: ibm-commonui-operator
-    spec:
-      commonWebUI:
-        replicas: 1
-        resources:
-          requests:
-            memory: 268Mi
-            cpu: 450m
-          limits:
-            memory: 268Mi
-            cpu: 1000m
-  - name: ibm-platform-api-operator
-    spec:
-      platformApi:
-        auditService:
-          resources:
-            limits:
-              cpu: 200m
-              memory: 262Mi
-            requests:
-              cpu: 200m
-              memory: 262Mi
-        platformApi:
-          resources:
-            limits:
-              cpu: 500m
-              memory: 536Mi
-            requests:
-              cpu: 500m
-              memory: 536Mi
-        replicas: 1
-  - name: ibm-catalog-ui-operator
-    spec:
-      catalogUI:
-        catalogui:
-          resources:
-            limits:
-              cpu: 300m
-              memory: 314Mi
-            requests:
-              cpu: 300m
-              memory: 314Mi
-        replicaCount: 1
-  - name: ibm-healthcheck-operator
-    spec:
-      healthService:
-        memcached:
-          replicas: 1
-          resources:
-            requests:
-              memory: 67Mi
-              cpu: 50m
-            limits:
-              memory: 536Mi
-              cpu: 500m
-        healthService:
-          replicas: 1
-          resources:
-            requests:
-              memory: 67Mi
-              cpu: 50m
-            limits:
-              memory: 536Mi
-              cpu: 500m
-  - name: ibm-auditlogging-operator
-    spec:
-      auditLogging:
-        fluentd:
-          resources:
-            requests:
-              cpu: 25m
-              memory: 104Mi
-            limits:
-              cpu: 300m
-              memory: 419Mi
-  - name: ibm-monitoring-exporters-operator
-    spec:
-      exporter:
-        collectd:
-          resource:
-            requests:
-              cpu: 30m
-              memory: 50Mi
-            limits:
-              cpu: 30m
-              memory: 50Mi
-          routerResource:
-            limits:
-              cpu: 200m
-              memory: 268Mi
-            requests:
-              cpu: 10m
-              memory: 67Mi
-        nodeExporter:
-          resource:
-            requests:
-              cpu: 20m
-              memory: 50Mi
-            limits:
-              cpu: 20m
-              memory: 50Mi
-          routerResource:
-            requests:
-              cpu: 50m
-              memory: 128Mi
-            limits:
-              cpu: 100m
-              memory: 256Mi
-        kubeStateMetrics:
-          resource:
-            requests:
-              cpu: 500m
-              memory: 180Mi
-            limits:
-              cpu: 540m
-              memory: 220Mi
-          routerResource:
-            limits:
-              cpu: 25m
-              memory: 50Mi
-            requests:
-              cpu: 20m
-              memory: 50Mi
-  - name: ibm-monitoring-grafana-operator
-    spec:
-      grafana:
-        grafanaConfig:
-          resources:
-            requests:
-              cpu: 400m
-              memory: 230Mi
-            limits:
-              cpu: 1073m
-              memory: 536Mi
-        dashboardConfig:
-          resources:
-            requests:
-              cpu: 200m
-              memory: 268Mi
-            limits:
-              cpu: 500m
-              memory: 536Mi
-        routerConfig:
-          resources:
-            requests:
-              cpu: 200m
-              memory: 268Mi
-            limits:
-              cpu: 500m
-              memory: 536Mi
-  - name: ibm-monitoring-prometheusext-operator
-    spec:
-      prometheusExt:
-        prometheusConfig:
-          routerResource:
-            requests:
-              cpu: 10m
-              memory: 50Mi
-            limits:
-              cpu: 75m
-              memory: 50Mi
-          resource:
-            requests:
-              cpu: 200m
-              memory: 3072Mi
-            limits:
-              cpu: 1000m
-              memory: 5120Mi
-        alertManagerConfig:
-          resource:
-            requests:
-              cpu: 20m
-              memory: 134Mi
-            limits:
-              cpu: 30m
-              memory: 200Mi
-        mcmMonitor:
-          resource:
-            requests:
-              cpu: 30m
-              memory: 50Mi
-            limits:
-              cpu: 50m
-              memory: 50Mi
+  size: small
 EOF
 }
 
@@ -905,7 +445,7 @@ spec:
   displayName: Infrastructure Automation Installer Catalog
   publisher: IBM Infrastructure Automation
   sourceType: grpc
-  image: quay.io/cp4mcm/cp4mcm-orchestrator-catalog:2.3-latest
+  image: quay.io/cp4mcm/cp4mcm-orchestrator-catalog:2.3.15
   updateStrategy:
     registryPoll:
       interval: 45m
@@ -1769,6 +1309,22 @@ uninstallFunc() {
     result=$(( result + $? ))
     deleteResource "csv" "openshift-operators" "ibm-management-orchestrator.v2.3.7" "false" 300
     result=$(( result + $? ))
+    deleteResource "csv" "openshift-operators" "ibm-management-orchestrator.v2.3.8" "false" 300
+    result=$(( result + $? ))
+    deleteResource "csv" "openshift-operators" "ibm-management-orchestrator.v2.3.9" "false" 300
+    result=$(( result + $? ))
+    deleteResource "csv" "openshift-operators" "ibm-management-orchestrator.v2.3.10" "false" 300
+    result=$(( result + $? ))
+    deleteResource "csv" "openshift-operators" "ibm-management-orchestrator.v2.3.11" "false" 300
+    result=$(( result + $? ))
+    deleteResource "csv" "openshift-operators" "ibm-management-orchestrator.v2.3.12" "false" 300
+    result=$(( result + $? ))
+    deleteResource "csv" "openshift-operators" "ibm-management-orchestrator.v2.3.13" "false" 300
+    result=$(( result + $? ))
+    deleteResource "csv" "openshift-operators" "ibm-management-orchestrator.v2.3.14" "false" 300
+    result=$(( result + $? ))
+    deleteResource "csv" "openshift-operators" "ibm-management-orchestrator.v2.3.15" "false" 300
+    result=$(( result + $? ))
     deleteResource "catalogsource" "openshift-marketplace" "ibm-management-orchestrator" "false" 300
     result=$(( result + $? ))
     deleteResource "deployment" "openshift-operators" "ibm-management-orchestrator" "false" 300
@@ -1787,27 +1343,27 @@ uninstallFunc() {
     result=$(( result + $? ))
     #deleteCRDs
     #result=$(( result + $? ))
-    oc delete OperandRequest -n ibm-common-services --force common-service ibm-commonui-request ibm-iam-request ibm-mongodb-request management-ingress monitoring-grafana-operator-request platform-api-request
-    deleteResource "OperandRequest" "ibm-common-services" "common-service" "false" 300
-    result=$(( result + $? ))
-    deleteResource "OperandRequest" "ibm-common-services" "ibm-commonui-request" "false" 300
-    result=$(( result + $? ))
-    deleteResource "OperandRequest" "ibm-common-services" "ibm-iam-request" "false" 300
-    result=$(( result + $? ))
-    deleteResource "OperandRequest" "ibm-common-services" "ibm-mongodb-request" "false" 300
-    result=$(( result + $? ))
-    deleteResource "OperandRequest" "ibm-common-services" "management-ingress" "false" 300
-    result=$(( result + $? ))
-    deleteResource "OperandRequest" "ibm-common-services" "monitoring-grafana-operator-request" "false" 300
-    result=$(( result + $? ))
-    deleteResource "OperandRequest" "ibm-common-services" "platform-api-request" "false" 300
-    result=$(( result + $? ))
-    meteringInstallPlan=`oc get InstallPlan -n ibm-common-services | grep "ibm-metering-operator" | awk '{ print $1 }'`
-    deleteResource "InstallPlan" "ibm-common-services" "${meteringInstallPlan}" "false" 300
-    result=$(( result + $? ))
-    mongodbInstallPlan=`oc get InstallPlan -n ibm-common-services | grep "ibm-mongodb" | awk '{ print $1 }'`
-    deleteResource "InstallPlan" "ibm-common-services" "${mongodbInstallPlan}" "false" 300
-    result=$(( result + $? ))
+    # oc delete OperandRequest -n ibm-common-services --force common-service ibm-commonui-request ibm-iam-request ibm-mongodb-request management-ingress monitoring-grafana-operator-request platform-api-request
+    # deleteResource "OperandRequest" "ibm-common-services" "common-service" "false" 300
+    # result=$(( result + $? ))
+    # deleteResource "OperandRequest" "ibm-common-services" "ibm-commonui-request" "false" 300
+    # result=$(( result + $? ))
+    # deleteResource "OperandRequest" "ibm-common-services" "ibm-iam-request" "false" 300
+    # result=$(( result + $? ))
+    # deleteResource "OperandRequest" "ibm-common-services" "ibm-mongodb-request" "false" 300
+    # result=$(( result + $? ))
+    # deleteResource "OperandRequest" "ibm-common-services" "management-ingress" "false" 300
+    # result=$(( result + $? ))
+    # deleteResource "OperandRequest" "ibm-common-services" "monitoring-grafana-operator-request" "false" 300
+    # result=$(( result + $? ))
+    # deleteResource "OperandRequest" "ibm-common-services" "platform-api-request" "false" 300
+    # result=$(( result + $? ))
+    # meteringInstallPlan=`oc get InstallPlan -n ibm-common-services | grep "ibm-metering-operator" | awk '{ print $1 }'`
+    # deleteResource "InstallPlan" "ibm-common-services" "${meteringInstallPlan}" "false" 300
+    # result=$(( result + $? ))
+    # mongodbInstallPlan=`oc get InstallPlan -n ibm-common-services | grep "ibm-mongodb" | awk '{ print $1 }'`
+    # deleteResource "InstallPlan" "ibm-common-services" "${mongodbInstallPlan}" "false" 300
+    # result=$(( result + $? ))
     if [[ "${result}" -ne 0 ]]; then
 	echo "ERROR: Could not complete removal of secrets, routes, pvcs, and OperandRequests" | tee -a "$logpath"
 	exit 1
