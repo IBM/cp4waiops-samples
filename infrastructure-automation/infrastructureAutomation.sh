@@ -445,7 +445,7 @@ spec:
   displayName: Infrastructure Automation Installer Catalog
   publisher: IBM Infrastructure Automation
   sourceType: grpc
-  image: quay.io/cp4mcm/cp4mcm-orchestrator-catalog:2.3.15
+  image: quay.io/cp4mcm/cp4mcm-orchestrator-catalog:2.3.16
   updateStrategy:
     registryPoll:
       interval: 45m
@@ -1137,7 +1137,15 @@ installFunc() {
     echo "Installing IBM Infrastructure Automation" | tee -a "$logpath"
     echo "**********************************************************************" | tee -a "$logpath"
     echo "" | tee -a "$logpath"        
-    createCScatalogSourceAndSubscription
+    echo "Checking if Common Service is already installed."
+    oc get CommonService common-service -n ibm-common-services > /dev/null 2>&1
+    local result=$?
+    if [[ "${result}" -ne 0 ]]; then
+        echo "Creating Common Service Catalog Source."
+        createCScatalogSourceAndSubscription
+    else
+        echo "Skip creating Common Service Catalog Source as it exists"
+    fi
     createIAcatalogSourceAndSubscription
     coolOff
     checkOrchestrator
