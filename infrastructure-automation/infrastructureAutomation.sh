@@ -1138,7 +1138,7 @@ installFunc() {
     echo "**********************************************************************" | tee -a "$logpath"
     echo "" | tee -a "$logpath"        
     echo "Checking if Common Service is already installed."
-    oc get CommonService common-service -n ibm-common-services > /dev/null 2>&1
+    oc -n openshift-operators get subscriptions | grep ibm-common-service-operator > /dev/null 2>&1
     local result=$?
     if [[ "${result}" -ne 0 ]]; then
         echo "Creating Common Service Catalog Source."
