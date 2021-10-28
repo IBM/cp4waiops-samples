@@ -378,7 +378,7 @@ spec:
   displayName: IBMCS Operators
   publisher: IBM
   sourceType: grpc
-  image: docker.io/ibmcom/ibm-common-service-catalog:3.12.0
+  image: docker.io/ibmcom/ibm-common-service-catalog:3.12
   updateStrategy:
     registryPoll:
       interval: 45m
@@ -445,7 +445,7 @@ spec:
   displayName: Infrastructure Automation Installer Catalog
   publisher: IBM Infrastructure Automation
   sourceType: grpc
-  image: quay.io/cp4mcm/cp4mcm-orchestrator-catalog:2.3.15
+  image: quay.io/cp4mcm/cp4mcm-orchestrator-catalog:2.3.17
   updateStrategy:
     registryPoll:
       interval: 45m
@@ -1325,6 +1325,10 @@ uninstallFunc() {
     result=$(( result + $? ))
     deleteResource "csv" "openshift-operators" "ibm-management-orchestrator.v2.3.15" "false" 300
     result=$(( result + $? ))
+    deleteResource "csv" "openshift-operators" "ibm-management-orchestrator.v2.3.16" "false" 300
+    result=$(( result + $? ))
+    deleteResource "csv" "openshift-operators" "ibm-management-orchestrator.v2.3.17" "false" 300
+    result=$(( result + $? ))    
     deleteResource "catalogsource" "openshift-marketplace" "ibm-management-orchestrator" "false" 300
     result=$(( result + $? ))
     deleteResource "deployment" "openshift-operators" "ibm-management-orchestrator" "false" 300
