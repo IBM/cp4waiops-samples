@@ -1137,7 +1137,15 @@ installFunc() {
     echo "Installing IBM Infrastructure Automation" | tee -a "$logpath"
     echo "**********************************************************************" | tee -a "$logpath"
     echo "" | tee -a "$logpath"        
-    createCScatalogSourceAndSubscription
+    echo "Checking if Common Service is already installed."
+    oc -n openshift-operators get subscriptions | grep ibm-common-service-operator > /dev/null 2>&1
+    local result=$?
+    if [[ "${result}" -ne 0 ]]; then
+        echo "Creating Common Service Catalog Source."
+        createCScatalogSourceAndSubscription
+    else
+        echo "Skip creating Common Service Catalog Source as it exists"
+    fi
     createIAcatalogSourceAndSubscription
     coolOff
     checkOrchestrator
