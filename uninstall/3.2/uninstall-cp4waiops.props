@@ -1,0 +1,38 @@
+#
+# Copyright 2020- IBM Inc. All rights reserved
+# SPDX-License-Identifier: Apache2.0
+#
+##################################################################################################
+##### This is the configuration file for the uninstall-cp4waiops.sh script that uninstalls   #####
+##### IBM Cloud Pak for Watson AIOps AI Manager (CP4WAIOps) v3.2 from your cluster.          #####
+#####                                                                                        #####
+##### Review and update each of the properties below to indicate what you want to uninstall. #####
+##### This script also removes dependencies that may be shared by other IBM Cloud Paks on    #####
+##### the cluster or in the project. Review these configuration properties carefully.        #####
+##################################################################################################
+
+# Set the name of OpenShift project where IBM Cloud Pak for Watson AIOps AI Manager is installed.
+# You may know it as a "namespace" - an OpenShift "project" is an alternative representation of a Kubernetes "namespace"
+CP4WAIOPS_PROJECT="cp4waiops"
+
+# Set the name of installation custom resource (CR) to delete. You can leave this blank if you've already deleted the installation CR.
+INSTALLATION_NAME="ibm-cp-watson-aiops"
+
+# Is IBM Cloud Pak for Watson AIOps AI Manager the only IBM Cloud Pak on the cluster? If true, this will remove the Cloud Pak Platform.
+ONLY_CLOUDPAK="false"
+
+# If true, this will delete all of the resources created by CP4WAIOps (see uninstall-cp4waiops-resource-groups.props)
+# This property does not affect the deletion of the Cloud Pak Platform as determined by the value of ONLY_CLOUDPAK
+DELETE_ALL="true"
+
+######################### ADVANCED CUSTOM CONFIGURATIONS BELOW ##############################
+
+# You must set DELETE_ALL to false in order to specify uninstall of specific resources as configured below.
+
+# Delete the PVCs created by IBM Cloud Pak for Watson AIOps AI Manager.
+# WARNING: CHOOSING TO DELETE PVCs CAN RESULT IN DATA LOSS. 
+# SEE uninstall-cp4waiops-resource-groups.props FOR PVCs THAT WILL BE REMOVED
+DELETE_PVCS="false"
+
+# Setting this to true will delete all CRDs created by IBM Cloud Pak for Watson AIOps AI Manager.
+DELETE_CRDS="false"
