@@ -264,23 +264,23 @@ checkLogin() {
 }
 
 checkOCPversion() {
-    echo "**********************************************************************" | tee -a "$logpath"
-    echo "Checking OCP version" | tee -a "$logpath"
-    echo "**********************************************************************" | tee -a "$logpath"
-    echo "" | tee -a "$logpath"    
-    local clusterVersion=`oc get clusterversion | grep "version" | awk '{ print $2 }'`
-    local major=`echo $clusterVersion | awk -F"[.]" '{ print $1}'`
-    local minor=`echo $clusterVersion | awk -F"[.]" '{ print $2}'`
-    if [[ "${major}" == "4" ]]; then
-	if [[ "${minor}" == "6" || "${minor}" == "8" ]]; then
-	    echo "Version is compatible" | tee -a "$logpath"
-	    echo "" | tee -a "$logpath"
-	    return 0
+	echo "**********************************************************************" | tee -a "$logpath"
+	echo "Checking OCP version" | tee -a "$logpath"
+	echo "**********************************************************************" | tee -a "$logpath"
+	echo "" | tee -a "$logpath"	
+	local clusterVersion=`oc get clusterversion | grep "version" | awk '{ print $2 }'`
+	local major=`echo $clusterVersion | awk -F"[.]" '{ print $1}'`
+	local minor=`echo $clusterVersion | awk -F"[.]" '{ print $2}'`
+	if [[ "${major}" == "4" ]]; then
+		if [[ "${minor}" == "6" || "${minor}" == "8" ]]; then
+			echo "Version is compatible" | tee -a "$logpath"
+			echo "" | tee -a "$logpath"
+			return 0
+		fi
 	fi
-    fi
-    echo "ERROR: OCP version $clusterVersion is not a supported release for IBM Infrastructure Automation; the only supported releases are OCP 4.6 or OCP 4.8" | tee -a "$logpath"
-    echo "" | tee -a "$logpath"
-    exit 1
+	echo "ERROR: OCP version $clusterVersion is not a supported release for IBM Infrastructure Automation; the only supported releases are OCP 4.6 or OCP 4.8" | tee -a "$logpath"
+	echo "" | tee -a "$logpath"
+	exit 1
 }
 
 checkNamespace() {
