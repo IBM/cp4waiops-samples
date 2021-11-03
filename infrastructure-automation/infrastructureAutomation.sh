@@ -264,21 +264,23 @@ checkLogin() {
 }
 
 checkOCPversion() {
-    echo "**********************************************************************" | tee -a "$logpath"
-    echo "Checking OCP version" | tee -a "$logpath"
-    echo "**********************************************************************" | tee -a "$logpath"
-    echo "" | tee -a "$logpath"    
-    local clusterVersion=`oc get clusterversion | grep "version" | awk '{ print $2 }'`
-    local major=`echo $clusterVersion | awk -F"[.]" '{ print $1}'`
-    local minor=`echo $clusterVersion | awk -F"[.]" '{ print $2}'`
-    if [[ "${major}" != "4" || "${minor}" != "8" ]]; then
-	echo "ERROR: OCP version $clusterVersion is not a supported release for IBM Infrastructure Automation; the only supported release is OCP 4.8.x" | tee -a "$logpath"
+	echo "**********************************************************************" | tee -a "$logpath"
+	echo "Checking OCP version" | tee -a "$logpath"
+	echo "**********************************************************************" | tee -a "$logpath"
+	echo "" | tee -a "$logpath"	
+	local clusterVersion=`oc get clusterversion | grep "version" | awk '{ print $2 }'`
+	local major=`echo $clusterVersion | awk -F"[.]" '{ print $1}'`
+	local minor=`echo $clusterVersion | awk -F"[.]" '{ print $2}'`
+	if [[ "${major}" == "4" ]]; then
+		if [[ "${minor}" == "6" || "${minor}" == "8" ]]; then
+			echo "Version is compatible" | tee -a "$logpath"
+			echo "" | tee -a "$logpath"
+			return 0
+		fi
+	fi
+	echo "ERROR: OCP version $clusterVersion is not a supported release for IBM Infrastructure Automation; the only supported releases are OCP 4.6 or OCP 4.8" | tee -a "$logpath"
 	echo "" | tee -a "$logpath"
 	exit 1
-    fi
-    echo "Version is compatible" | tee -a "$logpath"
-    echo "" | tee -a "$logpath"
-    return 0
 }
 
 checkNamespace() {
@@ -445,7 +447,7 @@ spec:
   displayName: Infrastructure Automation Installer Catalog
   publisher: IBM Infrastructure Automation
   sourceType: grpc
-  image: quay.io/cp4mcm/cp4mcm-orchestrator-catalog:2.3.17
+  image: quay.io/cp4mcm/cp4mcm-orchestrator-catalog:2.3.20
   updateStrategy:
     registryPoll:
       interval: 45m
@@ -1136,7 +1138,7 @@ installFunc() {
     echo "**********************************************************************" | tee -a "$logpath"
     echo "Installing IBM Infrastructure Automation" | tee -a "$logpath"
     echo "**********************************************************************" | tee -a "$logpath"
-    echo "" | tee -a "$logpath"        
+    echo "" | tee -a "$logpath"
     echo "Checking if Common Service is already installed."
     oc -n openshift-operators get subscriptions | grep ibm-common-service-operator > /dev/null 2>&1
     local result=$?
@@ -1336,7 +1338,13 @@ uninstallFunc() {
     deleteResource "csv" "openshift-operators" "ibm-management-orchestrator.v2.3.16" "false" 300
     result=$(( result + $? ))
     deleteResource "csv" "openshift-operators" "ibm-management-orchestrator.v2.3.17" "false" 300
-    result=$(( result + $? ))    
+    result=$(( result + $? ))
+    deleteResource "csv" "openshift-operators" "ibm-management-orchestrator.v2.3.18" "false" 300
+    result=$(( result + $? ))
+    deleteResource "csv" "openshift-operators" "ibm-management-orchestrator.v2.3.19" "false" 300
+    result=$(( result + $? ))
+    deleteResource "csv" "openshift-operators" "ibm-management-orchestrator.v2.3.20" "false" 300
+    result=$(( result + $? ))
     deleteResource "catalogsource" "openshift-marketplace" "ibm-management-orchestrator" "false" 300
     result=$(( result + $? ))
     deleteResource "deployment" "openshift-operators" "ibm-management-orchestrator" "false" 300
