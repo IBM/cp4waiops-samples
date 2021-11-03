@@ -380,7 +380,7 @@ spec:
   displayName: IBMCS Operators
   publisher: IBM
   sourceType: grpc
-  image: docker.io/ibmcom/ibm-common-service-catalog:3.12.0
+  image: docker.io/ibmcom/ibm-common-service-catalog:3.12
   updateStrategy:
     registryPoll:
       interval: 45m
@@ -1138,8 +1138,16 @@ installFunc() {
     echo "**********************************************************************" | tee -a "$logpath"
     echo "Installing IBM Infrastructure Automation" | tee -a "$logpath"
     echo "**********************************************************************" | tee -a "$logpath"
-    echo "" | tee -a "$logpath"        
-    createCScatalogSourceAndSubscription
+    echo "" | tee -a "$logpath"
+    echo "Checking if Common Service is already installed."
+    oc -n openshift-operators get subscriptions | grep ibm-common-service-operator > /dev/null 2>&1
+    local result=$?
+    if [[ "${result}" -ne 0 ]]; then
+        echo "Creating Common Service Catalog Source."
+        createCScatalogSourceAndSubscription
+    else
+        echo "Skip creating Common Service Catalog Source as it exists"
+    fi
     createIAcatalogSourceAndSubscription
     coolOff
     checkOrchestrator
