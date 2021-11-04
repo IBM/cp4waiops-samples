@@ -447,7 +447,7 @@ spec:
   displayName: Infrastructure Automation Installer Catalog
   publisher: IBM Infrastructure Automation
   sourceType: grpc
-  image: quay.io/cp4mcm/cp4mcm-orchestrator-catalog:2.3.20
+  image: quay.io/cp4mcm/cp4mcm-orchestrator-catalog:2.3.21
   updateStrategy:
     registryPoll:
       interval: 45m
@@ -807,7 +807,7 @@ verifyCAMstatus() {
 	local result=$?
 	if [[ "${result}" -eq 0 ]]; then
 	    break
-	elif [[ "${counter}" -ge 45 ]]; then
+	elif [[ "${counter}" -ge 120 ]]; then
 	    echo "ERROR: The cam-mongo deployment has not completed its rollout." | tee -a "$logpath"
 	    echo "" | tee -a "$logpath"
 	    exit 1
@@ -1344,6 +1344,8 @@ uninstallFunc() {
     deleteResource "csv" "openshift-operators" "ibm-management-orchestrator.v2.3.19" "false" 300
     result=$(( result + $? ))
     deleteResource "csv" "openshift-operators" "ibm-management-orchestrator.v2.3.20" "false" 300
+    result=$(( result + $? ))
+    deleteResource "csv" "openshift-operators" "ibm-management-orchestrator.v2.3.21" "false" 300
     result=$(( result + $? ))
     deleteResource "catalogsource" "openshift-marketplace" "ibm-management-orchestrator" "false" 300
     result=$(( result + $? ))
