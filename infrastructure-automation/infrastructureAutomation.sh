@@ -447,7 +447,7 @@ spec:
   displayName: Infrastructure Automation Installer Catalog
   publisher: IBM Infrastructure Automation
   sourceType: grpc
-  image: quay.io/cp4mcm/cp4mcm-orchestrator-catalog:2.3.20
+  image: quay.io/cp4mcm/cp4mcm-orchestrator-catalog:2.3.21
   updateStrategy:
     registryPoll:
       interval: 45m
