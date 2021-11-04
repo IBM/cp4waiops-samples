@@ -807,7 +807,7 @@ verifyCAMstatus() {
 	local result=$?
 	if [[ "${result}" -eq 0 ]]; then
 	    break
-	elif [[ "${counter}" -ge 45 ]]; then
+	elif [[ "${counter}" -ge 120 ]]; then
 	    echo "ERROR: The cam-mongo deployment has not completed its rollout." | tee -a "$logpath"
 	    echo "" | tee -a "$logpath"
 	    exit 1
