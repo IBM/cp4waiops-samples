@@ -1345,6 +1345,8 @@ uninstallFunc() {
     result=$(( result + $? ))
     deleteResource "csv" "openshift-operators" "ibm-management-orchestrator.v2.3.20" "false" 300
     result=$(( result + $? ))
+    deleteResource "csv" "openshift-operators" "ibm-management-orchestrator.v2.3.21" "false" 300
+    result=$(( result + $? ))
     deleteResource "catalogsource" "openshift-marketplace" "ibm-management-orchestrator" "false" 300
     result=$(( result + $? ))
     deleteResource "deployment" "openshift-operators" "ibm-management-orchestrator" "false" 300
