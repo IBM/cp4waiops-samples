@@ -91,9 +91,8 @@ CP4WAIOPS_INTERNAL_PVC=("app=cassandra"
                         "app.kubernetes.io/component=ep")
 
 # Delete these internal secrets always
-CP4WAIOPS_INTERNAL_SECRETS_LABELS=("release=aiops-topology"
-                                  "certmanager.k8s.io/certificate-name=sre-tunnel-tunnel-api-cert"
-                                  "certmanager.k8s.io/certificate-name=sre-tunnel-tunnel-readiness-cert")
+CP4WAIOPS_INTERNAL_SECRETS_LABELS=("release=aiops-topology")
+
 # Delete these internal secrets always
 CP4WAIOPS_INTERNAL_SECRETS=("secret/aiops-ir-lifecycle-eventprocessor-ep-client-cert-kp"
                             "secret/aiops-ir-lifecycle-eventprocessor-ep-internal-cert-kp"
@@ -101,8 +100,7 @@ CP4WAIOPS_INTERNAL_SECRETS=("secret/aiops-ir-lifecycle-eventprocessor-ep-client-
                             "secret/aiops-ir-lifecycle-policy-grpc-clt-svc"
                             "secret/cp4waiops-eventprocessor-eve-29ee-ep-client-cert-kp"
                             "secret/cp4waiops-eventprocessor-eve-29ee-ep-ss-cacert-kp"
-                            "secret/ir-ui-session-secret"
-                            "secret/sre-tunnel-tunnel-ui-secret")
+                            "secret/ir-ui-session-secret")
 
 
 CP4WAIOPS_CONFIGMAPS_INTERNAL_LABELS=("app=cp4waiops-eventprocessor-eve-29ee-ep")
@@ -139,12 +137,7 @@ CP4WAIOPS_LEASE=("lease.coordination.k8s.io/9efbc0e4.aiops.ibm.com"
                 "lease.coordination.k8s.io/5ba58da1.ai.ir.aiops.ibm.com"
                 "lease.coordination.k8s.io/e1d7d41e.ibm.com"
                 "lease.coordination.k8s.io/fc7f2af9.ibm.com"
-                "lease.coordination.k8s.io/ff20eae3.connectors.aiops.ibm.com"
-                "lease.coordination.k8s.io/1b727795.ibm.com"
-                "lease.coordination.k8s.io/2124ed9c.eventprocessing.flink.automation.ibm.com"
-                "lease.coordination.k8s.io/2133ec8b.automation.ibm.com"
-                "lease.coordination.k8s.io/651334e7.automation.ibm.com"
-                "lease.coordination.k8s.io/dd8836af.eventprocessing.automation.ibm.com")
+                "lease.coordination.k8s.io/ff20eae3.connectors.aiops.ibm.com")
 
 CP4WAIOPS_CRDS=("aimanagermainprods.ai-manager.watson-aiops.ibm.com" 
                 "aimanagers.ai-manager.watson-aiops.ibm.com"
@@ -180,6 +173,14 @@ IAF_CERTMANAGER=("certificate.certmanager.k8s.io/iaf-system-automationui-aui-zen
              "issuer.certmanager.k8s.io/iaf-system-automationui-aui-zen-issuer"
              "issuer.certmanager.k8s.io/iaf-system-automationui-aui-zen-ss-issuer"
 )
+
+#### IBM Automation Foundation (IAF) ####
+IAF_LEASES=("lease.coordination.k8s.io/1b727795.ibm.com"
+            "lease.coordination.k8s.io/2124ed9c.eventprocessing.flink.automation.ibm.com"
+            "lease.coordination.k8s.io/2133ec8b.automation.ibm.com"
+            "lease.coordination.k8s.io/651334e7.automation.ibm.com"
+            "lease.coordination.k8s.io/dd8836af.eventprocessing.automation.ibm.com")
+
 #### IBM Automation Foundation ####
 IAF_SECRETS=("secret/external-tls-secret"
             "secret/internal-nginx-svc-tls"
@@ -197,8 +198,10 @@ IAF_SECRETS=("secret/external-tls-secret"
             "secret/zen-service-broker-secret"
             "secret/iaf-system-automationui-aui-zen-ca"
             "secret/iaf-system-automationui-aui-zen-cert"
+            "secret/automationbase-sample-kafka-kf-cli-cert"
+            "secret/automationbase-sample-kafka-kf-clst-cert"
             )
-            
+                        
 #### IBM Automation Foundation ####
 IAF_SERVICEACCOUNTS_LABELS=("app.kubernetes.io/component=iaf-core-operator"
                            "app.kubernetes.io/instance=iaf-eventprocessing-operator"
@@ -212,7 +215,9 @@ IAF_CONFIGMAPS=("configmap/ibm-elasticsearch-operator"
                 "configmap/1b727795.ibm.com"
                 "configmap/2133ec8b.automation.ibm.com"
                 "configmap/651334e7.automation.ibm.com"
-                "configmap/dd8836af.eventprocessing.automation.ibm.com")
+                "configmap/dd8836af.eventprocessing.automation.ibm.com"
+                "configmap/ibm-cpp-config")
+
 #### IBM Automation Foundation ####
 ZEN_PVCS_LABELS=("app.kubernetes.io/component=zen-metastoredb")
 

@@ -139,12 +139,6 @@ if [[ ! -z "$CP4WAIOPS_PROJECT"  ]]; then
    	log $INFO "Deleting the zenservice CR..."
    	delete_zenservice_instance $ZENSERVICE_CR_NAME $CP4WAIOPS_PROJECT
 
-      log $INFO "Deleting IAF configmaps in $CP4WAIOPS_PROJECT"
-      for CONFIGMAP in ${IAF_CONFIGMAPS[@]}; do
-            log $INFO "Deleting configmap $CONFIGMAP.."
-            oc delete $CONFIGMAP -n $CP4WAIOPS_PROJECT --ignore-not-found
-      done
-
       log $INFO "Deleting IAF secrets in $CP4WAIOPS_PROJECT"
       for SECRET in ${IAF_SECRETS[@]}; do
             log $INFO "Deleting secret $SECRET.."
@@ -162,7 +156,7 @@ if [[ ! -z "$CP4WAIOPS_PROJECT"  ]]; then
             log $INFO "Deleting $RESOURCE.."
             oc delete $RESOURCE -n $CP4WAIOPS_PROJECT --ignore-not-found
       done
-	fi
+   fi
 
    # Start cleaning up remaining resources in the project that CP4WAIOps created 
    # and are not automatically deleted when CR is deleted
@@ -244,6 +238,18 @@ if [[ ! -z "$CP4WAIOPS_PROJECT"  ]]; then
    if [[ $ONLY_CLOUDPAK == "true" ]]; then
       log $INFO "Deleting IAF"
       delete_iaf_bedrock
+
+      log $INFO "Deleting IAF leases in $CP4WAIOPS_PROJECT"
+      for LEASE in ${IAF_LEASES[@]}; do
+         log $INFO "Deleting lease $LEASE.."
+         oc delete $LEASE -n $CP4WAIOPS_PROJECT --ignore-not-found
+      done
+
+      log $INFO "Deleting IAF configmaps in $CP4WAIOPS_PROJECT"
+      for CONFIGMAP in ${IAF_CONFIGMAPS[@]}; do
+            log $INFO "Deleting configmap $CONFIGMAP.."
+            oc delete $CONFIGMAP -n $CP4WAIOPS_PROJECT --ignore-not-found
+      done
 
       log $INFO "Deleting Zen PVCs in $CP4WAIOPS_PROJECT"
       for PVC in ${ZEN_PVCS_LABELS[@]}; do
