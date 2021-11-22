@@ -17,11 +17,13 @@ The prerequisite checker tool can be used to validate whether a Red Hat OpenShif
 Clone the following GitHub repository:
 
 ```
-  git clone https://github.ibm.com/katamari/katamari-util.git 
-  cd prereq-tool/3.2
+  git clone https://github.com:IBM/cp4waiops-samples.git
+  cd prereq-checker/3.2
 ```
 
 ## Running the prerequisite checker tool script
+
+Ensure you have logged into your OCP cluster and switched into the namespace you want to install the product into.
 
 To run the prerequisite checker tool, run the following command:
 ```
