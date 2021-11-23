@@ -377,7 +377,7 @@ function checkNetworkPolicy {
       NP_RES=$pass_msg
     else
       log $ERROR "Namespace default DOES NOT have the expected metadata label"
-      printf "Please see https://ibm.biz/nwk_policy_320 to configure a network policy"
+      printf "Please see https://ibm.biz/nwk_policy_320 to configure a network policy\n"
       NP_RES=$fail_msg
       startEndSection "Network Policy"
       return 1
