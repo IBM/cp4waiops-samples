@@ -38,17 +38,33 @@ INFO="[INFO]"
 WARNING="[WARNING]"
 ERROR="[ERROR]"
 
+# For Summary method
+OCP_VER_RES=""
+STORAGE_PROVIDER_RES=""
+NP_RES=""
+INT_REG_RES=""
+PROFILE_RES=""
+PS_RES=""
+
+warn_color="\x1b[33m"
+fail_color="\x1b[31m"
+pass_color="\e[32m"
+color_end="\x1b[0m"
+
+fail_msg=`printf "$fail_color FAIL $color_end"`
+pass_msg=`printf "$pass_color PASS $color_end\n"`
+warning_msg=`printf "$warn_color WARNING $color_end"`
 }
 
 display_help() {
    echo "**************************************** Usage ********************************************"
-   echo ""
+   echo
    echo " This script ensures that you have met the technical prerequisites."
-   echo ""
+   echo
    echo " Before you run this script, you will need: "
    echo " 1. OpenShift (oc) command line interface (CLI)"
    echo " 2. Must be logged in to your cluster with oc login"
-   echo ""
+   echo
    echo " Usage:"
    echo " ./prereq.sh -h"
    echo "  -h Prints out the help message"
@@ -85,45 +101,64 @@ echo
 # This function checks to see if user's OCP version meets our requirements by checking if 
 # substring "4.6" and "4.8" is in variable OCP_VER.
 function checkOCPVersion {
+  
   OCP_VER=$(oc version | grep "Server Version" | sed "s|Server Version: ||g")
   
+  echo
+  startEndSection "Openshift Container Platform Version Check"
   log $INFO "Checking OCP Version. Compatible Versions of OCP are v4.6 and v4.8."
+  
   if [[ $OCP_VER == *"4.6"* || $OCP_VER == *"4.8"* ]]; then
     log $INFO "OCP Version $OCP_VER is compatible with IBM Cloud Pak for Watson AIOps AI Manager"
-    echo
+    OCP_VER_RES=$pass_msg
+    startEndSection "Openshift Container Platform Version Check"
     return 0
   else
     log $ERROR "OCP Version is incompatible. Required Version: v4.6.* or v4.8.*" 
     log $ERROR "Your Version: v$OCP_VER"
     echo
+    OCP_VER_RES=$fail_msg
+    startEndSection "Openshift Container Platform Version Check"
     return 1
   fi
 }
 
 # Check for entitlement or global pull secret
 checkEntitlementSecret () {
-  log $INFO "Checking for Entitlement secret"
+  
   SECRET_NAME="ibm-entitlement-key"
-  ENTITLEMENT_SECRET=$(oc get secret --all-namespaces | grep $SECRET_NAME)
+  ENTITLEMENT_SECRET=$(oc get secret | grep $SECRET_NAME)
   GLOBAL_PULL_SECRET=$(oc get secret pull-secret -n openshift-config)
 
-  if [[ -z $ENTITLEMENT_SECRET || -z $GLOBAL_PULL_SECRET ]] ; then
-    log $ERROR "Please create the entitlement secret"
-    exit 1
+  echo
+  startEndSection "Entitlement Pull Secret"
+  log $INFO "Checking whether the Entitlement secret or Global pull secret is configured correctly."
+  
+
+  if [[ -z $ENTITLEMENT_SECRET && -z $GLOBAL_PULL_SECRET ]] ; then
+    log $ERROR "Ensure that you have either a '$SECRET_NAME' secret or a global pull secret 'pull-secret' configured in the namespace 'openshift-config'."
+    PS_RES=$fail_msg
+    startEndSection "Entitlement Pull Secret"
+    return 1
   else
     createTestJob
   fi
 }
 
+
+
 createTestJob () {
   JOB_NAME="cp4waiops-entitlement-key-test-job"
 
+  log $INFO "Checking if the job '$JOB_NAME' already exists."
   if [ `oc get job $JOB_NAME| wc -l` -gt 0  ]; then
-    # log $INFO "The job '$JOB_NAME exists, deleting the job."
     oc delete job $JOB_NAME
+    sleep 10s
+  else
+    log $INFO "The job with name '$JOB_NAME' was not found, so moving ahead and creating it."
   fi
-  # log $INFO "Creating the test job '$JOB_NAME'"
-
+  
+  log $INFO "Creating the job '$JOB_NAME' "
   cat <<EOF | oc apply -f -
   apiVersion: batch/v1
   kind: Job
@@ -143,19 +178,20 @@ createTestJob () {
           command: [ "echo", "SUCCESS" ] 
         restartPolicy: OnFailure
 EOF
+  sleep 3s
   checkEntitlementCred
 }
 
 checkEntitlementCred () {
-  AIOPS_PROJECT=temp
+  
   SLEEP_LOOP=5s
   IMAGE_PULL_STATUS_FLAG="false"
+  log $INFO "Verifying if the job '$JOB_NAME' completed successfully.."
   POD_NAME=$(oc get pod -o name | grep $JOB_NAME)
 
-  if [ $POD_NAME ];then
+  if [[ ! -z $POD_NAME ]];then
     LOOP_COUNT=0
-    # log $INFO "Checking if the entitlement secret is configured correctly."
-    while [ $LOOP_COUNT -lt 10 ]
+    while [ $LOOP_COUNT -lt 25 ]
     do
         phase_status=$(oc get $POD_NAME -o jsonpath='{.status.phase}')
         if [[ $phase_status == "Succeeded" ]];then
@@ -163,8 +199,6 @@ checkEntitlementCred () {
           if [[ "$container_status" != "ErrImagePull" && "$container_status" != "ImagePullBackOff" ]]; then
             if [[ "$container_status" == "Completed" ]]; then
                 image_pull_status_flag="true"
-                log $INFO "Entitlement secret is configured correctly."
-                echo
                 break
             fi
           fi
@@ -172,8 +206,6 @@ checkEntitlementCred () {
           container_status=$(oc get $POD_NAME -o jsonpath='{.status.containerStatuses[0].state.waiting.reason}')
           if [[ "$container_status" == "ErrImagePull" || "$container_status" == "ImagePullBackOff" ]]; then
             image_pull_status_flag="false" 
-            log $ERROR "Entitlement secret is not configured correctly."
-            echo
           fi
         fi
         # log $INFO "Waiting for $SLEEP_LOOP, and checking the job '$JOB_NAME' status again"
@@ -181,10 +213,30 @@ checkEntitlementCred () {
         LOOP_COUNT=`expr $LOOP_COUNT + 1`
     done
   else
-    log $ERROR "Some error occured while job creation for testing entitlement secret configuration. Please check secret values and try again."
-    echo
+    log $ERROR "Some error occured while '$JOB_NAME' job creation for testing entitlement secret configuration."
+    startEndSection "Entitlement Pull Secret"
     exit 1
   fi
+  
+  #Checking the job pod logs, where we chose to just print 'SUCCESS' message.
+  if [[ "$image_pull_status_flag" == "true" ]]; then
+     logs_status=$(oc logs $POD_NAME)
+     if [[ $logs_status == "SUCCESS"  ]];then
+        log $INFO "SUCCESS! Entitlement secret is configured correctly."
+        PS_RES=$pass_msg
+     else
+        log $ERROR "Some error occured in validating job '$JOB_NAME' logs, error validating the entitlement secret"
+        PS_RES=$fail_msg
+     fi
+  else
+     PS_RES=$fail_msg
+     log $ERROR "The pod '$POD_NAME' failed with container_status='$container_status'"
+     log $ERROR "Entitlement secret is not configured correctly."
+  fi
+  
+  #cleaning the job in case if script reaches here.
+  oc delete job $JOB_NAME
+  startEndSection "Entitlement Pull Secret"
 }
 
 function checkODF {
@@ -198,6 +250,7 @@ function checkODF {
       continue
     else
       log $ERROR "Pod in openshift-storage project namespace found not \"Running\" or \"Completed\": $p"
+      STORAGE_PROVIDER_RES=$fail_msg
       return 1
     fi
   done
@@ -211,14 +264,17 @@ function checkODF {
       log $INFO "$s exists."
     else
       log $ERROR "$s does not exist."
+      STORAGE_PROVIDER_RES=$fail_msg
       return 1
     fi
   done
 
+  STORAGE_PROVIDER_RES=$pass_msg
   return 0
 }
 
 function checkPortworx {
+  PORTWORX_WARNING="false"
   printf "\nChecking Portworx Configuration...\n"
   printf "Checking for storageclass \"portworx-fs\"...\n"
   
@@ -226,7 +282,8 @@ function checkPortworx {
   if [[ "$?" == "0" ]]; then
     log $INFO "StorageClass \"portworx-fs\" exists."
   else
-    echo ""
+    PORTWORX_WARNING="true"
+    echo
     log $WARNING "StorageClass \"portworx-fs\" does not exist. See \"Portworx Storage\" section in https://ibm.biz/storage_consideration_320 for details.\n"
   fi
 
@@ -235,8 +292,15 @@ function checkPortworx {
   if [[ "$?" == "0" ]]; then
     log $INFO "StorageClass \"portworx-aiops\" exists."
   else
-    echo ""
+    PORTWORX_WARNING="true"
+    echo
     log $WARNING "StorageClass \"portworx-aiops\" does not exist. See \"Portworx Storage\" section in https://ibm.biz/storage_consideration_320 for details.\n"
+  fi
+  
+  if [[ "$PORTWORX_WARNING" == "false" ]]; then
+    STORAGE_PROVIDER_RES=$pass_msg
+  else
+    STORAGE_PROVIDER_RES=$warning_msg
   fi
   
   return 0
@@ -246,8 +310,9 @@ function checkStorage {
   ODF_FOUND="false"
   PORTWORX_FOUND="false"
 
+  echo
+  startEndSection "Storage Provider"
   log $INFO "Checking storage providers"
-  # printf "\nThe supported Storage Providers are Portworx or Openshift Data Foundation.\nSee https://ibm.biz/storage_consideration_320 for details.\n\nChecking if one or the other is installed and running...\n"
 
   # Check if Portworx or ODF exist
   STORAGE_CLUSTER_NAMES=$(oc get storagecluster -n kube-system --ignore-not-found=true --no-headers=true | awk '{print $1}')
@@ -257,7 +322,7 @@ function checkStorage {
       log $INFO "Portworx Found. StorageCluster instance \"$sc\" is Online."
       PORTWORX_FOUND="true"
     else
-      echo ""
+      echo
       log $WARNING "StorageCluster instance is not Online. In order for Portworx to work, an instance of StorageCluster must have a status of \"Online\"."
       PORTWORX_FOUND="false"
     fi
@@ -266,7 +331,7 @@ function checkStorage {
 
   ODF_PODS=($(oc get pods -n openshift-storage --no-headers=true | awk '{print $1}'))
   if [[ "$ODF_PODS" == "" ]]; then
-    echo ""
+    echo
     log $WARNING "Openshift Data Foundation not running."
     ODF_FOUND="false"
   else
@@ -277,6 +342,8 @@ function checkStorage {
   if [[ "$PORTWORX_FOUND" == "false" && "$ODF_FOUND" == "false" ]]; then
     log $ERROR "At least one of the two Storage Providers are required"
     log $ERROR "The supported Storage Providers are Portworx or Openshift Data Foundation. See https://ibm.biz/storage_consideration_320 for details."
+    STORAGE_PROVIDER_RES=$fail_msg
+    startEndSection "Storage Provider"
     return 1
   elif [[ "$PORTWORX_FOUND" == "true" && "$ODF_FOUND" == "false" ]]; then
     checkPortworx
@@ -286,18 +353,18 @@ function checkStorage {
     checkPortworx
     checkODF $ODF_PODS
   fi
-
+  startEndSection "Storage Provider"
   return 0
 }
 
 function checkNetworkPolicy {
   endpointPubStrat=$(oc get ingresscontroller default -n openshift-ingress-operator -o jsonpath='{.status.endpointPublishingStrategy.type}')
   
+  echo
+  startEndSection "Network Policy"
   log $INFO "Checking Network Policy configuration"
-  if [[ "$endpointPubStrat" == "HostNetwork" ]]; then
-    # log $INFO "IngressController called default in openshift-ingress-operator namespace reads HostNetwork"
-    # printf "\nChecking to see if default namespace has the following metadata label:\n\"network.openshift.io/policy-group\":\"ingress\"\n\n"
-    
+
+  if [[ "$endpointPubStrat" == "HostNetwork" ]]; then    
     # A comparison will be run against two different expected labels. Certain versions of OC cli
     # have different outputs
     policygroupLabel=$(oc get namespace default -o jsonpath='{.metadata.labels}')
@@ -307,14 +374,16 @@ function checkNetworkPolicy {
     # Check if expectedLabel exists as a substring in policygroupLabel
     if [[ "$policygroupLabel" == *"$expectedLabel"* || "$policygroupLabel" == *"$altExpectedLabel"* ]]; then
       log $INFO "Namespace default has expected metadata label. Network policy configured correctly."
-      echo
+      NP_RES=$pass_msg
     else
       log $ERROR "Namespace default DOES NOT have the expected metadata label"
-      printf "Please see https://ibm.biz/nwk_policy_320 to configure a network policy"
-      echo
+      printf "Please see https://ibm.biz/nwk_policy_320 to configure a network policy\n"
+      NP_RES=$fail_msg
+      startEndSection "Network Policy"
       return 1
     fi
   fi
+  startEndSection "Network Policy"
   return 0
 }
 
@@ -467,9 +536,6 @@ check_available_cpu_and_memory() {
 
 analyze_resource_display() {
 
-fail_color="\x1b[31m"
-pass_color="\e[32m"
-color_end="\x1b[0m"
   
 if [[ $worker_node_count -ge $NODE_COUNT_LARGE ]]; then
    large_worker_node_count_string=`printf "$pass_color $worker_node_count $color_end\n"`
@@ -510,7 +576,9 @@ fi
 }
 
 checkSmallOrLargeProfileInstall() {
-
+  
+  echo
+  startEndSection "Small or Large Profile Install Resources"
   log $INFO "Checking for cluster resources"
   echo
   check_available_cpu_and_memory
@@ -534,42 +602,76 @@ checkSmallOrLargeProfileInstall() {
   else
      log $ERROR "Cluster does not have required resources available to install Cloud Pak for Watson AIOps AI Manager."
      echo
+     PROFILE_RES=$fail_msg
+     startEndSection "Small or Large Profile Install Resources"
      return 1
   fi
-
+  PROFILE_RES=$pass_msg
+  startEndSection "Small or Large Profile Install Resources"
 }
 
 function checkIntegratedRegistrySetup {
 
 
-  log $INFO "Checking if image registry is configured"
-
   # Check image registry's management state
   managementState=$(oc get configs.imageregistry.operator.openshift.io cluster -o jsonpath='{.spec.managementState}')
+
+  echo
+  startEndSection "Openshift Registry Setup"
+  log $INFO "Checking if image registry is configured"
+
 
   # Check to see if there are pods in openshift-image-registry namespace (maybe check for a pod with a substring of image-registry)
   # printf "Validating \".spec.managementState\" in configs.imageregistry.operator.openshift.io reads \"Managed\"\n"
   if [[ "$managementState" == "Managed" ]]; then
-    # log $INFO "managementState is \"Managed\"."
-
     storagePVCClaim=$(oc get configs.imageregistry.operator.openshift.io cluster -o jsonpath='{.spec.storage.pvc.claim}')
     if [[ -z "$storagePVCClaim" ]]; then
       log $ERROR "Image Registry Storage is not configured properly - configure an Empty Storage or Block Storage using the following docs:"
       printf "https://docs.openshift.com/container-platform/4.8/registry/configuring_registry_storage/configuring-registry-storage-vsphere.html\n\n"
       echo
+      INT_REG_RES=$fail_msg
+      startEndSection "Openshift Registry Setup"
       return 1
     fi
   else
-    echo ""
+    echo
     log $ERROR "managementState is not \"Managed\". See the following link:"
     printf "https://docs.openshift.com/container-platform/4.7/registry/configuring_registry_storage/configuring-registry-storage-vsphere.html#registry-change-management-state_configuring-registry-storage-vsphere\n\n"
     echo
+    INT_REG_RES=$fail_msg
+    startEndSection "Openshift Registry Setup"
     return 1
   fi
 
+  INT_REG_RES=$pass_msg
   log $INFO "Image Registry is configured."
-  echo
+  startEndSection "Openshift Registry Setup"
   return 0
+}
+
+showSummary() {
+
+  echo
+  echo
+  startEndSection "Prerequisite Checker Tool Summary"
+  string=`printf "      [ %s ] Openshift Container Platform Version Check " "${OCP_VER_RES}"`
+  printf "${string}\n"
+  string=`printf "      [ %s ] Entitlement Pull Secret" "${PS_RES}"`
+  printf "${string}\n"
+  string=`printf "      [ %s ] Storage Provider\n" "${STORAGE_PROVIDER_RES}"`
+  printf "${string}\n"
+  string=`printf "      [ %s ] Network Policy" "${NP_RES}"`
+  printf "${string}\n"
+  string=`printf "      [ %s ] Openshift Registry Setup" "${INT_REG_RES}"`
+  printf "${string}\n"
+  string=`printf "      [ %s ] Small or Large Profile Install Resources" "${PROFILE_RES}"`
+  printf "${string}\n"
+  startEndSection "Prerequisite Checker Tool Summary"
+}
+
+startEndSection() {
+  section=$1
+  log $INFO "=================================${section}================================="
 }
 
 function main {
@@ -581,6 +683,8 @@ function main {
   checkNetworkPolicy
   checkIntegratedRegistrySetup
   checkSmallOrLargeProfileInstall
+
+  showSummary
 }
 
 main

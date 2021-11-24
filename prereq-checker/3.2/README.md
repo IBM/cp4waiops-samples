@@ -12,18 +12,24 @@ The prerequisite checker tool can be used to validate whether a Red Hat OpenShif
 
 - **Small or large profile install check**: Checks whether the cluster has enough resources (vCPU, Memory, and Nodes) for installing a small or large profile of IBM Cloud Pak for Watson AIOps AI Manager. For more information, see the IBM Documentation [Hardware requirements](https://ibm.biz/aiops_hardware_320).
 
+- **Entitlement Secret check**: Checks whether a secret called ibm-entitlement-key or a global pull secret called pull-secret (global pull secret found in openshift-config namespace) have been created. For more information, see the IBM Documentation [Entitlement Keys](https://ibm.biz/entitlement_keys_320)
+
 ## Getting started
 
 Clone the following GitHub repository:
 
 ```
-  git clone https://github.com:IBM/cp4waiops-samples.git
+  git clone https://github.com:IBM/cp4waiops-samples.git 
   cd prereq-checker/3.2
 ```
 
 ## Running the prerequisite checker tool script
 
-Ensure you have logged into your OCP cluster and switched into the namespace you want to install the product into.
+NOTE: Before you run the script make sure that you are in the namespace where you are planning to install IBM Cloud Pak for Watson AIOps AI Manager.
+```
+oc project <namespace_name>
+ex: oc project cp4waiops
+```
 
 To run the prerequisite checker tool, run the following command:
 ```
