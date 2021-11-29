@@ -26,11 +26,10 @@ Clone the following GitHub repository:
 ## Running the prerequisite checker tool script
 
 NOTE: Before you run the script make sure that you are in the namespace where you are planning to install IBM Cloud Pak for Watson AIOps AI Manager.
-```
 
-oc project <namespace_name>
- 
-ex: 
+For example:
+
+```
 oc project cp4waiops
 
 ```
