@@ -31,7 +31,8 @@ Once you have updated the `./3.2/uninstall-cp4waiops.props` file, you are ready 
 
 To run the uninstall, you can run
 ```
-  ./3.2/uninstall-cp4waiops.sh
+  cd 3.2
+  ./uninstall-cp4waiops.sh
 ```
 
 You can choose to skip confirmation messages by passing in `-s`.
