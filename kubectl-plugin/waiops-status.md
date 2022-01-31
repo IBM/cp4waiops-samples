@@ -5,8 +5,6 @@ A kubectl plugin for CP4WAIOps
 https://kubernetes.io/docs/tasks/extend-kubectl/kubectl-plugins/
 
 ## Highlights
-- Discover the status of the various CP4WAIOps custom resource instances in your cluster
-
 
 ```
 $ oc waiops status
@@ -33,8 +31,7 @@ ASM         cp4waiops   aiops-topology   OK
 ## How to use
 
 ### Dependencies
-Requires `oc` cli
-Utilizes the current KUBECONFIG context
+- `oc` cli
 
 ### Installing
 Save `kubectl-plugin/kubectl-waiops` to a location in your path such as `/usr/local/bin/kubectl-waiops` and make the file executable. 
