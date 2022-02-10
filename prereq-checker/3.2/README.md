@@ -19,7 +19,7 @@ The prerequisite checker tool can be used to validate whether a Red Hat OpenShif
 Clone the following GitHub repository:
 
 ```
-  git clone https://github.com:IBM/cp4waiops-samples.git 
+  git clone https://github.com/IBM/cp4waiops-samples.git 
   cd prereq-checker/3.2
 ```
 
