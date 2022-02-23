@@ -1,6 +1,6 @@
 # IBM Cloud Pak for Watson AIOps AI Manager prerequisite checker tool
 
-The prerequisite checker tool can be used to validate whether a Red Hat OpenShift Container Platform cluster has the required resources available to enable a successful installation of IBM Cloud Pak for Watson AIOps AI Manager or whether the IAF version is supported for upgrades. This tool completes the following checks and generates an installation readiness report:
+The prerequisite checker tool can be used to validate whether a Red Hat OpenShift Container Platform cluster has the required resources and prerequisites available to enable a successful installation or upgrade of IBM Cloud Pak for Watson AIOps AI Manager. This tool completes the following checks and generates an installation readiness report:
 
 **Pre-Install Checker::**
 
@@ -17,7 +17,7 @@ The prerequisite checker tool can be used to validate whether a Red Hat OpenShif
 - **Entitlement Secret check**: Checks whether a secret called ibm-entitlement-key or a global pull secret called pull-secret (global pull secret found in openshift-config namespace) have been created. For more information, see the IBM Documentation [Entitlement Keys](https://ibm.biz/entitlement_keys_320)
 
 **Upgrade Checker::**
-- **IAF version check**: Checks whether the IAF version is 1.3, which is needed when upgrading from AI Manager 3.2.0 to the 3.2.1 AI Manager patch. For more information, see the IBM Documentation [Applying an AI Manager patch](https://ibmdocs-test.mybluemix.net/docs/en/cloud-paks/cloud-pak-watson-aiops/3.2.1?topic=manager-online-upgrade)
+- **IAF version check**: Checks whether the IAF version is 1.3, which is needed when upgrading from IBM Cloud Pak for Watson AIOps AI Manager 3.2.0 to the 3.2.1 IBM Cloud Pak for Watson AIOps AI Manager patch. For more information, see the IBM Documentation [Applying an AI Manager patch](https://www.ibm.com/docs/en/cloud-paks/cloud-pak-watson-aiops/3.2.1?topic=manager-online-upgrade)
 
 ## Getting started
 
