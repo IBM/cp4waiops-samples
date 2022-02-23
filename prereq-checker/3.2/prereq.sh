@@ -64,19 +64,93 @@ display_help() {
    echo " Before you run this script, you will need: "
    echo " 1. OpenShift (oc) command line interface (CLI)"
    echo " 2. Must be logged in to your cluster with oc login"
+   echo " 3. Must be in the project (namespace) you have installed or will install the product in"
    echo
    echo " Usage:"
    echo " ./prereq.sh -h"
    echo "  -h Prints out the help message"
+   echo " ./prereq.sh -u"
+   echo "  -u Runs the upgrade check"
+   echo " ./prereq.sh -s"
+   echo "  -s Skips confirmation and installs upgrade requirements when available"
    echo "*******************************************************************************************"
 }
 
+# Upgrade: Check if the user is doing an upgrade
+checkUpgrade () {
+  echo
+    log $INFO "Starting IBM Cloud Pak for Watson AIOps AI Manager upgrade checker..."
+  echo
+
+  OPS_NAMESPACE="openshift-operators"
+  INSTALL_NAMESPACE=`oc project -q`
+
+  ORCHESTRATOR_CHECK1=`oc get subscription.operator --ignore-not-found -n $INSTALL_NAMESPACE -o=jsonpath="{range .items[*]}{.spec.name}{'\n'}{end}" | grep ibm-aiops-orchestrator`
+
+  ORCHESTRATOR_CHECK2=`oc get subscription.operator --ignore-not-found -n $OPS_NAMESPACE -o=jsonpath="{range .items[*]}{.spec.name}{'\n'}{end}" | grep ibm-aiops-orchestrator`
+
+  if [[ $ORCHESTRATOR_CHECK1 || $ORCHESTRATOR_CHECK2 ]] ; then
+    checkIAFSubs
+  fi
+}
+
+# Upgrade: Check IAF subscription
+checkIAFSubs () {
+NUM_SUBS=`oc get subscription.operator --ignore-not-found -n $OPS_NAMESPACE -o=jsonpath="{range .items[*]}{.spec.name}{'\n'}{end}" | grep ibm-automation | wc -l || true`
+  if [ $NUM_SUBS -eq 5 ] ; then
+    checkIAFSubVersion
+  fi
+
+  if [ $NUM_SUBS -eq 0 ] ; then
+  OPS_NAMESPACE=$INSTALL_NAMESPACE
+  NUM_SUBS=`oc get subscription.operator --ignore-not-found -n $OPS_NAMESPACE  -o=jsonpath="{range .items[*]}{.spec.name}{'\n'}{end}" | grep ibm-automation |wc -l || true`
+    if [ $NUM_SUBS -eq 0 ] ; then
+      log $ERROR "Unable to check IAF version. Please ensure that you are in the installation namespace."
+      return 1
+    fi
+    if [ $NUM_SUBS -eq 5 ] ; then
+      checkIAFSubVersion
+    fi
+  fi
+}
+
+# Upgrde: Check IAF version
+checkIAFSubVersion () {
+    oc get subscription.operator -n $OPS_NAMESPACE -o=jsonpath="{range .items[*]}{.spec.name}{' '}{.spec.channel}{' '}{.metadata.name}{'\n'}{end}" | while read LINE
+    do
+        OP_NAME=`echo $LINE | awk '{print $1}'`
+        OP_CHANNEL=`echo $LINE | awk '{print $2}'`
+        OP_METANAME=`echo $LINE | awk '{print $3}'`
+        case $OP_NAME in
+          ibm-automation|ibm-automation-core|ibm-automation-elastic|ibm-automation-eventprocessing|ibm-automation-flink)
+            if [ "$OP_CHANNEL" = "v1.3" ]; then
+              log $INFO "IAF Version is up to date with the latest 1.3 version. Install is ready for upgrade."
+              return 0
+            fi
+            if [[ "$OP_CHANNEL" = "v1.2"  && "$SKIP_CONFIRM" == "true" ]]; then
+              oc patch subscription.operator $OP_METANAME -n $OPS_NAMESPACE --type='json' -p='[{"op": "replace", "path": "/spec/channel", "value": "v1.3"}]'
+            fi
+            if [[ "$OP_CHANNEL" = "v1.2" ]]; then
+              log $INFO "IAF Version needs to be upgraded to the latest 1.3 version. Please update the IAF subscription to v1.3 and try running the script again."
+              return 1
+            fi
+        esac
+    done
+  exit 0
+}
+
 # Add options as needed
-while getopts 'h' opt; do
+while getopts 'hsu' opt; do
   case "$opt" in
     h)
       display_help
       exit 0
+      ;;
+    u)
+      checkUpgrade
+      ;;
+    s)
+      SKIP_CONFIRM="true" && checkUpgrade
       ;;
   esac
 done
