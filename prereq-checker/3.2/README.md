@@ -1,6 +1,8 @@
 # IBM Cloud Pak for Watson AIOps AI Manager prerequisite checker tool
 
-The prerequisite checker tool can be used to validate whether a Red Hat OpenShift Container Platform cluster has the required resources available to enable a successful installation of IBM Cloud Pak for Watson AIOps AI Manager. This tool completes the following checks and generates an installation readiness report:
+The prerequisite checker tool can be used to validate whether a Red Hat OpenShift Container Platform cluster has the required resources and prerequisites available to enable a successful installation or upgrade of IBM Cloud Pak for Watson AIOps AI Manager. This tool completes the following checks and generates an installation readiness report:
+
+**Pre-Install Checker::**
 
 - **OpenShift version check** : Checks whether the Red Hat OpenShift Container Platform cluster version is a fully supported Extended Update Support (EUS) version and compatible for installing IBM Cloud Pak for Watson AIOps AI Manager. OpenShift Container Platform 4.6 and 4.8 are currently under full support and compatible. OpenShift Container Platform 4.7 full support is ended by Red Hat and is not supported for installing IBM Cloud Pak for Watson AIOps AI Manager.
 
@@ -14,27 +16,37 @@ The prerequisite checker tool can be used to validate whether a Red Hat OpenShif
 
 - **Entitlement Secret check**: Checks whether a secret called ibm-entitlement-key or a global pull secret called pull-secret (global pull secret found in openshift-config namespace) have been created. For more information, see the IBM Documentation [Entitlement Keys](https://ibm.biz/entitlement_keys_320)
 
+**Upgrade Checker::**
+- **IAF version check**: Checks whether the IAF version is 1.3, which is needed when upgrading from IBM Cloud Pak for Watson AIOps AI Manager 3.2.0 to the 3.2.1 IBM Cloud Pak for Watson AIOps AI Manager patch. For more information, see the IBM Documentation [Applying an AI Manager patch](https://www.ibm.com/docs/en/cloud-paks/cloud-pak-watson-aiops/3.2.1?topic=manager-online-upgrade)
+
 ## Getting started
 
 Clone the following GitHub repository:
 
 ```
-  git clone https://github.com/IBM/cp4waiops-samples.git
-  cd cp4waiops-samples/prereq-checker/3.2
+  git clone https://github.ibm.com/katamari/katamari-util.git 
+  cd prereq-checker/3.2
 ```
 
-## Running the prerequisite checker tool script
+## Running the prerequisite & upgrade checker tool script
 
-NOTE: Before you run the script make sure that you are in the namespace where you are planning to install IBM Cloud Pak for Watson AIOps AI Manager.
-
-For example:
-
+**IMPORTANT:** Before you run the script make sure that you are in the namespace where you have installed or are planning to install IBM Cloud Pak for Watson AIOps AI Manager.
 ```
-oc project cp4waiops
-
+oc project <namespace_name>
+ex: oc project cp4waiops
 ```
 
 To run the prerequisite checker tool, run the following command:
 ```
   ./prereq.sh
+```
+
+To run the upgrade checker tool, run the following command:
+```
+  ./prereq.sh -u
+```
+
+To run the upgrade checker tool and install upgrade requirements, if needed, run the following command:
+```
+  ./prereq.sh -s
 ```
