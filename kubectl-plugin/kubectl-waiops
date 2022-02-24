@@ -2,7 +2,7 @@
 # optional argument handling
 if [[ "$1" == "version" ]]
 then
-    echo "0.0.1"
+    echo "0.0.2"
     exit 0
 fi
 
@@ -17,6 +17,8 @@ fi
 if [[ "$1" == "status" ]]
 then
     oc get installations.orchestrator.aiops.ibm.com -A && echo "" &&  oc get ircore,AIOpsAnalyticsOrchestrator -A  -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,STATUS:status.conditions[?(@.type==\"Ready\")].reason" && echo "" && oc get lifecycleservice -A  -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,STATUS:status.conditions[?(@.type==\"Lifecycle Service Ready\")].reason" && echo "" && oc get BaseUI -A  -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,STATUS:status.conditions[?(@.type==\"Ready\")].reason" && echo "" && oc get AIManager,aiopsedge,asm -A  -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,STATUS:status.phase"
+    echo "" && oc get automationuiconfig,automationbase,cartridge,cartridgerequirements -A -o custom-columns='KIND:.kind,NAMESPACE:.metadata.namespace,NAME:.metadata.name,STATUS:.status.conditions[?(@.type=="Ready")].status'
+    echo "" && oc get zenservice -A -o custom-columns='KIND:.kind,NAME:.metadata.name,NAMESPACE:.metadata.namespace,STATUS:.status.zenStatus,PROGRESS:.status.Progress,MESSAGE:.status.ProgressMessage'
     exit 0
 fi
 
