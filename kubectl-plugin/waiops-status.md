@@ -26,6 +26,15 @@ KIND        NAMESPACE   NAME             STATUS
 AIManager   cp4waiops   aimanager        Completed
 AIOpsEdge   cp4waiops   aiopsedge        Configured
 ASM         cp4waiops   aiops-topology   OK
+
+KIND                    NAMESPACE   NAME                    STATUS
+AutomationUIConfig      cp4waiops   iaf-system              True
+AutomationBase          cp4waiops   automationbase-sample   True
+Cartridge               cp4waiops   cp4waiops-cartridge     True
+CartridgeRequirements   cp4waiops   cp4waiops-cartridge     True
+
+KIND         NAME                 NAMESPACE   STATUS      PROGRESS   MESSAGE
+ZenService   iaf-zen-cpdservice   cp4waiops   Completed   100%       The Current Operation Is Completed
 ```
 
 ## How to use
