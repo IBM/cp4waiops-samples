@@ -9,32 +9,44 @@ https://kubernetes.io/docs/tasks/extend-kubectl/kubectl-plugins/
 ```
 $ oc waiops status
 
-NAMESPACE   NAME                 PHASE     LICENSE    STORAGECLASS   STORAGECLASSLARGEBLOCK   AGE
-cp4waiops   aiops-installation   Running   Accepted   rook-cephfs    rook-cephfs              108m
+NAMESPACE   NAME        PHASE     LICENSE    STORAGECLASS                STORAGECLASSLARGEBLOCK        AGE
+aiops       ibm-aiops   Running   Accepted   ocs-storagecluster-cephfs   ocs-storagecluster-ceph-rbd   125m
 
 KIND                         NAMESPACE   NAME    STATUS
-IssueResolutionCore          cp4waiops   aiops   Ready
-AIOpsAnalyticsOrchestrator   cp4waiops   aiops   Ready
+IssueResolutionCore          aiops       aiops   Ready
+AIOpsAnalyticsOrchestrator   aiops       aiops   Ready
 
 KIND               NAMESPACE   NAME    STATUS
-LifecycleService   cp4waiops   aiops   LifecycleService ready
+LifecycleService   aiops       aiops   Ready
 
 KIND     NAMESPACE   NAME              STATUS
-BaseUI   cp4waiops   baseui-instance   Ready
+BaseUI   aiops       baseui-instance   Ready
 
 KIND        NAMESPACE   NAME             STATUS
-AIManager   cp4waiops   aimanager        Completed
-AIOpsEdge   cp4waiops   aiopsedge        Configured
-ASM         cp4waiops   aiops-topology   OK
+AIManager   aiops       aimanager        Completed
+AIOpsEdge   aiops       aiopsedge        Configured
+ASM         aiops       aiops-topology   OK
 
 KIND                    NAMESPACE   NAME                    STATUS
-AutomationUIConfig      cp4waiops   iaf-system              True
-AutomationBase          cp4waiops   automationbase-sample   True
-Cartridge               cp4waiops   cp4waiops-cartridge     True
-CartridgeRequirements   cp4waiops   cp4waiops-cartridge     True
+AutomationUIConfig      aiops       iaf-system              True
+AutomationBase          aiops       automationbase-sample   True
+Cartridge               aiops       cp4waiops-cartridge     True
+CartridgeRequirements   aiops       cp4waiops-cartridge     True
 
-KIND         NAME                 NAMESPACE   STATUS      PROGRESS   MESSAGE
-ZenService   iaf-zen-cpdservice   cp4waiops   Completed   100%       The Current Operation Is Completed
+KIND         NAME                 NAMESPACE   READY       PROGRESS   MESSAGE
+ZenService   iaf-zen-cpdservice   aiops       Completed   100%       The Current Operation Is Completed
+
+KIND         NAME                               NAMESPACE   READY
+KafkaClaim   cp4waiops-cartridge-kafka-auth-0   aiops       True
+KafkaClaim   iaf-system                         aiops       True
+Kafka        iaf-system                         aiops       True
+KafkaUser    aiops-ir-lifecycle-manager         aiops       True
+KafkaUser    cp4waiops-cartridge-kafka-auth-0   aiops       True
+
+KIND             NAME                                     READY
+KafkaComposite   cp4waiops-cartridge-kafka-auth-0-9qqvs   True
+KafkaComposite   iaf-system-xcjk5                         True
+
 ```
 
 ## How to use
