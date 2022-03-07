@@ -25,7 +25,9 @@ The purpose of this project is to provide sample files and code snippets for IBM
 
 To understand and use the IBM Cloud Pak for Watson AIOps, see the [documentation](https://www.ibm.com/docs/en/cloud-paks/cp-waiops) and select the appropriate version.  
 
-In the documentation, if the sample yaml file or script file is long, it is not included in the content. Instead, it is available inside this repo and linked to from the topic. By clicking the link in the topic, you open the specific file url and can then download the file to your local directory for direct use.  
+In the documentation, if the sample yaml file or script file is long, it is not included in the content. Instead, it is available inside this repo and linked to from the topic. By clicking the link in the topic, you open the specific file url and can then download the file to your local directory for direct use.
+
+You can also refer to [cp4waiops-gitops](https://github.com/IBM/cp4waiops-gitops) repo to check how to use gitops to deploy the IBM Cloud Pak for Watson AIOps.
 
 ## Contributing
 Pull requests are very welcome! Make sure that your patches are tested. Ideally create a topic branch for every separate change you make. For example:
