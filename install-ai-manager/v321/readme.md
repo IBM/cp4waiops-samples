@@ -1,9 +1,6 @@
 # Installing Watson AIOps AI-Manager 3.2.1 on ROKS
 
-Here is a steps to install IBM Watson AIOps AI Manager 3.2.1 on ROKS by using scripts.
-
-This document is based on the IBM Documentation https://www.ibm.com/docs/en/cloud-paks/cloud-pak-watson-aiops/3.2.1?topic=manager-starter-installation
-
+Here are the steps to install IBM Watson AIOps AI Manager 3.2.1 on ROKS by using scripts.
 
 ## 1. Update Config file
 
@@ -57,3 +54,8 @@ PASSWORD:
 ```
 You can use this to login into the WAIOps Console.
 
+
+
+## Reference
+
+https://www.ibm.com/docs/en/cloud-paks/cloud-pak-watson-aiops/3.2.1?topic=manager-starter-installation
