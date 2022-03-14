@@ -2,7 +2,7 @@
 # optional argument handling
 if [[ "$1" == "version" ]]
 then
-    echo "0.0.2"
+    echo "0.0.3"
     exit 0
 fi
 
