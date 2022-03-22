@@ -150,6 +150,14 @@ ibm-namespace-scope-operator                      ibm-namespace-scope-operator  
 ibm-platform-api-operator                         ibm-platform-api-operator-app                     ibm-cp-waiops-catalog   v3
 ibm-zen-operator                                  ibm-zen-operator                                  ibm-cp-waiops-catalog   v3
 operand-deployment-lifecycle-manager-app          ibm-odlm                                          ibm-cp-waiops-catalog   v3
+______________________________________________________________
+ODLM pod current status:
+
+operand-deployment-lifecycle-manager-86599c9b7f-jx9h7            1/1     Running     0          7d7h
+______________________________________________________________
+Orchestrator pod current status:
+
+ibm-aiops-orchestrator-controller-manager-768877589d-r7kmb        1/1     Running                 0          8d
 ```
 
 ## How to use
