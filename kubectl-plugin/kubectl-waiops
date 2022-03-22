@@ -20,6 +20,21 @@ echo "
 |                                                          |
 |  If your install is in a namespace called \"cp4waiops\",   |
 |  then no change to this script is required.              | 
+|                                                          |
+|  After running the status checker script, if the         |
+|  components listed below have successfully installed,    |
+|  each component's Status/Phase will indicate this in     |
+|  the list below as Completed/Configured/True/etc.        |
+|                                                          |
+|  However, if there are components that are not           |
+|  fully reconciled yet, please refer to their pod logs    |
+|  for more information. If only a short time has passed   |
+|  since the install was started, the components may       |
+|  need more time to complete fully. If you have waited    |
+|  a significant amount of time and the components         |
+|  listed below are not indicating completion or success,  |
+|  please refer to the troubleshooting docs or open        |
+|  a support case.                                         |
 |__________________________________________________________|
 "
 export PROJECT_NAMESPACE="cp4waiops"
@@ -83,7 +98,15 @@ then
 
     echo "______________________________________________________________"
     echo "Subscriptions from ibm-common-services namespace:" && echo ""
-    oc get subscriptions -n ibm-common-services 
+    oc get subscriptions -n ibm-common-services
+
+    echo "______________________________________________________________"
+    echo "ODLM pod current status:" && echo ""
+    oc get pod -n ibm-common-services | grep operand-deployment-lifecycle-manager
+
+    echo "______________________________________________________________"
+    echo "Orchestrator pod current status:" && echo ""
+    oc get pod -n cp4waiops | grep ibm-aiops-orchestrator-controller-manager
     
     echo ""
     exit 0
