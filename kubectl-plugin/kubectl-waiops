@@ -1,5 +1,27 @@
 #!/bin/bash
-printf "\nNOTE: Please remember to update the PROJECT_NAMESPACE variable in the script (default set to `cp4waiops`) so that it correctly references the namespace where you have. Otherwise you might encounter errors below.\n\n"
+# The CP4WAIOps status checker tool prints out several components to indicate the status of your install.
+# In a successful install, the components below should all have a successful STATUS/PROGRESS/PHASE indicator.
+# If any of the components are incomplete or are not reconciled after a significant period of time, 
+# please refer to the IBM troubleshooting docs online or open a support case. 
+
+echo "
+ __________________________________________________________
+|                                                          |
+|      CLOUD PAK FOR WATSON AIOPS STATUS CHECKER TOOL      |
+|__________________________________________________________|
+|  NOTE: Please remember to update the PROJECT_NAMESPACE   |
+|  variable in the script so that it correctly references  |
+|  your installation namespace.                            |
+|                                                          |
+|  If this is not set correctly, you will see errors in    |
+|  the output of the status checker below.                 |
+|                                                          |
+|  PROJECT_NAMESPACE by default is set to \"cp4waiops\".     |
+|                                                          |
+|  If your install is in a namespace called \"cp4waiops\",   |
+|  then no change to this script is required.              | 
+|__________________________________________________________|
+"
 export PROJECT_NAMESPACE="cp4waiops"
 
 # optional argument handling
@@ -19,21 +41,51 @@ fi
 # optional argument handling
 if [[ "$1" == "status" ]]
 then
-    oc get installations.orchestrator.aiops.ibm.com -A && echo "" &&  oc get ircore,AIOpsAnalyticsOrchestrator -A  -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:status.versions.reconciled,STATUS:status.conditions[?(@.type==\"Ready\")].reason" && echo "" && oc get lifecycleservice -A -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:status.versions.reconciled,STATUS:status.conditions[?(@.type==\"Lifecycle Service Ready\")].reason" && echo "" && oc get BaseUI -A  -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:status.versions.reconciled,STATUS:status.conditions[?(@.type==\"Ready\")].reason" && echo "" && oc get AIManager,aiopsedge,asm -A  -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:status.versions.reconciled,STATUS:status.phase"
-    echo "" && oc get automationuiconfig,automationbase,cartridge,cartridgerequirements -A -o custom-columns='KIND:.kind,NAMESPACE:.metadata.namespace,NAME:.metadata.name,VERSION:spec.version,STATUS:.status.conditions[?(@.type=="Ready")].status'
-    echo "" && oc get zenservice -A -o custom-columns='KIND:.kind,NAME:.metadata.name,NAMESPACE:.metadata.namespace,STATUS:.status.zenStatus,PROGRESS:.status.Progress,MESSAGE:.status.ProgressMessage'
+    echo "______________________________________________________________"
+    echo "Installation instances:" && echo ""
+    oc get installations.orchestrator.aiops.ibm.com -A 
     
-    printf "\nCSVs from $PROJECT_NAMESPACE namespace:"
-    echo "" && oc get csvs -n $PROJECT_NAMESPACE 
+    echo "______________________________________________________________"
+    echo "IRCore and AIOpsAnalyticsOrchestrator instances:" && echo ""
+    oc get ircore,AIOpsAnalyticsOrchestrator -A  -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:status.versions.reconciled,STATUS:status.conditions[?(@.type==\"Ready\")].reason"
     
-    printf "\nCSVs from ibm-common-services namespace:"
-    echo "" && oc get csvs -n ibm-common-services
+    echo "______________________________________________________________"
+    echo "LifecycleService instances:" && echo ""
+    oc get lifecycleservice -A -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:status.versions.reconciled,STATUS:status.conditions[?(@.type==\"Lifecycle Service Ready\")].reason"
+    
+    echo "______________________________________________________________"
+    echo "BaseUI instances:" && echo ""
+    oc get BaseUI -A  -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:status.versions.reconciled,STATUS:status.conditions[?(@.type==\"Ready\")].reason"
+    
+    echo "______________________________________________________________"
+    echo "AIManager, AIOpsEdge, and ASM instances:" && echo ""
+    oc get AIManager,aiopsedge,asm -A  -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:status.versions.reconciled,STATUS:status.phase"
+    
+    echo "______________________________________________________________"
+    echo "AutomationUIConfig, AutomationBase, Cartridge, and CartridgeRequirements instances:" && echo ""
+    oc get automationuiconfig,automationbase,cartridge,cartridgerequirements -A -o custom-columns='KIND:.kind,NAMESPACE:.metadata.namespace,NAME:.metadata.name,VERSION:spec.version,STATUS:.status.conditions[?(@.type=="Ready")].status'
+    
+    echo "______________________________________________________________"
+    echo "ZenService instances:" && echo ""
+    oc get zenservice -A -o custom-columns='KIND:.kind,NAME:.metadata.name,NAMESPACE:.metadata.namespace,VERSION:status.currentVersion,STATUS:.status.zenStatus,PROGRESS:.status.Progress,MESSAGE:.status.ProgressMessage'
+    
+    echo "______________________________________________________________"
+    echo "CSVs from $PROJECT_NAMESPACE namespace:" && echo ""
+    oc get csvs -n $PROJECT_NAMESPACE 
+ 
+    echo "______________________________________________________________"
+    echo "CSVs from ibm-common-services namespace:" && echo ""
+    oc get csvs -n ibm-common-services
 
-    printf "\nSubscriptions from $PROJECT_NAMESPACE namespace:"
-    echo "" && oc get subscriptions -n $PROJECT_NAMESPACE 
+    echo "______________________________________________________________"
+    echo "Subscriptions from $PROJECT_NAMESPACE namespace:" && echo ""
+    oc get subscriptions -n $PROJECT_NAMESPACE 
+
+    echo "______________________________________________________________"
+    echo "Subscriptions from ibm-common-services namespace:" && echo ""
+    oc get subscriptions -n ibm-common-services 
     
-    printf "\nSubscriptions from ibm-common-services namespace:"
-    echo "" && oc get subscriptions -n ibm-common-services
+    echo ""
     exit 0
 fi
 
