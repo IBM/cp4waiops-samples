@@ -1,5 +1,5 @@
 #!/bin/bash
-printf "NOTE: Please remember to update the PROJECT_NAMESPACE variable in the script so that it correctly references the namespace where you have"
+printf "\nNOTE: Please remember to update the PROJECT_NAMESPACE variable in the script (default set to `cp4waiops`) so that it correctly references the namespace where you have. Otherwise you might encounter errors below.\n\n"
 export PROJECT_NAMESPACE="cp4waiops"
 
 # optional argument handling
@@ -20,7 +20,7 @@ fi
 if [[ "$1" == "status" ]]
 then
     oc get installations.orchestrator.aiops.ibm.com -A && echo "" &&  oc get ircore,AIOpsAnalyticsOrchestrator -A  -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:status.versions.reconciled,STATUS:status.conditions[?(@.type==\"Ready\")].reason" && echo "" && oc get lifecycleservice -A -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:status.versions.reconciled,STATUS:status.conditions[?(@.type==\"Lifecycle Service Ready\")].reason" && echo "" && oc get BaseUI -A  -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:status.versions.reconciled,STATUS:status.conditions[?(@.type==\"Ready\")].reason" && echo "" && oc get AIManager,aiopsedge,asm -A  -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:status.versions.reconciled,STATUS:status.phase"
-    echo "" && oc get automationuiconfig,automationbase,cartridge,cartridgerequirements -A -o custom-columns='KIND:.kind,NAMESPACE:.metadata.namespace,NAME:.metadata.name,STATUS:.status.conditions[?(@.type=="Ready")].status'
+    echo "" && oc get automationuiconfig,automationbase,cartridge,cartridgerequirements -A -o custom-columns='KIND:.kind,NAMESPACE:.metadata.namespace,NAME:.metadata.name,VERSION:spec.version,STATUS:.status.conditions[?(@.type=="Ready")].status'
     echo "" && oc get zenservice -A -o custom-columns='KIND:.kind,NAME:.metadata.name,NAMESPACE:.metadata.namespace,STATUS:.status.zenStatus,PROGRESS:.status.Progress,MESSAGE:.status.ProgressMessage'
     
     printf "\nCSVs from $PROJECT_NAMESPACE namespace:"
