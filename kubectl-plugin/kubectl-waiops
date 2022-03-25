@@ -99,7 +99,11 @@ then
     echo "______________________________________________________________"
     echo "Subscriptions from ibm-common-services namespace:" && echo ""
     oc get subscriptions -n ibm-common-services
-
+    
+    echo "______________________________________________________________"
+    echo "OperandRequest instances:" && echo ""
+    oc get operandrequests -A -o custom-columns="NAMESPACE:metadata.namespace,NAME:metadata.name,PHASE:status.phase,CREATED AT:metadata.creationTimestamp"
+    
     echo "______________________________________________________________"
     echo "ODLM pod current status:" && echo ""
     oc get pod -n ibm-common-services | grep operand-deployment-lifecycle-manager
