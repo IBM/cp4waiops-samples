@@ -151,6 +151,29 @@ ibm-platform-api-operator                         ibm-platform-api-operator-app 
 ibm-zen-operator                                  ibm-zen-operator                                  ibm-cp-waiops-catalog   v3
 operand-deployment-lifecycle-manager-app          ibm-odlm                                          ibm-cp-waiops-catalog   v3
 ______________________________________________________________
+OperandRequest instances:
+
+NAMESPACE             NAME                                  PHASE     CREATED AT
+cp4waiops             aiopsedge-base                        Running   2022-03-14T16:23:01Z
+cp4waiops             aiopsedge-cs                          Running   2022-03-14T16:23:01Z
+cp4waiops             iaf-core-operator                     Running   2022-03-14T15:58:24Z
+cp4waiops             iaf-eventprocessing-operator          Running   2022-03-14T15:58:24Z
+cp4waiops             iaf-operator                          Running   2022-03-14T15:58:25Z
+cp4waiops             iaf-system                            Running   2022-03-14T17:45:55Z
+cp4waiops             iaf-system-common-service             Running   2022-03-14T16:20:45Z
+cp4waiops             iaf-system-events                     Running   2022-03-14T16:20:45Z
+cp4waiops             ibm-aiops-ai-manager                  Running   2022-03-14T16:20:40Z
+cp4waiops             ibm-aiops-aiops-foundation            Running   2022-03-14T16:20:40Z
+cp4waiops             ibm-aiops-application-manager         Running   2022-03-14T16:20:40Z
+cp4waiops             ibm-elastic-operator                  Running   2022-03-14T15:58:24Z
+cp4waiops             ibm-iam-service                       Running   2022-03-14T16:42:40Z
+cp4waiops             operandrequest-kafkauser-iaf-system   Running   2022-03-14T17:45:48Z
+ibm-common-services   ibm-commonui-request                  Running   2022-03-14T16:21:14Z
+ibm-common-services   ibm-iam-request                       Running   2022-03-14T16:21:19Z
+ibm-common-services   ibm-mongodb-request                   Running   2022-03-14T16:22:30Z
+ibm-common-services   management-ingress                    Running   2022-03-14T16:22:30Z
+ibm-common-services   platform-api-request                  Running   2022-03-14T16:22:30Z
+______________________________________________________________
 ODLM pod current status:
 
 operand-deployment-lifecycle-manager-86599c9b7f-jx9h7            1/1     Running     0          7d7h
