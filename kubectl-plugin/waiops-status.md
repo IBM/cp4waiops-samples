@@ -14,35 +14,35 @@ ______________________________________________________________
 Installation instances:
 
 NAMESPACE   NAME                 PHASE     LICENSE    STORAGECLASS   STORAGECLASSLARGEBLOCK   AGE
-katamari    aiops-installation   Running   Accepted   rook-cephfs    rook-cephfs              4h54m
+katamari    aiops-installation   Running   Accepted   rook-cephfs    rook-cephfs              14h
 ______________________________________________________________
 IRCore and AIOpsAnalyticsOrchestrator instances:
 
 KIND                         NAMESPACE   NAME    VERSION   STATUS
-IssueResolutionCore          katamari    aiops   3.4.0     Ready
+IssueResolutionCore          katamari    aiops   3.3.0     Ready
 AIOpsAnalyticsOrchestrator   katamari    aiops   3.2.0     Ready
 ______________________________________________________________
 LifecycleService instances:
 
 KIND               NAMESPACE   NAME    VERSION   STATUS
-LifecycleService   katamari    aiops   3.4.0     Ready
+LifecycleService   katamari    aiops   3.3.0     Ready
 ______________________________________________________________
 BaseUI instances:
 
 KIND     NAMESPACE   NAME              VERSION   STATUS
-BaseUI   katamari    baseui-instance   0.1.0     Ready
+BaseUI   katamari    baseui-instance   3.3.1     Ready
 ______________________________________________________________
 AIManager, ASM, AIOpsEdge, and AIOpsUI instances:
 
 KIND        NAMESPACE   NAME             VERSION   STATUS
 AIManager   katamari    aimanager        2.4.0     Completed
-ASM         katamari    aiops-topology   2.2.0     OK
+ASM         katamari    aiops-topology   2.5.0     OK
 
 KIND        NAMESPACE   NAME        STATUS
 AIOpsEdge   katamari    aiopsedge   Configured
 
 KIND      NAMESPACE   NAME               VERSION
-AIOpsUI   katamari    aiopsui-instance   0.1.0
+AIOpsUI   katamari    aiopsui-instance   3.3.1
 ______________________________________________________________
 AutomationUIConfig, AutomationBase, Cartridge, and CartridgeRequirements instances:
 
@@ -59,33 +59,33 @@ Kong   katamari    gateway
 ______________________________________________________________
 ZenService instances:
 
-KIND         NAME                 NAMESPACE   VERSION   STATUS      PROGRESS   MESSAGE
-ZenService   iaf-zen-cpdservice   katamari    4.4.3     Completed   100%       The Current Operation Is Completed
+KIND         NAME                 NAMESPACE   VERSION   STATUS
+ZenService   iaf-zen-cpdservice   katamari    4.4.3     Completed
 ______________________________________________________________
 CSVs from katamari namespace:
 
 NAME                                               DISPLAY                                            VERSION              REPLACES                                PHASE
-aimanager-operator.v0.1.0-202203281601             IBM Watson AIOps AI Manager                        0.1.0-202203281601                                           Succeeded
-aiopsedge-operator.v0.1.0-202203281601             IBM Watson AIOps Edge                              0.1.0-202203281601                                           Succeeded
-asm-operator.v0.1.0-202203281601                   IBM Netcool Agile Service Manager                  0.1.0-202203281601                                           Succeeded
+aimanager-operator.v3.3.1-202203282001             IBM Watson AIOps AI Manager                        3.3.1-202203282001                                           Succeeded
+aiopsedge-operator.v3.3.1-202203282001             IBM Watson AIOps Edge                              3.3.1-202203282001                                           Succeeded
+asm-operator.v3.3.1-202203282001                   IBM Netcool Agile Service Manager                  3.3.1-202203282001                                           Succeeded
 couchdb-operator.v2.2.1                            Operator for Apache CouchDB                        2.2.1                couchdb-operator.v2.2.0                 Succeeded
 elasticsearch-operator.5.3.5-20                    OpenShift Elasticsearch Operator                   5.3.5-20                                                     Succeeded
-ibm-aiops-ir-ai.v0.1.0-202203281601                IBM Watson AIOps Issue Resolution AI & Analytics   0.1.0-202203281601                                           Succeeded
-ibm-aiops-ir-core.v0.1.0-202203281601              IBM Watson AIOps Issue Resolution Core             0.1.0-202203281601                                           Succeeded
-ibm-aiops-ir-lifecycle.v0.1.0-202203281601         IBM Cloud Pak for Watson AIOps Lifecycle           0.1.0-202203281601                                           Succeeded
-ibm-aiops-orchestrator.v0.1.0-202203281601         IBM Cloud Pak for Watson AIOps AI Manager          0.1.0-202203281601                                           Succeeded
+ibm-aiops-ir-ai.v3.3.1-202203282001                IBM Watson AIOps Issue Resolution AI & Analytics   3.3.1-202203282001                                           Succeeded
+ibm-aiops-ir-core.v3.3.1-202203282001              IBM Watson AIOps Issue Resolution Core             3.3.1-202203282001                                           Succeeded
+ibm-aiops-ir-lifecycle.v3.3.1-202203282001         IBM Cloud Pak for Watson AIOps Lifecycle           3.3.1-202203282001                                           Succeeded
+ibm-aiops-orchestrator.v3.3.1-202203282001         IBM Cloud Pak for Watson AIOps AI Manager          3.3.1-202203282001                                           Succeeded
 ibm-automation-core.v1.3.5                         IBM Automation Foundation Core                     1.3.5                ibm-automation-core.v1.3.4              Succeeded
 ibm-automation-elastic.v1.3.4                      IBM Elastic                                        1.3.4                ibm-automation-elastic.v1.3.3           Succeeded
 ibm-automation-eventprocessing.v1.3.5              IBM Automation Foundation Event Processing         1.3.5                ibm-automation-eventprocessing.v1.3.4   Succeeded
 ibm-automation-flink.v1.3.4                        IBM Automation Foundation Flink                    1.3.4                ibm-automation-flink.v1.3.3             Succeeded
 ibm-automation.v1.3.5                              IBM Automation Foundation                          1.3.5                ibm-automation.v1.3.4                   Succeeded
 ibm-cloud-databases-redis.v1.4.3                   IBM Operator for Redis                             1.4.3                ibm-cloud-databases-redis.v1.4.2        Succeeded
-ibm-common-service-operator.v3.17.0                IBM Cloud Pak foundational services                3.17.0               ibm-common-service-operator.v3.16.1     Succeeded
-ibm-management-kong.v0.1.0-202203281601            IBM Internal - IBM Watson AIOps Kong               0.1.0-202203281601                                           Succeeded
-ibm-postgreservice-operator.v0.1.0-202203281601    IBM Postgreservice                                 0.1.0-202203281601                                           Succeeded
-ibm-secure-tunnel-operator.v0.1.0-202203281601     IBM Secure Tunnel                                  0.1.0-202203281601                                           Succeeded
-ibm-vault-operator.v0.1.0-202203281601             IBM Vault Operator                                 0.1.0-202203281601                                           Succeeded
-ibm-watson-aiops-ui-operator.v0.1.0-202203281601   IBM Watson AIOps UI                                0.1.0-202203281601                                           Succeeded
+ibm-common-service-operator.v3.17.0                IBM Cloud Pak foundational services                3.17.0               ibm-common-service-operator.v3.16.3     Succeeded
+ibm-management-kong.v3.3.1-202203282001            IBM Internal - IBM Watson AIOps Kong               3.3.1-202203282001                                           Succeeded
+ibm-postgreservice-operator.v3.3.1-202203282001    IBM Postgreservice                                 3.3.1-202203282001                                           Succeeded
+ibm-secure-tunnel-operator.v3.3.1-202203282001     IBM Secure Tunnel                                  3.3.1-202203282001                                           Succeeded
+ibm-vault-operator.v3.3.1-202203282001             IBM Vault Operator                                 3.3.1-202203282001                                           Succeeded
+ibm-watson-aiops-ui-operator.v3.3.1-202203282001   IBM Watson AIOps UI                                3.3.1-202203282001                                           Succeeded
 ______________________________________________________________
 CSVs from ibm-common-services namespace:
 
@@ -109,27 +109,27 @@ operand-deployment-lifecycle-manager.v1.15.0         Operand Deployment Lifecycl
 ______________________________________________________________
 Subscriptions from katamari namespace:
 
-NAME                                                                       PACKAGE                              SOURCE                  CHANNEL
-aimanager-operator                                                         aimanager-operator                   ibm-cp-waiops-catalog   0.1-dev
-aiopsedge-operator                                                         aiopsedge-operator                   ibm-cp-waiops-catalog   0.1-dev
-asm-operator                                                               asm-operator                         ibm-cp-waiops-catalog   0.1-dev
-couchdb                                                                    couchdb-operator                     ibm-cp-waiops-catalog   v2.2
-ibm-aiops-orchestrator                                                     ibm-aiops-orchestrator               ibm-cp-waiops-catalog   0.1-dev
-ibm-automation                                                             ibm-automation                       iaf-operators           v1.3
-ibm-automation-core-v1.3-iaf-core-operators-openshift-marketplace          ibm-automation-core                  iaf-core-operators      v1.3
-ibm-automation-elastic-v1.3-iaf-operators-openshift-marketplace            ibm-automation-elastic               iaf-operators           v1.3
-ibm-automation-eventprocessing-v1.3-iaf-operators-openshift-marketplace    ibm-automation-eventprocessing       iaf-operators           v1.3
-ibm-automation-flink-v1.3-iaf-operators-openshift-marketplace              ibm-automation-flink                 iaf-operators           v1.3
-ibm-common-service-operator-v3-opencloud-operators-openshift-marketplace   ibm-common-service-operator          opencloud-operators     v3
-ibm-management-kong                                                        ibm-management-kong                  ibm-cp-waiops-catalog   0.1-dev
-ibm-postgreservice-operator                                                ibm-postgreservice-operator          ibm-cp-waiops-catalog   0.1-dev
-ibm-secure-tunnel-operator                                                 ibm-secure-tunnel-operator           ibm-cp-waiops-catalog   0.1-dev
-ibm-watson-aiops-ui-operator                                               ibm-watson-aiops-ui-operator         ibm-cp-waiops-catalog   0.1-dev
-ir-ai-operator                                                             ibm-aiops-ir-ai                      ibm-cp-waiops-catalog   0.1-dev
-ir-core-operator                                                           ibm-aiops-ir-core                    ibm-cp-waiops-catalog   0.1-dev
-ir-lifecycle-operator                                                      ibm-aiops-ir-lifecycle               ibm-cp-waiops-catalog   0.1-dev
-redis                                                                      ibm-cloud-databases-redis-operator   ibm-cp-waiops-catalog   v1.4
-vault                                                                      ibm-vault-operator                   ibm-cp-waiops-catalog   0.1-dev
+NAME                                                                         PACKAGE                              SOURCE                  CHANNEL
+aimanager-operator                                                           aimanager-operator                   ibm-cp-waiops-catalog   3.3-dev
+aiopsedge-operator                                                           aiopsedge-operator                   ibm-cp-waiops-catalog   3.3-dev
+asm-operator                                                                 asm-operator                         ibm-cp-waiops-catalog   3.3-dev
+couchdb                                                                      couchdb-operator                     ibm-cp-waiops-catalog   v2.2
+ibm-aiops-orchestrator                                                       ibm-aiops-orchestrator               ibm-cp-waiops-catalog   3.3-dev
+ibm-automation                                                               ibm-automation                       iaf-operators           v1.3
+ibm-automation-core-v1.3-iaf-core-operators-openshift-marketplace            ibm-automation-core                  iaf-core-operators      v1.3
+ibm-automation-elastic-v1.3-iaf-operators-openshift-marketplace              ibm-automation-elastic               iaf-operators           v1.3
+ibm-automation-eventprocessing-v1.3-iaf-operators-openshift-marketplace      ibm-automation-eventprocessing       iaf-operators           v1.3
+ibm-automation-flink-v1.3-iaf-operators-openshift-marketplace                ibm-automation-flink                 iaf-operators           v1.3
+ibm-common-service-operator-v3-ibm-cp-waiops-catalog-openshift-marketplace   ibm-common-service-operator          opencloud-operators     v3
+ibm-management-kong                                                          ibm-management-kong                  ibm-cp-waiops-catalog   3.3-dev
+ibm-postgreservice-operator                                                  ibm-postgreservice-operator          ibm-cp-waiops-catalog   3.3-dev
+ibm-secure-tunnel-operator                                                   ibm-secure-tunnel-operator           ibm-cp-waiops-catalog   3.3-dev
+ibm-watson-aiops-ui-operator                                                 ibm-watson-aiops-ui-operator         ibm-cp-waiops-catalog   3.3-dev
+ir-ai-operator                                                               ibm-aiops-ir-ai                      ibm-cp-waiops-catalog   3.3-dev
+ir-core-operator                                                             ibm-aiops-ir-core                    ibm-cp-waiops-catalog   3.3-dev
+ir-lifecycle-operator                                                        ibm-aiops-ir-lifecycle               ibm-cp-waiops-catalog   3.3-dev
+redis                                                                        ibm-cloud-databases-redis-operator   ibm-cp-waiops-catalog   v1.4
+vault                                                                        ibm-vault-operator                   ibm-cp-waiops-catalog   3.3-dev
 ______________________________________________________________
 Subscriptions from ibm-common-services namespace:
 
@@ -153,79 +153,33 @@ ______________________________________________________________
 OperandRequest instances:
 
 NAMESPACE             NAME                                  PHASE     CREATED AT
-ibm-common-services   ibm-commonui-request                  Running   2022-03-28T21:24:19Z
-ibm-common-services   ibm-iam-request                       Running   2022-03-28T21:24:20Z
-ibm-common-services   ibm-mongodb-request                   Running   2022-03-28T21:25:29Z
-ibm-common-services   management-ingress                    Running   2022-03-28T21:25:29Z
-ibm-common-services   platform-api-request                  Running   2022-03-28T21:25:29Z
-katamari              aiopsedge-base                        Running   2022-03-28T21:25:53Z
-katamari              aiopsedge-cs                          Running   2022-03-28T21:25:53Z
-katamari              iaf-core-operator                     Running   2022-03-28T21:21:30Z
-katamari              iaf-eventprocessing-operator          Running   2022-03-28T21:21:23Z
-katamari              iaf-operator                          Running   2022-03-28T21:21:22Z
-katamari              iaf-system                            Running   2022-03-28T21:29:49Z
-katamari              iaf-system-common-service             Running   2022-03-28T21:24:16Z
-katamari              ibm-aiops-ai-manager                  Running   2022-03-28T21:23:42Z
-katamari              ibm-aiops-aiops-foundation            Running   2022-03-28T21:23:42Z
-katamari              ibm-aiops-application-manager         Running   2022-03-28T21:23:42Z
-katamari              ibm-aiops-connection                  Running   2022-03-28T21:23:42Z
-katamari              ibm-elastic-operator                  Running   2022-03-28T21:21:33Z
-katamari              ibm-iam-service                       Running   2022-03-28T21:39:37Z
-katamari              operandrequest-kafkauser-iaf-system   Running   2022-03-28T21:46:59Z
+ibm-common-services   ibm-commonui-request                  Running   2022-03-29T05:19:25Z
+ibm-common-services   ibm-iam-request                       Running   2022-03-29T05:19:25Z
+ibm-common-services   ibm-mongodb-request                   Running   2022-03-29T05:20:14Z
+ibm-common-services   management-ingress                    Running   2022-03-29T05:20:14Z
+ibm-common-services   platform-api-request                  Running   2022-03-29T05:20:14Z
+katamari              aiopsedge-base                        Running   2022-03-29T05:25:27Z
+katamari              aiopsedge-cs                          Running   2022-03-29T05:25:27Z
+katamari              iaf-core-operator                     Running   2022-03-29T05:16:19Z
+katamari              iaf-eventprocessing-operator          Running   2022-03-29T05:16:14Z
+katamari              iaf-operator                          Running   2022-03-29T05:16:10Z
+katamari              iaf-system                            Running   2022-03-29T05:29:15Z
+katamari              iaf-system-common-service             Running   2022-03-29T05:19:20Z
+katamari              ibm-aiops-ai-manager                  Running   2022-03-29T05:18:50Z
+katamari              ibm-aiops-aiops-foundation            Running   2022-03-29T05:18:50Z
+katamari              ibm-aiops-application-manager         Running   2022-03-29T05:18:50Z
+katamari              ibm-aiops-connection                  Running   2022-03-29T05:18:50Z
+katamari              ibm-elastic-operator                  Running   2022-03-29T05:16:21Z
+katamari              ibm-iam-service                       Running   2022-03-29T05:43:37Z
+katamari              operandrequest-kafkauser-iaf-system   Running   2022-03-29T05:52:39Z
 ______________________________________________________________
 ODLM pod current status:
 
-operand-deployment-lifecycle-manager-79b789fd56-gkdd4           1/1     Running     0               4h55m
+ibm-common-services                                operand-deployment-lifecycle-manager-687db67764-zb86w               1/1     Running     0          14h
 ______________________________________________________________
 Orchestrator pod current status:
 
-ibm-aiops-orchestrator-controller-manager-5787df5997-sz87g        1/1     Running            0                4h55m
-```
-
-### Status checker for upgrade scenario:
-```
-$ oc waiops upgrade-status
-
-Enter your Cloud Pak for Watson AIOps installation namespace: katamari
-
-______________________________________________________________
-
-The following component(s) have finished upgrading:
-
-
-KIND        NAMESPACE   NAME        STATUS
-AIOpsEdge   katamari    aiopsedge   Configured
-
-KIND   NAMESPACE   NAME
-Kong   katamari    gateway
-
-KIND        NAMESPACE   NAME        VERSION   STATUS
-AIManager   katamari    aimanager   2.4.0     Completed
-
-KIND                         NAMESPACE   NAME    VERSION   STATUS
-AIOpsAnalyticsOrchestrator   katamari    aiops   3.2.0     Ready
-
-______________________________________________________________
-
-______________________________________________________________
-
-Meanwhile, the following component(s) have not upgraded yet:
-
-
-KIND               NAMESPACE   NAME    VERSION   STATUS
-LifecycleService   katamari    aiops   3.2.0     Ready
-
-KIND                  NAMESPACE   NAME    VERSION   STATUS
-IssueResolutionCore   katamari    aiops   3.2.0     Ready
-
-If only a short time has passed since the upgrade was started, the components may
-need more time to complete upgrading. If you have waited a significant amount of time
-and the statuses of the components listed below are not changing, please refer to
-the troubleshooting docs or open a support case.
-
-______________________________________________________________
-
-Hint: for a more detailed printout of each operator's components' statuses, run `oc waiops status`.
+katamari                                           ibm-aiops-orchestrator-controller-manager-797979ccf8-9nzzs          1/1     Running     0          14h
 ```
 
 ## How to use

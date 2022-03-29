@@ -14,16 +14,8 @@ white=$(tput setaf 7)
 bold=$(tput bold)
 normal=$(tput sgr0) #reset color/bolding
 
-export CP4WAIOPS_VERSION="3.3"
-
-# Get installation namespace
-if [ "$PROJECT_NAMESPACE" == "" ]
-then
-    printf "
-${bold}${blue}Enter your Cloud Pak for Watson AIOps installation namespace: ${normal}"
-    read PROJECT_NAMESPACE
-    oc project ${PROJECT_NAMESPACE}
-fi
+# Get installation namespace (inferred from location of orchestrator pod)
+PROJECT_NAMESPACE=$(oc get pods --all-namespaces|grep ibm-aiops-orchestrator|awk '{print $1}')
 
 # optional argument handling
 if [[ "$1" == "version" ]]
@@ -42,228 +34,69 @@ fi
 # optional argument handling
 if [[ "$1" == "status" ]]
 then
-    if [[ "$CP4WAIOPS_VERSION" == "3.3" ]]
-    then
-        echo "______________________________________________________________"
-        echo "Installation instances:" && echo ""
-        oc get installations.orchestrator.aiops.ibm.com -A 
-        
-        echo "______________________________________________________________"
-        echo "IRCore and AIOpsAnalyticsOrchestrator instances:" && echo ""
-        oc get ircore,AIOpsAnalyticsOrchestrator -A  -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:status.versions.reconciled,STATUS:status.conditions[?(@.type==\"Ready\")].reason"
-        
-        echo "______________________________________________________________"
-        echo "LifecycleService instances:" && echo ""
-        oc get lifecycleservice -A -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:status.versions.reconciled,STATUS:status.conditions[?(@.type==\"Lifecycle Service Ready\")].reason"
-        
-        echo "______________________________________________________________"
-        echo "BaseUI instances:" && echo ""
-        oc get BaseUI -A  -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:status.versions.reconciled,STATUS:status.conditions[?(@.type==\"Ready\")].reason"
-        
-        echo "______________________________________________________________"
-        echo "AIManager, ASM, AIOpsEdge, and AIOpsUI instances:" && echo ""
-        oc get AIManager,asm -A  -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:status.versions.reconciled,STATUS:status.phase" && echo ""
-        oc get aiopsedge -A  -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,STATUS:status.phase" && echo ""
-        oc get aiopsui -A  -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:status.versions.reconciled"
-
-        echo "______________________________________________________________"
-        echo "AutomationUIConfig, AutomationBase, Cartridge, and CartridgeRequirements instances:" && echo ""
-        oc get automationuiconfig,automationbase,cartridge,cartridgerequirements -A -o custom-columns='KIND:.kind,NAMESPACE:.metadata.namespace,NAME:.metadata.name,VERSION:status.versions.reconciled,STATUS:.status.conditions[?(@.type=="Ready")].status'
-        
-        echo "______________________________________________________________"
-        echo "Kong instances:" && echo ""
-        oc get kong -A -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name"         
-        
-        echo "______________________________________________________________"
-        echo "ZenService instances:" && echo ""
-        oc get zenservice -A -o custom-columns='KIND:.kind,NAME:.metadata.name,NAMESPACE:.metadata.namespace,VERSION:status.currentVersion,STATUS:.status.zenStatus,PROGRESS:.status.Progress,MESSAGE:.status.ProgressMessage'
-        
-        echo "______________________________________________________________"
-        echo "CSVs from $PROJECT_NAMESPACE namespace:" && echo ""
-        oc get csvs -n $PROJECT_NAMESPACE 
+    echo "______________________________________________________________"
+    echo "Installation instances:" && echo ""
+    oc get installations.orchestrator.aiops.ibm.com -A 
     
-        echo "______________________________________________________________"
-        echo "CSVs from ibm-common-services namespace:" && echo ""
-        oc get csvs -n ibm-common-services
+    echo "______________________________________________________________"
+    echo "IRCore and AIOpsAnalyticsOrchestrator instances:" && echo ""
+    oc get ircore,AIOpsAnalyticsOrchestrator -A  -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:status.versions.reconciled,STATUS:status.conditions[?(@.type==\"Ready\")].reason"
+    
+    echo "______________________________________________________________"
+    echo "LifecycleService instances:" && echo ""
+    oc get lifecycleservice -A -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:status.versions.reconciled,STATUS:status.conditions[?(@.type==\"Lifecycle Service Ready\")].reason"
+    
+    echo "______________________________________________________________"
+    echo "BaseUI instances:" && echo ""
+    oc get BaseUI -A  -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:status.versions.reconciled,STATUS:status.conditions[?(@.type==\"Ready\")].reason"
+    
+    echo "______________________________________________________________"
+    echo "AIManager, ASM, AIOpsEdge, and AIOpsUI instances:" && echo ""
+    oc get AIManager,asm -A  -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:status.versions.reconciled,STATUS:status.phase" && echo ""
+    oc get aiopsedge -A  -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,STATUS:status.phase" && echo ""
+    oc get aiopsui -A  -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:status.versions.reconciled"
 
-        echo "______________________________________________________________"
-        echo "Subscriptions from $PROJECT_NAMESPACE namespace:" && echo ""
-        oc get subscriptions -n $PROJECT_NAMESPACE 
+    echo "______________________________________________________________"
+    echo "AutomationUIConfig, AutomationBase, Cartridge, and CartridgeRequirements instances:" && echo ""
+    oc get automationuiconfig,automationbase,cartridge,cartridgerequirements -A -o custom-columns='KIND:.kind,NAMESPACE:.metadata.namespace,NAME:.metadata.name,VERSION:status.versions.reconciled,STATUS:.status.conditions[?(@.type=="Ready")].status'
+    
+    echo "______________________________________________________________"
+    echo "Kong instances:" && echo ""
+    oc get kong -A -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name"         
+    
+    echo "______________________________________________________________"
+    echo "ZenService instances:" && echo ""
+    oc get zenservice -A -o custom-columns='KIND:.kind,NAME:.metadata.name,NAMESPACE:.metadata.namespace,VERSION:status.currentVersion,STATUS:.status.zenStatus'
+    
+    echo "______________________________________________________________"
+    echo "CSVs from $PROJECT_NAMESPACE namespace:" && echo ""
+    oc get csvs -n $PROJECT_NAMESPACE 
 
-        echo "______________________________________________________________"
-        echo "Subscriptions from ibm-common-services namespace:" && echo ""
-        oc get subscriptions -n ibm-common-services
-        
-        echo "______________________________________________________________"
-        echo "OperandRequest instances:" && echo ""
-        oc get operandrequests -A -o custom-columns="NAMESPACE:metadata.namespace,NAME:metadata.name,PHASE:status.phase,CREATED AT:metadata.creationTimestamp"
-        
-        echo "______________________________________________________________"
-        echo "ODLM pod current status:" && echo ""
-        oc get pod -n ibm-common-services | grep operand-deployment-lifecycle-manager
+    echo "______________________________________________________________"
+    echo "CSVs from ibm-common-services namespace:" && echo ""
+    oc get csvs -n ibm-common-services
 
-        echo "______________________________________________________________"
-        echo "Orchestrator pod current status:" && echo ""
-        oc get pod -n $PROJECT_NAMESPACE | grep ibm-aiops-orchestrator-controller-manager
-        
-        echo ""
-    else
-        echo "Sorry, this tool only supports CP4WAIOps v3.3 at this time. 
+    echo "______________________________________________________________"
+    echo "Subscriptions from $PROJECT_NAMESPACE namespace:" && echo ""
+    oc get subscriptions -n $PROJECT_NAMESPACE 
 
-You currently have your CP4WAIOps version in this script set to \"$CP4WAIOPS_VERSION\". 
+    echo "______________________________________________________________"
+    echo "Subscriptions from ibm-common-services namespace:" && echo ""
+    oc get subscriptions -n ibm-common-services
+    
+    echo "______________________________________________________________"
+    echo "OperandRequest instances:" && echo ""
+    oc get operandrequests -A -o custom-columns="NAMESPACE:metadata.namespace,NAME:metadata.name,PHASE:status.phase,CREATED AT:metadata.creationTimestamp"
+    
+    echo "______________________________________________________________"
+    echo "ODLM pod current status:" && echo ""
+    oc get pod -A | grep operand-deployment-lifecycle-manager
 
-If this is incorrect, please update the \`CP4WAIOPS_VERSION\` variable
-in this script to \"3.3\" and run \`oc waiops status\` again.
-"
-    fi
-    exit 0
-fi
 
-# optional argument handling
-if [[ "$1" == "upgrade-status" ]]
-then
-    # Script to check upgrade status of CP4WAIOps install for v3.3
-    # This script checks to see if your Cloud Pak for Watson AIOps
-    # instance is properly configured post-upgrade for v3.3. 
-
-    FAILING_UPGRADE=""
-    SUCCESSFULLY_UPGRADED=""
-
-    aiopsEdgeBaseUpgradeStatus() {    
-        UPGRADED=$(oc get aiopsedge aiopsedge -o jsonpath='{.status.conditions[?(@.type=="UpgradeReady")].status}')
-        DETAILS=$(oc get aiopsedge -A  -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,STATUS:status.phase")
-        if [ "${UPGRADED}" == "True" ];
-        then 
-            SUCCESSFULLY_UPGRADED+="${newline}${DETAILS}"
-            return 0;
-        else 
-            FAILING_UPGRADE+="${newline}${DETAILS}"
-            return 1;
-        fi
-    }
-
-    aiopsUIUpgradeStatus() {    
-        CURRENT_MAJOR_VERSION=$(oc get aiopsui aiopsui-instance -o jsonpath='{.status.versions.reconciled}' | cut -c1-3)
-        DETAILS=$(oc get aiopsui -A  -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:status.versions.reconciled")
-        if [ "${CURRENT_MAJOR_VERSION}" == "3.3" ];
-        then 
-            SUCCESSFULLY_UPGRADED+="${newline}${DETAILS}"
-            return 0;
-        else 
-            FAILING_UPGRADE+="${newline}${DETAILS}"
-            return 1;
-        fi
-    }
-
-    kongUpgradeStatus() {    
-        INITIALIZED=$(oc get kong gateway -o jsonpath='{.status.conditions[?(@.type=="Initialized")].status}')
-        DEPLOYED=$(oc get kong gateway -o jsonpath='{.status.conditions[?(@.type=="Deployed")].status}')
-        DETAILS=$(oc get kong -A -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name")
-        if [ "${INITIALIZED}" == "True" ] && [ "${DEPLOYED}" == "True" ];
-        then 
-            SUCCESSFULLY_UPGRADED+="${newline}${DETAILS}"
-            return 0;
-        else 
-            FAILING_UPGRADE+="${newline}${DETAILS}"
-            return 1;
-        fi
-    }
-
-    aiManagerUpgradeStatus() {    
-        PHASE_STATUS=$(oc get aimanager aimanager -o jsonpath='{.status.phase}')
-        CURRENT_MAJOR_VERSION=$(oc get aimanager aimanager -o jsonpath='{.status.versions.reconciled}' | cut -c1-3)
-        DETAILS=$(oc get aimanager -A -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:status.versions.reconciled,STATUS:status.phase")
-        if [ "${PHASE_STATUS}" == "Completed" ] && [ "${CURRENT_MAJOR_VERSION}" == "2.4" ];
-        then 
-            SUCCESSFULLY_UPGRADED+="${newline}${DETAILS}"
-            return 0;
-        else 
-            FAILING_UPGRADE+="${newline}${DETAILS}"
-            return 1;
-        fi
-    }
-
-    irCoreUpgradeStatus() {
-        UPGRADED=$(oc get ircore aiops -o json | jq '.metadata.generation as $generation|[(.status.conditions[]|select(.type=="Ready")|.status == "True" and .observedGeneration == $generation)]|all')
-        CURRENT_MAJOR_VERSION=$(oc get ircore aiops -o jsonpath='{.status.versions.reconciled}' | cut -c1-3)
-        DETAILS=$(oc get ircore -A  -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:status.versions.reconciled,STATUS:status.conditions[?(@.type==\"Ready\")].reason")
-        if [ "${UPGRADED}" == true ] && [ "${CURRENT_MAJOR_VERSION}" == "3.3" ];
-        then 
-            SUCCESSFULLY_UPGRADED+="${newline}${DETAILS}"
-            return 0;
-        else 
-            FAILING_UPGRADE+="${newline}${DETAILS}"
-            return 1;
-        fi
-    }
-
-    lifecycleUpgradeStatus() {
-        UPGRADED=$(oc get lifecycleservices aiops -o json | jq '.metadata.generation as $generation|[(.status.conditions[]|select(.type=="Ready")|.status == "True"), (.status.observedGeneration == $generation)]|all')
-        CURRENT_MAJOR_VERSION=$(oc get lifecycleservices aiops -o jsonpath='{.status.versions.reconciled}' | cut -c1-3)
-        DETAILS=$(oc get lifecycleservice -A -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:status.versions.reconciled,STATUS:status.conditions[?(@.type==\"Lifecycle Service Ready\")].reason")
-        if [ "${UPGRADED}" == true ] && [ "${CURRENT_MAJOR_VERSION}" == "3.3" ];
-        then 
-            SUCCESSFULLY_UPGRADED+="${newline}${DETAILS}"
-            return 0;
-        else 
-            FAILING_UPGRADE+="${newline}${DETAILS}"
-            return 1;
-        fi
-    }
-
-    aiopsAnalyticsUpgradeStatus() {
-        UPGRADED=$(oc get AIOpsAnalyticsOrchestrator aiops -o json | jq '.metadata.generation as $generation|[(.status.conditions[]|select(.type=="Ready")|.status == "True" and .observedGeneration == $generation)]|all')
-        CURRENT_MAJOR_VERSION=$(oc get AIOpsAnalyticsOrchestrator aiops -o jsonpath='{.status.versions.reconciled}' | cut -c1-3)
-        DETAILS=$(oc get AIOpsAnalyticsOrchestrator -A  -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:status.versions.reconciled,STATUS:status.conditions[?(@.type==\"Ready\")].reason")
-        if [ "${UPGRADED}" == true ] && [ "${CURRENT_MAJOR_VERSION}" == "3.2" ];
-        then 
-            SUCCESSFULLY_UPGRADED+="${newline}${DETAILS}"
-            return 0;
-        else 
-            FAILING_UPGRADE+="${newline}${DETAILS}"
-            return 1;
-        fi
-    }
-
-    # Run component status checks
-    aiopsEdgeBaseUpgradeStatus
-    lifecycleUpgradeStatus
-    aiopsUIUpgradeStatus
-    kongUpgradeStatus
-    aiManagerUpgradeStatus
-    irCoreUpgradeStatus
-    aiopsAnalyticsUpgradeStatus
-
-    # Print out results of status checks
-    printf "
-${bold}${green}______________________________________________________________
-
-The following component(s) have finished upgrading:
-${normal}${SUCCESSFULLY_UPGRADED}
-
-${bold}${green}______________________________________________________________
-"
-    if [ "$FAILING_UPGRADE" != "" ];
-    then 
-        printf "
-${bold}${red}______________________________________________________________
-
-Meanwhile, the following component(s) have not upgraded yet:
-${normal}${FAILING_UPGRADE}
-
-If only a short time has passed since the upgrade was started, the components may
-need more time to complete upgrading. If you have waited a significant amount of time
-and the statuses of the components listed below are not changing, please refer to
-the troubleshooting docs or open a support case.
-
-${bold}${red}______________________________________________________________
-";
-    fi
-
-    printf "
-${blue}${bold}Hint: for a more detailed printout of each operator's components' statuses, run \`oc waiops status\`.
-${normal}
-"
+    echo "______________________________________________________________"
+    echo "Orchestrator pod current status:" && echo ""
+    oc get pod -A | grep ibm-aiops-orchestrator-controller-manager    
+    echo ""
     exit 0
 fi
 
