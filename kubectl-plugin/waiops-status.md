@@ -76,7 +76,7 @@ IssueResolutionCore   katamari    aiops   3.2.0     Ready
 
 If only a short time has passed since the upgrade was started, the components may
 need more time to complete upgrading. If you have waited a significant amount of time
-and the statuses of the components listed below are not changing, please refer to
+and the statuses of the components listed above are not changing, please refer to
 the troubleshooting docs or open a support case.
 
 ______________________________________________________________
