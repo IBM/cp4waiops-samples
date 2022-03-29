@@ -212,13 +212,10 @@ Meanwhile, the following component(s) have not upgraded yet:
 
 
 KIND               NAMESPACE   NAME    VERSION   STATUS
-LifecycleService   katamari    aiops   3.4.0     Ready
-
-KIND      NAMESPACE   NAME               VERSION
-AIOpsUI   katamari    aiopsui-instance   0.1.0
+LifecycleService   katamari    aiops   3.2.0     Ready
 
 KIND                  NAMESPACE   NAME    VERSION   STATUS
-IssueResolutionCore   katamari    aiops   3.4.0     Ready
+IssueResolutionCore   katamari    aiops   3.2.0     Ready
 
 If only a short time has passed since the upgrade was started, the components may
 need more time to complete upgrading. If you have waited a significant amount of time
