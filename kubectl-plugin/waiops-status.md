@@ -199,9 +199,5 @@ Verify plugin:
 git clone https://github.com/IBM/cp4waiops-samples.git
 chmod +x cp4waiops-samples/kubectl-plugin/kubectl-waiops
 cp cp4waiops-samples/kubectl-plugin/kubectl-waiops /usr/local/bin/kubectl-waiops
-```
-
-Once you have done the above, you can run the following commands to use the status checker tool: 
-```
 oc waiops status 
 ```
