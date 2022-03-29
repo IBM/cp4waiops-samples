@@ -17,7 +17,7 @@ The prerequisite checker tool can be used to validate whether a Red Hat OpenShif
 - **Entitlement Secret check**: Checks whether a secret called ibm-entitlement-key or a global pull secret called pull-secret (global pull secret found in openshift-config namespace) have been created. For more information, see the IBM Documentation [Entitlement Keys](https://ibm.biz/entitlement_keys_330)
 
 **Upgrade Checker::**
-- **IAF version check**: Checks whether the IAF version is 1.3, which is needed when upgrading from IBM Cloud Pak for Watson AIOps AI Manager 3.2.0 to the 3.2.1 IBM Cloud Pak for Watson AIOps AI Manager patch. For more information, see the IBM Documentation [Applying an AI Manager patch](https://ibm.biz/aiops_upgrade_330)
+- **IAF version check**: Checks whether the IAF version is 1.3, which is needed when upgrading from IBM Cloud Pak for Watson AIOps AI Manager 3.2 to the 3.3 IBM Cloud Pak for Watson AIOps AI Manager patch. For more information, see the IBM Documentation [Applying an AI Manager patch](https://ibm.biz/aiops_upgrade_330)
 
 ## Getting started
 
