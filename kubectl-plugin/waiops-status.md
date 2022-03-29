@@ -185,6 +185,7 @@ ibm-aiops-orchestrator-controller-manager-5787df5997-sz87g        1/1     Runnin
 ### Status checker for upgrade scenario:
 ```
 $ oc waiops upgrade-status
+
 Enter your Cloud Pak for Watson AIOps installation namespace: katamari
 
 ______________________________________________________________
