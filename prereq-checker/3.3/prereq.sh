@@ -3,13 +3,13 @@
 
 
 #These defaults are given in section 'Hardware requirement totals for AI Manager only' of the 
-#link https://ibmdocs-test.mybluemix.net/docs/en/cloud-paks/cloud-pak-watson-aiops/3.3.0?topic=requirements-ai-manager
+#link https://www.ibm.com/docs/en/cloud-paks/cloud-pak-watson-aiops/3.3.0?topic=requirements-ai-manager
 #Minimum resource values for small profile install
 NODE_COUNT_SMALL=3
 VCPU_SMALL=48
-MEMORY_SMALL=144
+MEMORY_SMALL=132
 #These defaults are given in section 'Hardware requirement totals for AI Manager only' of the 
-#link https://ibmdocs-test.mybluemix.net/docs/en/cloud-paks/cloud-pak-watson-aiops/3.3.0?topic=requirements-ai-manager
+#link https://www.ibm.com/docs/en/cloud-paks/cloud-pak-watson-aiops/3.3.0?topic=requirements-ai-manager
 #Minimum resource values for large profile install
 NODE_COUNT_LARGE=6
 VCPU_LARGE=144
