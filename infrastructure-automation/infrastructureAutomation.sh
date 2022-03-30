@@ -413,7 +413,7 @@ do
     counter=$((counter + 1))
     echo "The CommonService CustomResource has not been created yet; delaying modification" | tee -a "$logpath"
     echo "" | tee -a "$logpath"
-    sleep 5s
+    sleep 5
     oc get CommonService common-service -n ibm-common-services > /dev/null 2>&1
     result=$?
 done
@@ -476,7 +476,7 @@ coolOff() {
     echo "**********************************************************************" | tee -a "$logpath"
     echo "" | tee -a "$logpath"        
     # Waiting for Common Services to cool off before creating the OperandRequest
-    sleep 600s
+    sleep 600
     return 0
 }
 
@@ -500,7 +500,7 @@ checkOrchestrator() {
 	fi
 	echo -n " ... " | tee -a "$logpath"
 	counter=$((counter + 1))
-	sleep 60s
+	sleep 60
     done
 
     echo "" | tee -a "$logpath"
@@ -814,7 +814,7 @@ verifyCAMstatus() {
 	fi
 	echo -n " ... " | tee -a "$logpath"
 	counter=$((counter + 1))
-	sleep 60s
+	sleep 60
     done
 
     echo "" | tee -a "$logpath"
@@ -836,7 +836,7 @@ verifyCAMstatus() {
 	fi
 	echo -n " ... " | tee -a "$logpath"
 	counter=$((counter + 1))
-	sleep 60s
+	sleep 60
     done
 
     echo "" | tee -a "$logpath"
@@ -927,7 +927,7 @@ waitUntilDeleted() {
     local counter=0
     while [[ "${stillThere}" -eq 0 && "${counter}" -le $waitTime ]] # 
     do
-	sleep 5s
+	sleep 5
 	oc get "${resourceType}" -n "${namespace}" | grep "${resourceName}" > /dev/null 2>&1
 	local result=$?
 	if [[ "${result}" -ne 0 ]]; then
@@ -952,7 +952,7 @@ waitUntilDeleted() {
     if [[ "${result}" -eq 0 ]]; then
 	echo "Failed to delete ${resourceType} ${resourceName} in namespace ${namespace}" | tee -a "$logpath"
 	echo "Please contact your kubernetes administrator to manually delete this resource" | tee -a "$logpath"
-	sleep 3s
+	sleep 3
 	return 1
     fi
 }
@@ -1018,7 +1018,7 @@ deleteResource() {
 
     echo "" | tee -a "$logpath"
 
-    sleep 3s
+    sleep 3
 
     oc get "${resourceType}" "${resourceName}" -n "${namespace}" > /dev/null 2>&1
     result=$?
@@ -1287,7 +1287,7 @@ uninstallFunc() {
     removeInfraVM
     echo "Scaling pods back up so that OperandRequest for Foundation can successfully be deleted; please return in ten minutes" | tee -a "$logpath"
     manipulateFoundation 1
-    sleep 600s
+    sleep 600
     deleteResource "installation.orchestrator.management.ibm.com" "${installNamespace}" "${crName}" "false" 3600
     local result=$?
     if [[ "${result}" -ne 0 ]]; then

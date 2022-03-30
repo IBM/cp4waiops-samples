@@ -227,7 +227,7 @@ createTestJob () {
   log $INFO "Checking if the job '$JOB_NAME' already exists."
   if [ `oc get job $JOB_NAME| wc -l` -gt 0  ]; then
     oc delete job $JOB_NAME
-    sleep 10s
+    sleep 10
   else
     log $INFO "The job with name '$JOB_NAME' was not found, so moving ahead and creating it."
   fi
@@ -252,7 +252,7 @@ createTestJob () {
           command: [ "echo", "SUCCESS" ] 
         restartPolicy: OnFailure
 EOF
-  sleep 3s
+  sleep 3
   checkEntitlementCred
 }
 
