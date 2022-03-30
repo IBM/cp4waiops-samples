@@ -75,7 +75,7 @@ display_help() {
    echo " ./prereq.sh -s"
    echo "  -s Skips confirmation and installs upgrade requirements when available"
    echo " ./prereq.sh -o"
-   echo "  -s Skips storageclass checks when using alternate storage providers"
+   echo "  -o Skips storageclass checks when using alternate storage providers"
    echo "*******************************************************************************************"
 }
 
