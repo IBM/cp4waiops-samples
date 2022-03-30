@@ -42,8 +42,6 @@ ZenService   iaf-zen-cpdservice   cp4waiops   Completed   100%       The Current
 ```
 $ oc waiops upgrade-status
 
-Enter your Cloud Pak for Watson AIOps installation namespace: katamari
-
 ______________________________________________________________
 
 The following component(s) have finished upgrading:
