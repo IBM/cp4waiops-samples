@@ -36,7 +36,7 @@ analyze_script_properties
 
 # Confirm we really want to uninstall 
 if [[ $SKIP_CONFIRM != "true" ]]; then
-  log $INFO "\033[0;33mUninstall v0.1 for AIOPs v3.3\033[0m"
+  log $INFO "\033[0;33mUninstall v0.2 for AIOPs v3.3\033[0m"
   log $INFO
   log $INFO "This script will uninstall IBM Cloud Pak for AIOps version 3.3. Please ensure you have deleted any CRs you created before running this script."
   log $INFO ""
@@ -329,7 +329,15 @@ if [[ ! -z "$CP4WAIOPS_PROJECT"  ]]; then
       # At this point we have cleaned up everything in the project
 
    log "[SUCCESS]" "----Congratulations! IBM Cloud Pak for Watson AIOps AI Manager has been uninstalled!----"
-   log "[SUCCESS]" "------ \033[1;36mYou can now delete the $CP4WAIOPS_PROJECT project safely.\033[0m------"
+   if [[ $ONLY_CLOUDPAK == "true" ]] || [[ $ONLY_CLOUDPAK == "false" && $IAF_PROJECT == $OPENSHIFT_OPERATORS ]]; then 
+   # If Cloud Pak Platform was removed, or IAF was installed at the cluster scope, cp4waiops project can be deleted
+      log "[SUCCESS]" "------ \033[1;36mYou can now delete the $CP4WAIOPS_PROJECT project safely.\033[0m------"
+   elif [[ $CP4WAIOPS_PROJECT == $IAF_PROJECT ]]
+   # When ONLY_CLOUDPAK is false (default value) -- if IAF and AIOps are namespaced installs (not in openshift-operators), warn against deleting the project as IAF will hang
+   then
+      log "[CAUTION]" "------ \033[0;31mThe Cloud Pak Platform may still be in the $CP4WAIOPS_PROJECT project, check before deleting the project.\033[0m------"
+      log "[INFO]" "If you wish to delete the $CP4WAIOPS_PROJECT project and the Cloud Pak Platform is not being used, re-run this script after changing ONLY_CLOUDPAK to true."
+   fi
 else
    log $ERROR "CP4WAIOPS_PROJECT not set. Please specify project and try again."
    display_help
