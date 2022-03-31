@@ -332,7 +332,7 @@ if [[ ! -z "$CP4WAIOPS_PROJECT"  ]]; then
    if [[ $ONLY_CLOUDPAK == "true" ]] || [[ $ONLY_CLOUDPAK == "false" && $IAF_PROJECT == $OPENSHIFT_OPERATORS ]]; then 
    # If Cloud Pak Platform was removed, or IAF was installed at the cluster scope, cp4waiops project can be deleted
       log "[SUCCESS]" "------ \033[1;36mYou can now delete the $CP4WAIOPS_PROJECT project safely.\033[0m------"
-   elif [[ $CP4WAIOPS_PROJECT == $IAF_PROJECT ]] && [[ $IAF_PROJECT != $OPENSHIFT_OPERATORS ]]
+   elif [[ $CP4WAIOPS_PROJECT == $IAF_PROJECT ]]
    # When ONLY_CLOUDPAK is false (default value) -- if IAF and AIOps are namespaced installs (not in openshift-operators), warn against deleting the project as IAF will hang
    then
       log "[CAUTION]" "------ \033[0;31mThe Cloud Pak Platform may still be in the $CP4WAIOPS_PROJECT project, check before deleting the project.\033[0m------"
