@@ -543,18 +543,18 @@ check_additional_installation_exists(){
 }
 
 delete_connections() {
-   until GET_AIOC_MSG=$(oc -n $CP4WAIOPS_PROJECT get aioc -o name 2>&1); do
-        if [[ "$GET_AIOC_MSG" == "error: the server doesn't have a resource type \"aioc\"" ]]; then
+   until GET_AIOC_MSG=$(oc -n $CP4WAIOPS_PROJECT get connectorconfigurations.connectors.aiops.ibm.com -o name 2>&1); do
+        if [[ "$GET_AIOC_MSG" == "error: the server doesn't have a resource type \"connectorconfigurations.connectors.aiops.ibm.com\"" ]]; then
             log $INFO "ConnectorConfiguration CRD is not installed, no need to clean up connections"
             return
         fi
         sleep 10
    done
    log $INFO "deleting all ConnectorConfigurations"
-   oc -n $CP4WAIOPS_PROJECT delete aioc --all &
+   oc -n $CP4WAIOPS_PROJECT delete connectorconfigurations.connectors.aiops.ibm.com --all &
    log $INFO "waiting for ConnectorComponent termination"
-   until [[ -z "$(oc -n $CP4WAIOPS_PROJECT get aicc -o name 2>&1)" ]]; do
-        oc -n $CP4WAIOPS_PROJECT get aicc -o name | while read r; do
+   until [[ -z "$(oc -n $CP4WAIOPS_PROJECT get connectorcomponents.connectors.aiops.ibm.com -o name 2>&1)" ]]; do
+        oc -n $CP4WAIOPS_PROJECT get connectorcomponents.connectors.aiops.ibm.com -o name | while read r; do
             DEL_TIMESTAMP=$(oc -n $CP4WAIOPS_PROJECT get $r -o jsonpath={.metadata.deletionTimestamp} 2>>/dev/null) || continue
             DEL_TIMESTAMP=$(date --date $DEL_TIMESTAMP +%s 2>>/dev/null) || continue
             NOW=$(date +%s)

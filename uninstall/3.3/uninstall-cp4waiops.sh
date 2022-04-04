@@ -169,21 +169,21 @@ if [[ ! -z "$CP4WAIOPS_PROJECT"  ]]; then
     log $INFO "Delete the Crossplane custom resources"
     # remove finalizers from and delete kafkaclaim, configurationrevisions composition
     log $INFO "Deleting kafkaclaims in $CP4WAIOPS_PROJECT"
-    oc get kafkaclaim -n $CP4WAIOPS_PROJECT --no-headers -o name | while read a b; do oc patch -n $CP4WAIOPS_PROJECT "$a" --type=json --patch='[ { "op": "remove", "path": "/metadata/finalizers" } ]' && oc delete "$a" -n $CP4WAIOPS_PROJECT --ignore-not-found; done
+    oc get kafkaclaim.shim.bedrock.ibm.com -n $CP4WAIOPS_PROJECT --no-headers -o name | while read a b; do oc patch -n $CP4WAIOPS_PROJECT "$a" --type=json --patch='[ { "op": "remove", "path": "/metadata/finalizers" } ]' && oc delete "$a" -n $CP4WAIOPS_PROJECT --ignore-not-found; done
     log $INFO "Deleting Object resources at the cluster scope"
-    oc get objects --no-headers -o name | while read a b; do oc patch "$a" --type=json --patch='[ { "op": "remove", "path": "/metadata/finalizers" } ]' && oc delete "$a"; done
+    for OBJECT in "kafka-iaf-system" "kafkauser-iaf-system" "operandrequest-iaf-system" "operandrequest-kafkauser-iaf-system"; do oc patch "object.kubernetes.crossplane.io/$OBJECT" --type=json --patch='[ { "op": "remove", "path": "/metadata/finalizers" } ]' && oc delete "object.kubernetes.crossplane.io/$OBJECT"; done
     log $INFO "Deleting configurations in $CP4WAIOPS_PROJECT"
-    oc get configurations -n $CP4WAIOPS_PROJECT --no-headers -o name | while read a b; do oc delete "$a" -n $CP4WAIOPS_PROJECT --ignore-not-found; done
+    oc get configuration.pkg.ibm.crossplane.io -n $CP4WAIOPS_PROJECT --no-headers -o name | while read a b; do oc delete "$a" -n $CP4WAIOPS_PROJECT --ignore-not-found; done
     log $INFO "Deleting configurationrevisions at the cluster scope"
-    oc get configurationrevisions --no-headers -o name | while read a b; do oc patch "$a" --type=json --patch='[ { "op": "remove", "path": "/metadata/finalizers" } ]' && oc delete "$a"; done
+    oc get configurationrevision.pkg.ibm.crossplane.io --no-headers -o name | while read a b; do oc patch "$a" --type=json --patch='[ { "op": "remove", "path": "/metadata/finalizers" } ]' && oc delete "$a"; done
     log $INFO "Deleting compositions at the cluster scope"
-    oc get Composition --no-headers -o name | while read a b; do oc delete "$a"; done
+    oc get composition.apiextensions.ibm.crossplane.io --no-headers -o name | while read a b; do oc delete "$a"; done
     log $INFO "Deleting ProviderConfigs at the cluster scope"
-    oc get providerconfigs --no-headers -o name | while read a b; do oc patch "$a" --type=json --patch='[ { "op": "remove", "path": "/metadata/finalizers" } ]' && oc delete "$a"; done
+    oc get providerconfig.kubernetes.crossplane.io --no-headers -o name | while read a b; do oc patch "$a" --type=json --patch='[ { "op": "remove", "path": "/metadata/finalizers" } ]' && oc delete "$a"; done
     log $INFO "Removing finalizers from cluster scoped locks"
-    oc patch locks lock -p '{"metadata":{"finalizers": []}}' --type=merge
+    oc patch lock.pkg.ibm.crossplane.io lock -p '{"metadata":{"finalizers": []}}' --type=merge
     log $INFO "Deleting compositeresourcedefinitions at the cluster scope"
-    oc get xrd -A --no-headers -o name | while read a b; do oc patch "$a" --type=json --patch='[ { "op": "remove", "path": "/metadata/finalizers" } ]' && oc delete "$a"; done
+    oc get compositeresourcedefinition.apiextensions.ibm.crossplane.io -A --no-headers -o name | while read a b; do oc patch "$a" --type=json --patch='[ { "op": "remove", "path": "/metadata/finalizers" } ]' && oc delete "$a"; done
     log $INFO "Deleting Crossplane and Kafka CRDs"
     oc get crd --no-headers -o name | grep -i 'crossplane|kafka' | while read a b; do oc patch "$a" --type=json --patch='[ { "op": "remove", "path": "/metadata/finalizers" } ]'; done
     oc get crd --no-headers -o name | grep -i 'crossplane|kafka' | while read a b; do oc delete "$a"; done
