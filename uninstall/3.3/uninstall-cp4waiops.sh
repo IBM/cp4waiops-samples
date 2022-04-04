@@ -36,7 +36,7 @@ analyze_script_properties
 
 # Confirm we really want to uninstall 
 if [[ $SKIP_CONFIRM != "true" ]]; then
-  log $INFO "\033[0;33mUninstall v0.2 for AIOPs v3.3\033[0m"
+  log $INFO "\033[0;33mUninstall v0.3 for AIOPs v3.3\033[0m"
   log $INFO
   log $INFO "This script will uninstall IBM Cloud Pak for AIOps version 3.3. Please ensure you have deleted any CRs you created before running this script."
   log $INFO ""
@@ -170,12 +170,16 @@ if [[ ! -z "$CP4WAIOPS_PROJECT"  ]]; then
     # remove finalizers from and delete kafkaclaim, configurationrevisions composition
     log $INFO "Deleting kafkaclaims in $CP4WAIOPS_PROJECT"
     oc get kafkaclaim -n $CP4WAIOPS_PROJECT --no-headers -o name | while read a b; do oc patch -n $CP4WAIOPS_PROJECT "$a" --type=json --patch='[ { "op": "remove", "path": "/metadata/finalizers" } ]' && oc delete "$a" -n $CP4WAIOPS_PROJECT --ignore-not-found; done
+    log $INFO "Deleting Object resources at the cluster scope"
+    oc get objects --no-headers -o name | while read a b; do oc patch "$a" --type=json --patch='[ { "op": "remove", "path": "/metadata/finalizers" } ]' && oc delete "$a"; done
     log $INFO "Deleting configurations in $CP4WAIOPS_PROJECT"
     oc get configurations -n $CP4WAIOPS_PROJECT --no-headers -o name | while read a b; do oc delete "$a" -n $CP4WAIOPS_PROJECT --ignore-not-found; done
     log $INFO "Deleting configurationrevisions at the cluster scope"
     oc get configurationrevisions --no-headers -o name | while read a b; do oc patch "$a" --type=json --patch='[ { "op": "remove", "path": "/metadata/finalizers" } ]' && oc delete "$a"; done
     log $INFO "Deleting compositions at the cluster scope"
     oc get Composition --no-headers -o name | while read a b; do oc delete "$a"; done
+    log $INFO "Deleting ProviderConfigs at the cluster scope"
+    oc get providerconfigs --no-headers -o name | while read a b; do oc patch "$a" --type=json --patch='[ { "op": "remove", "path": "/metadata/finalizers" } ]' && oc delete "$a"; done
     log $INFO "Removing finalizers from cluster scoped locks"
     oc patch locks lock -p '{"metadata":{"finalizers": []}}' --type=merge
     log $INFO "Deleting compositeresourcedefinitions at the cluster scope"
