@@ -14,13 +14,14 @@ white=$(tput setaf 7)
 bold=$(tput bold)
 normal=$(tput sgr0) #reset color/bolding
 
-# Get installation namespace (inferred from location of orchestrator pod)
-PROJECT_NAMESPACE=$(oc get pods --all-namespaces|grep ibm-aiops-orchestrator|awk '{print $1}')
+# Get installation namespace (gathered from existing installation instance on the cluster)
+INSTALLATION_NAME=$(oc get installations.orchestrator.aiops.ibm.com -A --no-headers | while read a b c; do echo "$b"; done;)
+INSTALLATION_NAMESPACE=$(oc get installations.orchestrator.aiops.ibm.com -A --no-headers | while read a b c; do echo "$a"; done;)
 
 # optional argument handling
 if [[ "$1" == "version" ]]
 then
-    echo "0.0.2"
+    echo "0.0.4"
     exit 0
 fi
 
@@ -50,11 +51,11 @@ then
     FAILING_UPGRADE=""
     SUCCESSFULLY_UPGRADED=""
 
-    oc project ${PROJECT_NAMESPACE}
+    oc project ${INSTALLATION_NAMESPACE}
 
     aiopsEdgeBaseUpgradeStatus() {    
         UPGRADED=$(oc get aiopsedge aiopsedge -o jsonpath='{.status.conditions[?(@.type=="UpgradeReady")].status}')
-        DETAILS=$(oc get aiopsedge -A  -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,STATUS:status.phase")
+        DETAILS=$(oc get aiopsedge -A)
         if [ "${UPGRADED}" == "True" ];
         then 
             SUCCESSFULLY_UPGRADED+="${newline}${DETAILS}"
@@ -154,6 +155,20 @@ then
         fi
     }
 
+    vaultUpgradeStatus() {
+        VAULTDEPLOY_COMPLETED=$(oc get vaultdeploy ibm-vault-deploy -o jsonpath='{.status.conditions[?(@.type=="Completed")].status}')
+        VAULTACCESS_COMPLETED=$(oc get vaultaccess ibm-vault-access -o jsonpath='{.status.conditions[?(@.type=="Completed")].status}')
+        DETAILS=$(oc get vaultdeploy -A  -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:metadata.annotations.productVersion,STATUS:status.conditions[?(@.type==\"Completed\")].status")
+        if [ "${VAULTDEPLOY_COMPLETED}" == "True" ] && [ "${VAULTACCESS_COMPLETED}" == "True" ];
+        then 
+            SUCCESSFULLY_UPGRADED+="${newline}${DETAILS}"
+            return 0;
+        else 
+            FAILING_UPGRADE+="${newline}${DETAILS}"
+            return 1;
+        fi
+    }
+
     # Run component status checks
     aiopsEdgeBaseUpgradeStatus
     lifecycleUpgradeStatus
@@ -162,6 +177,7 @@ then
     aiManagerUpgradeStatus
     irCoreUpgradeStatus
     aiopsAnalyticsUpgradeStatus
+    vaultUpgradeStatus
 
     # Print out results of status checks
     printf "
