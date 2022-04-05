@@ -14,8 +14,8 @@ white=$(tput setaf 7)
 bold=$(tput bold)
 normal=$(tput sgr0) #reset color/bolding
 
-# Get installation namespace (inferred from location of orchestrator pod)
-PROJECT_NAMESPACE=$(oc get pods --all-namespaces|grep ibm-aiops-orchestrator|awk '{print $1}')
+# Get installation namespace (inferred from installation instance)
+PROJECT_NAMESPACE=$(oc get installations.orchestrator.aiops.ibm.com -A --no-headers | while read a b c; do echo "$a"; done;)
 
 # optional argument handling
 if [[ "$1" == "version" ]]
