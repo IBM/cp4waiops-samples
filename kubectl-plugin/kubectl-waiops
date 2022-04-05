@@ -155,11 +155,25 @@ then
         fi
     }
 
-    vaultUpgradeStatus() {
+    vaultDeployUpgradeStatus() {
         VAULTDEPLOY_COMPLETED=$(oc get vaultdeploy ibm-vault-deploy -o jsonpath='{.status.conditions[?(@.type=="Completed")].status}')
-        VAULTACCESS_COMPLETED=$(oc get vaultaccess ibm-vault-access -o jsonpath='{.status.conditions[?(@.type=="Completed")].status}')
+        CURRENT_MAJOR_VERSION=$(oc get vaultdeploy ibm-vault-deploy -o jsonpath='{.metadata.annotations.productVersion}' | cut -c1-3)
         DETAILS=$(oc get vaultdeploy -A  -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:metadata.annotations.productVersion,STATUS:status.conditions[?(@.type==\"Completed\")].status")
-        if [ "${VAULTDEPLOY_COMPLETED}" == "True" ] && [ "${VAULTACCESS_COMPLETED}" == "True" ];
+        if [ "${VAULTDEPLOY_COMPLETED}" == "True" ] && [ "${CURRENT_MAJOR_VERSION}" == "3.3" ];
+        then 
+            SUCCESSFULLY_UPGRADED+="${newline}${DETAILS}"
+            return 0;
+        else 
+            FAILING_UPGRADE+="${newline}${DETAILS}"
+            return 1;
+        fi
+    }
+
+    vaultAccessUpgradeStatus() {
+        VAULTACCESS_COMPLETED=$(oc get vaultaccess ibm-vault-access -o jsonpath='{.status.conditions[?(@.type=="Completed")].status}')
+        CURRENT_MAJOR_VERSION=$(oc get vaultaccess ibm-vault-access -o jsonpath='{.metadata.annotations.productVersion}' | cut -c1-3)
+        DETAILS=$(oc get vaultaccess -A -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:metadata.annotations.productVersion,STATUS:status.conditions[?(@.type==\"Completed\")].status")
+        if [ "${VAULTACCESS_COMPLETED}" == "True" ] && [ "${CURRENT_MAJOR_VERSION}" == "3.3" ];
         then 
             SUCCESSFULLY_UPGRADED+="${newline}${DETAILS}"
             return 0;
@@ -177,7 +191,8 @@ then
     aiManagerUpgradeStatus
     irCoreUpgradeStatus
     aiopsAnalyticsUpgradeStatus
-    vaultUpgradeStatus
+    vaultDeployUpgradeStatus
+    vaultAccessUpgradeStatus
 
     # Print out results of status checks
     printf "
