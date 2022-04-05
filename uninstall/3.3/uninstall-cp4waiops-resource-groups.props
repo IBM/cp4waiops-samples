@@ -163,15 +163,18 @@ CP4WAIOPS_CRDS=("aimanagermainprods.ai-manager.watson-aiops.ibm.com"
                 "aiopsanalyticsorchestrators.ai.ir.aiops.ibm.com"
                 "aiopsedges.connectors.aiops.ibm.com"
                 "aiopsuis.consoleui.aiops.ibm.com"
+                "automationactions.connectors.aiops.ibm.com"
                 "bundlemanifests.connectors.aiops.ibm.com"
                 "bundlemanifests.cp4waiops.management.ibm.com"
                 "connectorcomponents.connectors.aiops.ibm.com"
                 "connectorconfigurations.connectors.aiops.ibm.com"
                 "connectorschemas.connectors.aiops.ibm.com"
+                "gitapps.connectors.aiops.ibm.com"
                 "issueresolutioncores.core.ir.aiops.ibm.com"
                 "lifecycleservices.lifecycle.ir.aiops.ibm.com"
                 "lifecycletriggers.lifecycle.ir.aiops.ibm.com"
-                "modeltrains.modeltrain.ibm.com")
+                "modeltrains.modeltrain.ibm.com"
+                "microedgeconfigurations.connectors.aiops.ibm.com")
 
 
 #### IBM Automation Foundation (IAF) ####
@@ -236,7 +239,49 @@ IAF_MISC=("client.oidc.security.ibm.com/zenclient-$IAF_NAMESPACE"
           "operatorgroup.operators.coreos.com/operand-deployment-lifecycle-manager-operatorgroup"
           "automationuiconfig.core.automation.ibm.com/iaf-system")
 
-BEDROCK_CRDS=("authentications.operator.ibm.com"
+CROSSPLANE_COMPOSITIONS=("composition.apiextensions.ibm.crossplane.io/kafka-iaf-k.odlm.bedrock.ibm.com"
+                        "composition.apiextensions.ibm.crossplane.io/kafka-iaf-skip-user-k.odlm.bedrock.ibm.com"
+                        "composition.apiextensions.ibm.crossplane.io/kafka-iaf-skip-user.ibmcloud.bedrock.ibm.com"
+                        "composition.apiextensions.ibm.crossplane.io/kafka-iaf-skip-user.odlm.bedrock.ibm.com"
+                        "composition.apiextensions.ibm.crossplane.io/kafka-iaf.external.bedrock.ibm.com"
+                        "composition.apiextensions.ibm.crossplane.io/kafka-iaf.ibmcloud.bedrock.ibm.com"
+                        "composition.apiextensions.ibm.crossplane.io/kafka-iaf.odlm.bedrock.ibm.com"
+                        "composition.apiextensions.ibm.crossplane.io/kafka-small.ibmcloud.bedrock.ibm.com"
+                        "composition.apiextensions.ibm.crossplane.io/kafka-small.odlm.bedrock.ibm.com"
+                        "composition.apiextensions.ibm.crossplane.io/postgres.ibmcloud.bedrock.ibm.com"
+                        "composition.apiextensions.ibm.crossplane.io/postgres.odlm.bedrock.ibm.com")
+
+CROSSPLANE_OBJECTS=("object.kubernetes.crossplane.io/kafka-iaf-system"
+                    "object.kubernetes.crossplane.io/kafkauser-iaf-system"
+                    "object.kubernetes.crossplane.io/operandrequest-iaf-system"
+                    "object.kubernetes.crossplane.io/operandrequest-kafkauser-iaf-system")
+
+CROSSPLANE_XRDS=("compositeresourcedefinition.apiextensions.ibm.crossplane.io/kafkacomposites.shim.bedrock.ibm.com"
+                "compositeresourcedefinition.apiextensions.ibm.crossplane.io/postgrescomposites.shim.bedrock.ibm.com")
+
+CROSSPLANE_KAFKACLAIMS=("kafkaclaim.shim.bedrock.ibm.com/cp4waiops-cartridge-kafka-auth-0"
+                        "kafkaclaim.shim.bedrock.ibm.com/iaf-system")
+
+BEDROCK_CRDS=(#Bedrock shim CRDS
+                "kafkaclaims.shim.bedrock.ibm.com"
+                "kafkacomposites.shim.bedrock.ibm.com"
+                "postgresclaims.shim.bedrock.ibm.com"
+                "postgrescomposites.shim.bedrock.ibm.com"
+                #Crossplane CRDs
+                "compositeresourcedefinitions.apiextensions.ibm.crossplane.io"
+                "compositionrevisions.apiextensions.ibm.crossplane.io"
+                "compositions.apiextensions.ibm.crossplane.io"
+                "configurationrevisions.pkg.ibm.crossplane.io"
+                "configurations.pkg.ibm.crossplane.io"
+                "controllerconfigs.pkg.ibm.crossplane.io"
+                "locks.pkg.ibm.crossplane.io"
+                "objects.kubernetes.crossplane.io"
+                "providerconfigs.kubernetes.crossplane.io"
+                "providerconfigusages.kubernetes.crossplane.io"
+                "providerrevisions.pkg.ibm.crossplane.io"
+                "providers.pkg.ibm.crossplane.io"
+                #Other Bedrock CRDs
+                "authentications.operator.ibm.com"
                 "certmanagers.operator.ibm.com"
                 "clients.oidc.security.ibm.com"
                 "commonservices.operator.ibm.com"
