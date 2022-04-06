@@ -12,10 +12,10 @@ export KNATIVE_EVENTING_NAMESPACE=knative-eventing
 export ZENSERVICE_CR_NAME=iaf-zen-cpdservice
 
 # SLEEP TIMES
-SLEEP_SHORT_LOOP=5s
-SLEEP_MEDIUM_LOOP=15s
-SLEEP_LONG_LOOP=30s
-SLEEP_EXTRA_LONG_LOOP=40s
+SLEEP_SHORT_LOOP=5
+SLEEP_MEDIUM_LOOP=15
+SLEEP_LONG_LOOP=30
+SLEEP_EXTRA_LONG_LOOP=40
 
 # Tracing prefixes
 INFO="[INFO]"
@@ -543,18 +543,18 @@ check_additional_installation_exists(){
 }
 
 delete_connections() {
-   until GET_AIOC_MSG=$(oc -n $CP4WAIOPS_PROJECT get aioc -o name 2>&1); do
-        if [[ "$GET_AIOC_MSG" == "error: the server doesn't have a resource type \"aioc\"" ]]; then
+   until GET_AIOC_MSG=$(oc -n $CP4WAIOPS_PROJECT get connectorconfigurations.connectors.aiops.ibm.com -o name 2>&1); do
+        if [[ "$GET_AIOC_MSG" == "error: the server doesn't have a resource type \"connectorconfigurations.connectors.aiops.ibm.com\"" ]]; then
             log $INFO "ConnectorConfiguration CRD is not installed, no need to clean up connections"
             return
         fi
         sleep 10
    done
-   log $INFO "deleting all ConnectorConfigurations"
-   oc -n $CP4WAIOPS_PROJECT delete aioc --all &
+   log $INFO "Deleting all ConnectorConfigurations"
+   oc -n $CP4WAIOPS_PROJECT delete connectorconfigurations.connectors.aiops.ibm.com --all &
    log $INFO "waiting for ConnectorComponent termination"
-   until [[ -z "$(oc -n $CP4WAIOPS_PROJECT get aicc -o name 2>&1)" ]]; do
-        oc -n $CP4WAIOPS_PROJECT get aicc -o name | while read r; do
+   until [[ -z "$(oc -n $CP4WAIOPS_PROJECT get connectorcomponents.connectors.aiops.ibm.com -o name 2>&1)" ]]; do
+        oc -n $CP4WAIOPS_PROJECT get connectorcomponents.connectors.aiops.ibm.com -o name | while read r; do
             DEL_TIMESTAMP=$(oc -n $CP4WAIOPS_PROJECT get $r -o jsonpath={.metadata.deletionTimestamp} 2>>/dev/null) || continue
             DEL_TIMESTAMP=$(date --date $DEL_TIMESTAMP +%s 2>>/dev/null) || continue
             NOW=$(date +%s)
@@ -566,4 +566,74 @@ delete_connections() {
         done
         sleep 10
    done
+   log $INFO "Finished deleting ConnectorConfigurations"
+}
+
+delete_securetunnel(){
+    log $INFO "Deleting the Secure tunnel resources in $CP4WAIOPS_PROJECT "
+    oc -n $CP4WAIOPS_PROJECT delete tunnelconnections.securetunnel.management.ibm.com --all 2>>/dev/null
+    oc -n $CP4WAIOPS_PROJECT delete applicationmappings.securetunnel.management.ibm.com --all 2>>/dev/null
+    oc -n $CP4WAIOPS_PROJECT delete templates.securetunnel.management.ibm.com --all 2>>/dev/null
+    oc -n $CP4WAIOPS_PROJECT delete tunnelconnections.tunnel.management.ibm.com --all 2>>/dev/null
+    oc -n $CP4WAIOPS_PROJECT delete applicationmappings.tunnel.management.ibm.com --all 2>>/dev/null
+    oc -n $CP4WAIOPS_PROJECT delete templates.tunnel.management.ibm.com --all 2>>/dev/null
+    # check if there have another Secure tunnel operator reference to the Secure Tunnel CRDs
+    COUNT=`oc get deployment -A | grep ibm-secure-tunnel-operator | wc -l`
+    if [ "${COUNT}" == "0" ]; then
+        log $INFO "No other Secure tunnel operator reference to the Secure tunnel CRDs, deleting them "
+        oc delete crd tunnelconnections.securetunnel.management.ibm.com 2>>/dev/null
+        oc delete crd applicationmappings.securetunnel.management.ibm.com 2>>/dev/null
+        oc delete crd templates.securetunnel.management.ibm.com 2>>/dev/null
+        oc delete crd tunnelconnections.tunnel.management.ibm.com 2>>/dev/null
+        oc delete crd applicationmappings.tunnel.management.ibm.com 2>>/dev/null
+        oc delete crd templates.tunnel.management.ibm.com 2>>/dev/null
+    fi
+    log $INFO "Finished deleting securetunnel resources"
+    # Securetunnel secrets are removed via resource group CP4WAIOPS_INTERNAL_SECRETS
+}
+
+delete_crossplane(){
+    oc get csv -n $IBM_COMMON_SERVICES_PROJECT --no-headers -o name | grep "crossplane" | while read a b; do oc delete "$a" -n $IBM_COMMON_SERVICES_PROJECT --ignore-not-found; done
+    oc delete sub ibm-crossplane-operator-app -n $IBM_COMMON_SERVICES_PROJECT --ignore-not-found
+
+    log $INFO "Delete the Crossplane custom resources"
+    # remove finalizers from and delete kafkaclaim, configurationrevisions, composition, objects, provider configs
+    log $INFO "Deleting kafkaclaims in $CP4WAIOPS_PROJECT"
+    for KAFKACLAIM in ${CROSSPLANE_KAFKACLAIMS[@]}; do
+      log $INFO "Deleting $KAFKACLAIM..."
+      oc patch -n $CP4WAIOPS_PROJECT $KAFKACLAIM --type=json --patch='[ { "op": "remove", "path": "/metadata/finalizers" } ]'
+      oc delete $KAFKACLAIM -n $CP4WAIOPS_PROJECT --ignore-not-found
+    done
+
+    log $INFO "Deleting Object resources at the cluster scope"
+    for OBJECT in ${CROSSPLANE_OBJECTS[@]}; do
+      log $INFO "Deleting $OBJECT..."
+      oc patch $OBJECT --type=json --patch='[ { "op": "remove", "path": "/metadata/finalizers" } ]'
+      oc delete $OBJECT --ignore-not-found
+    done
+
+    log $INFO "Deleting configurations at the cluster scope"
+    oc delete configuration.pkg.ibm.crossplane.io/ibm-crossplane-bedrock-shim-config --ignore-not-found
+    log $INFO "Deleting configurationrevisions at the cluster scope"
+    oc patch configurationrevision.pkg.ibm.crossplane.io/ibm-crossplane-bedrock-shim-config-ibm-crosspla --type=json --patch='[ { "op": "remove", "path": "/metadata/finalizers" } ]' && oc delete configurationrevision.pkg.ibm.crossplane.io/ibm-crossplane-bedrock-shim-config-ibm-crosspla --ignore-not-found
+    
+    log $INFO "Deleting compositions at the cluster scope"
+    for COMPOSITION in ${CROSSPLANE_COMPOSITIONS[@]}; do
+      log $INFO "Deleting crossplane composition $COMPOSITION.."
+      oc delete $COMPOSITION --ignore-not-found
+    done
+    log $INFO "Deleting ProviderConfig at the cluster scope"
+    oc patch providerconfig.kubernetes.crossplane.io/kubernetes-provider --type=json --patch='[ { "op": "remove", "path": "/metadata/finalizers" } ]' && oc delete providerconfig.kubernetes.crossplane.io/kubernetes-provider --ignore-not-found
+    log $INFO "Removing finalizers from cluster scoped lock"
+    oc patch lock.pkg.ibm.crossplane.io lock -p '{"metadata":{"finalizers": []}}' --type=merge
+
+    log $INFO "Deleting compositeresourcedefinitions at the cluster scope"
+    for XRD in ${CROSSPLANE_XRDS[@]}; do
+      oc patch $XRD --type=json --patch='[ { "op": "remove", "path": "/metadata/finalizers" } ]'
+      oc delete $XRD --ignore-not-found
+    done
+
+    log $INFO "Delete the Crossplane user management resources"
+    for RESOURCE in role rolebinding serviceaccount; do oc get $RESOURCE -A --no-headers -o name; done | grep crossplane | while read a b; do oc delete "$a" -n $IBM_COMMON_SERVICES_PROJECT; done
+    for RESOURCE in clusterrole clusterrolebinding; do oc get $RESOURCE -A --no-headers -o name; done | grep crossplane | while read a b; do oc delete "$a"; done
 }
