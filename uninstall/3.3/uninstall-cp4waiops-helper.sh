@@ -544,7 +544,7 @@ check_additional_installation_exists(){
 
 delete_connections() {
    until GET_AIOC_MSG=$(oc -n $CP4WAIOPS_PROJECT get connectorconfigurations.connectors.aiops.ibm.com -o name 2>&1); do
-        if [[ "$GET_AIOC_MSG" == "error: the server doesn't have a resource type \"connectorconfigurations.connectors.aiops.ibm.com\"" ]]; then
+        if [[ "$GET_AIOC_MSG" == "error: the server doesn't have a resource type \"connectorconfigurations\"" ]]; then
             log $INFO "ConnectorConfiguration CRD is not installed, no need to clean up connections"
             return
         fi
