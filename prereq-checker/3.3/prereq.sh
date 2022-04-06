@@ -3,13 +3,13 @@
 
 
 #These defaults are given in section 'Hardware requirement totals for AI Manager only' of the 
-#link https://ibmdocs-test.mybluemix.net/docs/en/cloud-paks/cloud-pak-watson-aiops/3.2.0?topic=requirements-ai-manager
+#link https://www.ibm.com/docs/en/cloud-paks/cloud-pak-watson-aiops/3.3.0?topic=requirements-ai-manager
 #Minimum resource values for small profile install
 NODE_COUNT_SMALL=3
 VCPU_SMALL=48
-MEMORY_SMALL=144
+MEMORY_SMALL=132
 #These defaults are given in section 'Hardware requirement totals for AI Manager only' of the 
-#link https://ibmdocs-test.mybluemix.net/docs/en/cloud-paks/cloud-pak-watson-aiops/3.2.0?topic=requirements-ai-manager
+#link https://www.ibm.com/docs/en/cloud-paks/cloud-pak-watson-aiops/3.3.0?topic=requirements-ai-manager
 #Minimum resource values for large profile install
 NODE_COUNT_LARGE=6
 VCPU_LARGE=144
@@ -54,6 +54,7 @@ color_end="\x1b[0m"
 fail_msg=`printf "$fail_color FAIL $color_end"`
 pass_msg=`printf "$pass_color PASS $color_end\n"`
 warning_msg=`printf "$warn_color WARNING $color_end"`
+skip_msg=`printf "$warn_color SKIP $color_end"`
 }
 
 display_help() {
@@ -73,6 +74,8 @@ display_help() {
    echo "  -u Runs the upgrade check"
    echo " ./prereq.sh -s"
    echo "  -s Skips confirmation and installs upgrade requirements when available"
+   echo " ./prereq.sh -o"
+   echo "  -o Skips storageclass checks when using alternate storage providers"
    echo "*******************************************************************************************"
 }
 
@@ -140,7 +143,7 @@ checkIAFSubVersion () {
 }
 
 # Add options as needed
-while getopts 'hsu' opt; do
+while getopts 'hsuo' opt; do
   case "$opt" in
     h)
       display_help
@@ -151,6 +154,9 @@ while getopts 'hsu' opt; do
       ;;
     s)
       SKIP_CONFIRM="true" && checkUpgrade
+      ;;
+    o)
+      SKIP_STORAGE_CHECK="true"
       ;;
   esac
 done
@@ -219,8 +225,6 @@ checkEntitlementSecret () {
   fi
 }
 
-
-
 createTestJob () {
   JOB_NAME="cp4waiops-entitlement-key-test-job"
 
@@ -231,27 +235,52 @@ createTestJob () {
   else
     log $INFO "The job with name '$JOB_NAME' was not found, so moving ahead and creating it."
   fi
-  
-  log $INFO "Creating the job '$JOB_NAME' "
-  cat <<EOF | oc apply -f -
-  apiVersion: batch/v1
-  kind: Job
-  metadata:
-    name: cp4waiops-entitlement-key-test-job 
-  spec:
-    parallelism: 1
-    completions: 1
-    template:         
-      metadata:
-        name: pi
-      spec:
-        containers:
-        - name: testimage
-          image: cp.icr.io/cp/cp4waiops/ai-platform-api-server@sha256:3c08f68c1ce898728b86ce9e570b08018fa8cf27a08df8603a2cd301cfae735a
-          imagePullPolicy: Always
-          command: [ "echo", "SUCCESS" ] 
-        restartPolicy: OnFailure
+
+  if [[ $ENTITLEMENT_SECRET ]] ; then
+    log $INFO "Creating the job '$JOB_NAME' "
+    cat <<EOF | oc apply -f -
+    apiVersion: batch/v1
+    kind: Job
+    metadata:
+      name: cp4waiops-entitlement-key-test-job
+    spec:
+      parallelism: 1
+      completions: 1
+      template:
+        metadata:
+          name: pi
+        spec:
+          imagePullSecrets:
+          - name: ibm-entitlement-key
+          containers:
+          - name: testimage
+            image: cp.icr.io/cp/cp4waiops/ai-platform-api-server@sha256:3c08f68c1ce898728b86ce9e570b08018fa8cf27a08df8603a2cd301cfae735a
+            imagePullPolicy: Always
+            command: [ "echo", "SUCCESS" ]
+          restartPolicy: OnFailure
 EOF
+  else
+    log $INFO "Creating the job '$JOB_NAME' "
+    cat <<EOF | oc apply -f -
+    apiVersion: batch/v1
+    kind: Job
+    metadata:
+      name: cp4waiops-entitlement-key-test-job
+    spec:
+      parallelism: 1
+      completions: 1
+      template:
+        metadata:
+          name: pi
+        spec:
+          containers:
+          - name: testimage
+            image: cp.icr.io/cp/cp4waiops/ai-platform-api-server@sha256:3c08f68c1ce898728b86ce9e570b08018fa8cf27a08df8603a2cd301cfae735a
+            imagePullPolicy: Always
+            command: [ "echo", "SUCCESS" ]
+          restartPolicy: OnFailure
+EOF
+  fi
   sleep 3s
   checkEntitlementCred
 }
@@ -358,7 +387,7 @@ function checkPortworx {
   else
     PORTWORX_WARNING="true"
     echo
-    log $WARNING "StorageClass \"portworx-fs\" does not exist. See \"Portworx Storage\" section in https://ibm.biz/storage_consideration_320 for details.\n"
+    log $WARNING "StorageClass \"portworx-fs\" does not exist. See \"Portworx Storage\" section in https://ibm.biz/storage_consideration_330 for details.\n"
   fi
 
   printf "Checking for storageclass \"portworx-aiops\"...\n"
@@ -368,7 +397,7 @@ function checkPortworx {
   else
     PORTWORX_WARNING="true"
     echo
-    log $WARNING "StorageClass \"portworx-aiops\" does not exist. See \"Portworx Storage\" section in https://ibm.biz/storage_consideration_320 for details.\n"
+    log $WARNING "StorageClass \"portworx-aiops\" does not exist. See \"Portworx Storage\" section in https://ibm.biz/storage_consideration_330 for details.\n"
   fi
   
   if [[ "$PORTWORX_WARNING" == "false" ]]; then
@@ -383,6 +412,15 @@ function checkPortworx {
 function checkStorage {
   ODF_FOUND="false"
   PORTWORX_FOUND="false"
+
+  if [[ $SKIP_STORAGE_CHECK == "true" ]]; then
+    echo
+    startEndSection "Storage Provider"
+    log $INFO "Skipping storage provider check"
+    startEndSection "Storage Provider"
+    STORAGE_PROVIDER_RES=$skip_msg
+    return 0
+  fi
 
   echo
   startEndSection "Storage Provider"
@@ -415,7 +453,7 @@ function checkStorage {
 
   if [[ "$PORTWORX_FOUND" == "false" && "$ODF_FOUND" == "false" ]]; then
     log $ERROR "At least one of the two Storage Providers are required"
-    log $ERROR "The supported Storage Providers are Portworx or Openshift Data Foundation. See https://ibm.biz/storage_consideration_320 for details."
+    log $ERROR "The supported Storage Providers are Portworx or Openshift Data Foundation. See https://ibm.biz/storage_consideration_330 for details."
     STORAGE_PROVIDER_RES=$fail_msg
     startEndSection "Storage Provider"
     return 1
@@ -451,7 +489,7 @@ function checkNetworkPolicy {
       NP_RES=$pass_msg
     else
       log $ERROR "Namespace default DOES NOT have the expected metadata label"
-      printf "Please see https://ibm.biz/nwk_policy_320 to configure a network policy\n"
+      printf "Please see https://ibm.biz/aiops_netpolicy_330 to configure a network policy\n"
       NP_RES=$fail_msg
       startEndSection "Network Policy"
       return 1

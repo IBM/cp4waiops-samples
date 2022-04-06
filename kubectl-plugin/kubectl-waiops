@@ -1,0 +1,103 @@
+#!/bin/bash
+
+# The CP4WAIOps status checker tool prints out several components to indicate the status of your install.
+# In a successful install, the components below should all have a successful STATUS/PROGRESS/PHASE indicator.
+# If any of the components are incomplete or are not reconciled after a significant period of time, 
+# please refer to the IBM troubleshooting docs online or open a support case. 
+
+# Various formatting elements
+newline='\n\n'
+red=$(tput setaf 1)
+green=$(tput setaf 2)
+blue=$(tput setaf 4)
+white=$(tput setaf 7)
+bold=$(tput bold)
+normal=$(tput sgr0) #reset color/bolding
+
+# Get installation namespace (inferred from installation instance)
+PROJECT_NAMESPACE=$(oc get installations.orchestrator.aiops.ibm.com -A --no-headers | while read a b c; do echo "$a"; done;)
+
+# optional argument handling
+if [[ "$1" == "version" ]]
+then
+    echo "0.0.3"
+    exit 0
+fi
+
+# optional argument handling
+if [[ "$1" == "config" ]]
+then
+    echo "$KUBECONFIG"
+    exit 0
+fi
+
+# optional argument handling
+if [[ "$1" == "status" ]]
+then
+    echo "______________________________________________________________"
+    echo "Installation instances:" && echo ""
+    oc get installations.orchestrator.aiops.ibm.com -A 
+    
+    echo "______________________________________________________________"
+    echo "IRCore and AIOpsAnalyticsOrchestrator instances:" && echo ""
+    oc get ircore,AIOpsAnalyticsOrchestrator -A  -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:status.versions.reconciled,STATUS:status.conditions[?(@.type==\"Ready\")].reason"
+    
+    echo "______________________________________________________________"
+    echo "LifecycleService instances:" && echo ""
+    oc get lifecycleservice -A -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:status.versions.reconciled,STATUS:status.conditions[?(@.type==\"Lifecycle Service Ready\")].reason"
+    
+    echo "______________________________________________________________"
+    echo "BaseUI instances:" && echo ""
+    oc get BaseUI -A  -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:status.versions.reconciled,STATUS:status.conditions[?(@.type==\"Ready\")].reason"
+    
+    echo "______________________________________________________________"
+    echo "AIManager, ASM, AIOpsEdge, and AIOpsUI instances:" && echo ""
+    oc get AIManager,asm -A  -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:status.versions.reconciled,STATUS:status.phase" && echo ""
+    oc get aiopsedge -A  -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,STATUS:status.phase" && echo ""
+    oc get aiopsui -A  -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:status.versions.reconciled"
+
+    echo "______________________________________________________________"
+    echo "AutomationUIConfig, AutomationBase, Cartridge, and CartridgeRequirements instances:" && echo ""
+    oc get automationuiconfig,automationbase,cartridge,cartridgerequirements -A -o custom-columns='KIND:.kind,NAMESPACE:.metadata.namespace,NAME:.metadata.name,VERSION:status.versions.reconciled,STATUS:.status.conditions[?(@.type=="Ready")].status'
+    
+    echo "______________________________________________________________"
+    echo "Kong instances:" && echo ""
+    oc get kong -A -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name"         
+    
+    echo "______________________________________________________________"
+    echo "ZenService instances:" && echo ""
+    oc get zenservice -A -o custom-columns='KIND:.kind,NAME:.metadata.name,NAMESPACE:.metadata.namespace,VERSION:status.currentVersion,STATUS:.status.zenStatus'
+    
+    echo "______________________________________________________________"
+    echo "CSVs from $PROJECT_NAMESPACE namespace:" && echo ""
+    oc get csvs -n $PROJECT_NAMESPACE 
+
+    echo "______________________________________________________________"
+    echo "CSVs from ibm-common-services namespace:" && echo ""
+    oc get csvs -n ibm-common-services
+
+    echo "______________________________________________________________"
+    echo "Subscriptions from $PROJECT_NAMESPACE namespace:" && echo ""
+    oc get subscriptions -n $PROJECT_NAMESPACE 
+
+    echo "______________________________________________________________"
+    echo "Subscriptions from ibm-common-services namespace:" && echo ""
+    oc get subscriptions -n ibm-common-services
+    
+    echo "______________________________________________________________"
+    echo "OperandRequest instances:" && echo ""
+    oc get operandrequests -A -o custom-columns="NAMESPACE:metadata.namespace,NAME:metadata.name,PHASE:status.phase,CREATED AT:metadata.creationTimestamp"
+    
+    echo "______________________________________________________________"
+    echo "ODLM pod current status:" && echo ""
+    oc get pod -A | grep operand-deployment-lifecycle-manager
+
+
+    echo "______________________________________________________________"
+    echo "Orchestrator pod current status:" && echo ""
+    oc get pod -A | grep ibm-aiops-orchestrator-controller-manager    
+    echo ""
+    exit 0
+fi
+
+echo "kubectl-waiops"
