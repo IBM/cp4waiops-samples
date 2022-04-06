@@ -4,15 +4,15 @@ This directory contains a package for setting up a uni-directional gateway betwe
 
 ## Getting started
 
-Clone the following GitHub repository:
+1. Clone the following GitHub repository:
 
-```
-  git clone https://github.com:IBM/cp4waiops-samples.git
-  cd uni-directional-gateway/3.3
-```
+   ```
+   git clone https://github.com:IBM/cp4waiops-samples.git
+   cd uni-directional-gateway/3.3
+   ```
 
-Copy the package to the `$NCHOME/omnibus/gates` directory within your IBM Cloud Pak for Watson AIOps Event Manager environment. The default location for `$NCHOME` is `/opt/IBM/tivoli/netcool/`.
+2. Copy the package to the `$NCHOME/omnibus/gates` directory within your IBM Cloud Pak for Watson AIOps Event Manager environment. The default location for `$NCHOME` is `/opt/IBM/tivoli/netcool/`.
 
 ## Instruction documentation
 
-For more information, and the instructions for using this package to set up the gateway, see the IBM Documentation [Connecting with on-premises probes and uni-directional gateway](https://ibm.biz/aiops_unidirectgate).
+For more information, and the instructions for using this package to set up the gateway, see the IBM Documentation [Connecting with on-premises probes and uni-directional gateway](https://ibm.biz/aiops_unidirectgate_33).
