@@ -6,7 +6,7 @@ https://kubernetes.io/docs/tasks/extend-kubectl/kubectl-plugins/
 
 ## Highlights
 
-### Main status checker
+### Installation status checker
 ```
 $ oc waiops status
 
