@@ -63,7 +63,7 @@ then
     
     echo "______________________________________________________________"
     echo "Kong instances:" && echo ""
-    oc get kong -A -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,STATUS:.status.conditions[].status,MESSAGE:status.conditions[?(@.type==\"Deployed\")].reason"         
+    oc get kong -A -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,STATUS:.status.conditions[?(@.type==\"Deployed\")].status,MESSAGE:status.conditions[?(@.type==\"Deployed\")].reason"         
     
     echo "______________________________________________________________"
     echo "ZenService instances:" && echo ""
