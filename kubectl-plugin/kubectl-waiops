@@ -18,6 +18,7 @@ normal=$(tput sgr0) #reset color/bolding
 INSTALLATION_NAME=$(oc get installations.orchestrator.aiops.ibm.com -A --no-headers | while read a b c; do echo "$b"; done;)
 INSTALLATION_NAMESPACE=$(oc get installations.orchestrator.aiops.ibm.com -A --no-headers | while read a b c; do echo "$a"; done;)
 
+
 # optional argument handling
 if [[ "$1" == "version" ]]
 then
@@ -35,9 +36,70 @@ fi
 # optional argument handling
 if [[ "$1" == "status" ]]
 then
-    oc get installations.orchestrator.aiops.ibm.com -A && echo "" &&  oc get ircore,AIOpsAnalyticsOrchestrator -A  -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,STATUS:status.conditions[?(@.type==\"Ready\")].reason" && echo "" && oc get lifecycleservice -A  -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,STATUS:status.conditions[?(@.type==\"Lifecycle Service Ready\")].reason" && echo "" && oc get BaseUI -A  -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,STATUS:status.conditions[?(@.type==\"Ready\")].reason" && echo "" && oc get AIManager,aiopsedge,asm -A  -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,STATUS:status.phase"
-    echo "" && oc get automationuiconfig,automationbase,cartridge,cartridgerequirements -A -o custom-columns='KIND:.kind,NAMESPACE:.metadata.namespace,NAME:.metadata.name,STATUS:.status.conditions[?(@.type=="Ready")].status'
-    echo "" && oc get zenservice -A -o custom-columns='KIND:.kind,NAME:.metadata.name,NAMESPACE:.metadata.namespace,STATUS:.status.zenStatus,PROGRESS:.status.Progress,MESSAGE:.status.ProgressMessage'
+    echo "______________________________________________________________"
+    echo "Installation instances:" && echo ""
+    oc get installations.orchestrator.aiops.ibm.com -A 
+    
+    echo "______________________________________________________________"
+    echo "IRCore and AIOpsAnalyticsOrchestrator instances:" && echo ""
+    oc get ircore,AIOpsAnalyticsOrchestrator -A  -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:status.versions.reconciled,STATUS:status.conditions[?(@.type==\"Ready\")].reason,MESSAGE:status.conditions[?(@.type==\"Ready\")].message"
+    
+    echo "______________________________________________________________"
+    echo "LifecycleService instances:" && echo ""
+    oc get lifecycleservice -A -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:status.versions.reconciled,STATUS:status.conditions[?(@.type==\"Lifecycle Service Ready\")].reason,MESSAGE:status.conditions[?(@.type==\"Ready\")].message"
+    
+    echo "______________________________________________________________"
+    echo "BaseUI instances:" && echo ""
+    oc get BaseUI -A  -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:status.versions.reconciled,STATUS:status.conditions[?(@.type==\"Ready\")].status,MESSAGE:status.conditions[?(@.type==\"Ready\")].reason"
+    
+    echo "______________________________________________________________"
+    echo "AIManager, ASM, AIOpsEdge, and AIOpsUI instances:" && echo ""
+    oc get AIManager -A  -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:status.versions.reconciled,STATUS:status.phase,MESSAGE:status.message" && echo ""
+    oc get asm -A  -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:status.versions.reconciled,STATUS:status.phase" && echo ""
+    oc get aiopsedge -A  -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,STATUS:status.phase,MESSAGE:status.conditions[?(@.type==\"Ready\")].message" && echo ""
+    oc get aiopsui -A  -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:status.versions.reconciled,STATUS:status.conditions[?(@.type==\"Ready\")].status,MESSAGE:status.conditions[?(@.type==\"Ready\")].reason"
+
+    echo "______________________________________________________________"
+    echo "AutomationUIConfig, AutomationBase, Cartridge, and CartridgeRequirements instances:" && echo ""
+    oc get automationuiconfig,automationbase,cartridge,cartridgerequirements -A -o custom-columns='KIND:.kind,NAMESPACE:.metadata.namespace,NAME:.metadata.name,VERSION:status.versions.reconciled,STATUS:.status.conditions[?(@.type=="Ready")].status,MESSAGE:.status.conditions[?(@.type=="Ready")].message'
+    
+    echo "______________________________________________________________"
+    echo "Kong instances:" && echo ""
+    oc get kong -A -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,STATUS:.status.conditions[?(@.type==\"Deployed\")].status,MESSAGE:status.conditions[?(@.type==\"Deployed\")].reason"         
+    
+    echo "______________________________________________________________"
+    echo "ZenService instances:" && echo ""
+    oc get zenservice -A -o custom-columns='KIND:.kind,NAME:.metadata.name,NAMESPACE:.metadata.namespace,VERSION:status.currentVersion,STATUS:.status.zenStatus,PROGRESS:.status.Progress,MESSAGE:.status.ProgressMessage'
+    
+    echo "______________________________________________________________"
+    echo "CSVs from $INSTALLATION_NAMESPACE namespace:" && echo ""
+    oc get csvs -n $INSTALLATION_NAMESPACE 
+
+    echo "______________________________________________________________"
+    echo "CSVs from ibm-common-services namespace:" && echo ""
+    oc get csvs -n ibm-common-services
+
+    echo "______________________________________________________________"
+    echo "Subscriptions from $INSTALLATION_NAMESPACE namespace:" && echo ""
+    oc get subscriptions -n $INSTALLATION_NAMESPACE 
+
+    echo "______________________________________________________________"
+    echo "Subscriptions from ibm-common-services namespace:" && echo ""
+    oc get subscriptions -n ibm-common-services
+    
+    echo "______________________________________________________________"
+    echo "OperandRequest instances:" && echo ""
+    oc get operandrequests -A -o custom-columns="NAMESPACE:metadata.namespace,NAME:metadata.name,PHASE:status.phase,CREATED AT:metadata.creationTimestamp"
+    
+    echo "______________________________________________________________"
+    echo "ODLM pod current status:" && echo ""
+    oc get pod -A | grep operand-deployment-lifecycle-manager
+
+
+    echo "______________________________________________________________"
+    echo "Orchestrator pod current status:" && echo ""
+    oc get pod -A | grep ibm-aiops-orchestrator-controller-manager    
+    echo ""
     exit 0
 fi
 
