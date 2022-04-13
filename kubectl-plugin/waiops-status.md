@@ -192,7 +192,7 @@ Orchestrator pod current status:
 cp4waiops                                          ibm-aiops-orchestrator-controller-manager-cf876559-jvwz2          1/1     Running       0          64m
 ```
 
-### Status checker for upgrade scenario:
+### Upgrade status checker:
 ```
 $ oc waiops upgrade-status
 
