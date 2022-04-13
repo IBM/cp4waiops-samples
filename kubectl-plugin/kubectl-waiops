@@ -70,6 +70,14 @@ then
     echo "______________________________________________________________"
     echo "ZenService instances:" && echo ""
     oc get zenservice -A -o custom-columns='KIND:.kind,NAME:.metadata.name,NAMESPACE:.metadata.namespace,VERSION:status.currentVersion,STATUS:.status.zenStatus,PROGRESS:.status.Progress,MESSAGE:.status.ProgressMessage'
+
+    echo "______________________________________________________________"
+    echo "Vault (VaultDeploy and VaultAccess) instances:" && echo ""
+    oc get vaultdeploy,vaultaccess -A  -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:metadata.annotations.productVersion,STATUS:status.conditions[?(@.type==\"Completed\")].status,MESSAGE:status.conditions[?(@.type==\"Completed\")].message"
+
+    echo "______________________________________________________________"
+    echo "Postgres (Postgreservices and PostgresDB) instances:" && echo ""
+    oc get postgreservices,postgresdb -A  -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:spec.version,STATUS:status.conditions[?(@.type==\"Completed\")].status,MESSAGE:status.conditions[?(@.type==\"Completed\")].message"
     
     echo "______________________________________________________________"
     echo "CSVs from $INSTALLATION_NAMESPACE namespace:" && echo ""
@@ -95,7 +103,6 @@ then
     echo "ODLM pod current status:" && echo ""
     oc get pod -A | grep operand-deployment-lifecycle-manager
 
-
     echo "______________________________________________________________"
     echo "Orchestrator pod current status:" && echo ""
     oc get pod -A | grep ibm-aiops-orchestrator-controller-manager    
@@ -117,7 +124,7 @@ then
 
     aiopsEdgeBaseUpgradeStatus() {    
         UPGRADED=$(oc get aiopsedge aiopsedge -o jsonpath='{.status.conditions[?(@.type=="UpgradeReady")].status}')
-        DETAILS=$(oc get aiopsedge -A)
+        DETAILS=$(oc get aiopsedge -A  -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,STATUS:status.phase,MESSAGE:status.conditions[?(@.type==\"Ready\")].message")
         if [ "${UPGRADED}" == "True" ];
         then 
             SUCCESSFULLY_UPGRADED+="${newline}${DETAILS}"
@@ -130,7 +137,7 @@ then
 
     aiopsUIUpgradeStatus() {    
         CURRENT_MAJOR_VERSION=$(oc get aiopsui aiopsui-instance -o jsonpath='{.status.versions.reconciled}' | cut -c1-3)
-        DETAILS=$(oc get aiopsui -A  -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:status.versions.reconciled")
+        DETAILS=$(oc get aiopsui -A  -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:status.versions.reconciled,STATUS:status.conditions[?(@.type==\"Ready\")].status,MESSAGE:status.conditions[?(@.type==\"Ready\")].reason")
         if [ "${CURRENT_MAJOR_VERSION}" == "3.3" ];
         then 
             SUCCESSFULLY_UPGRADED+="${newline}${DETAILS}"
@@ -144,7 +151,7 @@ then
     kongUpgradeStatus() {    
         INITIALIZED=$(oc get kong gateway -o jsonpath='{.status.conditions[?(@.type=="Initialized")].status}')
         DEPLOYED=$(oc get kong gateway -o jsonpath='{.status.conditions[?(@.type=="Deployed")].status}')
-        DETAILS=$(oc get kong -A -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name")
+        DETAILS=$(oc get kong -A -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,STATUS:.status.conditions[?(@.type==\"Deployed\")].status,MESSAGE:status.conditions[?(@.type==\"Deployed\")].reason" )
         if [ "${INITIALIZED}" == "True" ] && [ "${DEPLOYED}" == "True" ];
         then 
             SUCCESSFULLY_UPGRADED+="${newline}${DETAILS}"
@@ -158,7 +165,7 @@ then
     aiManagerUpgradeStatus() {    
         PHASE_STATUS=$(oc get aimanager aimanager -o jsonpath='{.status.phase}')
         CURRENT_MAJOR_VERSION=$(oc get aimanager aimanager -o jsonpath='{.status.versions.reconciled}' | cut -c1-3)
-        DETAILS=$(oc get aimanager -A -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:status.versions.reconciled,STATUS:status.phase")
+        DETAILS=$(oc get AIManager -A  -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:status.versions.reconciled,STATUS:status.phase,MESSAGE:status.message")
         if [ "${PHASE_STATUS}" == "Completed" ] && [ "${CURRENT_MAJOR_VERSION}" == "2.4" ];
         then 
             SUCCESSFULLY_UPGRADED+="${newline}${DETAILS}"
@@ -174,7 +181,7 @@ then
         METADATA_GENERATION=$(oc get ircore aiops -o jsonpath='{.metadata.generation}')   
         OBSERVED_GENERATION=$(oc get ircore aiops -o jsonpath='{.status.conditions[].observedGeneration}')        
         CURRENT_MAJOR_VERSION=$(oc get ircore aiops -o jsonpath='{.status.versions.reconciled}' | cut -c1-3)
-        DETAILS=$(oc get ircore -A  -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:status.versions.reconciled,STATUS:status.conditions[?(@.type==\"Ready\")].reason")
+        DETAILS=$(oc get ircore -A  -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:status.versions.reconciled,STATUS:status.conditions[?(@.type==\"Ready\")].reason,MESSAGE:status.conditions[?(@.type==\"Ready\")].message")
         if [ "${UPGRADED}" == "True" ] && [ "${OBSERVED_GENERATION}" == ${METADATA_GENERATION} ] && [ "${CURRENT_MAJOR_VERSION}" == "3.3" ];
         then 
             SUCCESSFULLY_UPGRADED+="${newline}${DETAILS}"
@@ -190,7 +197,7 @@ then
         METADATA_GENERATION=$(oc get lifecycleservices aiops -o jsonpath='{.metadata.generation}')   
         OBSERVED_GENERATION=$(oc get lifecycleservices aiops -o jsonpath='{.status.observedGeneration}')
         CURRENT_MAJOR_VERSION=$(oc get lifecycleservices aiops -o jsonpath='{.status.versions.reconciled}' | cut -c1-3)
-        DETAILS=$(oc get lifecycleservice -A -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:status.versions.reconciled,STATUS:status.conditions[?(@.type==\"Lifecycle Service Ready\")].reason")
+        DETAILS=$(oc get lifecycleservice -A -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:status.versions.reconciled,STATUS:status.conditions[?(@.type==\"Lifecycle Service Ready\")].reason,MESSAGE:status.conditions[?(@.type==\"Ready\")].message")
         if [ "${UPGRADED}" == "True" ] && [ "${OBSERVED_GENERATION}" == ${METADATA_GENERATION} ] && [ "${CURRENT_MAJOR_VERSION}" == "3.3" ];
         then 
             SUCCESSFULLY_UPGRADED+="${newline}${DETAILS}"
@@ -206,7 +213,7 @@ then
         METADATA_GENERATION=$(oc get AIOpsAnalyticsOrchestrator aiops -o jsonpath='{.metadata.generation}')   
         OBSERVED_GENERATION=$(oc get AIOpsAnalyticsOrchestrator aiops -o jsonpath='{.status.observedGeneration}')
         CURRENT_MAJOR_VERSION=$(oc get AIOpsAnalyticsOrchestrator aiops -o jsonpath='{.status.versions.reconciled}' | cut -c1-3)
-        DETAILS=$(oc get AIOpsAnalyticsOrchestrator -A  -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:status.versions.reconciled,STATUS:status.conditions[?(@.type==\"Ready\")].reason")
+        DETAILS=$(oc get AIOpsAnalyticsOrchestrator -A  -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:status.versions.reconciled,STATUS:status.conditions[?(@.type==\"Ready\")].reason,MESSAGE:status.conditions[?(@.type==\"Ready\")].message")
         if [ "${UPGRADED}" == "True" ] && [ "${OBSERVED_GENERATION}" == ${METADATA_GENERATION} ] && [ "${CURRENT_MAJOR_VERSION}" == "3.2" ];
         then 
             SUCCESSFULLY_UPGRADED+="${newline}${DETAILS}"
@@ -220,7 +227,7 @@ then
     vaultDeployUpgradeStatus() {
         VAULTDEPLOY_COMPLETED=$(oc get vaultdeploy ibm-vault-deploy -o jsonpath='{.status.conditions[?(@.type=="Completed")].status}')
         CURRENT_MAJOR_VERSION=$(oc get vaultdeploy ibm-vault-deploy -o jsonpath='{.metadata.annotations.productVersion}' | cut -c1-3)
-        DETAILS=$(oc get vaultdeploy -A  -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:metadata.annotations.productVersion,STATUS:status.conditions[?(@.type==\"Completed\")].status")
+        DETAILS=$(oc get vaultdeploy -A  -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:metadata.annotations.productVersion,STATUS:status.conditions[?(@.type==\"Completed\")].status,MESSAGE:status.conditions[?(@.type==\"Completed\")].message")
         if [ "${VAULTDEPLOY_COMPLETED}" == "True" ] && [ "${CURRENT_MAJOR_VERSION}" == "3.3" ];
         then 
             SUCCESSFULLY_UPGRADED+="${newline}${DETAILS}"
@@ -234,8 +241,48 @@ then
     vaultAccessUpgradeStatus() {
         VAULTACCESS_COMPLETED=$(oc get vaultaccess ibm-vault-access -o jsonpath='{.status.conditions[?(@.type=="Completed")].status}')
         CURRENT_MAJOR_VERSION=$(oc get vaultaccess ibm-vault-access -o jsonpath='{.metadata.annotations.productVersion}' | cut -c1-3)
-        DETAILS=$(oc get vaultaccess -A -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:metadata.annotations.productVersion,STATUS:status.conditions[?(@.type==\"Completed\")].status")
+        DETAILS=$(oc get vaultaccess -A  -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:metadata.annotations.productVersion,STATUS:status.conditions[?(@.type==\"Completed\")].status,MESSAGE:status.conditions[?(@.type==\"Completed\")].message")
         if [ "${VAULTACCESS_COMPLETED}" == "True" ] && [ "${CURRENT_MAJOR_VERSION}" == "3.3" ];
+        then 
+            SUCCESSFULLY_UPGRADED+="${newline}${DETAILS}"
+            return 0;
+        else 
+            FAILING_UPGRADE+="${newline}${DETAILS}"
+            return 1;
+        fi
+    }
+
+    postgresUpgradeStatus() {
+        POSTGRESERVICE_COMPLETED=$(oc get postgreservice cp4waiops-postgres -o jsonpath='{.status.conditions[0].type}')
+        POSTGRESDB_COMPLETED=$(oc get postgresdb cp4waiops-postgresdb -o jsonpath='{.status.conditions[0].type}')
+
+        STATEFULSET_REPLICA_COUNT=$(oc get statefulset cp4waiops-postgres-keeper -o jsonpath='{.status.replicas}')
+        STATEFULSET_CURRENT_REPLICA_COUNT=$(oc get statefulset cp4waiops-postgres-keeper -o jsonpath='{.status.currentReplicas}')
+
+        POSTGRES_PROXY_REPLICA_COUNT=$(oc get deployment cp4waiops-postgres-proxy -o jsonpath='{.status.replicas}')
+        POSTGRES_PROXY_CURRENT_REPLICA_COUNT=$(oc get deployment cp4waiops-postgres-proxy -o jsonpath='{.status.availableReplicas}')
+
+        POSTGRES_SENTINEL_REPLICA_COUNT=$(oc get deployment cp4waiops-postgres-sentinel -o jsonpath='{.status.replicas}')
+        POSTGRES_SENTINEL_CURRENT_REPLICA_COUNT=$(oc get deployment cp4waiops-postgres-sentinel -o jsonpath='{.status.availableReplicas}')
+
+        POSTGRESERVICE_CURRENT_MAJOR_VERSION=$(oc get postgreservices cp4waiops-postgres -o jsonpath='{.spec.version}' | cut -c1-3)
+        POSTGRESDB_CURRENT_MAJOR_VERSION=$(oc get postgresdb cp4waiops-postgresdb -o jsonpath='{.spec.version}' | cut -c1-3)
+        DETAILS=$(oc get postgreservices,postgresdb -A  -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:spec.version,STATUS:status.conditions[?(@.type==\"Completed\")].status,MESSAGE:status.conditions[?(@.type==\"Completed\")].message")
+        if [ "${POSTGRESERVICE_COMPLETED}" == "${POSTGRESDB_COMPLETED}" ] && [ "${STATEFULSET_REPLICA_COUNT}" == "${STATEFULSET_CURRENT_REPLICA_COUNT}" ] && [ "${POSTGRES_PROXY_REPLICA_COUNT}" == "${POSTGRES_PROXY_CURRENT_REPLICA_COUNT}" ] && [ "${POSTGRES_SENTINEL_REPLICA_COUNT}" == "${POSTGRES_SENTINEL_CURRENT_REPLICA_COUNT}" ] && [ "${POSTGRESERVICE_CURRENT_MAJOR_VERSION}" == "1.0" ] && [ "${POSTGRESDB_CURRENT_MAJOR_VERSION}" == "1.0" ];
+        then 
+            SUCCESSFULLY_UPGRADED+="${newline}${DETAILS}"
+            return 0;
+        else 
+            FAILING_UPGRADE+="${newline}${DETAILS}"
+            return 1;
+        fi
+    }
+
+    asmUpgradeStatus() {
+        ASM_COMPLETED=$(oc get asm aiops-topology -o jsonpath='{.status.phase}')
+        CURRENT_MAJOR_VERSION=$(oc get asm aiops-topology -o jsonpath='{.status.versions.reconciled}' | cut -c1-3)
+        DETAILS=$(oc get asm -A  -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:status.versions.reconciled,STATUS:status.phase")
+        if [ "${ASM_COMPLETED}" == "OK" ] && [ "${CURRENT_MAJOR_VERSION}" == "2.5" ];
         then 
             SUCCESSFULLY_UPGRADED+="${newline}${DETAILS}"
             return 0;
@@ -255,6 +302,8 @@ then
     aiopsAnalyticsUpgradeStatus
     vaultDeployUpgradeStatus
     vaultAccessUpgradeStatus
+    postgresUpgradeStatus
+    asmUpgradeStatus
 
     # Print out results of status checks
     printf "
