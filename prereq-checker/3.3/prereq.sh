@@ -250,6 +250,15 @@ createTestJob () {
         metadata:
           name: pi
         spec:
+          affinity:
+            nodeAffinity:
+              requiredDuringSchedulingIgnoredDuringExecution:
+                nodeSelectorTerms:
+                  - matchExpressions:
+                    - key: kubernetes.io/arch
+                      operator: In
+                      values:
+                        - amd64
           imagePullSecrets:
           - name: ibm-entitlement-key
           containers:
@@ -273,6 +282,15 @@ EOF
         metadata:
           name: pi
         spec:
+          affinity:
+            nodeAffinity:
+              requiredDuringSchedulingIgnoredDuringExecution:
+                nodeSelectorTerms:
+                  - matchExpressions:
+                    - key: kubernetes.io/arch
+                      operator: In
+                      values:
+                        - amd64
           containers:
           - name: testimage
             image: cp.icr.io/cp/cp4waiops/ai-platform-api-server@sha256:3c08f68c1ce898728b86ce9e570b08018fa8cf27a08df8603a2cd301cfae735a
