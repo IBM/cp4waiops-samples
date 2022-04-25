@@ -6,6 +6,7 @@ https://kubernetes.io/docs/tasks/extend-kubectl/kubectl-plugins/
 
 ## Highlights
 
+
 ### Installation status checker
 ```
 $ oc waiops status
@@ -14,7 +15,7 @@ ______________________________________________________________
 Installation instances:
 
 NAMESPACE   NAME                  PHASE     LICENSE    STORAGECLASS   STORAGECLASSLARGEBLOCK   AGE
-cp4waiops   ibm-cp-watson-aiops   Running   Accepted   rook-cephfs    rook-ceph-block          99m
+cp4waiops   ibm-cp-watson-aiops   Running   Accepted   rook-cephfs    rook-ceph-block          63m
 ______________________________________________________________
 IRCore and AIOpsAnalyticsOrchestrator instances:
 
@@ -63,6 +64,18 @@ ZenService instances:
 
 KIND         NAME                 NAMESPACE   VERSION   STATUS      PROGRESS   MESSAGE
 ZenService   iaf-zen-cpdservice   cp4waiops   4.4.2     Completed   100%       The Current Operation Is Completed
+______________________________________________________________
+Vault (VaultDeploy and VaultAccess) instances:
+
+KIND          NAMESPACE   NAME               VERSION   STATUS   MESSAGE
+VaultDeploy   cp4waiops   ibm-vault-deploy   3.3.0     True     VaultDeploy completed successfully
+VaultAccess   cp4waiops   ibm-vault-access   3.3.0     True     VaultAccess completed successfully
+______________________________________________________________
+Postgres (Postgreservices and PostgresDB) instances:
+
+KIND             NAMESPACE   NAME                   VERSION   STATUS   MESSAGE
+Postgreservice   cp4waiops   cp4waiops-postgres     1.0.0     True     Success to deploy postgres stolon cluster
+PostgresDB       cp4waiops   cp4waiops-postgresdb   1.0.0     True     Success to create postgres db
 ______________________________________________________________
 CSVs from cp4waiops namespace:
 
@@ -151,32 +164,80 @@ ______________________________________________________________
 OperandRequest instances:
 
 NAMESPACE             NAME                                  PHASE     CREATED AT
-cp4waiops             aiopsedge-base                        Running   2022-04-11T22:56:17Z
-cp4waiops             aiopsedge-cs                          Running   2022-04-11T22:56:17Z
-cp4waiops             iaf-core-operator                     Running   2022-04-11T22:50:36Z
-cp4waiops             iaf-eventprocessing-operator          Running   2022-04-11T22:50:42Z
-cp4waiops             iaf-operator                          Running   2022-04-11T22:50:40Z
-cp4waiops             iaf-system                            Running   2022-04-11T22:57:19Z
-cp4waiops             iaf-system-common-service             Running   2022-04-11T22:53:58Z
-cp4waiops             ibm-aiops-ai-manager                  Running   2022-04-11T22:53:54Z
-cp4waiops             ibm-aiops-aiops-foundation            Running   2022-04-11T22:53:54Z
-cp4waiops             ibm-aiops-application-manager         Running   2022-04-11T22:53:54Z
-cp4waiops             ibm-elastic-operator                  Running   2022-04-11T22:50:37Z
-cp4waiops             ibm-iam-service                       Running   2022-04-11T23:09:51Z
-cp4waiops             operandrequest-kafkauser-iaf-system   Running   2022-04-11T23:17:17Z
-ibm-common-services   ibm-commonui-request                  Running   2022-04-11T22:54:28Z
-ibm-common-services   ibm-iam-request                       Running   2022-04-11T22:54:32Z
-ibm-common-services   ibm-mongodb-request                   Running   2022-04-11T22:55:55Z
-ibm-common-services   management-ingress                    Running   2022-04-11T22:55:00Z
-ibm-common-services   platform-api-request                  Running   2022-04-11T22:55:00Z
+cp4waiops             aiopsedge-base                        Running   2022-04-13T00:46:20Z
+cp4waiops             aiopsedge-cs                          Running   2022-04-13T00:46:20Z
+cp4waiops             iaf-core-operator                     Running   2022-04-13T00:41:37Z
+cp4waiops             iaf-eventprocessing-operator          Running   2022-04-13T00:41:34Z
+cp4waiops             iaf-operator                          Running   2022-04-13T00:41:37Z
+cp4waiops             iaf-system                            Running   2022-04-13T00:51:44Z
+cp4waiops             iaf-system-common-service             Running   2022-04-13T00:44:07Z
+cp4waiops             ibm-aiops-ai-manager                  Running   2022-04-13T00:44:03Z
+cp4waiops             ibm-aiops-aiops-foundation            Running   2022-04-13T00:44:03Z
+cp4waiops             ibm-aiops-application-manager         Running   2022-04-13T00:44:03Z
+cp4waiops             ibm-elastic-operator                  Running   2022-04-13T00:41:37Z
+cp4waiops             ibm-iam-service                       Running   2022-04-13T00:59:31Z
+cp4waiops             operandrequest-kafkauser-iaf-system   Running   2022-04-13T01:07:19Z
+ibm-common-services   ibm-commonui-request                  Running   2022-04-13T00:44:36Z
+ibm-common-services   ibm-iam-request                       Running   2022-04-13T00:44:40Z
+ibm-common-services   ibm-mongodb-request                   Running   2022-04-13T00:45:29Z
+ibm-common-services   management-ingress                    Running   2022-04-13T00:45:29Z
+ibm-common-services   platform-api-request                  Running   2022-04-13T00:45:29Z
 ______________________________________________________________
 ODLM pod current status:
 
-ibm-common-services                                operand-deployment-lifecycle-manager-dbd498fc5-wjg6m              1/1     Running     0          103m
+ibm-common-services                                operand-deployment-lifecycle-manager-dbd498fc5-brv57              1/1     Running       0          66m
 ______________________________________________________________
 Orchestrator pod current status:
 
-cp4waiops                                          ibm-aiops-orchestrator-controller-manager-cf876559-mkfxl          1/1     Running     0          103m
+cp4waiops                                          ibm-aiops-orchestrator-controller-manager-cf876559-jvwz2          1/1     Running       0          64m
+```
+
+### Upgrade status checker:
+```
+$ oc waiops upgrade-status
+
+______________________________________________________________
+
+The following component(s) have finished upgrading:
+
+
+KIND        NAMESPACE   NAME        STATUS       MESSAGE
+AIOpsEdge   cp4waiops   aiopsedge   Configured   all critical components are reporting healthy
+
+KIND               NAMESPACE   NAME    VERSION   STATUS   MESSAGE
+LifecycleService   cp4waiops   aiops   3.3.0     Ready    All Services Ready
+
+KIND      NAMESPACE   NAME               VERSION   STATUS   MESSAGE
+AIOpsUI   cp4waiops   aiopsui-instance   3.3.0     True     Ready
+
+KIND   NAMESPACE   NAME      STATUS   MESSAGE
+Kong   cp4waiops   gateway   True     InstallSuccessful
+
+KIND        NAMESPACE   NAME        VERSION   STATUS      MESSAGE
+AIManager   cp4waiops   aimanager   2.4.0     Completed   AI Manager is ready
+
+KIND                  NAMESPACE   NAME    VERSION   STATUS   MESSAGE
+IssueResolutionCore   cp4waiops   aiops   3.3.0     Ready    All Services Ready
+
+KIND                         NAMESPACE   NAME    VERSION   STATUS   MESSAGE
+AIOpsAnalyticsOrchestrator   cp4waiops   aiops   3.2.0     Ready    All Services Ready
+
+KIND          NAMESPACE   NAME               VERSION   STATUS   MESSAGE
+VaultDeploy   cp4waiops   ibm-vault-deploy   3.3.0     True     VaultDeploy completed successfully
+
+KIND          NAMESPACE   NAME               VERSION   STATUS   MESSAGE
+VaultAccess   cp4waiops   ibm-vault-access   3.3.0     True     VaultAccess completed successfully
+
+KIND             NAMESPACE   NAME                   VERSION   STATUS   MESSAGE
+Postgreservice   cp4waiops   cp4waiops-postgres     1.0.0     True     Success to deploy postgres stolon cluster
+PostgresDB       cp4waiops   cp4waiops-postgresdb   1.0.0     True     Success to create postgres db
+
+KIND   NAMESPACE   NAME             VERSION   STATUS
+ASM    cp4waiops   aiops-topology   2.5.0     OK
+
+______________________________________________________________
+
+Hint: for a more detailed printout of each operator's components' statuses, run `oc waiops status`.
 ```
 
 ## How to use
@@ -196,5 +257,7 @@ Verify plugin:
 git clone https://github.com/IBM/cp4waiops-samples.git
 chmod +x cp4waiops-samples/kubectl-plugin/kubectl-waiops
 cp cp4waiops-samples/kubectl-plugin/kubectl-waiops /usr/local/bin/kubectl-waiops
-oc waiops status 
+
+oc waiops status
+oc waiops upgrade-status
 ```
