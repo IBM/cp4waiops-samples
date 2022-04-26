@@ -22,7 +22,7 @@ INSTALLATION_NAMESPACE=$(oc get installations.orchestrator.aiops.ibm.com -A --no
 # optional argument handling
 if [[ "$1" == "version" ]]
 then
-    echo "0.0.4"
+    echo "0.0.5"
     exit 0
 fi
 
@@ -124,8 +124,9 @@ then
 
     aiopsEdgeBaseUpgradeStatus() {    
         UPGRADED=$(oc get aiopsedge aiopsedge -o jsonpath='{.status.conditions[?(@.type=="UpgradeReady")].status}')
+        CONFIGURED=$(oc get aiopsedge aiopsedge -o jsonpath='{.status.phase}')
         DETAILS=$(oc get aiopsedge -A  -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,STATUS:status.phase,MESSAGE:status.conditions[?(@.type==\"Ready\")].message")
-        if [ "${UPGRADED}" == "True" ];
+        if [ "${UPGRADED}" == "True" ] && [ "${CONFIGURED}" == "Configured" ];
         then 
             SUCCESSFULLY_UPGRADED+="${newline}${DETAILS}"
             return 0;
