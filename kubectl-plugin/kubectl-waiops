@@ -124,8 +124,9 @@ then
 
     aiopsEdgeBaseUpgradeStatus() {    
         UPGRADED=$(oc get aiopsedge aiopsedge -o jsonpath='{.status.conditions[?(@.type=="UpgradeReady")].status}')
+        CONFIGURED=$(oc get aiopsedge aiopsedge -o jsonpath='{.status.phase}')
         DETAILS=$(oc get aiopsedge -A  -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,STATUS:status.phase,MESSAGE:status.conditions[?(@.type==\"Ready\")].message")
-        if [ "${UPGRADED}" == "True" ];
+        if [ "${UPGRADED}" == "True" ] && [ "${CONFIGURED}" == "Configured" ];
         then 
             SUCCESSFULLY_UPGRADED+="${newline}${DETAILS}"
             return 0;
