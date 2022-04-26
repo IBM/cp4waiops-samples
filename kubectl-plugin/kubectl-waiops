@@ -22,7 +22,7 @@ INSTALLATION_NAMESPACE=$(oc get installations.orchestrator.aiops.ibm.com -A --no
 # optional argument handling
 if [[ "$1" == "version" ]]
 then
-    echo "0.0.4"
+    echo "0.0.5"
     exit 0
 fi
 
