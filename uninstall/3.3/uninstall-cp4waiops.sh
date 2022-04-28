@@ -36,7 +36,7 @@ analyze_script_properties
 
 # Confirm we really want to uninstall 
 if [[ $SKIP_CONFIRM != "true" ]]; then
-  log $INFO "\033[0;33mUninstall v0.3 for AIOPs v3.3\033[0m"
+  log $INFO "\033[0;33mUninstall v0.4 for AIOPs v3.3\033[0m"
   log $INFO
   log $INFO "This script will uninstall IBM Cloud Pak for AIOps version 3.3. Please ensure you have deleted any CRs you created before running this script."
   log $INFO ""
@@ -55,6 +55,7 @@ if [[ $SKIP_CONFIRM != "true" ]]; then
     exit 0
   fi
 else
+  log $INFO "\033[0;33mUninstall v0.4 for AIOPs v3.3\033[0m"
   log $INFO
   log $INFO "This script will uninstall IBM Cloud Pak for AIOps."
   display_script_properties

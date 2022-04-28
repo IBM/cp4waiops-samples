@@ -447,6 +447,7 @@ delete_iaf_bedrock () {
         oc delete deployment ibm-common-service-webhook -n ibm-common-services --ignore-not-found
         oc delete deployment meta-api-deploy -n ibm-common-services --ignore-not-found
         oc delete deployment secretshare -n ibm-common-services --ignore-not-found
+        oc get role.rbac.authorization.k8s.io --no-headers -o name | grep nss-runtime-managed-role-from-ibm-common-services | while read a b; do oc delete "$a"; done
 
         oc delete service cert-manager-webhook -n ibm-common-services --ignore-not-found
         oc delete service ibm-common-service-webhook -n ibm-common-services --ignore-not-found
