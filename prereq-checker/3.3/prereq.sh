@@ -3,13 +3,13 @@
 
 
 #These defaults are given in section 'Hardware requirement totals for AI Manager only' of the 
-#link https://www.ibm.com/docs/en/cloud-paks/cloud-pak-watson-aiops/3.3.0?topic=requirements-ai-manager
+#link https://www.ibm.com/docs/en/cloud-paks/cloud-pak-watson-aiops/3.3.1?topic=requirements-ai-manager
 #Minimum resource values for small profile install
 NODE_COUNT_SMALL=3
-VCPU_SMALL=48
-MEMORY_SMALL=132
+VCPU_SMALL=56
+MEMORY_SMALL=142
 #These defaults are given in section 'Hardware requirement totals for AI Manager only' of the 
-#link https://www.ibm.com/docs/en/cloud-paks/cloud-pak-watson-aiops/3.3.0?topic=requirements-ai-manager
+#link https://www.ibm.com/docs/en/cloud-paks/cloud-pak-watson-aiops/3.3.1?topic=requirements-ai-manager
 #Minimum resource values for large profile install
 NODE_COUNT_LARGE=6
 VCPU_LARGE=144
@@ -179,22 +179,22 @@ log $INFO "Starting IBM Cloud Pak for Watson AIOps AI Manager prerequisite check
 echo
 
 # This function checks to see if user's OCP version meets our requirements by checking if 
-# substring "4.6" and "4.8" is in variable OCP_VER.
+# substring "4.6", "4.8", and "4.10" is in variable OCP_VER.
 function checkOCPVersion {
   
-  OCP_VER=$(oc version | grep "Server Version" | sed "s|Server Version: ||g")
+  OCP_VER=$(oc get clusterversion version -o=jsonpath='{.status.desired.version}')
   
   echo
   startEndSection "Openshift Container Platform Version Check"
-  log $INFO "Checking OCP Version. Compatible Versions of OCP are v4.6 and v4.8."
+  log $INFO "Checking OCP Version. Compatible Versions of OCP are v4.6, v4.8, and v4.10."
   
-  if [[ $OCP_VER == *"4.6"* || $OCP_VER == *"4.8"* ]]; then
+  if [[ $OCP_VER == *"4.6"* || $OCP_VER == *"4.8"* || $OCP_VER == *"4.10"* ]]; then
     log $INFO "OCP Version $OCP_VER is compatible with IBM Cloud Pak for Watson AIOps AI Manager"
     OCP_VER_RES=$pass_msg
     startEndSection "Openshift Container Platform Version Check"
     return 0
   else
-    log $ERROR "OCP Version is incompatible. Required Version: v4.6.* or v4.8.*" 
+    log $ERROR "OCP Version is incompatible. Required Version: v4.6.*, v4.8.*, or v4.10.*"
     log $ERROR "Your Version: v$OCP_VER"
     echo
     OCP_VER_RES=$fail_msg
@@ -263,7 +263,7 @@ createTestJob () {
           - name: ibm-entitlement-key
           containers:
           - name: testimage
-            image: cp.icr.io/cp/cp4waiops/ai-platform-api-server@sha256:3c08f68c1ce898728b86ce9e570b08018fa8cf27a08df8603a2cd301cfae735a
+            image: cp.icr.io/cp/cp4waiops/ai-platform-api-server@sha256:5b552299e687fec90e6aae1dbe7fe7466b7ae4035340fd96c38a6f34f603c8cd
             imagePullPolicy: Always
             command: [ "echo", "SUCCESS" ]
           restartPolicy: OnFailure
@@ -293,7 +293,7 @@ EOF
                         - amd64
           containers:
           - name: testimage
-            image: cp.icr.io/cp/cp4waiops/ai-platform-api-server@sha256:3c08f68c1ce898728b86ce9e570b08018fa8cf27a08df8603a2cd301cfae735a
+            image: cp.icr.io/cp/cp4waiops/ai-platform-api-server@sha256:5b552299e687fec90e6aae1dbe7fe7466b7ae4035340fd96c38a6f34f603c8cd
             imagePullPolicy: Always
             command: [ "echo", "SUCCESS" ]
           restartPolicy: OnFailure
