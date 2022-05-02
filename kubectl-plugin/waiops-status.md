@@ -297,7 +297,7 @@ ASM    cp4waiops   aiops-topology   2.5.0     OK
 
 ______________________________________________________________
 
-Hint: for a more detailed printout of each operator's components' statuses, run `oc waiops status`.
+Hint: for a more detailed printout of each operator's components' statuses, run `oc waiops status` or `oc waiops status-all`.
 ```
 
 ## How to use
