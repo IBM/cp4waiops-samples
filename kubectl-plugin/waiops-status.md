@@ -69,7 +69,7 @@ Hint: for a more detailed printout of each operator's components' statuses, run 
 
 ### Detailed installation status checker output (`oc waiops status-all`)
 ```
-$ oc waiops status
+$ oc waiops status-all
 
 ______________________________________________________________
 Installation instances:
@@ -254,7 +254,7 @@ cp4waiops                                          ibm-aiops-orchestrator-contro
 
 ### Upgrade status checker (`oc waiops status-upgrade`):
 ```
-$ oc waiops upgrade-status
+$ oc waiops status-upgrade
 
 ______________________________________________________________
 
