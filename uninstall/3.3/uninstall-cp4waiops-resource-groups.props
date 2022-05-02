@@ -42,17 +42,6 @@ CP4WAIOPS_DEPENDENT_CRDS=(#elasticsearch
                           "formations.couchdb.databases.cloud.ibm.com"
                           "recipes.couchdb.databases.cloud.ibm.com"
                           "recipetemplates.couchdb.databases.cloud.ibm.com"
-                          #EventsOperator
-                          "kafkabridges.ibmevents.ibm.com"
-                          "kafkaconnectors.ibmevents.ibm.com"
-                          "kafkaconnects.ibmevents.ibm.com"
-                          "kafkaconnects2is.ibmevents.ibm.com"
-                          "kafkamirrormaker2s.ibmevents.ibm.com"
-                          "kafkamirrormakers.ibmevents.ibm.com"
-                          "kafkarebalances.ibmevents.ibm.com"
-                          "kafkas.ibmevents.ibm.com"
-                          "kafkatopics.ibmevents.ibm.com"
-                          "kafkausers.ibmevents.ibm.com"
                           #PostgresOperator
                           "postgreservices.postgres.aiops.ibm.com"
                           "postgresdbs.postgres.aiops.ibm.com"
