@@ -5,7 +5,7 @@ A kubectl plugin for CP4WAIOps
 https://kubernetes.io/docs/tasks/extend-kubectl/kubectl-plugins/
 
 ## Highlights
-Run `oc waiops status` to print out the status of some of your instance's main components. You can also run `oc waiops status-all` for a more detailed printout with more components.
+Run `oc waiops status` to print the statuses of some of your instance's main components. If you see components with issues (or are generally facing issues on your cluster), run `oc waiops status-all` for a more detailed printout with more components.
 
 If you are upgrading your instance to the latest version, run `oc waiops status-upgrade`, which returns a list of components that have (and have not) completed upgrading. 
 
