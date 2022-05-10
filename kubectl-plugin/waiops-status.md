@@ -28,11 +28,13 @@ ZenService   iaf-zen-cpdservice   cp4waiops   4.4.2     Completed   100%       T
 ______________________________________________________________
 AutomationUIConfig, AutomationBase, Cartridge, and CartridgeRequirements instances:
 
-KIND                    NAMESPACE   NAME                    VERSION   STATUS   MESSAGE
-AutomationUIConfig      cp4waiops   iaf-system              1.3.3     True     AutomationUIConfig successfully registered
-AutomationBase          cp4waiops   automationbase-sample   2.0.3     True     AutomationBase instance successfully created
-Cartridge               cp4waiops   cp4waiops-cartridge     1.3.3     True     Cartridge successfully registered
-CartridgeRequirements   cp4waiops   cp4waiops-cartridge     1.3.3     True     CartridgeRequirements successfully registered
+KIND                    NAMESPACE   NAME                       VERSION   STATUS   MESSAGE
+AutomationUIConfig      cp4waiops   iaf-system                 1.3.3     True     AutomationUIConfig successfully registered
+AutomationBase          cp4waiops   automationbase-sample      2.0.3     True     AutomationBase instance successfully created
+Cartridge               cp4waiops   cp4waiops-cartridge        1.3.3     True     Cartridge successfully registered
+CartridgeRequirements   cp4waiops   cp4waiops-cartridge        1.3.3     True     CartridgeRequirements successfully registered
+EventProcessor          cp4waiops   aiops-ir-lifecycle         3.0.0     True     Event Processor is ready
+EventProcessor          cp4waiops   cp4waiops-eventprocessor   4.0.5     True     Event Processor is ready
 ______________________________________________________________
 IRCore and AIOpsAnalyticsOrchestrator instances:
 
@@ -84,11 +86,13 @@ ZenService   iaf-zen-cpdservice   cp4waiops   4.4.2     Completed   100%       T
 ______________________________________________________________
 AutomationUIConfig, AutomationBase, Cartridge, and CartridgeRequirements instances:
 
-KIND                    NAMESPACE   NAME                    VERSION   STATUS   MESSAGE
-AutomationUIConfig      cp4waiops   iaf-system              1.3.3     True     AutomationUIConfig successfully registered
-AutomationBase          cp4waiops   automationbase-sample   2.0.3     True     AutomationBase instance successfully created
-Cartridge               cp4waiops   cp4waiops-cartridge     1.3.3     True     Cartridge successfully registered
-CartridgeRequirements   cp4waiops   cp4waiops-cartridge     1.3.3     True     CartridgeRequirements successfully registered
+KIND                    NAMESPACE   NAME                       VERSION   STATUS   MESSAGE
+AutomationUIConfig      cp4waiops   iaf-system                 1.3.3     True     AutomationUIConfig successfully registered
+AutomationBase          cp4waiops   automationbase-sample      2.0.3     True     AutomationBase instance successfully created
+Cartridge               cp4waiops   cp4waiops-cartridge        1.3.3     True     Cartridge successfully registered
+CartridgeRequirements   cp4waiops   cp4waiops-cartridge        1.3.3     True     CartridgeRequirements successfully registered
+EventProcessor          cp4waiops   aiops-ir-lifecycle         3.0.0     True     Event Processor is ready
+EventProcessor          cp4waiops   cp4waiops-eventprocessor   4.0.5     True     Event Processor is ready
 ______________________________________________________________
 IRCore and AIOpsAnalyticsOrchestrator instances:
 
@@ -294,6 +298,9 @@ PostgresDB       cp4waiops   cp4waiops-postgresdb   1.0.0     True     Success t
 
 KIND   NAMESPACE   NAME             VERSION   STATUS
 ASM    cp4waiops   aiops-topology   2.5.0     OK
+
+KIND             NAMESPACE   NAME                       VERSION   STATUS   MESSAGE
+EventProcessor   cp4waiops   cp4waiops-eventprocessor   4.0.5     True     Event Processor is ready
 
 ______________________________________________________________
 

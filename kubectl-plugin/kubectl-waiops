@@ -45,8 +45,8 @@ then
     oc get zenservice -A -o custom-columns='KIND:.kind,NAME:.metadata.name,NAMESPACE:.metadata.namespace,VERSION:status.currentVersion,STATUS:.status.zenStatus,PROGRESS:.status.Progress,MESSAGE:.status.ProgressMessage'
 
     echo "______________________________________________________________"
-    echo "AutomationUIConfig, AutomationBase, Cartridge, and CartridgeRequirements instances:" && echo ""
-    oc get automationuiconfig,automationbase,cartridge,cartridgerequirements -A -o custom-columns='KIND:.kind,NAMESPACE:.metadata.namespace,NAME:.metadata.name,VERSION:status.versions.reconciled,STATUS:.status.conditions[?(@.type=="Ready")].status,MESSAGE:.status.conditions[?(@.type=="Ready")].message'
+    echo "AutomationUIConfig, AutomationBase, Cartridge, CartridgeRequirements, and EventProcessor instances:" && echo ""
+    oc get automationuiconfig,automationbase,cartridge,cartridgerequirements,EventProcessor -A -o custom-columns='KIND:.kind,NAMESPACE:.metadata.namespace,NAME:.metadata.name,VERSION:status.versions.reconciled,STATUS:.status.conditions[?(@.type=="Ready")].status,MESSAGE:.status.conditions[?(@.type=="Ready")].message'
     
     echo "______________________________________________________________"
     echo "IRCore and AIOpsAnalyticsOrchestrator instances:" && echo ""
@@ -86,8 +86,8 @@ then
     oc get zenservice -A -o custom-columns='KIND:.kind,NAME:.metadata.name,NAMESPACE:.metadata.namespace,VERSION:status.currentVersion,STATUS:.status.zenStatus,PROGRESS:.status.Progress,MESSAGE:.status.ProgressMessage'
 
     echo "______________________________________________________________"
-    echo "AutomationUIConfig, AutomationBase, Cartridge, and CartridgeRequirements instances:" && echo ""
-    oc get automationuiconfig,automationbase,cartridge,cartridgerequirements -A -o custom-columns='KIND:.kind,NAMESPACE:.metadata.namespace,NAME:.metadata.name,VERSION:status.versions.reconciled,STATUS:.status.conditions[?(@.type=="Ready")].status,MESSAGE:.status.conditions[?(@.type=="Ready")].message'
+    echo "AutomationUIConfig, AutomationBase, Cartridge, CartridgeRequirements, and EventProcessor instances:" && echo ""
+    oc get automationuiconfig,automationbase,cartridge,cartridgerequirements,EventProcessor -A -o custom-columns='KIND:.kind,NAMESPACE:.metadata.namespace,NAME:.metadata.name,VERSION:status.versions.reconciled,STATUS:.status.conditions[?(@.type=="Ready")].status,MESSAGE:.status.conditions[?(@.type=="Ready")].message'
     
     echo "______________________________________________________________"
     echo "IRCore and AIOpsAnalyticsOrchestrator instances:" && echo ""
@@ -335,6 +335,20 @@ then
         fi
     }
 
+    FlinkEventProcessorUpgradeStatus() {
+        FLINK_EP_COMPLETED=$(oc get EventProcessor cp4waiops-eventprocessor -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}')
+        CURRENT_MAJOR_VERSION=$(oc get EventProcessor cp4waiops-eventprocessor -o jsonpath='{.status.versions.reconciled}' | cut -c1-3)
+        DETAILS=$(oc get EventProcessor cp4waiops-eventprocessor -o custom-columns='KIND:.kind,NAMESPACE:.metadata.namespace,NAME:.metadata.name,VERSION:status.versions.reconciled,STATUS:.status.conditions[?(@.type=="Ready")].status,MESSAGE:.status.conditions[?(@.type=="Ready")].message')
+        if [ "${FLINK_EP_COMPLETED}" == "True" ] && [ "${CURRENT_MAJOR_VERSION}" == "4.0" ];
+        then 
+            SUCCESSFULLY_UPGRADED+="${newline}${DETAILS}"
+            return 0;
+        else 
+            FAILING_UPGRADE+="${newline}${DETAILS}"
+            return 1;
+        fi
+    }
+
     # Run component status checks
     aiopsEdgeBaseUpgradeStatus
     lifecycleUpgradeStatus
@@ -347,6 +361,7 @@ then
     vaultAccessUpgradeStatus
     postgresUpgradeStatus
     asmUpgradeStatus
+    FlinkEventProcessorUpgradeStatus
 
     # Print out results of status checks
     printf "
