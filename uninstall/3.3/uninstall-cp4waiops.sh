@@ -36,7 +36,7 @@ analyze_script_properties
 
 # Confirm we really want to uninstall 
 if [[ $SKIP_CONFIRM != "true" ]]; then
-  log $INFO "\033[0;33mUninstall v0.4 for AIOPs v3.3\033[0m"
+  log $INFO "\033[0;33mUninstall v0.5 for AIOPs v3.3\033[0m"
   log $INFO
   log $INFO "This script will uninstall IBM Cloud Pak for AIOps version 3.3. Please ensure you have deleted any CRs you created before running this script."
   log $INFO ""
@@ -55,7 +55,7 @@ if [[ $SKIP_CONFIRM != "true" ]]; then
     exit 0
   fi
 else
-  log $INFO "\033[0;33mUninstall v0.4 for AIOPs v3.3\033[0m"
+  log $INFO "\033[0;33mUninstall v0.5 for AIOPs v3.3\033[0m"
   log $INFO
   log $INFO "This script will uninstall IBM Cloud Pak for AIOps."
   display_script_properties
@@ -129,6 +129,16 @@ if [[ ! -z "$CP4WAIOPS_PROJECT"  ]]; then
     unsubscribe "ibm-aiops-orchestrator" $CP4WAIOPS_PROJECT ""
    else
 	unsubscribe "ibm-aiops-orchestrator" $OPERATORS_PROJECT ""
+   fi
+
+   # Check if asm instances exist outside the ai mgr ns, and decide whether to delete those CRDs
+   # There is an overlap with Event Mgr CRDs
+   check_additional_asm_exists
+   if [[ $DELETE_ASM == "true" ]]; then
+      log $INFO "Deleting ASM CRDs..."
+      delete_crd_group ASM_CRDS
+   else
+      log $INFO "Skipping ASM CRD deletion."
    fi
 
    # Now verify from user input that there are no other cloud paks in this project
