@@ -5,9 +5,13 @@ A kubectl plugin for CP4WAIOps
 https://kubernetes.io/docs/tasks/extend-kubectl/kubectl-plugins/
 
 ## Highlights
+Run `oc waiops status` to print the statuses of some of your instance's main components. If you see components with issues (or are generally facing issues on your cluster), run `oc waiops status-all` for a more detailed printout with more components.
 
+If you are upgrading your instance to the latest version, run `oc waiops status-upgrade`, which returns a list of components that have (and have not) completed upgrading. 
 
-### Installation status checker
+Below are example outputs of these commands.
+
+### Installation status checker output (`oc waiops status`)
 ```
 $ oc waiops status
 
@@ -16,6 +20,79 @@ Installation instances:
 
 NAMESPACE   NAME                  PHASE     LICENSE    STORAGECLASS   STORAGECLASSLARGEBLOCK   AGE
 cp4waiops   ibm-cp-watson-aiops   Running   Accepted   rook-cephfs    rook-ceph-block          63m
+______________________________________________________________
+ZenService instances:
+
+KIND         NAME                 NAMESPACE   VERSION   STATUS      PROGRESS   MESSAGE
+ZenService   iaf-zen-cpdservice   cp4waiops   4.4.2     Completed   100%       The Current Operation Is Completed
+______________________________________________________________
+AutomationUIConfig, AutomationBase, Cartridge, and CartridgeRequirements instances:
+
+KIND                    NAMESPACE   NAME                       VERSION   STATUS   MESSAGE
+AutomationUIConfig      cp4waiops   iaf-system                 1.3.3     True     AutomationUIConfig successfully registered
+AutomationBase          cp4waiops   automationbase-sample      2.0.3     True     AutomationBase instance successfully created
+Cartridge               cp4waiops   cp4waiops-cartridge        1.3.3     True     Cartridge successfully registered
+CartridgeRequirements   cp4waiops   cp4waiops-cartridge        1.3.3     True     CartridgeRequirements successfully registered
+EventProcessor          cp4waiops   aiops-ir-lifecycle         3.0.0     True     Event Processor is ready
+EventProcessor          cp4waiops   cp4waiops-eventprocessor   4.0.5     True     Event Processor is ready
+______________________________________________________________
+IRCore and AIOpsAnalyticsOrchestrator instances:
+
+KIND                         NAMESPACE   NAME    VERSION   STATUS   MESSAGE
+IssueResolutionCore          cp4waiops   aiops   3.3.0     Ready    All Services Ready
+AIOpsAnalyticsOrchestrator   cp4waiops   aiops   3.2.0     Ready    All Services Ready
+______________________________________________________________
+LifecycleService instances:
+
+KIND               NAMESPACE   NAME    VERSION   STATUS   MESSAGE
+LifecycleService   cp4waiops   aiops   3.3.0     Ready    All Services Ready
+______________________________________________________________
+BaseUI instances:
+
+KIND     NAMESPACE   NAME              VERSION   STATUS   MESSAGE
+BaseUI   cp4waiops   baseui-instance   3.3.0     True     Ready
+______________________________________________________________
+AIManager, ASM, AIOpsEdge, and AIOpsUI instances:
+
+KIND        NAMESPACE   NAME        VERSION   STATUS      MESSAGE
+AIManager   cp4waiops   aimanager   2.4.0     Completed   AI Manager is ready
+
+KIND   NAMESPACE   NAME             VERSION   STATUS
+ASM    cp4waiops   aiops-topology   2.5.0     OK
+
+KIND        NAMESPACE   NAME        STATUS       MESSAGE
+AIOpsEdge   cp4waiops   aiopsedge   Configured   all critical components are reporting healthy
+
+KIND      NAMESPACE   NAME               VERSION   STATUS   MESSAGE
+AIOpsUI   cp4waiops   aiopsui-instance   3.3.0     True     Ready
+
+Hint: for a more detailed printout of each operator's components' statuses, run `oc waiops status-all`.
+```
+
+### Detailed installation status checker output (`oc waiops status-all`)
+```
+$ oc waiops status-all
+
+______________________________________________________________
+Installation instances:
+
+NAMESPACE   NAME                  PHASE     LICENSE    STORAGECLASS   STORAGECLASSLARGEBLOCK   AGE
+cp4waiops   ibm-cp-watson-aiops   Running   Accepted   rook-cephfs    rook-ceph-block          63m
+______________________________________________________________
+ZenService instances:
+
+KIND         NAME                 NAMESPACE   VERSION   STATUS      PROGRESS   MESSAGE
+ZenService   iaf-zen-cpdservice   cp4waiops   4.4.2     Completed   100%       The Current Operation Is Completed
+______________________________________________________________
+AutomationUIConfig, AutomationBase, Cartridge, and CartridgeRequirements instances:
+
+KIND                    NAMESPACE   NAME                       VERSION   STATUS   MESSAGE
+AutomationUIConfig      cp4waiops   iaf-system                 1.3.3     True     AutomationUIConfig successfully registered
+AutomationBase          cp4waiops   automationbase-sample      2.0.3     True     AutomationBase instance successfully created
+Cartridge               cp4waiops   cp4waiops-cartridge        1.3.3     True     Cartridge successfully registered
+CartridgeRequirements   cp4waiops   cp4waiops-cartridge        1.3.3     True     CartridgeRequirements successfully registered
+EventProcessor          cp4waiops   aiops-ir-lifecycle         3.0.0     True     Event Processor is ready
+EventProcessor          cp4waiops   cp4waiops-eventprocessor   4.0.5     True     Event Processor is ready
 ______________________________________________________________
 IRCore and AIOpsAnalyticsOrchestrator instances:
 
@@ -47,23 +124,10 @@ AIOpsEdge   cp4waiops   aiopsedge   Configured   all critical components are rep
 KIND      NAMESPACE   NAME               VERSION   STATUS   MESSAGE
 AIOpsUI   cp4waiops   aiopsui-instance   3.3.0     True     Ready
 ______________________________________________________________
-AutomationUIConfig, AutomationBase, Cartridge, and CartridgeRequirements instances:
-
-KIND                    NAMESPACE   NAME                    VERSION   STATUS   MESSAGE
-AutomationUIConfig      cp4waiops   iaf-system              1.3.3     True     AutomationUIConfig successfully registered
-AutomationBase          cp4waiops   automationbase-sample   2.0.3     True     AutomationBase instance successfully created
-Cartridge               cp4waiops   cp4waiops-cartridge     1.3.3     True     Cartridge successfully registered
-CartridgeRequirements   cp4waiops   cp4waiops-cartridge     1.3.3     True     CartridgeRequirements successfully registered
-______________________________________________________________
 Kong instances:
 
 KIND   NAMESPACE   NAME      STATUS   MESSAGE
 Kong   cp4waiops   gateway   True     InstallSuccessful
-______________________________________________________________
-ZenService instances:
-
-KIND         NAME                 NAMESPACE   VERSION   STATUS      PROGRESS   MESSAGE
-ZenService   iaf-zen-cpdservice   cp4waiops   4.4.2     Completed   100%       The Current Operation Is Completed
 ______________________________________________________________
 Vault (VaultDeploy and VaultAccess) instances:
 
@@ -192,9 +256,9 @@ Orchestrator pod current status:
 cp4waiops                                          ibm-aiops-orchestrator-controller-manager-cf876559-jvwz2          1/1     Running       0          64m
 ```
 
-### Upgrade status checker:
+### Upgrade status checker (`oc waiops status-upgrade`):
 ```
-$ oc waiops upgrade-status
+$ oc waiops status-upgrade
 
 ______________________________________________________________
 
@@ -235,9 +299,12 @@ PostgresDB       cp4waiops   cp4waiops-postgresdb   1.0.0     True     Success t
 KIND   NAMESPACE   NAME             VERSION   STATUS
 ASM    cp4waiops   aiops-topology   2.5.0     OK
 
+KIND             NAMESPACE   NAME                       VERSION   STATUS   MESSAGE
+EventProcessor   cp4waiops   cp4waiops-eventprocessor   4.0.5     True     Event Processor is ready
+
 ______________________________________________________________
 
-Hint: for a more detailed printout of each operator's components' statuses, run `oc waiops status`.
+Hint: for a more detailed printout of each operator's components' statuses, run `oc waiops status` or `oc waiops status-all`.
 ```
 
 ## How to use
@@ -259,5 +326,6 @@ chmod +x cp4waiops-samples/kubectl-plugin/kubectl-waiops
 cp cp4waiops-samples/kubectl-plugin/kubectl-waiops /usr/local/bin/kubectl-waiops
 
 oc waiops status
-oc waiops upgrade-status
+oc waiops status-all
+oc waiops status-upgrade
 ```

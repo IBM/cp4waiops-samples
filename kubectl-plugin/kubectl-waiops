@@ -22,7 +22,7 @@ INSTALLATION_NAMESPACE=$(oc get installations.orchestrator.aiops.ibm.com -A --no
 # optional argument handling
 if [[ "$1" == "version" ]]
 then
-    echo "0.0.5"
+    echo "0.0.6"
     exit 0
 fi
 
@@ -39,6 +39,14 @@ then
     echo "______________________________________________________________"
     echo "Installation instances:" && echo ""
     oc get installations.orchestrator.aiops.ibm.com -A 
+    
+    echo "______________________________________________________________"
+    echo "ZenService instances:" && echo ""
+    oc get zenservice -A -o custom-columns='KIND:.kind,NAME:.metadata.name,NAMESPACE:.metadata.namespace,VERSION:status.currentVersion,STATUS:.status.zenStatus,PROGRESS:.status.Progress,MESSAGE:.status.ProgressMessage'
+
+    echo "______________________________________________________________"
+    echo "AutomationUIConfig, AutomationBase, Cartridge, CartridgeRequirements, and EventProcessor instances:" && echo ""
+    oc get automationuiconfig,automationbase,cartridge,cartridgerequirements,EventProcessor -A -o custom-columns='KIND:.kind,NAMESPACE:.metadata.namespace,NAME:.metadata.name,VERSION:status.versions.reconciled,STATUS:.status.conditions[?(@.type=="Ready")].status,MESSAGE:.status.conditions[?(@.type=="Ready")].message'
     
     echo "______________________________________________________________"
     echo "IRCore and AIOpsAnalyticsOrchestrator instances:" && echo ""
@@ -59,18 +67,51 @@ then
     oc get aiopsedge -A  -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,STATUS:status.phase,MESSAGE:status.conditions[?(@.type==\"Ready\")].message" && echo ""
     oc get aiopsui -A  -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:status.versions.reconciled,STATUS:status.conditions[?(@.type==\"Ready\")].status,MESSAGE:status.conditions[?(@.type==\"Ready\")].reason"
 
+    printf "
+${blue}${bold}Hint: for a more detailed printout of each operator's components' statuses, run \`oc waiops status-all\`.
+${normal}
+"
+    exit 0
+fi
+
+# optional argument handling
+if [[ "$1" == "status-all" ]]
+then
     echo "______________________________________________________________"
-    echo "AutomationUIConfig, AutomationBase, Cartridge, and CartridgeRequirements instances:" && echo ""
-    oc get automationuiconfig,automationbase,cartridge,cartridgerequirements -A -o custom-columns='KIND:.kind,NAMESPACE:.metadata.namespace,NAME:.metadata.name,VERSION:status.versions.reconciled,STATUS:.status.conditions[?(@.type=="Ready")].status,MESSAGE:.status.conditions[?(@.type=="Ready")].message'
-    
-    echo "______________________________________________________________"
-    echo "Kong instances:" && echo ""
-    oc get kong -A -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,STATUS:.status.conditions[?(@.type==\"Deployed\")].status,MESSAGE:status.conditions[?(@.type==\"Deployed\")].reason"         
+    echo "Installation instances:" && echo ""
+    oc get installations.orchestrator.aiops.ibm.com -A 
     
     echo "______________________________________________________________"
     echo "ZenService instances:" && echo ""
     oc get zenservice -A -o custom-columns='KIND:.kind,NAME:.metadata.name,NAMESPACE:.metadata.namespace,VERSION:status.currentVersion,STATUS:.status.zenStatus,PROGRESS:.status.Progress,MESSAGE:.status.ProgressMessage'
 
+    echo "______________________________________________________________"
+    echo "AutomationUIConfig, AutomationBase, Cartridge, CartridgeRequirements, and EventProcessor instances:" && echo ""
+    oc get automationuiconfig,automationbase,cartridge,cartridgerequirements,EventProcessor -A -o custom-columns='KIND:.kind,NAMESPACE:.metadata.namespace,NAME:.metadata.name,VERSION:status.versions.reconciled,STATUS:.status.conditions[?(@.type=="Ready")].status,MESSAGE:.status.conditions[?(@.type=="Ready")].message'
+    
+    echo "______________________________________________________________"
+    echo "IRCore and AIOpsAnalyticsOrchestrator instances:" && echo ""
+    oc get ircore,AIOpsAnalyticsOrchestrator -A  -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:status.versions.reconciled,STATUS:status.conditions[?(@.type==\"Ready\")].reason,MESSAGE:status.conditions[?(@.type==\"Ready\")].message"
+    
+    echo "______________________________________________________________"
+    echo "LifecycleService instances:" && echo ""
+    oc get lifecycleservice -A -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:status.versions.reconciled,STATUS:status.conditions[?(@.type==\"Lifecycle Service Ready\")].reason,MESSAGE:status.conditions[?(@.type==\"Ready\")].message"
+    
+    echo "______________________________________________________________"
+    echo "BaseUI instances:" && echo ""
+    oc get BaseUI -A  -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:status.versions.reconciled,STATUS:status.conditions[?(@.type==\"Ready\")].status,MESSAGE:status.conditions[?(@.type==\"Ready\")].reason"
+    
+    echo "______________________________________________________________"
+    echo "AIManager, ASM, AIOpsEdge, and AIOpsUI instances:" && echo ""
+    oc get AIManager -A  -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:status.versions.reconciled,STATUS:status.phase,MESSAGE:status.message" && echo ""
+    oc get asm -A  -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:status.versions.reconciled,STATUS:status.phase" && echo ""
+    oc get aiopsedge -A  -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,STATUS:status.phase,MESSAGE:status.conditions[?(@.type==\"Ready\")].message" && echo ""
+    oc get aiopsui -A  -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:status.versions.reconciled,STATUS:status.conditions[?(@.type==\"Ready\")].status,MESSAGE:status.conditions[?(@.type==\"Ready\")].reason"
+    
+    echo "______________________________________________________________"
+    echo "Kong instances:" && echo ""
+    oc get kong -A -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,STATUS:.status.conditions[?(@.type==\"Deployed\")].status,MESSAGE:status.conditions[?(@.type==\"Deployed\")].reason"         
+    
     echo "______________________________________________________________"
     echo "Vault (VaultDeploy and VaultAccess) instances:" && echo ""
     oc get vaultdeploy,vaultaccess -A  -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:metadata.annotations.productVersion,STATUS:status.conditions[?(@.type==\"Completed\")].status,MESSAGE:status.conditions[?(@.type==\"Completed\")].message"
@@ -106,12 +147,13 @@ then
     echo "______________________________________________________________"
     echo "Orchestrator pod current status:" && echo ""
     oc get pod -A | grep ibm-aiops-orchestrator-controller-manager    
+    
     echo ""
     exit 0
 fi
 
 # optional argument handling
-if [[ "$1" == "upgrade-status" ]]
+if [[ "$1" == "status-upgrade" ]]
 then
     # Script to check upgrade status of CP4WAIOps install for v3.3
     # This script checks to see if your Cloud Pak for Watson AIOps
@@ -293,6 +335,20 @@ then
         fi
     }
 
+    FlinkEventProcessorUpgradeStatus() {
+        FLINK_EP_COMPLETED=$(oc get EventProcessor cp4waiops-eventprocessor -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}')
+        CURRENT_MAJOR_VERSION=$(oc get EventProcessor cp4waiops-eventprocessor -o jsonpath='{.status.versions.reconciled}' | cut -c1-3)
+        DETAILS=$(oc get EventProcessor cp4waiops-eventprocessor -o custom-columns='KIND:.kind,NAMESPACE:.metadata.namespace,NAME:.metadata.name,VERSION:status.versions.reconciled,STATUS:.status.conditions[?(@.type=="Ready")].status,MESSAGE:.status.conditions[?(@.type=="Ready")].message')
+        if [ "${FLINK_EP_COMPLETED}" == "True" ] && [ "${CURRENT_MAJOR_VERSION}" == "4.0" ];
+        then 
+            SUCCESSFULLY_UPGRADED+="${newline}${DETAILS}"
+            return 0;
+        else 
+            FAILING_UPGRADE+="${newline}${DETAILS}"
+            return 1;
+        fi
+    }
+
     # Run component status checks
     aiopsEdgeBaseUpgradeStatus
     lifecycleUpgradeStatus
@@ -305,6 +361,7 @@ then
     vaultAccessUpgradeStatus
     postgresUpgradeStatus
     asmUpgradeStatus
+    FlinkEventProcessorUpgradeStatus
 
     # Print out results of status checks
     printf "
@@ -333,7 +390,7 @@ ${bold}${red}______________________________________________________________
     fi
 
     printf "
-${blue}${bold}Hint: for a more detailed printout of each operator's components' statuses, run \`oc waiops status\`.
+${blue}${bold}Hint: for a more detailed printout of each operator's components' statuses, run \`oc waiops status\` or \`oc waiops status-all\`.
 ${normal}
 "
     exit 0
