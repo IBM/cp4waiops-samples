@@ -3,7 +3,7 @@
 usage() {
    cat<<EOF
    This script is used to uninstall the Secure Tunnel as a standalone installation and can also be used to uninstall the Tunnel connector.
-   
+
 -t, --type <server|connector>,                              --type server: delete the server side of secure tunnel, --type connector: delete the connector side of the secure tunnel, by default is --type server
 -n, --namespace <namespace>,                                the namespace of the tunnel server or tunnel connector
 -c, --connection-name <the name of the tunnel connection>,  the name of the Secure tunnel connection that you want to uninstall
