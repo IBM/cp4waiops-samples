@@ -2,7 +2,6 @@
 
 usage() {
    cat<<EOF
-   This script is used to uninstall the Secure Tunnel as a standalone installation and can also be used to uninstall the Tunnel connector.
 -t, --type <server|connector>,                              --type server: delete the server side of secure tunnel, --type connector: delete the connector side of the secure tunnel, by default is --type server
 -n, --namespace <namespace>,                                the namespace of the tunnel server or tunnel connector
 -c, --connection-name <the name of the tunnel connection>,  the name of the Secure tunnel connection that you want to uninstall
@@ -139,6 +138,23 @@ if [ "${TYPE}" == "connector" ]; then
 
         ${KUBECTL} get all -n ${NAMESPACE}
 
+        for SERVICE_NAME in `${KUBECTL} -n ${NAMESPACE} get service -l tunnel_connection_name=${CONNECTOR_NAME} | awk '{print $1}'`;
+        do
+            ${KUBECTL} -n ${NAMESPACE} delete --ignore-not-found service ${SERVICE_NAME}
+        done
+        for NETWORKPOLICY_NAME in `${KUBECTL} -n ${NAMESPACE} get NetworkPolicy -l tunnel_connection_name=${CONNECTOR_NAME} | awk '{print $1}'`;
+        do
+            ${KUBECTL} -n ${NAMESPACE} delete --ignore-not-found NetworkPolicy ${NETWORKPOLICY_NAME}
+        done
+        for ROUTE_NAME in `${KUBECTL} -n ${NAMESPACE} get route -l tunnel_connection_name=${CONNECTOR_NAME} | awk '{print $1}'`;
+        do
+            ${KUBECTL} -n ${NAMESPACE} delete --ignore-not-found route ${ROUTE_NAME}
+        done
+        for INGRESS_NAME in `${KUBECTL} -n ${NAMESPACE} get ingress -l tunnel_connection_name=${CONNECTOR_NAME} | awk '{print $1}'`;
+        do
+            ${KUBECTL} -n ${NAMESPACE} delete --ignore-not-found ingress ${INGRESS_NAME}
+        done
+
         find_connector="false"
         deployType="statefulset"
         for DEPLOY_NAME in `${KUBECTL} -n ${NAMESPACE} get ${deployType} -l tunnel_connection_name=${CONNECTOR_NAME} | grep tunnel | awk '{print $1}'`;
@@ -237,9 +253,19 @@ else
 
     $KUBECTL -n $NAMESPACE delete tunnels.sretooling.management.ibm.com --all --ignore-not-found
 
+    CLUSTER_ROLE_NAME=`$KUBECTL -n $NAMESPACE get ClusterRole --ignore-not-found | grep $NAMESPACE-tunnel-cluster | awk '{print $1}'`
+    if [ "${CLUSTER_ROLE_NAME}" != "" ]; then
+        $KUBECTL -n $NAMESPACE delete ClusterRole $CLUSTER_ROLE_NAME --ignore-not-found
+    fi
+
+    for CLUSTER_ROLE_BIND_NAME in `$KUBECTL -n $NAMESPACE get ClusterRoleBinding --ignore-not-found | grep $NAMESPACE-tunnel-cluster | awk '{print $1}'`;
+    do
+        $KUBECTL -n $NAMESPACE delete ClusterRoleBinding $CLUSTER_ROLE_BIND_NAME --ignore-not-found
+    done
+
     $KUBECTL -n $NAMESPACE delete subscription ibm-secure-tunnel-operator --ignore-not-found
 
-    CSV_NAME=`$KUBECTL -n tunnel-stand-alone get csv --ignore-not-found | grep ibm-secure-tunnel-operator | awk '{print $1}'`
+    CSV_NAME=`$KUBECTL -n $NAMESPACE get csv --ignore-not-found | grep ibm-secure-tunnel | awk '{print $1}'`
     if [ "${CSV_NAME}" != "" ]; then
         $KUBECTL -n $NAMESPACE delete csv ${CSV_NAME} --ignore-not-found
     fi
@@ -248,8 +274,14 @@ else
     $KUBECTL -n $NAMESPACE delete secret `$KUBECTL -n $NAMESPACE get secret | grep 'sre-tunnel[0-9|a-z|-]*cert' | awk '{print $1}'` --ignore-not-found
 
     echo "check if there have another Secure tunnel operator reference to the Secure Tunnel CRDs"
-    COUNT=`$KUBECTL get deployment -A | grep ibm-secure-tunnel-operator | wc -l`
-    if [ "${COUNT}" == "0" ]; then
+    FIND_FLAG=false
+    for TUNNEL_OPERATOR_NAMESPACE in `$KUBECTL get deployment -A | grep ibm-secure-tunnel-operator |  awk '{print $1}'`
+    do
+        if [ "${TUNNEL_OPERATOR_NAMESPACE}" != "${NAMESPACE}" ]; then
+            FIND_FLAG=true
+        fi
+    done
+    if [ "${FIND_FLAG}" == "false" ]; then
         echo "No other Secure tunnel operator reference to the Secure tunnel CRDs, deleteing them "
         $KUBECTL delete crd tunnelconnections.securetunnel.management.ibm.com --ignore-not-found
         $KUBECTL delete crd applicationmappings.securetunnel.management.ibm.com --ignore-not-found
@@ -260,6 +292,26 @@ else
         $KUBECTL delete crd templates.tunnel.management.ibm.com --ignore-not-found
 
         $KUBECTL delete crd tunnels.sretooling.management.ibm.com --ignore-not-found
+
+        $KUBECTL delete ServiceAccount ibm-secure-tunnel-operator --ignore-not-found
+
+        for ROLE_NAME in `$KUBECTL -n $NAMESPACE get Role --ignore-not-found | grep ibm-secure-tunnel | awk '{print $1}'`;
+        do
+            $KUBECTL -n $NAMESPACE delete Role $ROLE_NAME --ignore-not-found
+        done
+        for ROLE_NAME in `$KUBECTL get ClusterRole --ignore-not-found | grep ibm-secure-tunnel | awk '{print $1}'`;
+        do
+            $KUBECTL delete ClusterRole $ROLE_NAME --ignore-not-found
+        done
+
+        for ROLE_BIND_NAME in `$KUBECTL -n $NAMESPACE get RoleBinding --ignore-not-found | grep ibm-secure-tunnel | awk '{print $1}'`;
+        do
+            $KUBECTL -n $NAMESPACE delete RoleBinding $ROLE_BIND_NAME --ignore-not-found
+        done
+        for ROLE_BIND_NAME in `$KUBECTL get ClusterRoleBinding --ignore-not-found | grep ibm-secure-tunnel | awk '{print $1}'`;
+        do
+            $KUBECTL delete ClusterRoleBinding $ROLE_BIND_NAME --ignore-not-found
+        done
     fi
 
     echo "uninstall tunnel server from namespace ${NAMESPACE} successful"
