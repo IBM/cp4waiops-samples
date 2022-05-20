@@ -141,8 +141,6 @@ CP4WAIOPS_CRDS=("aimanagermainprods.ai-manager.watson-aiops.ibm.com"
                 "applicationmanageragents.aiops.ibm.com"
                 "applicationmanagers.aiops.ibm.com"
                 "applicationuis.consoleui.aiops.ibm.com"
-                "asmformations.asm.ibm.com"
-                "asms.asm.ibm.com"
                 "baseuis.consoleui.aiops.ibm.com"
                 "cemformations.cem.ibm.com"
                 "cemserviceinstances.cem.ibm.com"
@@ -165,6 +163,11 @@ CP4WAIOPS_CRDS=("aimanagermainprods.ai-manager.watson-aiops.ibm.com"
                 "modeltrains.modeltrain.ibm.com"
                 "microedgeconfigurations.connectors.aiops.ibm.com")
 
+# Event Manager may have overlap with these CRDs
+# This CRD group will not be deleted if instances are found outside ai mgr ns
+
+ASM_CRDS=("asmformations.asm.ibm.com"
+          "asms.asm.ibm.com")
 
 #### IBM Automation Foundation (IAF) ####
 IAF_CERTMANAGER=("certificate.certmanager.k8s.io/iaf-system-automationui-aui-zen-ca"
