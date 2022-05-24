@@ -178,10 +178,9 @@ unsubscribe () {
 }
 
 # If any custom instances created by users for below CRD's
-# "applicationmanageragents.aiops.ibm.com": None of the instance is expected to be present with install
-# "applicationmanagers.aiops.ibm.com": None of the instance is expected to be present with install
 # "eventmanagergateways.ai-manager.watson-aiops.ibm.com": None of the instance is expected to be present with install
 # "kongs.management.ibm.com" : Expected custom resource to be ignored named 'gateway' that gets created with install.
+# Will automatically delete insightsuis.consoleui.aiops.ibm.com CR
 aiops_custom_instance_exists () {
   
   local namespace=$1
