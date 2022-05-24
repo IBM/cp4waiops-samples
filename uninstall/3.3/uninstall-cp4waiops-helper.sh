@@ -548,10 +548,10 @@ check_additional_asm_exists(){
     if [ `oc get asms.asm.ibm.com -A --no-headers | while read a b; do echo $a | grep -vw $CP4WAIOPS_PROJECT; done | wc -l`  -gt 0 ] ||
      [ `oc get asmformations.asm.ibm.com -A --no-headers | while read a b; do echo $a | grep -vw $CP4WAIOPS_PROJECT; done | wc -l` -gt 0 ] ; then
         log $INFO "ASM resource instances were found outside the $CP4WAIOPS_PROJECT namespace"
-        $DELETE_ASM="false"
+        DELETE_ASM="false"
     else
         log $INFO "No ASM resource instances were found outside the $CP4WAIOPS_PROJECT namespace, so the ASM CRDs can be deleted."
-        $DELETE_ASM="true"
+        DELETE_ASM="true"
     fi
 }
 
