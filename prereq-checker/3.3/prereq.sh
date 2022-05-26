@@ -1,19 +1,34 @@
 #!/bin/bash
 
 
-
-#These defaults are given in section 'Hardware requirement totals for AI Manager only' of the 
+## Resource size for 3.3
+#These defaults are given in section 'Hardware requirement totals for AI Manager only' of the
 #link https://www.ibm.com/docs/en/cloud-paks/cloud-pak-watson-aiops/3.3.1?topic=requirements-ai-manager
 #Minimum resource values for small profile install
-NODE_COUNT_SMALL=3
-VCPU_SMALL=56
-MEMORY_SMALL=142
-#These defaults are given in section 'Hardware requirement totals for AI Manager only' of the 
+NODE_COUNT_SMALL_3_3=3
+VCPU_SMALL_3_3=56
+MEMORY_SMALL_3_3=142
+#These defaults are given in section 'Hardware requirement totals for AI Manager only' of the
 #link https://www.ibm.com/docs/en/cloud-paks/cloud-pak-watson-aiops/3.3.1?topic=requirements-ai-manager
 #Minimum resource values for large profile install
-NODE_COUNT_LARGE=6
-VCPU_LARGE=144
-MEMORY_LARGE=324
+NODE_COUNT_LARGE_3_3=6
+VCPU_LARGE_3_3=144
+MEMORY_LARGE_3_3=324
+
+
+## Resource size for 3.2
+#These defaults are given in section 'Hardware requirement totals for AI Manager only' of the 
+#link https://www.ibm.com/docs/en/cloud-paks/cloud-pak-watson-aiops/3.2.1?topic=requirements-ai-manager
+#Minimum resource values for small profile install
+NODE_COUNT_SMALL_3_2=3
+VCPU_SMALL_3_2=48
+MEMORY_SMALL_3_2=132
+#These defaults are given in section 'Hardware requirement totals for AI Manager only' of the 
+#link https://www.ibm.com/docs/en/cloud-paks/cloud-pak-watson-aiops/3.2.1?topic=requirements-ai-manager
+#Minimum resource values for large profile install
+NODE_COUNT_LARGE_3_2=6
+VCPU_LARGE_3_2=144
+MEMORY_LARGE_3_2=324
  
 log () {
    local log_tracing_prefix=$1
@@ -84,6 +99,7 @@ checkUpgrade () {
   echo
     log $INFO "Starting IBM Cloud Pak for Watson AIOps AI Manager upgrade checker..."
   echo
+  ORCHESTRATOR_UPGRADE="true"
 
   OPS_NAMESPACE="openshift-operators"
   INSTALL_NAMESPACE=`oc project -q`
@@ -175,7 +191,7 @@ if [ $? -gt 0 ]; then
 fi
 
 echo
-log $INFO "Starting IBM Cloud Pak for Watson AIOps AI Manager prerequisite checker..."
+log $INFO "Starting IBM Cloud Pak for Watson AIOps AI Manager prerequisite checker v3.3..."
 echo
 
 # This function checks to see if user's OCP version meets our requirements by checking if 
@@ -263,7 +279,7 @@ createTestJob () {
           - name: ibm-entitlement-key
           containers:
           - name: testimage
-            image: cp.icr.io/cp/cp4waiops/ai-platform-api-server@sha256:5b552299e687fec90e6aae1dbe7fe7466b7ae4035340fd96c38a6f34f603c8cd
+            image: cp.icr.io/cp/cp4waiops/ai-platform-api-server@sha256:f0ed6dbb91bf420b5a5b6da6356bc91eaf48ef5fc1f017acd098d77c0655a451
             imagePullPolicy: Always
             command: [ "echo", "SUCCESS" ]
           restartPolicy: OnFailure
@@ -293,7 +309,7 @@ EOF
                         - amd64
           containers:
           - name: testimage
-            image: cp.icr.io/cp/cp4waiops/ai-platform-api-server@sha256:5b552299e687fec90e6aae1dbe7fe7466b7ae4035340fd96c38a6f34f603c8cd
+            image: cp.icr.io/cp/cp4waiops/ai-platform-api-server@sha256:f0ed6dbb91bf420b5a5b6da6356bc91eaf48ef5fc1f017acd098d77c0655a451
             imagePullPolicy: Always
             command: [ "echo", "SUCCESS" ]
           restartPolicy: OnFailure
@@ -427,9 +443,26 @@ function checkPortworx {
   return 0
 }
 
+function checkIBMCFileGoldGidStorage {
+  printf "Checking for storageclass \"ibmc-file-gold-gid\"...\n"
+
+  oc get storageclass ibmc-file-gold-gid > /dev/null 2>&1
+  if [[ "$?" == "0" ]]; then
+    log $INFO "StorageClass \"ibmc-file-gold-gid\" exists."
+    IBMC_FILE_GOLD_GID="true"
+    STORAGE_PROVIDER_RES=$pass_msg
+  else
+    log $WARNING "StorageClass \"ibmc-file-gold-gid\" does not exist. See \"Storage\" section in https://ibm.biz/storage_consideration_330 for details.\n"
+  fi
+
+  return 0
+}
+
 function checkStorage {
   ODF_FOUND="false"
   PORTWORX_FOUND="false"
+  IBMC_FILE_GOLD_GID_FOUND="false"
+
 
   if [[ $SKIP_STORAGE_CHECK == "true" ]]; then
     echo
@@ -444,7 +477,7 @@ function checkStorage {
   startEndSection "Storage Provider"
   log $INFO "Checking storage providers"
 
-  # Check if Portworx or ODF exist
+  # Check if Portworx, ODF, or IBMC-file-gold-gid exist
   STORAGE_CLUSTER_NAMES=$(oc get storagecluster -n kube-system --ignore-not-found=true --no-headers=true | awk '{print $1}')
   for sc in "${STORAGE_CLUSTER_NAMES[@]}"; do
     scPhase=$(oc get storagecluster $sc -n kube-system -o jsonpath='{.status.phase}')
@@ -469,19 +502,32 @@ function checkStorage {
     ODF_FOUND="true"
   fi
 
-  if [[ "$PORTWORX_FOUND" == "false" && "$ODF_FOUND" == "false" ]]; then
-    log $ERROR "At least one of the two Storage Providers are required"
-    log $ERROR "The supported Storage Providers are Portworx or Openshift Data Foundation. See https://ibm.biz/storage_consideration_330 for details."
+  IBMC_FILE_GOLD_GID=$(oc get storageclass ibmc-file-gold-gid)
+  if [[ "$IBMC_FILE_GOLD_GID" == "" ]]; then
+    echo
+    log $WARNING "ibmc-file-gold-gid is not running."
+    IBMC_FILE_GOLD_GID="false"
+  else
+    IBMC_FILE_GOLD_GID="true"
+  fi
+
+
+  if [[ "$PORTWORX_FOUND" == "false" && "$ODF_FOUND" == "false" && "$IBMC_FILE_GOLD_GID" == "false" ]]; then
+    log $ERROR "At least one of the three Storage Providers are required"
+    log $ERROR "The supported Storage Providers are Portworx, Openshift Data Foundation, or IBMC File Gold Gid. See https://ibm.biz/storage_consideration_330 for details."
     STORAGE_PROVIDER_RES=$fail_msg
     startEndSection "Storage Provider"
     return 1
-  elif [[ "$PORTWORX_FOUND" == "true" && "$ODF_FOUND" == "false" ]]; then
+  elif [[ "$PORTWORX_FOUND" == "true" && "$ODF_FOUND" == "false" && "$IBMC_FILE_GOLD_GID" == "false" ]]; then
     checkPortworx
-  elif [[ "$PORTWORX_FOUND" == "false" && "$ODF_FOUND" == "true" ]]; then
+  elif [[ "$PORTWORX_FOUND" == "false" && "$ODF_FOUND" == "true" && "$IBMC_FILE_GOLD_GID" == "false" ]]; then
     checkODF $ODF_PODS
-  elif [[ "$PORTWORX_FOUND" == "true" && "$ODF_FOUND" == "true" ]]; then
+  elif [[ "$PORTWORX_FOUND" == "false" && "$ODF_FOUND" == "false" && "$IBMC_FILE_GOLD_GID" == "true" ]]; then
+    checkIBMCFileGoldGidStorage
+  elif [[ "$PORTWORX_FOUND" == "true" && "$ODF_FOUND" == "true" && "$IBMC_FILE_GOLD_GID" == "true"  ]]; then
     checkPortworx
     checkODF $ODF_PODS
+    checkIBMCFileGoldGidStorage
   fi
   startEndSection "Storage Provider"
   return 0
@@ -666,38 +712,77 @@ check_available_cpu_and_memory() {
 
 analyze_resource_display() {
 
-  
-if [[ $worker_node_count -ge $NODE_COUNT_LARGE ]]; then
+# Display for upgrade
+  if [[ ORCHESTRATOR_UPGRADE == "true" ]] ; then
+    if [[ $worker_node_count -ge $(($NODE_COUNT_LARGE_3_3-$NODE_COUNT_LARGE_3_2)) ]]; then
+      large_worker_node_count_string=`printf "$pass_color $worker_node_count $color_end\n"`
+    else
+      large_worker_node_count_string=`printf "$fail_color $worker_node_count $color_end\n"`
+    fi
+
+    if [[ $total_cpu_unrequested -ge $(($VCPU_LARGE_3_3-$VCPU_LARGE_3_2)) ]]; then
+      large_total_cpu_unrequested_string=`printf "$pass_color $total_cpu_unrequested $color_end\n"`
+    else
+      large_total_cpu_unrequested_string=`printf "$fail_color $total_cpu_unrequested $color_end\n"`
+    fi
+
+    if [[ $total_memory_unrequested_GB -ge $(($MEMORY_LARGE_3_3-$MEMORY_LARGE_3_2)) ]]; then
+      large_total_memory_unrequested_GB_string=`printf "$pass_color $total_memory_unrequested_GB $color_end\n"`
+    else
+      large_total_memory_unrequested_GB_string=`printf "$fail_color $total_memory_unrequested_GB $color_end\n"`
+    fi
+
+    if [[ $worker_node_count -ge $(($NODE_COUNT_SMALL_3_3-$NODE_COUNT_SMALL_3_2)) ]]; then
+      small_worker_node_count_string=`printf "$pass_color $worker_node_count $color_end\n"`
+    else
+      small_worker_node_count_string=`printf "$fail_color $worker_node_count $color_end\n"`
+    fi
+
+    if [[ $total_cpu_unrequested -ge $(($VCPU_SMALL_3_3-$VCPU_SMALL_3_2)) ]]; then
+      small_total_cpu_unrequested_string=`printf "$pass_color $total_cpu_unrequested $color_end\n"`
+    else
+      small_total_cpu_unrequested_string=`printf "$fail_color $total_cpu_unrequested $color_end\n"`
+    fi
+
+    if [[ $total_memory_unrequested_GB -ge $(($MEMORY_SMALL_3_3-$MEMORY_SMALL_3_2)) ]]; then
+      small_total_memory_unrequested_GB_string=`printf "$pass_color $total_memory_unrequested_GB $color_end\n"`
+    else
+      small_total_memory_unrequested_GB_string=`printf "$fail_color $total_memory_unrequested_GB $color_end\n"`
+    fi
+  return 1
+fi
+## Display for regular install
+if [[ $worker_node_count -ge $NODE_COUNT_LARGE_3_3 ]]; then
    large_worker_node_count_string=`printf "$pass_color $worker_node_count $color_end\n"`
 else
    large_worker_node_count_string=`printf "$fail_color $worker_node_count $color_end\n"`
 fi
   
-if [[ $total_cpu_unrequested -ge $VCPU_LARGE ]]; then
+if [[ $total_cpu_unrequested -ge $VCPU_LARGE_3_3 ]]; then
    large_total_cpu_unrequested_string=`printf "$pass_color $total_cpu_unrequested $color_end\n"`
 else
    large_total_cpu_unrequested_string=`printf "$fail_color $total_cpu_unrequested $color_end\n"`
 fi
-  
-if [[ $total_memory_unrequested_GB -ge $MEMORY_LARGE ]]; then
+
+if [[ $total_memory_unrequested_GB -ge $MEMORY_LARGE_3_3 ]]; then
    large_total_memory_unrequested_GB_string=`printf "$pass_color $total_memory_unrequested_GB $color_end\n"`
 else
    large_total_memory_unrequested_GB_string=`printf "$fail_color $total_memory_unrequested_GB $color_end\n"`
 fi
-  
-if [[ $worker_node_count -ge $NODE_COUNT_SMALL ]]; then
+
+if [[ $worker_node_count -ge $NODE_COUNT_SMALL_3_3 ]]; then
    small_worker_node_count_string=`printf "$pass_color $worker_node_count $color_end\n"`
 else
    small_worker_node_count_string=`printf "$fail_color $worker_node_count $color_end\n"`
 fi
   
-if [[ $total_cpu_unrequested -ge $VCPU_SMALL ]]; then
+if [[ $total_cpu_unrequested -ge $VCPU_SMALL_3_3 ]]; then
    small_total_cpu_unrequested_string=`printf "$pass_color $total_cpu_unrequested $color_end\n"`
 else
    small_total_cpu_unrequested_string=`printf "$fail_color $total_cpu_unrequested $color_end\n"`
 fi
   
-if [[ $total_memory_unrequested_GB -ge $MEMORY_SMALL ]]; then
+if [[ $total_memory_unrequested_GB -ge $MEMORY_SMALL_3_3 ]]; then
    small_total_memory_unrequested_GB_string=`printf "$pass_color $total_memory_unrequested_GB $color_end\n"`
 else
    small_total_memory_unrequested_GB_string=`printf "$fail_color $total_memory_unrequested_GB $color_end\n"`
@@ -714,19 +799,46 @@ checkSmallOrLargeProfileInstall() {
   check_available_cpu_and_memory
   
   analyze_resource_display
+
+  if  [[ $ORCHESTRATOR_UPGRADE ]]; then
+    log $INFO "==================================Upgrade Resource Summary====================================================="
+    header=`printf "   %40s   |      %s      |     %s" "Additional Nodes" "Additional vCPU" "Additional Memory(GB)"`
+    log $INFO "${header}"
+    string=`printf "Upgrade Small profile(available/required)  [ %s/ %s ]   [ %s/ %s ]       [ %s/ %s ]" "$small_worker_node_count_string" "$(($NODE_COUNT_SMALL_3_3-$NODE_COUNT_SMALL_3_2))" "$small_total_cpu_unrequested_string" "$(($VCPU_SMALL_3_3-$VCPU_SMALL_3_2))" "$small_total_memory_unrequested_GB_string" "$(($MEMORY_SMALL_3_3-$MEMORY_SMALL_3_2))"`
+    log $INFO "${string}"
+    string=`printf "Upgrade Large profile(available/required)  [ %s/ %s ]   [ %s/ %s ]       [ %s/ %s ]" "$large_worker_node_count_string" "$(($NODE_COUNT_LARGE_3_3-$NODE_COUNT_LARGE_3_2))" "$large_total_cpu_unrequested_string" "$(($VCPU_LARGE_3_3-$VCPU_LARGE_3_2))" "$large_total_memory_unrequested_GB_string" "$(($MEMORY_LARGE_3_3-$MEMORY_LARGE_3_2))"`
+    log $INFO "${string}"
+    log $INFO "==================================Upgrade Resource Summary====================================================="
+
+    if [[ ($worker_node_count -ge $(($NODE_COUNT_LARGE_3_3-$NODE_COUNT_LARGE_3_2))) && ($total_cpu_unrequested -ge $(($VCPU_LARGE_3_3-$VCPU_LARGE_3_2))) && ($total_memory_unrequested_GB -ge $(($MEMORY_LARGE_3_3-$MEMORY_LARGE_3_2)))  ]] ; then
+      log $INFO "Cluster currently has resources available to upgrade Cloud Pak for Watson AIOps AI Manager"
+    elif [[ $worker_node_count -ge $(($NODE_COUNT_SMALL_3_3-$NODE_COUNT_SMALL_3_2)) && ($total_cpu_unrequested -ge $(($VCPU_SMALL_3_3-$VCPU_SMALL_3_2))) && ($total_memory_unrequested_GB -ge $(($MEMORY_SMALL_3_3-$MEMORY_SMALL_3_2))) ]] ; then
+      log $INFO "Cluster currently has resources available to upgrade Cloud Pak for Watson AIOps AI Manager"
+      echo
+    else
+      log $ERROR "Cluster does not have required resources available to upgrade Cloud Pak for Watson AIOps AI Manager."
+      echo
+      PROFILE_RES=$fail_msg
+      startEndSection "Small or Large Profile Install Resources"
+      return 1
+    fi
+    PROFILE_RES=$pass_msg
+    return 1
+  fi
+
   
   log $INFO "==================================Resource Summary====================================================="
   header=`printf "   %40s   |      %s      |     %s" "Nodes" "vCPU" "Memory(GB)"`
   log $INFO "${header}"
-  string=`printf "Small profile(available/required)  [ %s/ %s ]   [ %s/ %s ]       [ %s/ %s ]" "$small_worker_node_count_string" "$NODE_COUNT_SMALL" "$small_total_cpu_unrequested_string" "$VCPU_SMALL" "$small_total_memory_unrequested_GB_string" "$MEMORY_SMALL"`
+  string=`printf "Small profile(available/required)  [ %s/ %s ]   [ %s/ %s ]       [ %s/ %s ]" "$small_worker_node_count_string" "$NODE_COUNT_SMALL_3_3" "$small_total_cpu_unrequested_string" "$VCPU_SMALL_3_3" "$small_total_memory_unrequested_GB_string" "$MEMORY_SMALL_3_3"`
   log $INFO "${string}"
-  string=`printf "Large profile(available/required)  [ %s/ %s ]   [ %s/ %s ]       [ %s/ %s ]" "$large_worker_node_count_string" "$NODE_COUNT_LARGE" "$large_total_cpu_unrequested_string" "$VCPU_LARGE" "$large_total_memory_unrequested_GB_string" "$MEMORY_LARGE"`
+  string=`printf "Large profile(available/required)  [ %s/ %s ]   [ %s/ %s ]       [ %s/ %s ]" "$large_worker_node_count_string" "$NODE_COUNT_LARGE_3_3" "$large_total_cpu_unrequested_string" "$VCPU_LARGE_3_3" "$large_total_memory_unrequested_GB_string" "$MEMORY_LARGE_3_3"`
   log $INFO "${string}"
   log $INFO "==================================Resource Summary====================================================="
      
-  if [[ ($worker_node_count -ge $NODE_COUNT_LARGE) && ($total_cpu_unrequested -ge $VCPU_LARGE) && ($total_memory_unrequested_GB -ge $MEMORY_LARGE)  ]] ; then
+  if [[ ($worker_node_count -ge $NODE_COUNT_LARGE_3_3) && ($total_cpu_unrequested -ge $VCPU_LARGE_3_3) && ($total_memory_unrequested_GB -ge $MEMORY_LARGE_3_3)  ]] ; then
      log $INFO "Cluster currently has resources available to create a large profile of Cloud Pak for Watson AIOps AI Manager"
-  elif [[ $worker_node_count -ge $NODE_COUNT_SMALL && ($total_cpu_unrequested -ge $VCPU_SMALL) && ($total_memory_unrequested_GB -ge $MEMORY_SMALL) ]] ; then
+  elif [[ $worker_node_count -ge $NODE_COUNT_SMALL_3_3 && ($total_cpu_unrequested -ge $VCPU_SMALL_3_3) && ($total_memory_unrequested_GB -ge $MEMORY_SMALL_3_3) ]] ; then
      log $INFO "Cluster currently has resources available to create a small profile of Cloud Pak for Watson AIOps AI Manager"
      echo
   else
