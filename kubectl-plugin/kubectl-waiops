@@ -64,7 +64,7 @@ then
     STATUS_AB=$(oc get automationbase automationbase-sample -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}')
     STATUS_CARTRIDGE=$(oc get cartridge cp4waiops-cartridge -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}')
     STATUS_CARTRIDGE_REQS=$(oc get cartridgerequirements cp4waiops-cartridge -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}')
-    STATUS_IR_EP=$(oc get eventprocessor cp4waiops-eventprocessor -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}')
+    STATUS_IR_EP=$(oc get eventprocessor aiops-ir-lifecycle -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}')
     STATUS_EP=$(oc get eventprocessor cp4waiops-eventprocessor -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}')
     if [[ $STATUS_AUIC == "True" ]] && [[ $STATUS_AB == "True" ]] && [[ $STATUS_CARTRIDGE == "True" ]] && [[ $STATUS_CARTRIDGE_REQS == "True" ]] && [[ $STATUS_IR_EP == "True" ]] && [[ $STATUS_EP == "True" ]]; then
         printf '%s\n' "$green$INSTANCE$normal"
@@ -158,7 +158,7 @@ then
     STATUS_AB=$(oc get automationbase automationbase-sample -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}')
     STATUS_CARTRIDGE=$(oc get cartridge cp4waiops-cartridge -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}')
     STATUS_CARTRIDGE_REQS=$(oc get cartridgerequirements cp4waiops-cartridge -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}')
-    STATUS_IR_EP=$(oc get eventprocessor cp4waiops-eventprocessor -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}')
+    STATUS_IR_EP=$(oc get eventprocessor aiops-ir-lifecycle -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}')
     STATUS_EP=$(oc get eventprocessor cp4waiops-eventprocessor -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}')
     if [[ $STATUS_AUIC == "True" ]] && [[ $STATUS_AB == "True" ]] && [[ $STATUS_CARTRIDGE == "True" ]] && [[ $STATUS_CARTRIDGE_REQS == "True" ]] && [[ $STATUS_IR_EP == "True" ]] && [[ $STATUS_EP == "True" ]]; then
         printf '%s\n' "$green$INSTANCE$normal"
