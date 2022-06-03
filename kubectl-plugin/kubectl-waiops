@@ -18,11 +18,10 @@ normal=$(tput sgr0) #reset color/bolding
 INSTALLATION_NAME=$(oc get installations.orchestrator.aiops.ibm.com -A --no-headers | while read a b c; do echo "$b"; done;)
 INSTALLATION_NAMESPACE=$(oc get installations.orchestrator.aiops.ibm.com -A --no-headers | while read a b c; do echo "$a"; done;)
 
-
 # optional argument handling
 if [[ "$1" == "version" ]]
 then
-    echo "0.0.6"
+    echo "0.0.7"
     exit 0
 fi
 
@@ -36,36 +35,89 @@ fi
 # optional argument handling
 if [[ "$1" == "status" ]]
 then
+    oc project ${INSTALLATION_NAMESPACE}
+    
     echo "______________________________________________________________"
     echo "Installation instances:" && echo ""
-    oc get installations.orchestrator.aiops.ibm.com -A 
+    INSTANCE=$(oc get installation aiops-installation)
+    STATUS=$(oc get installation aiops-installation -o jsonpath='{.status.phase}')
+    if [[ $STATUS == "Running" ]]; then
+        printf "$green$INSTANCE$normal\n"
+    else
+        printf "$red$INSTANCE$normal\n"
+    fi
     
     echo "______________________________________________________________"
     echo "ZenService instances:" && echo ""
-    oc get zenservice -A -o custom-columns='KIND:.kind,NAME:.metadata.name,NAMESPACE:.metadata.namespace,VERSION:status.currentVersion,STATUS:.status.zenStatus,PROGRESS:.status.Progress,MESSAGE:.status.ProgressMessage'
+    INSTANCE=$(oc get zenservice iaf-zen-cpdservice -o custom-columns='KIND:.kind,NAME:.metadata.name,NAMESPACE:.metadata.namespace,VERSION:status.currentVersion,STATUS:.status.zenStatus,PROGRESS:.status.Progress,MESSAGE:.status.ProgressMessage')
+    STATUS=$(oc get zenservice iaf-zen-cpdservice -o jsonpath='{.status.zenStatus}')
+    if [[ $STATUS == "Completed" ]]; then
+        printf '%s\n' "$green$INSTANCE$normal"
+    else
+        printf '%s\n' "$red$INSTANCE$normal"
+    fi
 
     echo "______________________________________________________________"
     echo "AutomationUIConfig, AutomationBase, Cartridge, CartridgeRequirements, and EventProcessor instances:" && echo ""
-    oc get automationuiconfig,automationbase,cartridge,cartridgerequirements,EventProcessor -A -o custom-columns='KIND:.kind,NAMESPACE:.metadata.namespace,NAME:.metadata.name,VERSION:status.versions.reconciled,STATUS:.status.conditions[?(@.type=="Ready")].status,MESSAGE:.status.conditions[?(@.type=="Ready")].message'
-    
+    INSTANCE=$(oc get automationuiconfig,automationbase,cartridge,cartridgerequirements,EventProcessor -A -o custom-columns='KIND:.kind,NAMESPACE:.metadata.namespace,NAME:.metadata.name,VERSION:status.versions.reconciled,STATUS:.status.conditions[?(@.type=="Ready")].status,MESSAGE:.status.conditions[?(@.type=="Ready")].message')
+    STATUS_AUIC=$(oc get automationuiconfig iaf-system -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}')
+    STATUS_AB=$(oc get automationbase automationbase-sample -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}')
+    STATUS_CARTRIDGE=$(oc get cartridge cp4waiops-cartridge -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}')
+    STATUS_CARTRIDGE_REQS=$(oc get cartridgerequirements cp4waiops-cartridge -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}')
+    STATUS_IR_EP=$(oc get eventprocessor cp4waiops-eventprocessor -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}')
+    STATUS_EP=$(oc get eventprocessor cp4waiops-eventprocessor -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}')
+    if [[ $STATUS_AUIC == "True" ]] && [[ $STATUS_AB == "True" ]] && [[ $STATUS_CARTRIDGE == "True" ]] && [[ $STATUS_CARTRIDGE_REQS == "True" ]] && [[ $STATUS_IR_EP == "True" ]] && [[ $STATUS_EP == "True" ]]; then
+        printf '%s\n' "$green$INSTANCE$normal"
+    else
+        printf '%s\n' "$red$INSTANCE$normal"
+    fi
+
     echo "______________________________________________________________"
     echo "IRCore and AIOpsAnalyticsOrchestrator instances:" && echo ""
-    oc get ircore,AIOpsAnalyticsOrchestrator -A  -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:status.versions.reconciled,STATUS:status.conditions[?(@.type==\"Ready\")].reason,MESSAGE:status.conditions[?(@.type==\"Ready\")].message"
-    
+    INSTANCE=$(oc get ircore,AIOpsAnalyticsOrchestrator -A  -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:status.versions.reconciled,STATUS:status.conditions[?(@.type==\"Ready\")].reason,MESSAGE:status.conditions[?(@.type==\"Ready\")].message")
+    STATUS_IRCORE=$(oc get ircore aiops -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}')
+    STATUS_ANALYTICS_ORCHESTRATOR=$(oc get AIOpsAnalyticsOrchestrator aiops -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}')
+    if [[ $STATUS_IRCORE == "True" ]] && [[ $STATUS_ANALYTICS_ORCHESTRATOR == "True" ]]; then
+        printf '%s\n' "$green$INSTANCE$normal"
+    else
+        printf '%s\n' "$red$INSTANCE$normal"
+    fi
+
     echo "______________________________________________________________"
     echo "LifecycleService instances:" && echo ""
-    oc get lifecycleservice -A -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:status.versions.reconciled,STATUS:status.conditions[?(@.type==\"Lifecycle Service Ready\")].reason,MESSAGE:status.conditions[?(@.type==\"Ready\")].message"
-    
+    INSTANCE=$(oc get lifecycleservice -A -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:status.versions.reconciled,STATUS:status.conditions[?(@.type==\"Lifecycle Service Ready\")].reason,MESSAGE:status.conditions[?(@.type==\"Ready\")].message")
+    STATUS=$(oc get lifecycleservice aiops -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}')
+    if [[ $STATUS == "True" ]]; then
+        printf '%s\n' "$green$INSTANCE$normal"
+    else
+        printf '%s\n' "$red$INSTANCE$normal"
+    fi
+
     echo "______________________________________________________________"
     echo "BaseUI instances:" && echo ""
-    oc get BaseUI -A  -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:status.versions.reconciled,STATUS:status.conditions[?(@.type==\"Ready\")].status,MESSAGE:status.conditions[?(@.type==\"Ready\")].reason"
-    
+    INSTANCE=$(oc get BaseUI baseui-instance -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:status.versions.reconciled,STATUS:status.conditions[?(@.type==\"Ready\")].status,MESSAGE:status.conditions[?(@.type==\"Ready\")].reason")
+    STATUS=$(oc get BaseUI baseui-instance -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}')
+    if [[ $STATUS == "True" ]]; then
+        printf '%s\n' "$green$INSTANCE$normal"
+    else
+        printf '%s\n' "$red$INSTANCE$normal"
+    fi
+
     echo "______________________________________________________________"
     echo "AIManager, ASM, AIOpsEdge, and AIOpsUI instances:" && echo ""
-    oc get AIManager -A  -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:status.versions.reconciled,STATUS:status.phase,MESSAGE:status.message" && echo ""
-    oc get asm -A  -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:status.versions.reconciled,STATUS:status.phase" && echo ""
-    oc get aiopsedge -A  -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,STATUS:status.phase,MESSAGE:status.conditions[?(@.type==\"Ready\")].message" && echo ""
-    oc get aiopsui -A  -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:status.versions.reconciled,STATUS:status.conditions[?(@.type==\"Ready\")].status,MESSAGE:status.conditions[?(@.type==\"Ready\")].reason"
+    INSTANCE=$(oc get AIManager aimanager -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:status.versions.reconciled,STATUS:status.phase,MESSAGE:status.message" && echo ""
+    oc get asm aiops-topology -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:status.versions.reconciled,STATUS:status.phase" && echo ""
+    oc get aiopsedge aiopsedge -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,STATUS:status.phase,MESSAGE:status.conditions[?(@.type==\"Ready\")].message" && echo ""
+    oc get aiopsui aiopsui-instance -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:status.versions.reconciled,STATUS:status.conditions[?(@.type==\"Ready\")].status,MESSAGE:status.conditions[?(@.type==\"Ready\")].reason")
+    STATUS_AIMANAGER=$(oc get AIManager aimanager -o jsonpath='{.status.phase}')
+    STATUS_ASM=$(oc get asm aiops-topology -o jsonpath='{.status.phase}')
+    STATUS_AIOPSEDGE=$(oc get aiopsedge aiopsedge -o jsonpath='{.status.phase}')
+    STATUS_AIOPSUI=$(oc get aiopsui aiopsui-instance -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}')
+    if [[ $STATUS_AIMANAGER == "Completed" ]] && [[ $STATUS_ASM == "OK" ]] && [[ $STATUS_AIOPSEDGE == "Configured" ]] && [[ $STATUS_AIOPSUI == "True" ]]; then
+        printf '%s\n' "$green$INSTANCE$normal"
+    else
+        printf '%s\n' "$red$INSTANCE$normal"
+    fi
 
     printf "
 ${blue}${bold}Hint: for a more detailed printout of each operator's components' statuses, run \`oc waiops status-all\`.
@@ -77,77 +129,362 @@ fi
 # optional argument handling
 if [[ "$1" == "status-all" ]]
 then
+    oc project ${INSTALLATION_NAMESPACE}
+
     echo "______________________________________________________________"
     echo "Installation instances:" && echo ""
-    oc get installations.orchestrator.aiops.ibm.com -A 
+    INSTANCE=$(oc get installation aiops-installation)
+    STATUS=$(oc get installation aiops-installation -o jsonpath='{.status.phase}')
+    if [[ $STATUS == "Running" ]]; then
+        printf "$green$INSTANCE$normal\n"
+    else
+        printf "$red$INSTANCE$normal\n"
+    fi
     
     echo "______________________________________________________________"
     echo "ZenService instances:" && echo ""
-    oc get zenservice -A -o custom-columns='KIND:.kind,NAME:.metadata.name,NAMESPACE:.metadata.namespace,VERSION:status.currentVersion,STATUS:.status.zenStatus,PROGRESS:.status.Progress,MESSAGE:.status.ProgressMessage'
+    INSTANCE=$(oc get zenservice iaf-zen-cpdservice -o custom-columns='KIND:.kind,NAME:.metadata.name,NAMESPACE:.metadata.namespace,VERSION:status.currentVersion,STATUS:.status.zenStatus,PROGRESS:.status.Progress,MESSAGE:.status.ProgressMessage')
+    STATUS=$(oc get zenservice iaf-zen-cpdservice -o jsonpath='{.status.zenStatus}')
+    if [[ $STATUS == "Completed" ]]; then
+        printf '%s\n' "$green$INSTANCE$normal"
+    else
+        printf '%s\n' "$red$INSTANCE$normal"
+    fi
 
     echo "______________________________________________________________"
     echo "AutomationUIConfig, AutomationBase, Cartridge, CartridgeRequirements, and EventProcessor instances:" && echo ""
-    oc get automationuiconfig,automationbase,cartridge,cartridgerequirements,EventProcessor -A -o custom-columns='KIND:.kind,NAMESPACE:.metadata.namespace,NAME:.metadata.name,VERSION:status.versions.reconciled,STATUS:.status.conditions[?(@.type=="Ready")].status,MESSAGE:.status.conditions[?(@.type=="Ready")].message'
-    
+    INSTANCE=$(oc get automationuiconfig,automationbase,cartridge,cartridgerequirements,EventProcessor -A -o custom-columns='KIND:.kind,NAMESPACE:.metadata.namespace,NAME:.metadata.name,VERSION:status.versions.reconciled,STATUS:.status.conditions[?(@.type=="Ready")].status,MESSAGE:.status.conditions[?(@.type=="Ready")].message')
+    STATUS_AUIC=$(oc get automationuiconfig iaf-system -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}')
+    STATUS_AB=$(oc get automationbase automationbase-sample -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}')
+    STATUS_CARTRIDGE=$(oc get cartridge cp4waiops-cartridge -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}')
+    STATUS_CARTRIDGE_REQS=$(oc get cartridgerequirements cp4waiops-cartridge -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}')
+    STATUS_IR_EP=$(oc get eventprocessor cp4waiops-eventprocessor -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}')
+    STATUS_EP=$(oc get eventprocessor cp4waiops-eventprocessor -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}')
+    if [[ $STATUS_AUIC == "True" ]] && [[ $STATUS_AB == "True" ]] && [[ $STATUS_CARTRIDGE == "True" ]] && [[ $STATUS_CARTRIDGE_REQS == "True" ]] && [[ $STATUS_IR_EP == "True" ]] && [[ $STATUS_EP == "True" ]]; then
+        printf '%s\n' "$green$INSTANCE$normal"
+    else
+        printf '%s\n' "$red$INSTANCE$normal"
+    fi
+
     echo "______________________________________________________________"
     echo "IRCore and AIOpsAnalyticsOrchestrator instances:" && echo ""
-    oc get ircore,AIOpsAnalyticsOrchestrator -A  -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:status.versions.reconciled,STATUS:status.conditions[?(@.type==\"Ready\")].reason,MESSAGE:status.conditions[?(@.type==\"Ready\")].message"
-    
+    INSTANCE=$(oc get ircore,AIOpsAnalyticsOrchestrator -A  -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:status.versions.reconciled,STATUS:status.conditions[?(@.type==\"Ready\")].reason,MESSAGE:status.conditions[?(@.type==\"Ready\")].message")
+    STATUS_IRCORE=$(oc get ircore aiops -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}')
+    STATUS_ANALYTICS_ORCHESTRATOR=$(oc get AIOpsAnalyticsOrchestrator aiops -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}')
+    if [[ $STATUS_IRCORE == "True" ]] && [[ $STATUS_ANALYTICS_ORCHESTRATOR == "True" ]]; then
+        printf '%s\n' "$green$INSTANCE$normal"
+    else
+        printf '%s\n' "$red$INSTANCE$normal"
+    fi
+
     echo "______________________________________________________________"
     echo "LifecycleService instances:" && echo ""
-    oc get lifecycleservice -A -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:status.versions.reconciled,STATUS:status.conditions[?(@.type==\"Lifecycle Service Ready\")].reason,MESSAGE:status.conditions[?(@.type==\"Ready\")].message"
-    
+    INSTANCE=$(oc get lifecycleservice -A -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:status.versions.reconciled,STATUS:status.conditions[?(@.type==\"Lifecycle Service Ready\")].reason,MESSAGE:status.conditions[?(@.type==\"Ready\")].message")
+    STATUS=$(oc get lifecycleservice aiops -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}')
+    if [[ $STATUS == "True" ]]; then
+        printf '%s\n' "$green$INSTANCE$normal"
+    else
+        printf '%s\n' "$red$INSTANCE$normal"
+    fi
+
     echo "______________________________________________________________"
     echo "BaseUI instances:" && echo ""
-    oc get BaseUI -A  -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:status.versions.reconciled,STATUS:status.conditions[?(@.type==\"Ready\")].status,MESSAGE:status.conditions[?(@.type==\"Ready\")].reason"
-    
+    INSTANCE=$(oc get BaseUI baseui-instance -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:status.versions.reconciled,STATUS:status.conditions[?(@.type==\"Ready\")].status,MESSAGE:status.conditions[?(@.type==\"Ready\")].reason")
+    STATUS=$(oc get BaseUI baseui-instance -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}')
+    if [[ $STATUS == "True" ]]; then
+        printf '%s\n' "$green$INSTANCE$normal"
+    else
+        printf '%s\n' "$red$INSTANCE$normal"
+    fi
+
     echo "______________________________________________________________"
     echo "AIManager, ASM, AIOpsEdge, and AIOpsUI instances:" && echo ""
-    oc get AIManager -A  -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:status.versions.reconciled,STATUS:status.phase,MESSAGE:status.message" && echo ""
-    oc get asm -A  -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:status.versions.reconciled,STATUS:status.phase" && echo ""
-    oc get aiopsedge -A  -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,STATUS:status.phase,MESSAGE:status.conditions[?(@.type==\"Ready\")].message" && echo ""
-    oc get aiopsui -A  -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:status.versions.reconciled,STATUS:status.conditions[?(@.type==\"Ready\")].status,MESSAGE:status.conditions[?(@.type==\"Ready\")].reason"
-    
+    INSTANCE=$(oc get AIManager aimanager -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:status.versions.reconciled,STATUS:status.phase,MESSAGE:status.message" && echo ""
+    oc get asm aiops-topology -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:status.versions.reconciled,STATUS:status.phase" && echo ""
+    oc get aiopsedge aiopsedge -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,STATUS:status.phase,MESSAGE:status.conditions[?(@.type==\"Ready\")].message" && echo ""
+    oc get aiopsui aiopsui-instance -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:status.versions.reconciled,STATUS:status.conditions[?(@.type==\"Ready\")].status,MESSAGE:status.conditions[?(@.type==\"Ready\")].reason")
+    STATUS_AIMANAGER=$(oc get AIManager aimanager -o jsonpath='{.status.phase}')
+    STATUS_ASM=$(oc get asm aiops-topology -o jsonpath='{.status.phase}')
+    STATUS_AIOPSEDGE=$(oc get aiopsedge aiopsedge -o jsonpath='{.status.phase}')
+    STATUS_AIOPSUI=$(oc get aiopsui aiopsui-instance -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}')
+    if [[ $STATUS_AIMANAGER == "Completed" ]] && [[ $STATUS_ASM == "OK" ]] && [[ $STATUS_AIOPSEDGE == "Configured" ]] && [[ $STATUS_AIOPSUI == "True" ]]; then
+        printf '%s\n' "$green$INSTANCE$normal"
+    else
+        printf '%s\n' "$red$INSTANCE$normal"
+    fi
+
     echo "______________________________________________________________"
     echo "Kong instances:" && echo ""
-    oc get kong -A -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,STATUS:.status.conditions[?(@.type==\"Deployed\")].status,MESSAGE:status.conditions[?(@.type==\"Deployed\")].reason"         
-    
+    INSTANCE=$(oc get kong gateway -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,STATUS:.status.conditions[?(@.type==\"Deployed\")].status,MESSAGE:status.conditions[?(@.type==\"Deployed\")].reason")         
+    STATUS=$(oc get kong gateway -o jsonpath='{.status.conditions[].status}')
+    if [[ $STATUS == "True" ]]; then
+        printf '%s\n' "$green$INSTANCE$normal"
+    else
+        printf '%s\n' "$red$INSTANCE$normal"
+    fi
+
     echo "______________________________________________________________"
     echo "Vault (VaultDeploy and VaultAccess) instances:" && echo ""
-    oc get vaultdeploy,vaultaccess -A  -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:metadata.annotations.productVersion,STATUS:status.conditions[?(@.type==\"Completed\")].status,MESSAGE:status.conditions[?(@.type==\"Completed\")].message"
+    INSTANCE=$(oc get vaultdeploy,vaultaccess -A  -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:metadata.annotations.productVersion,STATUS:status.conditions[?(@.type==\"Completed\")].status,MESSAGE:status.conditions[?(@.type==\"Completed\")].message")
+    STATUS_VAULTDEPLOY=$(oc get vaultdeploy ibm-vault-deploy -o jsonpath='{.status.conditions[].status}')
+    STATUS_VAULTACCESS=$(oc get vaultaccess ibm-vault-access -o jsonpath='{.status.conditions[].status}')
+    if [[ $STATUS_VAULTDEPLOY == "True" ]] && [[ $STATUS_VAULTACCESS == "True" ]]; then
+        printf '%s\n' "$green$INSTANCE$normal"
+    else
+        printf '%s\n' "$red$INSTANCE$normal"
+    fi
 
     echo "______________________________________________________________"
     echo "Postgres (Postgreservices and PostgresDB) instances:" && echo ""
-    oc get postgreservices,postgresdb -A  -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:spec.version,STATUS:status.conditions[?(@.type==\"Completed\")].status,MESSAGE:status.conditions[?(@.type==\"Completed\")].message"
-    
+    INSTANCE=$(oc get postgreservices,postgresdb -A  -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:spec.version,STATUS:status.conditions[?(@.type==\"Completed\")].status,MESSAGE:status.conditions[?(@.type==\"Completed\")].message")
+    STATUS_POSTGRESERVICES=$(oc get postgreservices cp4waiops-postgres -o jsonpath='{.status.conditions[].status}')
+    STATUS_POSTGRESDB=$(oc get postgresdb cp4waiops-postgresdb -o jsonpath='{.status.conditions[].status}')
+    if [[ $STATUS_POSTGRESERVICES == "True" ]] && [[ $STATUS_POSTGRESDB == "True" ]]; then
+        printf '%s\n' "$green$INSTANCE$normal"
+    else
+        printf '%s\n' "$red$INSTANCE$normal"
+    fi
+
     echo "______________________________________________________________"
     echo "CSVs from $INSTALLATION_NAMESPACE namespace:" && echo ""
-    oc get csvs -n $INSTALLATION_NAMESPACE 
+    INSTANCE=$(oc get csvs -n $INSTALLATION_NAMESPACE) 
+
+    CSV_NAME=$(oc get csvs -o name --no-headers=true -n $INSTALLATION_NAMESPACE | grep aimanager-operator)         
+    STATUS_AIMANAGER=$(oc get $CSV_NAME -n $INSTALLATION_NAMESPACE -o jsonpath='{.status.phase}')
+
+    CSV_NAME=$(oc get csvs -o name --no-headers=true -n $INSTALLATION_NAMESPACE | grep aiopsedge-operator)         
+    STATUS_AIOPSEDGE=$(oc get $CSV_NAME -n $INSTALLATION_NAMESPACE -o jsonpath='{.status.phase}')
+    
+    CSV_NAME=$(oc get csvs -o name --no-headers=true -n $INSTALLATION_NAMESPACE | grep asm-operator)         
+    STATUS_ASM=$(oc get $CSV_NAME -n $INSTALLATION_NAMESPACE -o jsonpath='{.status.phase}')
+    
+    CSV_NAME=$(oc get csvs -o name --no-headers=true -n $INSTALLATION_NAMESPACE | grep couchdb-operator)         
+    STATUS_COUCHDB=$(oc get $CSV_NAME -n $INSTALLATION_NAMESPACE -o jsonpath='{.status.phase}')
+    
+    CSV_NAME=$(oc get csvs -o name --no-headers=true -n $INSTALLATION_NAMESPACE | grep elasticsearch-operator)         
+    STATUS_ELASTICSEARCH=$(oc get $CSV_NAME -n $INSTALLATION_NAMESPACE -o jsonpath='{.status.phase}')
+    
+    CSV_NAME=$(oc get csvs -o name --no-headers=true -n $INSTALLATION_NAMESPACE | grep ibm-aiops-ir-ai)         
+    STATUS_AIOPSIRAI=$(oc get $CSV_NAME -n $INSTALLATION_NAMESPACE -o jsonpath='{.status.phase}')
+    
+    CSV_NAME=$(oc get csvs -o name --no-headers=true -n $INSTALLATION_NAMESPACE | grep ibm-aiops-ir-core)         
+    STATUS_AIOPSIRCORE=$(oc get $CSV_NAME -n $INSTALLATION_NAMESPACE -o jsonpath='{.status.phase}')
+    
+    CSV_NAME=$(oc get csvs -o name --no-headers=true -n $INSTALLATION_NAMESPACE | grep ibm-aiops-ir-lifecycle)         
+    STATUS_AIOPSIRLIFECYCLE=$(oc get $CSV_NAME -n $INSTALLATION_NAMESPACE -o jsonpath='{.status.phase}')
+    
+    CSV_NAME=$(oc get csvs -o name --no-headers=true -n $INSTALLATION_NAMESPACE | grep ibm-aiops-orchestrator)         
+    STATUS_AIOPSORCHESTRATOR=$(oc get $CSV_NAME -n $INSTALLATION_NAMESPACE -o jsonpath='{.status.phase}')
+    
+    CSV_NAME=$(oc get csvs -o name --no-headers=true -n $INSTALLATION_NAMESPACE | grep ibm-automation-core)         
+    STATUS_AUTOMATIONCORE=$(oc get $CSV_NAME -n $INSTALLATION_NAMESPACE -o jsonpath='{.status.phase}')
+    
+    CSV_NAME=$(oc get csvs -o name --no-headers=true -n $INSTALLATION_NAMESPACE | grep ibm-automation-elastic)         
+    STATUS_ELASTIC=$(oc get $CSV_NAME -n $INSTALLATION_NAMESPACE -o jsonpath='{.status.phase}')
+    
+    CSV_NAME=$(oc get csvs -o name --no-headers=true -n $INSTALLATION_NAMESPACE | grep ibm-automation-eventprocessing)         
+    STATUS_EP=$(oc get $CSV_NAME -n $INSTALLATION_NAMESPACE -o jsonpath='{.status.phase}')
+    
+    CSV_NAME=$(oc get csvs -o name --no-headers=true -n $INSTALLATION_NAMESPACE | grep ibm-automation-flink)         
+    STATUS_FLINK=$(oc get $CSV_NAME -n $INSTALLATION_NAMESPACE -o jsonpath='{.status.phase}')
+    
+    CSV_NAME=$(oc get csvs -o name --no-headers=true -n $INSTALLATION_NAMESPACE | grep ibm-automation.v)         
+    STATUS_AUTOMATION=$(oc get $CSV_NAME -n $INSTALLATION_NAMESPACE -o jsonpath='{.status.phase}')
+    
+    CSV_NAME=$(oc get csvs -o name --no-headers=true -n $INSTALLATION_NAMESPACE | grep ibm-cloud-databases-redis)         
+    STATUS_REDIS=$(oc get $CSV_NAME -n $INSTALLATION_NAMESPACE -o jsonpath='{.status.phase}')
+    
+    CSV_NAME=$(oc get csvs -o name --no-headers=true -n $INSTALLATION_NAMESPACE | grep ibm-common-service-operator)         
+    STATUS_COMMONSERVICE=$(oc get $CSV_NAME -n $INSTALLATION_NAMESPACE -o jsonpath='{.status.phase}')
+    
+    CSV_NAME=$(oc get csvs -o name --no-headers=true -n $INSTALLATION_NAMESPACE | grep ibm-management-kong)         
+    STATUS_KONG=$(oc get $CSV_NAME -n $INSTALLATION_NAMESPACE -o jsonpath='{.status.phase}')
+    
+    CSV_NAME=$(oc get csvs -o name --no-headers=true -n $INSTALLATION_NAMESPACE | grep ibm-postgreservice-operator)         
+    STATUS_POSTGRESERVICE=$(oc get $CSV_NAME -n $INSTALLATION_NAMESPACE -o jsonpath='{.status.phase}')
+    
+    CSV_NAME=$(oc get csvs -o name --no-headers=true -n $INSTALLATION_NAMESPACE | grep ibm-secure-tunnel-operator)         
+    STATUS_SECURETUNNEL=$(oc get $CSV_NAME -n $INSTALLATION_NAMESPACE -o jsonpath='{.status.phase}')
+    
+    CSV_NAME=$(oc get csvs -o name --no-headers=true -n $INSTALLATION_NAMESPACE | grep ibm-vault-operator)         
+    STATUS_VAULT=$(oc get $CSV_NAME -n $INSTALLATION_NAMESPACE -o jsonpath='{.status.phase}')
+    
+    CSV_NAME=$(oc get csvs -o name --no-headers=true -n $INSTALLATION_NAMESPACE | grep ibm-watson-aiops-ui-operator)         
+    STATUS_AIOPSUI=$(oc get $CSV_NAME -n $INSTALLATION_NAMESPACE -o jsonpath='{.status.phase}')
+    
+    if [[ $STATUS_AIMANAGER == "Succeeded" ]] && [[ $STATUS_AIOPSEDGE == "Succeeded" ]] && [[ $STATUS_ASM == "Succeeded" ]] && [[ $STATUS_COUCHDB == "Succeeded" ]] && [[ $STATUS_ELASTICSEARCH == "Succeeded" ]] && [[ $STATUS_AIOPSIRAI == "Succeeded" ]] && [[ $STATUS_AIOPSIRCORE == "Succeeded" ]] && [[ $STATUS_AIOPSIRLIFECYCLE == "Succeeded" ]] && [[ $STATUS_AIOPSORCHESTRATOR == "Succeeded" ]] && [[ $STATUS_AUTOMATIONCORE == "Succeeded" ]] && [[ $STATUS_ELASTIC == "Succeeded" ]] && [[ $STATUS_EP == "Succeeded" ]] && [[ $STATUS_FLINK == "Succeeded" ]] && [[ $STATUS_AUTOMATION == "Succeeded" ]] && [[ $STATUS_REDIS == "Succeeded" ]] && [[ $STATUS_COMMONSERVICE == "Succeeded" ]] && [[ $STATUS_KONG == "Succeeded" ]] && [[ $STATUS_POSTGRESERVICE == "Succeeded" ]] && [[ $STATUS_SECURETUNNEL == "Succeeded" ]] && [[ $STATUS_VAULT == "Succeeded" ]] && [[ $STATUS_AIOPSUI == "Succeeded" ]]; then
+        printf '%s\n' "$green$INSTANCE$normal"
+    else
+        printf '%s\n' "$red$INSTANCE$normal"
+    fi
 
     echo "______________________________________________________________"
     echo "CSVs from ibm-common-services namespace:" && echo ""
-    oc get csvs -n ibm-common-services
+    INSTANCE=$(oc get csvs -n ibm-common-services)
+    
+    CSV_NAME=$(oc get csvs -o name --no-headers=true -n ibm-common-services | grep cloud-native-postgresql)         
+    STATUS_ClOUDNATIVEPOSTGRES=$(oc get $CSV_NAME -n ibm-common-services -o jsonpath='{.status.phase}')
+
+    CSV_NAME=$(oc get csvs -o name --no-headers=true -n ibm-common-services | grep elasticsearch-operator)         
+    STATUS_ELASTICSEARCH=$(oc get $CSV_NAME -n ibm-common-services -o jsonpath='{.status.phase}')
+
+    CSV_NAME=$(oc get csvs -o name --no-headers=true -n ibm-common-services | grep ibm-cert-manager-operator)         
+    STATUS_CERTMANAGER=$(oc get $CSV_NAME -n ibm-common-services -o jsonpath='{.status.phase}')
+
+    CSV_NAME=$(oc get csvs -o name --no-headers=true -n ibm-common-services | grep ibm-common-service-operator)         
+    STATUS_COMMONSERVICE=$(oc get $CSV_NAME -n ibm-common-services -o jsonpath='{.status.phase}')
+
+    CSV_NAME=$(oc get csvs -o name --no-headers=true -n ibm-common-services | grep ibm-commonui-operator)         
+    STATUS_COMMONUI=$(oc get $CSV_NAME -n ibm-common-services -o jsonpath='{.status.phase}')
+
+    CSV_NAME=$(oc get csvs -o name --no-headers=true -n ibm-common-services | grep ibm-crossplane-operator)         
+    STATUS_CROSSPLANE=$(oc get $CSV_NAME -n ibm-common-services -o jsonpath='{.status.phase}')
+
+    CSV_NAME=$(oc get csvs -o name --no-headers=true -n ibm-common-services | grep ibm-crossplane-provider-kubernetes-operator)         
+    STATUS_CROSSPLANEPROVIDER=$(oc get $CSV_NAME -n ibm-common-services -o jsonpath='{.status.phase}')
+
+    CSV_NAME=$(oc get csvs -o name --no-headers=true -n ibm-common-services | grep ibm-events-operator)         
+    STATUS_EVENTS=$(oc get $CSV_NAME -n ibm-common-services -o jsonpath='{.status.phase}')
+
+    CSV_NAME=$(oc get csvs -o name --no-headers=true -n ibm-common-services | grep ibm-iam-operator)         
+    STATUS_IAM=$(oc get $CSV_NAME -n ibm-common-services -o jsonpath='{.status.phase}')
+
+    CSV_NAME=$(oc get csvs -o name --no-headers=true -n ibm-common-services | grep ibm-ingress-nginx-operator)         
+    STATUS_INGRESS=$(oc get $CSV_NAME -n ibm-common-services -o jsonpath='{.status.phase}')
+
+    CSV_NAME=$(oc get csvs -o name --no-headers=true -n ibm-common-services | grep ibm-licensing-operator)         
+    STATUS_LICENSING=$(oc get $CSV_NAME -n ibm-common-services -o jsonpath='{.status.phase}')
+
+    CSV_NAME=$(oc get csvs -o name --no-headers=true -n ibm-common-services | grep ibm-management-ingress-operator)         
+    STATUS_MGMTINGRESS=$(oc get $CSV_NAME -n ibm-common-services -o jsonpath='{.status.phase}')
+
+    CSV_NAME=$(oc get csvs -o name --no-headers=true -n ibm-common-services | grep ibm-mongodb-operator)         
+    STATUS_MONGODB=$(oc get $CSV_NAME -n ibm-common-services -o jsonpath='{.status.phase}')
+
+    CSV_NAME=$(oc get csvs -o name --no-headers=true -n ibm-common-services | grep ibm-namespace-scope-operator)         
+    STATUS_NAMESPACESCOPE=$(oc get $CSV_NAME -n ibm-common-services -o jsonpath='{.status.phase}')
+
+    CSV_NAME=$(oc get csvs -o name --no-headers=true -n ibm-common-services | grep ibm-platform-api-operator)         
+    STATUS_PLATFORMAPI=$(oc get $CSV_NAME -n ibm-common-services -o jsonpath='{.status.phase}')
+
+    CSV_NAME=$(oc get csvs -o name --no-headers=true -n ibm-common-services | grep ibm-zen-operator)         
+    STATUS_ZEN=$(oc get $CSV_NAME -n ibm-common-services -o jsonpath='{.status.phase}')
+
+    CSV_NAME=$(oc get csvs -o name --no-headers=true -n ibm-common-services | grep operand-deployment-lifecycle-manager)         
+    STATUS_ODLM=$(oc get $CSV_NAME -n ibm-common-services -o jsonpath='{.status.phase}')
+
+    if [[ $STATUS_ClOUDNATIVEPOSTGRES == "Succeeded" ]] && [[ $STATUS_ELASTICSEARCH == "Succeeded" ]] && [[ $STATUS_CERTMANAGER == "Succeeded" ]] && [[ $STATUS_COMMONSERVICE == "Succeeded" ]] && [[ $STATUS_COMMONUI == "Succeeded" ]] && [[ $STATUS_CROSSPLANE == "Succeeded" ]] && [[ $STATUS_CROSSPLANEPROVIDER == "Succeeded" ]] && [[ $STATUS_EVENTS == "Succeeded" ]] && [[ $STATUS_IAM == "Succeeded" ]] && [[ $STATUS_INGRESS == "Succeeded" ]] && [[ $STATUS_LICENSING == "Succeeded" ]] && [[ $STATUS_MGMTINGRESS == "Succeeded" ]] && [[ $STATUS_MONGODB == "Succeeded" ]] && [[ $STATUS_NAMESPACESCOPE == "Succeeded" ]] && [[ $STATUS_PLATFORMAPI == "Succeeded" ]] && [[ $STATUS_ZEN == "Succeeded" ]] && [[ $STATUS_ODLM == "Succeeded" ]]; then
+        printf '%s\n' "$green$INSTANCE$normal"
+    else
+        printf '%s\n' "$red$INSTANCE$normal"
+    fi
 
     echo "______________________________________________________________"
     echo "Subscriptions from $INSTALLATION_NAMESPACE namespace:" && echo ""
-    oc get subscriptions -n $INSTALLATION_NAMESPACE 
+    INSTANCE=$(oc get subscriptions -n $INSTALLATION_NAMESPACE)
+    STATUS_AIMANAGER=$(oc get subscription aimanager-operator -n $INSTALLATION_NAMESPACE -o jsonpath='{.status.catalogHealth[].healthy}')
+    STATUS_AIOPSEDGE=$(oc get subscription aiopsedge-operator -n $INSTALLATION_NAMESPACE -o jsonpath='{.status.catalogHealth[].healthy}')
+    STATUS_ASM=$(oc get subscription asm-operator -n $INSTALLATION_NAMESPACE -o jsonpath='{.status.catalogHealth[].healthy}')
+    STATUS_COUCHDB=$(oc get subscription couchdb -n $INSTALLATION_NAMESPACE -o jsonpath='{.status.catalogHealth[].healthy}')
+    STATUS_AIOPSORCHESTRATOR=$(oc get subscription ibm-aiops-orchestrator -n $INSTALLATION_NAMESPACE -o jsonpath='{.status.catalogHealth[].healthy}')
+    STATUS_AUTOMATION=$(oc get subscription ibm-automation -n $INSTALLATION_NAMESPACE -o jsonpath='{.status.catalogHealth[].healthy}')
+    STATUS_AUTOMATIONCORE=$(oc get subscription ibm-automation-core-v1.3-iaf-core-operators-openshift-marketplace -n $INSTALLATION_NAMESPACE -o jsonpath='{.status.catalogHealth[].healthy}')
+    STATUS_AUTOMATIONELASTIC=$(oc get subscription ibm-automation-elastic-v1.3-iaf-operators-openshift-marketplace -n $INSTALLATION_NAMESPACE -o jsonpath='{.status.catalogHealth[].healthy}')
+    STATUS_AUTOMATIONEP=$(oc get subscription ibm-automation-eventprocessing-v1.3-iaf-operators-openshift-marketplace -n $INSTALLATION_NAMESPACE -o jsonpath='{.status.catalogHealth[].healthy}')
+    STATUS_AUTOMATIONFLINK=$(oc get subscription ibm-automation-flink-v1.3-iaf-operators-openshift-marketplace -n $INSTALLATION_NAMESPACE -o jsonpath='{.status.catalogHealth[].healthy}')
+    STATUS_COMMONSERVICE=$(oc get subscription ibm-common-service-operator-v3-opencloud-operators-openshift-marketplace -n $INSTALLATION_NAMESPACE -o jsonpath='{.status.catalogHealth[].healthy}')
+    STATUS_KONG=$(oc get subscription ibm-management-kong -n $INSTALLATION_NAMESPACE -o jsonpath='{.status.catalogHealth[].healthy}')
+    STATUS_POSTGRESERVICE=$(oc get subscription ibm-postgreservice-operator -n $INSTALLATION_NAMESPACE -o jsonpath='{.status.catalogHealth[].healthy}')
+    STATUS_SECURETUNNEL=$(oc get subscription ibm-secure-tunnel-operator -n $INSTALLATION_NAMESPACE -o jsonpath='{.status.catalogHealth[].healthy}')
+    STATUS_AIOPSUI=$(oc get subscription ibm-watson-aiops-ui-operator -n $INSTALLATION_NAMESPACE -o jsonpath='{.status.catalogHealth[].healthy}')
+    STATUS_IRAI=$(oc get subscription ir-ai-operator -n $INSTALLATION_NAMESPACE -o jsonpath='{.status.catalogHealth[].healthy}')
+    STATUS_IRCORE=$(oc get subscription ir-core-operator -n $INSTALLATION_NAMESPACE -o jsonpath='{.status.catalogHealth[].healthy}')
+    STATUS_IRLIFECYCLE=$(oc get subscription ir-lifecycle-operator -n $INSTALLATION_NAMESPACE -o jsonpath='{.status.catalogHealth[].healthy}')
+    STATUS_REDIS=$(oc get subscription redis -n $INSTALLATION_NAMESPACE -o jsonpath='{.status.catalogHealth[].healthy}')
+    STATUS_VAULT=$(oc get subscription vault -n $INSTALLATION_NAMESPACE -o jsonpath='{.status.catalogHealth[].healthy}')
+    if [[ $STATUS_AIMANAGER == "true" ]] && [[ $STATUS_AIOPSEDGE == "true" ]] && [[ $STATUS_ASM == "true" ]] && [[ $STATUS_COUCHDB == "true" ]] && [[ $STATUS_AIOPSORCHESTRATOR == "true" ]] && [[ $STATUS_AUTOMATION == "true" ]] && [[ $STATUS_AUTOMATIONCORE == "true" ]] && [[ $STATUS_AUTOMATIONELASTIC == "true" ]] && [[ $STATUS_AUTOMATIONEP == "true" ]] && [[ $STATUS_AUTOMATIONFLINK == "true" ]] && [[ $STATUS_COMMONSERVICE == "true" ]] && [[ $STATUS_KONG == "true" ]] && [[ $STATUS_POSTGRESERVICE == "true" ]] && [[ $STATUS_SECURETUNNEL == "true" ]] && [[ $STATUS_AIOPSUI == "true" ]] && [[ $STATUS_IRAI == "true" ]] && [[ $STATUS_IRCORE == "true" ]] && [[ $STATUS_IRLIFECYCLE == "true" ]] && [[ $STATUS_REDIS == "true" ]] && [[ $STATUS_VAULT == "true" ]]; then
+        printf '%s\n' "$green$INSTANCE$normal"
+    else
+        printf '%s\n' "$red$INSTANCE$normal"
+    fi
+
 
     echo "______________________________________________________________"
     echo "Subscriptions from ibm-common-services namespace:" && echo ""
-    oc get subscriptions -n ibm-common-services
-    
-    echo "______________________________________________________________"
-    echo "OperandRequest instances:" && echo ""
-    oc get operandrequests -A -o custom-columns="NAMESPACE:metadata.namespace,NAME:metadata.name,PHASE:status.phase,CREATED AT:metadata.creationTimestamp"
-    
-    echo "______________________________________________________________"
-    echo "ODLM pod current status:" && echo ""
-    oc get pod -A | grep operand-deployment-lifecycle-manager
+    INSTANCE=$(oc get subscriptions -n ibm-common-services)
+    STATUS_ClOUDNATIVEPOSTGRES=$(oc get subscription cloud-native-postgresql -n ibm-common-services -o jsonpath='{.status.catalogHealth[].healthy}')
+    STATUS_CERTMANAGER=$(oc get subscription ibm-cert-manager-operator -n ibm-common-services -o jsonpath='{.status.catalogHealth[].healthy}')
+    STATUS_COMMONSERVICE=$(oc get subscription ibm-common-service-operator -n ibm-common-services -o jsonpath='{.status.catalogHealth[].healthy}')
+    STATUS_COMMONUI=$(oc get subscription ibm-commonui-operator -n ibm-common-services -o jsonpath='{.status.catalogHealth[].healthy}')
+    STATUS_CROSSPLANE=$(oc get subscription ibm-crossplane-operator-app -n ibm-common-services -o jsonpath='{.status.catalogHealth[].healthy}')
+    STATUS_CROSSPLANEPROVIDER=$(oc get subscription ibm-crossplane-provider-kubernetes-operator-app -n ibm-common-services -o jsonpath='{.status.catalogHealth[].healthy}')
+    STATUS_EVENTS=$(oc get subscription ibm-events-operator -n ibm-common-services -o jsonpath='{.status.catalogHealth[].healthy}')
+    STATUS_IAM=$(oc get subscription ibm-iam-operator -n ibm-common-services -o jsonpath='{.status.catalogHealth[].healthy}')
+    STATUS_INGRESS=$(oc get subscription ibm-ingress-nginx-operator -n ibm-common-services -o jsonpath='{.status.catalogHealth[].healthy}')
+    STATUS_LICENSING=$(oc get subscription ibm-licensing-operator -n ibm-common-services -o jsonpath='{.status.catalogHealth[].healthy}')
+    STATUS_MGMTINGRESS=$(oc get subscription ibm-management-ingress-operator -n ibm-common-services -o jsonpath='{.status.catalogHealth[].healthy}')
+    STATUS_MONGODB=$(oc get subscription ibm-mongodb-operator -n ibm-common-services -o jsonpath='{.status.catalogHealth[].healthy}')
+    STATUS_NAMESPACESCOPE=$(oc get subscription ibm-namespace-scope-operator -n ibm-common-services -o jsonpath='{.status.catalogHealth[].healthy}')
+    STATUS_PLATFORMAPI=$(oc get subscription ibm-platform-api-operator -n ibm-common-services -o jsonpath='{.status.catalogHealth[].healthy}')
+    STATUS_ZEN=$(oc get subscription ibm-zen-operator -n ibm-common-services -o jsonpath='{.status.catalogHealth[].healthy}')
+    STATUS_ODLM=$(oc get subscription operand-deployment-lifecycle-manager-app -n ibm-common-services -o jsonpath='{.status.catalogHealth[].healthy}')
+    if [[ $STATUS_ClOUDNATIVEPOSTGRES == "true" ]] && [[ $STATUS_CERTMANAGER == "true" ]] && [[ $STATUS_COMMONSERVICE == "true" ]] && [[ $STATUS_COMMONUI == "true" ]] && [[ $STATUS_CROSSPLANE == "true" ]] && [[ $STATUS_CROSSPLANEPROVIDER == "true" ]] && [[ $STATUS_EVENTS == "true" ]] && [[ $STATUS_IAM == "true" ]] && [[ $STATUS_INGRESS == "true" ]] && [[ $STATUS_LICENSING == "true" ]] && [[ $STATUS_MGMTINGRESS == "true" ]] && [[ $STATUS_MONGODB == "true" ]] && [[ $STATUS_NAMESPACESCOPE == "true" ]] && [[ $STATUS_PLATFORMAPI == "true" ]] && [[ $STATUS_ZEN == "true" ]] && [[ $STATUS_ODLM == "true" ]]; then
+        printf '%s\n' "$green$INSTANCE$normal"
+    else
+        printf '%s\n' "$red$INSTANCE$normal"
+    fi
 
     echo "______________________________________________________________"
-    echo "Orchestrator pod current status:" && echo ""
-    oc get pod -A | grep ibm-aiops-orchestrator-controller-manager    
-    
+    echo "OperandRequest instances:" && echo ""
+    INSTANCE=$(oc get operandrequests -A -o custom-columns="NAMESPACE:metadata.namespace,NAME:metadata.name,PHASE:status.phase,CREATED AT:metadata.creationTimestamp")
+    STATUS_COMMONUIREQUEST=$(oc get operandrequests ibm-commonui-request -n ibm-common-services -o jsonpath='{.status.phase}')
+    STATUS_IAMREQUEST=$(oc get operandrequests ibm-iam-request -n ibm-common-services -o jsonpath='{.status.phase}')
+    STATUS_MONGODBREQUEST=$(oc get operandrequests ibm-mongodb-request -n ibm-common-services -o jsonpath='{.status.phase}')
+    STATUS_MGMTINGRESSREQUEST=$(oc get operandrequests management-ingress -n ibm-common-services -o jsonpath='{.status.phase}')
+    STATUS_PLATFORMAPIREQUEST=$(oc get operandrequests platform-api-request -n ibm-common-services -o jsonpath='{.status.phase}')
+    STATUS_EDGEBASEREQUEST=$(oc get operandrequests aiopsedge-base -n $INSTALLATION_NAMESPACE -o jsonpath='{.status.phase}')
+    STATUS_EDGECSREQUEST=$(oc get operandrequests aiopsedge-cs -n $INSTALLATION_NAMESPACE -o jsonpath='{.status.phase}')
+    STATUS_IAFCOREREQUEST=$(oc get operandrequests iaf-core-operator -n $INSTALLATION_NAMESPACE -o jsonpath='{.status.phase}')
+    STATUS_IAFEPREQUEST=$(oc get operandrequests iaf-eventprocessing-operator -n $INSTALLATION_NAMESPACE -o jsonpath='{.status.phase}')
+    STATUS_IAFOPERATORREQUEST=$(oc get operandrequests iaf-operator -n $INSTALLATION_NAMESPACE -o jsonpath='{.status.phase}')
+    STATUS_IAFSYSTEMREQUEST=$(oc get operandrequests iaf-system -n $INSTALLATION_NAMESPACE -o jsonpath='{.status.phase}')
+    STATUS_IAFSYSTEMCSREQUEST=$(oc get operandrequests iaf-system-common-service -n $INSTALLATION_NAMESPACE -o jsonpath='{.status.phase}')
+    STATUS_AIOPSAIMANAGERREQUEST=$(oc get operandrequests ibm-aiops-ai-manager -n $INSTALLATION_NAMESPACE -o jsonpath='{.status.phase}')
+    STATUS_AIOPSFOUNDATIONREQUEST=$(oc get operandrequests ibm-aiops-aiops-foundation -n $INSTALLATION_NAMESPACE -o jsonpath='{.status.phase}')
+    STATUS_AIOPSAPPLICATIONMANAGERREQUEST=$(oc get operandrequests ibm-aiops-application-manager -n $INSTALLATION_NAMESPACE -o jsonpath='{.status.phase}')
+    STATUS_AIOPSCONNECTIONREQUEST=$(oc get operandrequests ibm-aiops-connection -n $INSTALLATION_NAMESPACE -o jsonpath='{.status.phase}')
+    STATUS_ELASTICREQUEST=$(oc get operandrequests ibm-elastic-operator -n $INSTALLATION_NAMESPACE -o jsonpath='{.status.phase}')
+    STATUS_IAMSERVICEREQUEST=$(oc get operandrequests ibm-iam-service -n $INSTALLATION_NAMESPACE -o jsonpath='{.status.phase}')
+    STATUS_KAFKAUSERREQUEST=$(oc get operandrequests operandrequest-kafkauser-iaf-system -n $INSTALLATION_NAMESPACE -o jsonpath='{.status.phase}')
+
+    if [[ $STATUS_COMMONUIREQUEST == "Running" ]] && [[ $STATUS_IAMREQUEST == "Running" ]] && [[ $STATUS_MONGODBREQUEST == "Running" ]] && [[ $STATUS_MGMTINGRESSREQUEST == "Running" ]] && [[ $STATUS_PLATFORMAPIREQUEST == "Running" ]] && [[ $STATUS_EDGEBASEREQUEST == "Running" ]] && [[ $STATUS_EDGECSREQUEST == "Running" ]] && [[ $STATUS_IAFCOREREQUEST == "Running" ]] && [[ $STATUS_IAFEPREQUEST == "Running" ]] && [[ $STATUS_IAFOPERATORREQUEST == "Running" ]] && [[ $STATUS_IAFSYSTEMREQUEST == "Running" ]] && [[ $STATUS_IAFSYSTEMCSREQUEST == "Running" ]] && [[ $STATUS_AIOPSAIMANAGERREQUEST == "Running" ]] && [[ $STATUS_AIOPSFOUNDATIONREQUEST == "Running" ]] && [[ $STATUS_AIOPSAPPLICATIONMANAGERREQUEST == "Running" ]] && [[ $STATUS_AIOPSCONNECTIONREQUEST == "Running" ]] && [[ $STATUS_ELASTICREQUEST == "Running" ]] && [[ $STATUS_IAMSERVICEREQUEST == "Running" ]] && [[ $STATUS_KAFKAUSERREQUEST == "Running" ]]; then
+        printf '%s\n' "$green$INSTANCE$normal"
+    else
+        printf '%s\n' "$red$INSTANCE$normal"
+    fi
+
+    echo "______________________________________________________________"
+    echo "ODLM pod current status:" && echo ""
+    INSTANCE=$(oc get pod -A | grep operand-deployment-lifecycle-manager)
+    POD_NAME=$(oc get pods -o name --no-headers=true -n ibm-common-services | grep operand-deployment | awk '{ print substr( $0, 5 ) }')         
+    STATUS=$(oc get pod $POD_NAME -n ibm-common-services -o jsonpath='{.status.phase}')
+    if [[ $STATUS == "Running" ]]; then
+        printf '%s\n' "$green$INSTANCE$normal"
+    else
+        printf '%s\n' "$red$INSTANCE$normal"
+    fi
+
+    echo "______________________________________________________________"
+    echo "Orchestrator pod current status:" && echo ""   
+    INSTANCE=$(oc get pod -A | grep ibm-aiops-orchestrator-controller-manager)
+    POD_NAME=$(oc get pods -o name --no-headers=true -n $INSTALLATION_NAMESPACE | grep ibm-aiops-orchestrator-controller-manager | awk '{ print substr( $0, 5 ) }')         
+    STATUS=$(oc get pod $POD_NAME -n $INSTALLATION_NAMESPACE -o jsonpath='{.status.phase}')
+    if [[ $STATUS == "Running" ]]; then
+        printf '%s\n' "$green$INSTANCE$normal"
+    else
+        printf '%s\n' "$red$INSTANCE$normal"
+    fi
+
     echo ""
     exit 0
 fi
