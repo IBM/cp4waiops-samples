@@ -403,6 +403,7 @@ then
     
     SUBSCRIPTION_NAME=$(oc get subscription -o name --no-headers=true -n $INSTALLATION_NAMESPACE | grep ibm-common-service-operator)
     STATUS_COMMONSERVICE=$(oc get $SUBSCRIPTION_NAME -n $INSTALLATION_NAMESPACE -o jsonpath='{.status.catalogHealth[].healthy}')
+
     STATUS_KONG=$(oc get subscription ibm-management-kong -n $INSTALLATION_NAMESPACE -o jsonpath='{.status.catalogHealth[].healthy}')
     STATUS_POSTGRESERVICE=$(oc get subscription ibm-postgreservice-operator -n $INSTALLATION_NAMESPACE -o jsonpath='{.status.catalogHealth[].healthy}')
     STATUS_SECURETUNNEL=$(oc get subscription ibm-secure-tunnel-operator -n $INSTALLATION_NAMESPACE -o jsonpath='{.status.catalogHealth[].healthy}')
