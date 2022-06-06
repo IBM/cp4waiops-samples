@@ -38,6 +38,8 @@ fi
 if [[ "$1" == "status" ]]
 then
     oc project ${INSTALLATION_NAMESPACE}
+    echo ""
+    echo "${blue}Cloud Pak for Watson AIOps AI Manager v${VERSION_AIOPSORCHESTRATOR} installation status:${normal}"
     
     echo "______________________________________________________________"
     echo "Installation instances:" && echo ""
@@ -132,6 +134,8 @@ fi
 if [[ "$1" == "status-all" ]]
 then
     oc project ${INSTALLATION_NAMESPACE}
+    echo ""
+    echo "${blue}Cloud Pak for Watson AIOps AI Manager v${VERSION_AIOPSORCHESTRATOR} installation status:${normal}"
 
     echo "______________________________________________________________"
     echo "Installation instances:" && echo ""
@@ -729,7 +733,7 @@ then
 
     # Check current instance version and component status checks for that version of CP4WAIOps
     echo ""
-    echo "${blue}Cloud Pak for Watson AIOps v${VERSION_AIOPSORCHESTRATOR} upgrade status:"
+    echo "${blue}Cloud Pak for Watson AIOps AI Manager v${VERSION_AIOPSORCHESTRATOR} upgrade status:${normal}"
 
     if [ "${VERSION_AIOPSORCHESTRATOR}" == "3.4" ];
     then 
