@@ -23,7 +23,7 @@ VERSION_AIOPSORCHESTRATOR=$(oc get $CSV_NAME -n $INSTALLATION_NAMESPACE -o jsonp
 # optional argument handling
 if [[ "$1" == "version" ]]
 then
-    echo "0.0.7"
+    echo "0.0.8"
     exit 0
 fi
 
