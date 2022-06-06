@@ -39,7 +39,7 @@ if [[ "$1" == "status" ]]
 then
     oc project ${INSTALLATION_NAMESPACE}
     echo ""
-    echo "${blue}Cloud Pak for Watson AIOps AI Manager v${VERSION_AIOPSORCHESTRATOR} installation status:${normal}"
+    echo "${blue}${bold}Cloud Pak for Watson AIOps AI Manager v${VERSION_AIOPSORCHESTRATOR} installation status:${normal}"
     
     echo "______________________________________________________________"
     echo "Installation instances:" && echo ""
@@ -135,7 +135,7 @@ if [[ "$1" == "status-all" ]]
 then
     oc project ${INSTALLATION_NAMESPACE}
     echo ""
-    echo "${blue}Cloud Pak for Watson AIOps AI Manager v${VERSION_AIOPSORCHESTRATOR} installation status:${normal}"
+    echo "${blue}${bold}Cloud Pak for Watson AIOps AI Manager v${VERSION_AIOPSORCHESTRATOR} installation status:${normal}"
 
     echo "______________________________________________________________"
     echo "Installation instances:" && echo ""
