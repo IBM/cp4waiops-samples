@@ -43,8 +43,8 @@ then
     
     echo "______________________________________________________________"
     echo "Installation instances:" && echo ""
-    INSTANCE=$(oc get installation aiops-installation)
-    STATUS=$(oc get installation aiops-installation -o jsonpath='{.status.phase}')
+    INSTANCE=$(oc get installations.orchestrator.aiops.ibm.com)
+    STATUS=$(oc get installations.orchestrator.aiops.ibm.com -o jsonpath='{.items[].status.phase}')
     if [[ $STATUS == "Running" ]]; then
         printf "$green$INSTANCE$normal\n"
     else
@@ -139,8 +139,8 @@ then
 
     echo "______________________________________________________________"
     echo "Installation instances:" && echo ""
-    INSTANCE=$(oc get installation aiops-installation)
-    STATUS=$(oc get installation aiops-installation -o jsonpath='{.status.phase}')
+    INSTANCE=$(oc get installations.orchestrator.aiops.ibm.com)
+    STATUS=$(oc get installations.orchestrator.aiops.ibm.com -o jsonpath='{.items[].status.phase}')
     if [[ $STATUS == "Running" ]]; then
         printf "$green$INSTANCE$normal\n"
     else
