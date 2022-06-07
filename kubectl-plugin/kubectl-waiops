@@ -545,7 +545,7 @@ then
         MAJORVERSION_ASM="2.7"
         MAJORVERSION_FLINKEP="4.0"
     }
-    
+
     aiopsEdgeBaseUpgradeStatus() {    
         UPGRADED=$(oc get aiopsedge aiopsedge -o jsonpath='{.status.conditions[?(@.type=="UpgradeReady")].status}')
         CONFIGURED=$(oc get aiopsedge aiopsedge -o jsonpath='{.status.phase}')
@@ -744,7 +744,7 @@ then
         component-versions-34
         echo ""
         echo "${red}${bold}NOTE: ${normal}Your Cloud Pak for Watson AIOps AI Manager install appears to be an internal dev version (v${VERSION_AIOPSORCHESTRATOR})."
-        echo "      The upgrade-status command checks the status of upgrades to v3.3 and v3.4 only." 
+        echo "      The status-upgrade command checks the status of upgrades to v3.3 and v3.4 only." 
         echo "      Therefore, the upgrade checks below will be against v3.4 component versions."
         echo "      This may influence your results below if your dev build is not based on release-3.4.${normal}"
     fi
