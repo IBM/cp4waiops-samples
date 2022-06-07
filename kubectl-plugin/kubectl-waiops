@@ -732,16 +732,25 @@ then
     }
 
     # Check current instance version and component status checks for that version of CP4WAIOps
-    echo ""
-    echo "${blue}${bold}Cloud Pak for Watson AIOps AI Manager v${VERSION_AIOPSORCHESTRATOR} upgrade status:${normal}"
-
     if [ "${VERSION_AIOPSORCHESTRATOR}" == "3.4" ];
     then 
         component-versions-34
     elif [ "${VERSION_AIOPSORCHESTRATOR}" == "3.3" ]; 
     then
         component-versions-33
+    elif [ "${VERSION_AIOPSORCHESTRATOR}" == "0.1" ]
+    then
+        # for developer builds (v0.1), we will check against release-34 versions
+        component-versions-34
+        echo ""
+        echo "${red}${bold}NOTE: ${normal}Your Cloud Pak for Watson AIOps AI Manager install appears to be an internal dev version (v${VERSION_AIOPSORCHESTRATOR})."
+        echo "      The upgrade-status command checks the status of upgrades to v3.3 and v3.4 only." 
+        echo "      Therefore, the upgrade checks below will be against v3.4 component versions."
+        echo "      This may influence your results below if your dev build is not based on release-3.4.${normal}"
     fi
+
+    echo ""
+    echo "${blue}${bold}Cloud Pak for Watson AIOps AI Manager v${VERSION_AIOPSORCHESTRATOR} upgrade status:${normal}"
 
     aiopsEdgeBaseUpgradeStatus
     lifecycleUpgradeStatus
