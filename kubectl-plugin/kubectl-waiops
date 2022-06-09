@@ -252,6 +252,16 @@ then
     fi
 
     echo "______________________________________________________________"
+    echo "Secure Tunnel instances:" && echo ""
+    INSTANCE=$(oc get tunnels.sretooling.management.ibm.com -A -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,STATUS:status.conditions[?(@.type==\"Deployed\")].status")
+    STATUS=$(oc get tunnels.sretooling.management.ibm.com -o jsonpath='{.items[].status.versions.status}')
+    if [[ $STATUS == "Ready" ]]; then
+        printf '%s\n' "$green$INSTANCE$normal"
+    else
+        printf '%s\n' "$red$INSTANCE$normal"
+    fi
+
+    echo "______________________________________________________________"
     echo "CSVs from $INSTALLATION_NAMESPACE namespace:" && echo ""
     INSTANCE=$(oc get csvs -n $INSTALLATION_NAMESPACE) 
 
@@ -731,6 +741,33 @@ then
         fi
     }
 
+    secureTunnelUpgradeStatus() {    
+        INITIALIZED=$(oc get tunnels.sretooling.management.ibm.com -o jsonpath='{.items[].status.conditions[?(@.type=="Initialized")].status}')
+        DEPLOYED=$(oc get tunnels.sretooling.management.ibm.com -o jsonpath='{.items[].status.conditions[?(@.type=="Deployed")].status}')
+        
+        NUM_DEPLOYMENT_OPERATORREPLICAS=$(oc get deployment ibm-secure-tunnel-operator -o jsonpath='{.status.replicas}')
+        NUM_DEPLOYMENT_OPERATORAVAILABLEREPLICAS=$(oc get deployment ibm-secure-tunnel-operator -o jsonpath='{.status.availableReplicas}')
+        
+        NUM_STATEFULSET_REPLICAS=$(oc get statefulset sre-tunnel-controller -o jsonpath='{.status.replicas}')
+        NUM_STATEFULSET_READYREPLICAS=$(oc get statefulset sre-tunnel-controller -o jsonpath='{.status.readyReplicas}')
+        
+        NUM_DEPLOYMENT_NETWORKAPIREPLICAS=$(oc get deployment sre-tunnel-tunnel-network-api -o jsonpath='{.status.replicas}')
+        NUM_DEPLOYMENT_NETWORKAPIAVAILABLEREPLICAS=$(oc get deployment sre-tunnel-tunnel-network-api -o jsonpath='{.status.availableReplicas}')
+        
+        NUM_DEPLOYMENT_TUNNELUIREPLICAS=$(oc get deployment sre-tunnel-tunnel-ui-mcmtunnelui -o jsonpath='{.status.replicas}')
+        NUM_DEPLOYMENT_TUNNELUIAVAILABLEREPLICAS=$(oc get deployment sre-tunnel-tunnel-ui-mcmtunnelui -o jsonpath='{.status.availableReplicas}')
+        
+        DETAILS=$(oc get tunnels.sretooling.management.ibm.com -A -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,STATUS:status.conditions[?(@.type==\"Deployed\")].status")
+        if [ "${INITIALIZED}" == "True" ] && [ "${DEPLOYED}" == "True" ] && [ "${NUM_DEPLOYMENT_OPERATORREPLICAS}" == "${NUM_DEPLOYMENT_OPERATORAVAILABLEREPLICAS}" ] && [ "${NUM_STATEFULSET_REPLICAS}" == "${NUM_STATEFULSET_READYREPLICAS}" ] && [ "${NUM_DEPLOYMENT_NETWORKAPIREPLICAS}" == "${NUM_DEPLOYMENT_NETWORKAPIAVAILABLEREPLICAS}" ] && [ "${NUM_DEPLOYMENT_TUNNELUIREPLICAS}" == "${NUM_DEPLOYMENT_TUNNELUIAVAILABLEREPLICAS}" ];
+        then 
+            SUCCESSFULLY_UPGRADED+="${newline}${DETAILS}"
+            return 0;
+        else 
+            FAILING_UPGRADE+="${newline}${DETAILS}"
+            return 1;
+        fi
+    }
+
     # Check current instance version and component status checks for that version of CP4WAIOps
     if [ "${VERSION_AIOPSORCHESTRATOR}" == "3.4" ];
     then 
@@ -762,32 +799,33 @@ then
     vaultDeployUpgradeStatus
     vaultAccessUpgradeStatus
     postgresUpgradeStatus
+    secureTunnelUpgradeStatus
     asmUpgradeStatus
     FlinkEventProcessorUpgradeStatus
 
     # Print out results of status checks
     printf "
-${bold}${green}______________________________________________________________
+${normal}______________________________________________________________
 
 The following component(s) have finished upgrading:
-${normal}${SUCCESSFULLY_UPGRADED}
+${green}${SUCCESSFULLY_UPGRADED}
 
-${bold}${green}______________________________________________________________
+${normal}______________________________________________________________
 "
     if [ "$FAILING_UPGRADE" != "" ];
     then 
         printf "
-${bold}${red}______________________________________________________________
+${normal}______________________________________________________________
 
 Meanwhile, the following component(s) have not upgraded yet:
-${normal}${FAILING_UPGRADE}
+${red}${FAILING_UPGRADE}
 
-If only a short time has passed since the upgrade was started, the components may
+${normal}If only a short time has passed since the upgrade was started, the components may
 need more time to complete upgrading. If you have waited a significant amount of time
 and the statuses of the components listed above are not changing, please refer to
 the troubleshooting docs or open a support case.
 
-${bold}${red}______________________________________________________________
+${normal}______________________________________________________________
 ";
     fi
 
