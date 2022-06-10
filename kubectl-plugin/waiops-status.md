@@ -141,6 +141,11 @@ KIND             NAMESPACE   NAME                   VERSION   STATUS   MESSAGE
 Postgreservice   cp4waiops   cp4waiops-postgres     1.0.0     True     Success to deploy postgres stolon cluster
 PostgresDB       cp4waiops   cp4waiops-postgresdb   1.0.0     True     Success to create postgres db
 ______________________________________________________________
+Secure Tunnel instances:
+
+KIND     NAMESPACE   NAME         STATUS
+Tunnel   katamari    sre-tunnel   True
+______________________________________________________________
 CSVs from cp4waiops namespace:
 
 NAME                                    DISPLAY                                            VERSION   REPLACES                                PHASE
@@ -295,6 +300,9 @@ VaultAccess   cp4waiops   ibm-vault-access   3.3.0     True     VaultAccess comp
 KIND             NAMESPACE   NAME                   VERSION   STATUS   MESSAGE
 Postgreservice   cp4waiops   cp4waiops-postgres     1.0.0     True     Success to deploy postgres stolon cluster
 PostgresDB       cp4waiops   cp4waiops-postgresdb   1.0.0     True     Success to create postgres db
+
+KIND     NAMESPACE   NAME         STATUS
+Tunnel   katamari    sre-tunnel   True
 
 KIND   NAMESPACE   NAME             VERSION   STATUS
 ASM    cp4waiops   aiops-topology   2.5.0     OK
