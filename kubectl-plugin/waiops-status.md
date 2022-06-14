@@ -320,6 +320,10 @@ Hint: for a more detailed printout of each operator's components' statuses, run 
 ### Dependencies
 - `oc` cli
 
+## Requirements
+- You must have an installation of Cloud Pak for Watson AIOps AI Manager v3.3 or v3.4. 
+- You must be logged into your cluster as a cluster admin. This is required for the tool to provide you a complete view of your install status.
+
 ### Installing
 Save `kubectl-plugin/kubectl-waiops` to a location in your path such as `/usr/local/bin/kubectl-waiops` and make the file executable. 
 
