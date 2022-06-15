@@ -552,7 +552,7 @@ then
                 SUCCESSFULLY_UPGRADED+="${newline}${DETAILS}"
                 return 0;
             else 
-                FAILING_UPGRADE+="${newline}${DETAILS}"
+                FAILING_UPGRADE+="${newline}${DETAILS}${newline}EXPECTED AIOpsUI MAJOR VERSION: ${MAJORVERSION_AIOPSUI}"
                 return 1;
             fi
         }
@@ -580,7 +580,7 @@ then
                 SUCCESSFULLY_UPGRADED+="${newline}${DETAILS}"
                 return 0;
             else 
-                FAILING_UPGRADE+="${newline}${DETAILS}"
+                FAILING_UPGRADE+="${newline}${DETAILS}${newline}EXPECTED AIManager MAJOR VERSION: ${MAJORVERSION_AIMANAGER}"
                 return 1;
             fi
         }
@@ -596,7 +596,7 @@ then
                 SUCCESSFULLY_UPGRADED+="${newline}${DETAILS}"
                 return 0;
             else 
-                FAILING_UPGRADE+="${newline}${DETAILS}"
+                FAILING_UPGRADE+="${newline}${DETAILS}${newline}EXPECTED IssueResolutionCore MAJOR VERSION: ${MAJORVERSION_IRCORE}"
                 return 1;
             fi
         }
@@ -612,7 +612,7 @@ then
                 SUCCESSFULLY_UPGRADED+="${newline}${DETAILS}"
                 return 0;
             else 
-                FAILING_UPGRADE+="${newline}${DETAILS}"
+                FAILING_UPGRADE+="${newline}${DETAILS}${newline}EXPECTED LifecycleService MAJOR VERSION: ${MAJORVERSION_LIFECYCLESERVICE}"
                 return 1;
             fi
         }
@@ -628,7 +628,7 @@ then
                 SUCCESSFULLY_UPGRADED+="${newline}${DETAILS}"
                 return 0;
             else 
-                FAILING_UPGRADE+="${newline}${DETAILS}"
+                FAILING_UPGRADE+="${newline}${DETAILS}${newline}EXPECTED AIOpsAnalyticsOrchestrator MAJOR VERSION: ${MAJORVERSION_AIOPSANALYTICSORCHESTRATOR}"
                 return 1;
             fi
         }
@@ -642,7 +642,7 @@ then
                 SUCCESSFULLY_UPGRADED+="${newline}${DETAILS}"
                 return 0;
             else 
-                FAILING_UPGRADE+="${newline}${DETAILS}"
+                FAILING_UPGRADE+="${newline}${DETAILS}${newline}EXPECTED VaultDeploy MAJOR VERSION: ${MAJORVERSION_VAULTDEPLOY}"
                 return 1;
             fi
         }
@@ -656,7 +656,7 @@ then
                 SUCCESSFULLY_UPGRADED+="${newline}${DETAILS}"
                 return 0;
             else 
-                FAILING_UPGRADE+="${newline}${DETAILS}"
+                FAILING_UPGRADE+="${newline}${DETAILS}${newline}EXPECTED VaultAccess MAJOR VERSION: ${MAJORVERSION_VAULTACCESS}"
                 return 1;
             fi
         }
@@ -682,7 +682,7 @@ then
                 SUCCESSFULLY_UPGRADED+="${newline}${DETAILS}"
                 return 0;
             else 
-                FAILING_UPGRADE+="${newline}${DETAILS}"
+                FAILING_UPGRADE+="${newline}${DETAILS}${newline}EXPECTED Postgreservice MAJOR VERSION: ${MAJORVERSION_POSTGRESERVICE}${newline}EXPECTED PostgresDB MAJOR VERSION: ${MAJORVERSION_POSTGRESDB}"
                 return 1;
             fi
         }
@@ -696,7 +696,7 @@ then
                 SUCCESSFULLY_UPGRADED+="${newline}${DETAILS}"
                 return 0;
             else 
-                FAILING_UPGRADE+="${newline}${DETAILS}"
+                FAILING_UPGRADE+="${newline}${DETAILS}${newline}EXPECTED ASM MAJOR VERSION: ${MAJORVERSION_ASM}"
                 return 1;
             fi
         }
@@ -710,7 +710,7 @@ then
                 SUCCESSFULLY_UPGRADED+="${newline}${DETAILS}"
                 return 0;
             else 
-                FAILING_UPGRADE+="${newline}${DETAILS}"
+                FAILING_UPGRADE+="${newline}${DETAILS}${newline}EXPECTED EventProcessor MAJOR VERSION: ${MAJORVERSION_FLINKEP}"
                 return 1;
             fi
         }
