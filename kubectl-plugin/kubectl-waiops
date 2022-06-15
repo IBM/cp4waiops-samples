@@ -19,7 +19,7 @@ INSTALLATION_NAME=$(oc get installations.orchestrator.aiops.ibm.com -A --no-head
 INSTALLATION_NAMESPACE=$(oc get installations.orchestrator.aiops.ibm.com -A --no-headers | while read a b c; do echo "$a"; done; 2>/dev/null)
 CSV_NAME=$(oc get csvs -o name --no-headers=true -n $INSTALLATION_NAMESPACE | grep ibm-aiops-orchestrator)         
 VERSION_AIOPSORCHESTRATOR=$(oc get $CSV_NAME -n $INSTALLATION_NAMESPACE -o jsonpath='{.spec.version}' | awk '{ print substr( $0, 0, 3 ) }')
-CLUSTER_ADMIN=""
+CLUSTER_ADMIN=$(oc auth can-i '*' '*' --all-namespaces)
 
 # optional argument handling
 if [[ "$1" == "version" ]]
@@ -42,20 +42,6 @@ printStatus() {
         printf '%s\n\n' "$green$3$normal"
     else
         printf '%s\n\n' "$red$3$normal"
-    fi
-}
-
-checkClusterAdmin() {
-    if [[ "$INSTALLATION_NAME" == "" ]];
-    then
-        echo ""
-        echo "${bold}${red}ERROR: ${normal}Installation instance not found." 
-        echo "       This means either an installation instance has not been made,"
-        echo "       or the status checker is not being run at cluster-admin level."
-        echo ""
-        CLUSTER_ADMIN="false"
-    else
-        CLUSTER_ADMIN="true"
     fi
 }
 
@@ -88,8 +74,7 @@ getOperandRequestStatus () {
 # optional argument handling
 if [[ "$1" == "status" ]]
 then
-    checkClusterAdmin
-    if [[ "$CLUSTER_ADMIN" == "true" ]];
+    if [[ "$CLUSTER_ADMIN" == "yes" ]];
     then
         oc project ${INSTALLATION_NAMESPACE}
 
@@ -197,7 +182,7 @@ ${normal}
 "
         exit 0
     else       
-        printf "${blue}${bold}Hint: log in with your CLUSTER_ADMIN credentials and try again.${normal}
+        printf "${blue}${bold}Hint: log into your cluster with CLUSTER_ADMIN credentials and try again.${normal}
 
 "
         exit 0
@@ -207,8 +192,7 @@ fi
 # optional argument handling
 if [[ "$1" == "status-all" ]]
 then
-    checkClusterAdmin
-    if [[ "${CLUSTER_ADMIN}" == "true" ]]
+    if [[ "${CLUSTER_ADMIN}" == "yes" ]]
     then
         oc project ${INSTALLATION_NAMESPACE}
         echo ""
@@ -480,7 +464,7 @@ then
         echo ""
         exit 0
     else       
-        printf "${blue}${bold}Hint: log in with your CLUSTER_ADMIN credentials and try again to return a full output.${normal}
+        printf "${blue}${bold}Hint: log into your cluster with CLUSTER_ADMIN credentials and try again.${normal}
 
 "
         exit 0
@@ -494,8 +478,7 @@ then
     # This script checks to see if your Cloud Pak for Watson AIOps
     # instance is properly configured post-upgrade for v3.3. 
 
-    checkClusterAdmin
-    if [[ "${CLUSTER_ADMIN}" == "true" ]]
+    if [[ "${CLUSTER_ADMIN}" == "yes" ]]
     then
         FAILING_UPGRADE=""
         SUCCESSFULLY_UPGRADED=""
@@ -813,7 +796,7 @@ ${normal}
 "
         exit 0
     else
-        printf "${blue}${bold}Hint: log in with your CLUSTER_ADMIN credentials and try again.${normal}
+        printf "${blue}${bold}Hint: log into your cluster with CLUSTER_ADMIN credentials and try again.${normal}
 
 "
         exit 0
