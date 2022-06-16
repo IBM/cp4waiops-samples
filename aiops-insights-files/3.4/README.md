@@ -20,7 +20,7 @@ Below are the instructions on how to enable the AIOps insights dashboard.
 
 We provide 3 sets of scripts that will perform prerequisite check, enabling, and disabling respectively.
 
-For more information about configuring and using these scripts and the dashboard, see the [IBM Docs for Managing AIOps]( https://ibmdocs-test.mybluemix.net/docs/en/cloud-paks/cloud-pak-watson-aiops/3.4.0?topic=operating-managing-aiops-insights).
+For more information about configuring and using these scripts and the dashboard, see the [IBM Docs for Managing AIOps](https://www.ibm.com/docs/en/SSJGDOB_3.4.0/overview/aiops_insights.html).
 
 ## Check prerequisites
 
