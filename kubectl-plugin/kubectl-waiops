@@ -801,8 +801,6 @@ ${normal}
 "
         exit 0
     fi
-    
-    
 fi
 
 echo "kubectl-waiops"
