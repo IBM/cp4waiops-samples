@@ -381,7 +381,6 @@ then
         getSubscriptionStatus "asm-operator" "$INSTALLATION_NAMESPACE" 
         getSubscriptionStatus "couchdb" "$INSTALLATION_NAMESPACE" 
         getSubscriptionStatus "ibm-aiops-orchestrator" "$INSTALLATION_NAMESPACE" 
-        getSubscriptionStatusGrep "ibm-automation-v" "$INSTALLATION_NAMESPACE" 
         getSubscriptionStatusGrep "ibm-automation-core" "$INSTALLATION_NAMESPACE" 
         getSubscriptionStatusGrep "ibm-automation-elastic" "$INSTALLATION_NAMESPACE" 
         getSubscriptionStatusGrep "ibm-automation-eventprocessing" "$INSTALLATION_NAMESPACE" 
