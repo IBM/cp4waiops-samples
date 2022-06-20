@@ -24,7 +24,7 @@ CLUSTER_ADMIN=$(oc auth can-i '*' '*' --all-namespaces)
 # optional argument handling
 if [[ "$1" == "version" ]]
 then
-    echo "0.0.8"
+    echo "0.0.9"
     exit 0
 fi
 
