@@ -558,6 +558,10 @@ function checkNetworkPolicy {
       startEndSection "Network Policy"
       return 1
     fi
+  else
+    # ROKS -  Extra configuration is not required
+    log $INFO "HostNetwork endpoint publishing strategy is not used."
+    NP_RES=$pass_msg
   fi
   startEndSection "Network Policy"
   return 0

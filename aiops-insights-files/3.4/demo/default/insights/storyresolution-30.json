@@ -1,0 +1,52 @@
+[
+  {
+    "priorityLabel": "p1.label",
+    "stateLabel": "opened.label",
+    "count": 15
+  },
+  {
+    "priorityLabel": "p1.label",
+    "stateLabel": "closed.label",
+    "count": 11
+  },
+  {
+    "priorityLabel": "p2.label",
+    "stateLabel": "opened.label",
+    "count": 157
+  },
+  {
+    "priorityLabel": "p2.label",
+    "stateLabel": "closed.label",
+    "count": 173
+  },
+  {
+    "priorityLabel": "p3.label",
+    "stateLabel": "opened.label",
+    "count": 128
+  },
+  {
+    "priorityLabel": "p3.label",
+    "stateLabel": "closed.label",
+    "count": 114
+  },
+  {
+    "priorityLabel": "p4.label",
+    "stateLabel": "opened.label",
+    "count": 109
+  },
+  {
+    "priorityLabel": "p4.label",
+    "stateLabel": "closed.label",
+    "count": 75
+  },
+  {
+    "priorityLabel": "p5.label",
+    "stateLabel": "opened.label",
+    "count": 143
+  },
+  {
+    "priorityLabel": "p5.label",
+    "stateLabel": "closed.label",
+    "count": 96
+  }
+]

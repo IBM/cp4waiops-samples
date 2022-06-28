@@ -1,0 +1,17 @@
+[
+  {
+    "sourceLabel": "",
+    "targetLabel": "event.label",
+    "value": 18948
+  },
+  {
+    "sourceLabel": "event.label",
+    "targetLabel": "alert.label",
+    "value": 2184
+  },
+  {
+    "sourceLabel": "alert.label",
+    "targetLabel": "story.label",
+    "value": 552
+  }
+]

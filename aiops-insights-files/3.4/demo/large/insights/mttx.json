@@ -1,0 +1,477 @@
+[
+    {
+      "metricLabel": "incident.chart.isolate",
+      "value": 5,
+      "endTime": "2019-01-01T06:00:00.000Z"
+    },
+    {
+      "metricLabel": "incident.chart.isolate",
+      "value": 6,
+      "endTime": "2019-01-01T18:00:00.000Z"
+    },
+    {
+      "metricLabel": "incident.chart.isolate",
+      "value": 3,
+      "endTime": "2019-01-05T06:00:00.000Z"
+    },
+    {
+      "metricLabel": "incident.chart.isolate",
+      "value": 5,
+      "endTime": "2019-01-01T06:00:00.000Z"
+    },
+    {
+      "metricLabel": "incident.chart.isolate",
+      "value": 6,
+      "endTime": "2019-01-01T18:00:00.000Z"
+    },
+    {
+      "metricLabel": "incident.chart.isolate",
+      "value": 3,
+      "endTime": "2019-01-05T06:00:00.000Z"
+    },
+    {
+      "metricLabel": "incident.chart.isolate",
+      "value": 3,
+      "endTime": "2019-01-05T06:00:00.000Z"
+    },
+    {
+      "metricLabel": "incident.chart.isolate",
+      "value": 4,
+      "endTime": "2019-01-08T06:00:00.000Z"
+    },
+    {
+      "metricLabel": "incident.chart.isolate",
+      "value": 3,
+      "endTime": "2019-01-08T06:00:00.000Z"
+    },
+    {
+      "metricLabel": "incident.chart.isolate",
+      "value": 5,
+      "endTime": "2019-01-13T06:00:00.000Z"
+    },
+    {
+      "metricLabel": "incident.chart.isolate",
+      "value": 3,
+      "endTime": "2019-01-13T06:00:00.000Z"
+    },
+    {
+      "metricLabel": "incident.chart.isolate",
+      "value": 3,
+      "endTime": "2019-01-17T06:00:00.000Z"
+    },
+    {
+      "metricLabel": "incident.chart.isolate",
+      "value": 8,
+      "endTime": "2019-01-17T06:00:00.000Z"
+    },
+    {
+      "metricLabel": "incident.chart.isolate",
+      "value": 6,
+      "endTime": "2019-01-01T06:00:00.000Z"
+    },
+    {
+      "metricLabel": "incident.chart.isolate",
+      "value": 6,
+      "endTime": "2019-01-01T06:00:00.000Z"
+    },
+    {
+      "metricLabel": "incident.chart.isolate",
+      "value": 1,
+      "endTime": "2019-01-05T06:00:00.000Z"
+    },
+    {
+      "metricLabel": "incident.chart.isolate",
+      "value": 1,
+      "endTime": "2019-01-05T06:00:00.000Z"
+    },
+    {
+      "metricLabel": "incident.chart.isolate",
+      "value": 2,
+      "endTime": "2019-01-08T06:00:00.000Z"
+    },
+    {
+      "metricLabel": "incident.chart.isolate",
+      "value": 2,
+      "endTime": "2019-01-08T06:00:00.000Z"
+    },
+    {
+      "metricLabel": "incident.chart.isolate",
+      "value": 3,
+      "endTime": "2019-01-13T06:00:00.000Z"
+    },
+    {
+      "metricLabel": "incident.chart.isolate",
+      "value": 3,
+      "endTime": "2019-01-13T06:00:00.000Z"
+    },
+    {
+      "metricLabel": "incident.chart.isolate",
+      "value": 3,
+      "endTime": "2019-01-17T06:00:00.000Z"
+    },
+    {
+      "metricLabel": "incident.chart.isolate",
+      "value": 3,
+      "endTime": "2019-01-17T06:00:00.000Z"
+    },
+    {
+      "metricLabel": "incident.chart.isolate",
+      "value": 3,
+      "endTime": "2019-01-05T06:00:00.000Z"
+    },
+    {
+      "metricLabel": "incident.chart.isolate",
+      "value": 6,
+      "endTime": "2019-01-05T06:00:00.000Z"
+    },
+    {
+      "metricLabel": "incident.chart.isolate",
+      "value": 3,
+      "endTime": "2019-01-08T06:00:00.000Z"
+    },
+    {
+      "metricLabel": "incident.chart.isolate",
+      "value": 2,
+      "endTime": "2019-01-08T06:00:00.000Z"
+    },
+    {
+      "metricLabel": "incident.chart.isolate",
+      "value": 2,
+      "endTime": "2019-01-13T06:00:00.000Z"
+    },
+    {
+      "metricLabel": "incident.chart.isolate",
+      "value": 4,
+      "endTime": "2019-01-13T06:00:00.000Z"
+    },
+    {
+      "metricLabel": "incident.chart.isolate",
+      "value": 4,
+      "endTime": "2019-01-17T06:00:00.000Z"
+    },
+    {
+      "metricLabel": "incident.chart.isolate",
+      "value": 3,
+      "endTime": "2019-01-17T06:00:00.000Z"
+    },
+    {
+      "metricLabel": "incident.chart.repair",
+      "value": 10,
+      "endTime": "2019-01-01T06:00:00.000Z"
+    },
+    {
+      "metricLabel": "incident.chart.repair",
+      "value": 10,
+      "endTime": "2019-01-01T18:00:00.000Z"
+    },
+    {
+      "metricLabel": "incident.chart.repair",
+      "value": 13,
+      "endTime": "2019-01-05T06:00:00.000Z"
+    },
+    {
+      "metricLabel": "incident.chart.repair",
+      "value": 10,
+      "endTime": "2019-01-01T06:00:00.000Z"
+    },
+    {
+      "metricLabel": "incident.chart.repair",
+      "value": 10,
+      "endTime": "2019-01-01T18:00:00.000Z"
+    },
+    {
+      "metricLabel": "incident.chart.repair",
+      "value": 13,
+      "endTime": "2019-01-05T06:00:00.000Z"
+    },
+    {
+      "metricLabel": "incident.chart.repair",
+      "value": 16,
+      "endTime": "2019-01-05T06:00:00.000Z"
+    },
+    {
+      "metricLabel": "incident.chart.repair",
+      "value": 16,
+      "endTime": "2019-01-08T06:00:00.000Z"
+    },
+    {
+      "metricLabel": "incident.chart.repair",
+      "value": 16,
+      "endTime": "2019-01-08T06:00:00.000Z"
+    },
+    {
+      "metricLabel": "incident.chart.repair",
+      "value": 16,
+      "endTime": "2019-01-13T06:00:00.000Z"
+    },
+    {
+      "metricLabel": "incident.chart.repair",
+      "value": 16,
+      "endTime": "2019-01-13T06:00:00.000Z"
+    },
+    {
+      "metricLabel": "incident.chart.repair",
+      "value": 16,
+      "endTime": "2019-01-17T06:00:00.000Z"
+    },
+    {
+      "metricLabel": "incident.chart.repair",
+      "value": 16,
+      "endTime": "2019-01-17T06:00:00.000Z"
+    },
+    {
+      "metricLabel": "incident.chart.repair",
+      "value": 16,
+      "endTime": "2019-01-01T06:00:00.000Z"
+    },
+    {
+      "metricLabel": "incident.chart.repair",
+      "value": 16,
+      "endTime": "2019-01-05T06:00:00.000Z"
+    },
+    {
+      "metricLabel": "incident.chart.repair",
+      "value": 16,
+      "endTime": "2019-01-05T06:00:00.000Z"
+    },
+    {
+      "metricLabel": "incident.chart.repair",
+      "value": 16,
+      "endTime": "2019-01-08T06:00:00.000Z"
+    },
+    {
+      "metricLabel": "incident.chart.repair",
+      "value": 16,
+      "endTime": "2019-01-08T06:00:00.000Z"
+    },
+    {
+      "metricLabel": "incident.chart.repair",
+      "value": 16,
+      "endTime": "2019-01-13T06:00:00.000Z"
+    },
+    {
+      "metricLabel": "incident.chart.repair",
+      "value": 16,
+      "endTime": "2019-01-13T06:00:00.000Z"
+    },
+    {
+      "metricLabel": "incident.chart.repair",
+      "value": 16,
+      "endTime": "2019-01-17T06:00:00.000Z"
+    },
+    {
+      "metricLabel": "incident.chart.repair",
+      "value": 16,
+      "endTime": "2019-01-17T06:00:00.000Z"
+    },
+    {
+      "metricLabel": "incident.chart.repair",
+      "value": 16,
+      "endTime": "2019-01-01T06:00:00.000Z"
+    },
+    {
+      "metricLabel": "incident.chart.repair",
+      "value": 19,
+      "endTime": "2019-01-05T06:00:00.000Z"
+    },
+    {
+      "metricLabel": "incident.chart.repair",
+      "value": 19,
+      "endTime": "2019-01-05T06:00:00.000Z"
+    },
+    {
+      "metricLabel": "incident.chart.repair",
+      "value": 25,
+      "endTime": "2019-01-08T06:00:00.000Z"
+    },
+    {
+      "metricLabel": "incident.chart.repair",
+      "value": 16,
+      "endTime": "2019-01-08T06:00:00.000Z"
+    },
+    {
+      "metricLabel": "incident.chart.repair",
+      "value": 16,
+      "endTime": "2019-01-13T06:00:00.000Z"
+    },
+    {
+      "metricLabel": "incident.chart.repair",
+      "value": 13,
+      "endTime": "2019-01-13T06:00:00.000Z"
+    },
+    {
+      "metricLabel": "incident.chart.repair",
+      "value": 8,
+      "endTime": "2019-01-17T06:00:00.000Z"
+    },
+    {
+      "metricLabel": "incident.chart.repair",
+      "value": 5,
+      "endTime": "2019-01-17T06:00:00.000Z"
+    },
+    {
+      "metricLabel": "incident.chart.recover",
+      "value": 21,
+      "endTime": "2019-01-01T06:00:00.000Z"
+    },
+    {
+      "metricLabel": "incident.chart.recover",
+      "value": 20,
+      "endTime": "2019-01-01T06:00:00.000Z"
+    },
+    {
+      "metricLabel": "incident.chart.recover",
+      "value": 19,
+      "endTime": "2019-01-05T06:00:00.000Z"
+    },
+    {
+      "metricLabel": "incident.chart.recover",
+      "value": 21,
+      "endTime": "2019-01-01T06:00:00.000Z"
+    },
+    {
+      "metricLabel": "incident.chart.recover",
+      "value": 20,
+      "endTime": "2019-01-01T06:00:00.000Z"
+    },
+    {
+      "metricLabel": "incident.chart.recover",
+      "value": 19,
+      "endTime": "2019-01-05T06:00:00.000Z"
+    },
+    {
+      "metricLabel": "incident.chart.recover",
+      "value": 19,
+      "endTime": "2019-01-05T06:00:00.000Z"
+    },
+    {
+      "metricLabel": "incident.chart.recover",
+      "value": 19,
+      "endTime": "2019-01-08T06:00:00.000Z"
+    },
+    {
+      "metricLabel": "incident.chart.recover",
+      "value": 19,
+      "endTime": "2019-01-08T06:00:00.000Z"
+    },
+    {
+      "metricLabel": "incident.chart.recover",
+      "value": 19,
+      "endTime": "2019-01-13T06:00:00.000Z"
+    },
+    {
+      "metricLabel": "incident.chart.recover",
+      "value": 19,
+      "endTime": "2019-01-13T06:00:00.000Z"
+    },
+    {
+      "metricLabel": "incident.chart.recover",
+      "value": 19,
+      "endTime": "2019-01-17T06:00:00.000Z"
+    },
+    {
+      "metricLabel": "incident.chart.recover",
+      "value": 21,
+      "endTime": "2019-01-17T06:00:00.000Z"
+    },
+    {
+      "metricLabel": "incident.chart.recover",
+      "value": 19,
+      "endTime": "2019-01-01T06:00:00.000Z"
+    },
+    {
+      "metricLabel": "incident.chart.recover",
+      "value": 19,
+      "endTime": "2019-01-01T06:00:00.000Z"
+    },
+    {
+      "metricLabel": "incident.chart.recover",
+      "value": 19,
+      "endTime": "2019-01-05T06:00:00.000Z"
+    },
+    {
+      "metricLabel": "incident.chart.recover",
+      "value": 19,
+      "endTime": "2019-01-05T06:00:00.000Z"
+    },
+    {
+      "metricLabel": "incident.chart.recover",
+      "value": 19,
+      "endTime": "2019-01-08T06:00:00.000Z"
+    },
+    {
+      "metricLabel": "incident.chart.recover",
+      "value": 19,
+      "endTime": "2019-01-08T06:00:00.000Z"
+    },
+    {
+      "metricLabel": "incident.chart.recover",
+      "value": 19,
+      "endTime": "2019-01-13T06:00:00.000Z"
+    },
+    {
+      "metricLabel": "incident.chart.recover",
+      "value": 19,
+      "endTime": "2019-01-13T06:00:00.000Z"
+    },
+    {
+      "metricLabel": "incident.chart.recover",
+      "value": 19,
+      "endTime": "2019-01-17T06:00:00.000Z"
+    },
+    {
+      "metricLabel": "incident.chart.recover",
+      "value": 21,
+      "endTime": "2019-01-17T06:00:00.000Z"
+    },    
+    {
+      "metricLabel": "incident.chart.recover",
+      "value": 19,
+      "endTime": "2019-01-01T06:00:00.000Z"
+    },
+    {
+      "metricLabel": "incident.chart.recover",
+      "value": 19,
+      "endTime": "2019-01-01T06:00:00.000Z"
+    },
+    {
+      "metricLabel": "incident.chart.recover",
+      "value": 19,
+      "endTime": "2019-01-05T06:00:00.000Z"
+    },
+    {
+      "metricLabel": "incident.chart.recover",
+      "value": 19,
+      "endTime": "2019-01-05T06:00:00.000Z"
+    },
+    {
+      "metricLabel": "incident.chart.recover",
+      "value": 19,
+      "endTime": "2019-01-08T06:00:00.000Z"
+    },
+    {
+      "metricLabel": "incident.chart.recover",
+      "value": 19,
+      "endTime": "2019-01-08T06:00:00.000Z"
+    },
+    {
+      "metricLabel": "incident.chart.recover",
+      "value": 19,
+      "endTime": "2019-01-13T06:00:00.000Z"
+    },
+    {
+      "metricLabel": "incident.chart.recover",
+      "value": 19,
+      "endTime": "2019-01-13T06:00:00.000Z"
+    },
+    {
+      "metricLabel": "incident.chart.recover",
+      "value": 19,
+      "endTime": "2019-01-17T06:00:00.000Z"
+    },
+    {
+      "metricLabel": "incident.chart.recover",
+      "value": 19,
+      "endTime": "2019-01-17T06:00:00.000Z"
+    }
+]

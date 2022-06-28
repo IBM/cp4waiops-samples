@@ -1,0 +1,302 @@
+[
+  {
+    "typeLabel": "runbook.label.automated",
+    "count": 892,
+    "endTime": "dummy",
+    "success": 845
+  },
+  {
+    "typeLabel": "runbook.label.automated",
+    "count": 812,
+    "endTime": "dummy",
+    "success": 734
+  },
+  {
+    "typeLabel": "runbook.label.automated",
+    "count": 898,
+    "endTime": "dummy",
+    "success": 801
+  },
+  {
+    "typeLabel": "runbook.label.automated",
+    "count": 846,
+    "endTime": "dummy",
+    "success": 745
+  },
+  {
+    "typeLabel": "runbook.label.automated",
+    "count": 857,
+    "endTime": "dummy",
+    "success": 754
+  },
+  {
+    "typeLabel": "runbook.label.automated",
+    "count": 859,
+    "endTime": "dummy",
+    "success": 739
+  },
+  {
+    "typeLabel": "runbook.label.automated",
+    "count": 865,
+    "endTime": "dummy",
+    "success": 711
+  },
+  {
+    "typeLabel": "runbook.label.automated",
+    "count": 757,
+    "endTime": "dummy",
+    "success": 702
+  },
+  {
+    "typeLabel": "runbook.label.automated",
+    "count": 825,
+    "endTime": "dummy",
+    "success": 800
+  },
+  {
+    "typeLabel": "runbook.label.automated",
+    "count": 827,
+    "endTime": "dummy",
+    "success": 745
+  },
+  {
+    "typeLabel": "runbook.label.automated",
+    "count": 811,
+    "endTime": "dummy",
+    "success": 764
+  },
+  {
+    "typeLabel": "runbook.label.automated",
+    "count": 793,
+    "endTime": "dummy",
+    "success": 736
+  },
+  {
+    "typeLabel": "runbook.label.automated",
+    "count": 821,
+    "endTime": "dummy",
+    "success": 780
+  },
+  {
+    "typeLabel": "runbook.label.automated",
+    "count": 845,
+    "endTime": "dummy",
+    "success": 812
+  },
+  {
+    "typeLabel": "runbook.label.automated",
+    "count": 753,
+    "endTime": "dummy",
+    "success": 698
+  },
+  {
+    "typeLabel": "runbook.label.automated",
+    "count": 922,
+    "endTime": "dummy",
+    "success": 873
+  },
+  {
+    "typeLabel": "runbook.label.automated",
+    "count": 948,
+    "endTime": "dummy",
+    "success": 834
+  },
+  {
+    "typeLabel": "runbook.label.automated",
+    "count": 919,
+    "endTime": "dummy",
+    "success": 849
+  },
+  {
+    "typeLabel": "runbook.label.automated",
+    "count": 946,
+    "endTime": "dummy",
+    "success": 903
+  },
+  {
+    "typeLabel": "runbook.label.automated",
+    "count": 900,
+    "endTime": "dummy",
+    "success": 855
+  },
+  {
+    "typeLabel": "runbook.label.automated",
+    "count": 942,
+    "endTime": "dummy",
+    "success": 860
+  },
+  {
+    "typeLabel": "runbook.label.automated",
+    "count": 922,
+    "endTime": "dummy",
+    "success": 785
+  },
+  {
+    "typeLabel": "runbook.label.automated",
+    "count": 865,
+    "endTime": "dummy",
+    "success": 850
+  },
+  {
+    "typeLabel": "runbook.label.automated",
+    "count": 900,
+    "endTime": "dummy",
+    "success": 837
+  },
+  {
+    "typeLabel": "runbook.label.automated",
+    "count": 912,
+    "endTime": "dummy",
+    "success": 833
+  },
+  {
+    "typeLabel": "runbook.label.manual",
+    "count": 397,
+    "endTime": "dummy",
+    "success": 365
+  },
+  {
+    "typeLabel": "runbook.label.manual",
+    "count": 341,
+    "endTime": "dummy",
+    "success": 298
+  },
+  {
+    "typeLabel": "runbook.label.manual",
+    "count": 422,
+    "endTime": "dummy",
+    "success": 37
+  },
+  {
+    "typeLabel": "runbook.label.manual",
+    "count": 299,
+    "endTime": "dummy",
+    "success": 264
+  },
+  {
+    "typeLabel": "runbook.label.manual",
+    "count": 213,
+    "endTime": "dummy",
+    "success": 83
+  },
+  {
+    "typeLabel": "runbook.label.manual",
+    "count": 343,
+    "endTime": "dummy",
+    "success": 243
+  },
+  {
+    "typeLabel": "runbook.label.manual",
+    "count": 313,
+    "endTime": "dummy",
+    "success": 287
+  },
+  {
+    "typeLabel": "runbook.label.manual",
+    "count": 444,
+    "endTime": "dummy",
+    "success": 401
+  },
+  {
+    "typeLabel": "runbook.label.manual",
+    "count": 278,
+    "endTime": "dummy",
+    "success": 250
+  },
+  {
+    "typeLabel": "runbook.label.manual",
+    "count": 200,
+    "endTime": "dummy",
+    "success": 169
+  },
+  {
+    "typeLabel": "runbook.label.manual",
+    "count": 332,
+    "endTime": "dummy",
+    "success": 286
+  },
+  {
+    "typeLabel": "runbook.label.manual",
+    "count": 283,
+    "endTime": "dummy",
+    "success": 143
+  },
+  {
+    "typeLabel": "runbook.label.manual",
+    "count": 203,
+    "endTime": "dummy",
+    "success": 57
+  },
+  {
+    "typeLabel": "runbook.label.manual",
+    "count": 167,
+    "endTime": "dummy",
+    "success": 159
+  },
+  {
+    "typeLabel": "runbook.label.manual",
+    "count": 323,
+    "endTime": "dummy",
+    "success": 285
+  },
+  {
+    "typeLabel": "runbook.label.manual",
+    "count": 245,
+    "endTime": "dummy",
+    "success": 232
+  },
+  {
+    "typeLabel": "runbook.label.manual",
+    "count": 225,
+    "endTime": "dummy",
+    "success": 134
+  },
+  {
+    "typeLabel": "runbook.label.manual",
+    "count": 99,
+    "endTime": "dummy",
+    "success": 94
+  },
+  {
+    "typeLabel": "runbook.label.manual",
+    "count": 234,
+    "endTime": "dummy",
+    "success": 122
+  },
+  {
+    "typeLabel": "runbook.label.manual",
+    "count": 304,
+    "endTime": "dummy",
+    "success": 289
+  },
+  {
+    "typeLabel": "runbook.label.manual",
+    "count": 294,
+    "endTime": "dummy",
+    "success": 265
+  },
+  {
+    "typeLabel": "runbook.label.manual",
+    "count": 212,
+    "endTime": "dummy",
+    "success": 186
+  },
+  {
+    "typeLabel": "runbook.label.manual",
+    "count": 142,
+    "endTime": "dummy",
+    "success": 109
+  },
+  {
+    "typeLabel": "runbook.label.manual",
+    "count": 121,
+    "endTime": "dummy",
+    "success": 112
+  },
+  {
+    "typeLabel": "runbook.label.manual",
+    "count": 241,
+    "endTime": "dummy",
+    "success": 142
+  }
+]
