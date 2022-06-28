@@ -363,7 +363,10 @@ then
         echo "______________________________________________________________"
         echo "CSVs from ibm-common-services namespace:" && echo ""
 
-        getCSVStatus "ibm-common-services" "cloud-native-postgresql"
+        if [ "${VERSION_AIOPSORCHESTRATOR}" != "3.3" ];
+        then 
+            getCSVStatus "ibm-common-services" "cloud-native-postgresql"
+        fi
         getCSVStatus "ibm-common-services" "ibm-cert-manager-operator"
         getCSVStatus "ibm-common-services" "ibm-common-service-operator"
         getCSVStatus "ibm-common-services" "ibm-commonui-operator"
@@ -405,7 +408,10 @@ then
         
         echo "______________________________________________________________"
         echo "Subscriptions from ibm-common-services namespace:" && echo ""
-        getSubscriptionStatus "cloud-native-postgresql" "ibm-common-services" 
+        if [ "${VERSION_AIOPSORCHESTRATOR}" != "3.3" ];
+        then 
+            getSubscriptionStatus "cloud-native-postgresql" "ibm-common-services" 
+        fi
         getSubscriptionStatus "ibm-cert-manager-operator" "ibm-common-services" 
         getSubscriptionStatus "ibm-common-service-operator" "ibm-common-services" 
         getSubscriptionStatus "ibm-commonui-operator" "ibm-common-services" 
