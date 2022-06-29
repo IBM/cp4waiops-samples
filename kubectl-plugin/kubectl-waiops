@@ -24,7 +24,7 @@ CLUSTER_ADMIN=$(oc auth can-i '*' '*' --all-namespaces)
 # optional argument handling
 if [[ "$1" == "version" ]]
 then
-    echo "0.0.8"
+    echo "0.0.9"
     exit 0
 fi
 
@@ -62,6 +62,12 @@ getSubscriptionStatusGrep () {
     SUBSCRIPTION=$(oc get subscription -o name --no-headers=true -n $2 | grep $1)   
     INSTANCE=$(oc get $SUBSCRIPTION -n $2)                    
     STATUS=$(oc get $SUBSCRIPTION -n $2 -o jsonpath='{.status.catalogHealth[].healthy}')
+    printStatus "$STATUS" "true" "$INSTANCE"
+}
+
+getSubscriptionStatusSelector () {
+    INSTANCE=$(oc get subscription --selector=$1 -n $2) 
+    STATUS=$(oc get subscription --selector=$1 -n $2 -o jsonpath='{.items[].status.catalogHealth[].healthy}')
     printStatus "$STATUS" "true" "$INSTANCE"
 }
 
@@ -177,7 +183,7 @@ then
 
         echo "______________________________________________________________"
         printf "
-${blue}${bold}Hint: for a more detailed printout of each operator's components' statuses, run \`oc waiops status-all\`.
+${blue}${bold}Hint: for a more detailed printout of component statuses, run \`oc waiops status-all\`.
 ${normal}
 "
         exit 0
@@ -337,7 +343,6 @@ then
         getCSVStatus "$INSTALLATION_NAMESPACE" "aiopsedge-operator"
         getCSVStatus "$INSTALLATION_NAMESPACE" "asm-operator"
         getCSVStatus "$INSTALLATION_NAMESPACE" "couchdb-operator"
-        getCSVStatus "$INSTALLATION_NAMESPACE" "elasticsearch-operator"
         getCSVStatus "$INSTALLATION_NAMESPACE" "ibm-aiops-ir-ai"
         getCSVStatus "$INSTALLATION_NAMESPACE" "ibm-aiops-ir-core"
         getCSVStatus "$INSTALLATION_NAMESPACE" "ibm-aiops-ir-lifecycle"
@@ -358,8 +363,10 @@ then
         echo "______________________________________________________________"
         echo "CSVs from ibm-common-services namespace:" && echo ""
 
-        getCSVStatus "ibm-common-services" "cloud-native-postgresql"
-        getCSVStatus "ibm-common-services" "elasticsearch-operator"
+        if [ "${VERSION_AIOPSORCHESTRATOR}" != "3.3" ];
+        then 
+            getCSVStatus "ibm-common-services" "cloud-native-postgresql"
+        fi
         getCSVStatus "ibm-common-services" "ibm-cert-manager-operator"
         getCSVStatus "ibm-common-services" "ibm-common-service-operator"
         getCSVStatus "ibm-common-services" "ibm-commonui-operator"
@@ -383,7 +390,7 @@ then
         getSubscriptionStatus "asm-operator" "$INSTALLATION_NAMESPACE" 
         getSubscriptionStatus "couchdb" "$INSTALLATION_NAMESPACE" 
         getSubscriptionStatus "ibm-aiops-orchestrator" "$INSTALLATION_NAMESPACE" 
-        getSubscriptionStatus "ibm-automation" "$INSTALLATION_NAMESPACE" 
+        getSubscriptionStatusSelector "operators.coreos.com/ibm-automation.$INSTALLATION_NAMESPACE" "$INSTALLATION_NAMESPACE" 
         getSubscriptionStatusGrep "ibm-automation-core" "$INSTALLATION_NAMESPACE" 
         getSubscriptionStatusGrep "ibm-automation-elastic" "$INSTALLATION_NAMESPACE" 
         getSubscriptionStatusGrep "ibm-automation-eventprocessing" "$INSTALLATION_NAMESPACE" 
@@ -401,7 +408,10 @@ then
         
         echo "______________________________________________________________"
         echo "Subscriptions from ibm-common-services namespace:" && echo ""
-        getSubscriptionStatus "cloud-native-postgresql" "ibm-common-services" 
+        if [ "${VERSION_AIOPSORCHESTRATOR}" != "3.3" ];
+        then 
+            getSubscriptionStatus "cloud-native-postgresql" "ibm-common-services" 
+        fi
         getSubscriptionStatus "ibm-cert-manager-operator" "ibm-common-services" 
         getSubscriptionStatus "ibm-common-service-operator" "ibm-common-services" 
         getSubscriptionStatus "ibm-commonui-operator" "ibm-common-services" 
@@ -791,7 +801,7 @@ ${normal}______________________________________________________________
         fi
 
         printf "
-${blue}${bold}Hint: for a more detailed printout of each operator's components' statuses, run \`oc waiops status\` or \`oc waiops status-all\`.
+${blue}${bold}Hint: for a more detailed printout of component statuses, run \`oc waiops status\` or \`oc waiops status-all\`.
 ${normal}
 "
         exit 0
@@ -803,4 +813,4 @@ ${normal}
     fi
 fi
 
-echo "kubectl-waiops"
+echo "kubectl-waiops" 
