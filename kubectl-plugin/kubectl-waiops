@@ -801,7 +801,7 @@ ${normal}______________________________________________________________
         fi
 
         printf "
-${blue}${bold}Hint: for a more detailed printout of each operator's components' statuses, run \`oc waiops status\` or \`oc waiops status-all\`.
+${blue}${bold}Hint: for a more detailed printout of each component's status, run \`oc waiops status\` or \`oc waiops status-all\`.
 ${normal}
 "
         exit 0
