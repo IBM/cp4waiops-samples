@@ -200,12 +200,38 @@ echo
 function checkOCPVersion {
   
   OCP_VER=$(oc get clusterversion version -o=jsonpath='{.status.desired.version}')
+
+  ODF_STORAGE=$(oc get storageclass ocs-storagecluster-cephfs)
+
+  OCP_MINOR_VER=`echo $OCP_VER | awk '{split($0,a,"."); print a[3]}'`
   
   echo
   startEndSection "Openshift Container Platform Version Check"
   log $INFO "Checking OCP Version. Compatible Versions of OCP are v4.6, v4.8, and v4.10."
   
   if [[ $OCP_VER == *"4.6"* || $OCP_VER == *"4.8"* || $OCP_VER == *"4.10"* ]]; then
+    if [[ $OCP_VER == "4.8"* ]]; then
+      if [[ $OCP_MINOR_VER -ge 43 && -z $ODF_STORAGE ]]; then
+        log $INFO "OCP Version $OCP_VER is compatible with IBM Cloud Pak for Watson AIOps AI Manager"
+        OCP_VER_RES=$pass_msg
+        return 0
+      else
+        log $INFO "OCP Version $OCP_VER is not compatible with IBM Cloud Pak for Watson AIOps AI Manager. If you are using ODF storage, 4.8.43 is the miniumum supported level"
+        OCP_VER_RES=$fail_msg
+        return 1
+      fi
+    fi
+    if [[ $OCP_VER == "4.10"* ]]; then
+      if [[ $OCP_MINOR_VER -ge 17 && -z $ODF_STORAGE ]];then
+        log $INFO "OCP Version $OCP_VER is compatible with IBM Cloud Pak for Watson AIOps AI Manager"
+        OCP_VER_RES=$pass_msg
+        return 0
+      else
+        log $INFO "OCP Version $OCP_VER is not compatible with IBM Cloud Pak for Watson AIOps AI Manager. If you are using ODF storage, 4.10.17 is the miniumum supported level"
+        OCP_VER_RES=$fail_msg
+        return 1
+      fi
+    fi
     log $INFO "OCP Version $OCP_VER is compatible with IBM Cloud Pak for Watson AIOps AI Manager"
     OCP_VER_RES=$pass_msg
     startEndSection "Openshift Container Platform Version Check"
