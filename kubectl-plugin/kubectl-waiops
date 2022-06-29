@@ -183,7 +183,7 @@ then
 
         echo "______________________________________________________________"
         printf "
-${blue}${bold}Hint: for a more detailed printout of each operator's components' statuses, run \`oc waiops status-all\`.
+${blue}${bold}Hint: for a more detailed printout of component statuses, run \`oc waiops status-all\`.
 ${normal}
 "
         exit 0
