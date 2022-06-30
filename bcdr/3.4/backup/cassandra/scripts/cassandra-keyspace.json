@@ -1,0 +1,48 @@
+{
+  "name": "Cassandra-Keyspaces",
+  "squad": "",
+  "owner": "",
+  "release-updates": "",
+  "keyspaces": [
+    {
+      "name": "system_schema",
+      "description": ""
+    },
+    {
+      "name": "system",
+      "description": ""
+    },
+    {
+      "name": "system_distributed",
+      "description": ""
+    },
+    {
+      "name": "system_auth",
+      "description": ""
+    },
+    {
+      "name": "janusgraph",
+      "description": "It is required for resource topology"
+    },
+    {
+      "name": "system_traces",
+      "description": ""
+    },
+    {
+      "name": "tararam",
+      "description": "It is required for metric anamoly detector model"
+    },
+    {
+      "name": "aiops",
+      "description": ""
+    },
+    {
+      "name": "aiops_policies",
+      "description": ""
+    },
+    {
+      "name": "mime_config",
+      "description": ""
+    }
+  ]
+}
