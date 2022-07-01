@@ -46,6 +46,9 @@ wait "90"
 echo "Triggering the Cassandra native restore now.."
 ./trigger-cassandra-restore.sh
 
+echo "Deleting cassandra-bcdr-config configmap"
+oc delete cm cassandra-bcdr-config -n $namespace 
+
 #Post backup task for cassandra
 echo "Scaling up the Agile Service Manager pods and running the Cassandra native post-restore after Cassandra native restore is done"
 ./cassandra-native-post-restore.sh

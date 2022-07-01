@@ -7,8 +7,5 @@ echo $namespace $CASSANDRA_RC
 echo "Deleting the backup pods"
 oc delete pod -n $namespace -l cassandra.cp4aiops.ibm.com/backup=t
 
-echo "Deleting cassandra-bcdr-config configmap"
-oc delete cm cassandra-bcdr-config -n $namespace 
-
 echo "Scaling up the aiops-topology-cassandra statefulset"
 oc scale sts aiops-topology-cassandra -n $namespace --replicas=$CASSANDRA_RC
