@@ -20,6 +20,7 @@ INSTALLATION_NAMESPACE=$(oc get installations.orchestrator.aiops.ibm.com -A --no
 CSV_NAME=$(oc get csvs -o name --no-headers=true -n $INSTALLATION_NAMESPACE | grep ibm-aiops-orchestrator)         
 VERSION_AIOPSORCHESTRATOR=$(oc get $CSV_NAME -n $INSTALLATION_NAMESPACE -o jsonpath='{.spec.version}' | awk '{ print substr( $0, 0, 3 ) }')
 CLUSTER_ADMIN=$(oc auth can-i '*' '*' --all-namespaces)
+CLUSTER_SCOPE_INSTALL=$(if [ $(oc get subscription -A  | grep ibm-aiops-orchestrator | awk '{ print $1 }') == "openshift-operators" ]; then echo "true"; else echo "false"; fi)
 
 # optional argument handling
 if [[ "$1" == "version" ]]
@@ -389,12 +390,15 @@ then
         getSubscriptionStatus "aiopsedge-operator" "$INSTALLATION_NAMESPACE" 
         getSubscriptionStatus "asm-operator" "$INSTALLATION_NAMESPACE" 
         getSubscriptionStatus "couchdb" "$INSTALLATION_NAMESPACE" 
-        getSubscriptionStatus "ibm-aiops-orchestrator" "$INSTALLATION_NAMESPACE" 
-        getSubscriptionStatusSelector "operators.coreos.com/ibm-automation.$INSTALLATION_NAMESPACE" "$INSTALLATION_NAMESPACE" 
-        getSubscriptionStatusGrep "ibm-automation-core" "$INSTALLATION_NAMESPACE" 
-        getSubscriptionStatusGrep "ibm-automation-elastic" "$INSTALLATION_NAMESPACE" 
-        getSubscriptionStatusGrep "ibm-automation-eventprocessing" "$INSTALLATION_NAMESPACE" 
-        getSubscriptionStatusGrep "ibm-automation-flink" "$INSTALLATION_NAMESPACE" 
+        if [ "${CLUSTER_SCOPE_INSTALL}" == "false" ];
+        then 
+            getSubscriptionStatus "ibm-aiops-orchestrator" "$INSTALLATION_NAMESPACE" 
+            getSubscriptionStatusSelector "operators.coreos.com/ibm-automation.$INSTALLATION_NAMESPACE" "$INSTALLATION_NAMESPACE" 
+            getSubscriptionStatusGrep "ibm-automation-core" "$INSTALLATION_NAMESPACE" 
+            getSubscriptionStatusGrep "ibm-automation-elastic" "$INSTALLATION_NAMESPACE" 
+            getSubscriptionStatusGrep "ibm-automation-eventprocessing" "$INSTALLATION_NAMESPACE" 
+            getSubscriptionStatusGrep "ibm-automation-flink" "$INSTALLATION_NAMESPACE" 
+        fi
         getSubscriptionStatusGrep "ibm-common-service-operator" "$INSTALLATION_NAMESPACE" 
         getSubscriptionStatus "ibm-management-kong" "$INSTALLATION_NAMESPACE" 
         getSubscriptionStatus "ibm-postgreservice-operator" "$INSTALLATION_NAMESPACE" 
@@ -413,7 +417,10 @@ then
             getSubscriptionStatus "cloud-native-postgresql" "ibm-common-services" 
         fi
         getSubscriptionStatus "ibm-cert-manager-operator" "ibm-common-services" 
-        getSubscriptionStatus "ibm-common-service-operator" "ibm-common-services" 
+        if [ "${CLUSTER_SCOPE_INSTALL}" == "false" ];
+        then  
+            getSubscriptionStatusGrep "ibm-common-service-operator" "ibm-common-services" 
+        fi
         getSubscriptionStatus "ibm-commonui-operator" "ibm-common-services" 
         getSubscriptionStatus "ibm-crossplane-operator-app" "ibm-common-services" 
         getSubscriptionStatus "ibm-crossplane-provider-kubernetes-operator-app" "ibm-common-services" 
@@ -428,6 +435,19 @@ then
         getSubscriptionStatus "ibm-zen-operator" "ibm-common-services" 
         getSubscriptionStatus "operand-deployment-lifecycle-manager-app" "ibm-common-services" 
 
+        if [ "${CLUSTER_SCOPE_INSTALL}" == "true" ];
+        then 
+            echo "______________________________________________________________"
+            echo "Subscriptions from openshift-operators namespace:" && echo ""
+            getSubscriptionStatus "ibm-aiops-orchestrator" "openshift-operators" 
+            getSubscriptionStatusSelector "operators.coreos.com/ibm-automation.openshift-operators" "openshift-operators" 
+            getSubscriptionStatusGrep "ibm-automation-core" "openshift-operators" 
+            getSubscriptionStatusGrep "ibm-automation-elastic" "openshift-operators" 
+            getSubscriptionStatusGrep "ibm-automation-eventprocessing" "openshift-operators" 
+            getSubscriptionStatusGrep "ibm-automation-flink" "openshift-operators"
+            getSubscriptionStatusGrep "ibm-common-service-operator" "openshift-operators" 
+        fi
+
         echo "______________________________________________________________"
         echo "OperandRequest instances:" && echo ""
         getOperandRequestStatus "ibm-commonui-request" "ibm-common-services" 
@@ -437,15 +457,23 @@ then
         getOperandRequestStatus "platform-api-request" "ibm-common-services" 
         getOperandRequestStatus "aiopsedge-base" "$INSTALLATION_NAMESPACE"  
         getOperandRequestStatus "aiopsedge-cs" "$INSTALLATION_NAMESPACE"  
-        getOperandRequestStatus "iaf-core-operator" "$INSTALLATION_NAMESPACE"  
-        getOperandRequestStatus "iaf-eventprocessing-operator" "$INSTALLATION_NAMESPACE" 
-        getOperandRequestStatus "iaf-operator" "$INSTALLATION_NAMESPACE" 
+        if [ "${CLUSTER_SCOPE_INSTALL}" == "false" ];
+        then 
+            getOperandRequestStatus "iaf-core-operator" "$INSTALLATION_NAMESPACE"  
+            getOperandRequestStatus "iaf-eventprocessing-operator" "$INSTALLATION_NAMESPACE" 
+            getOperandRequestStatus "iaf-operator" "$INSTALLATION_NAMESPACE" 
+            getOperandRequestStatus "ibm-elastic-operator" "$INSTALLATION_NAMESPACE"
+        else
+            getOperandRequestStatus "iaf-core-operator" "openshift-operators"  
+            getOperandRequestStatus "iaf-eventprocessing-operator" "openshift-operators" 
+            getOperandRequestStatus "iaf-operator" "openshift-operators"
+            getOperandRequestStatus "ibm-elastic-operator" "openshift-operators"
+        fi
         getOperandRequestStatus "iaf-system" "$INSTALLATION_NAMESPACE" 
         getOperandRequestStatus "iaf-system-common-service" "$INSTALLATION_NAMESPACE" 
         getOperandRequestStatus "ibm-aiops-ai-manager" "$INSTALLATION_NAMESPACE" 
         getOperandRequestStatus "ibm-aiops-aiops-foundation" "$INSTALLATION_NAMESPACE" 
         getOperandRequestStatus "ibm-aiops-connection" "$INSTALLATION_NAMESPACE"  
-        getOperandRequestStatus "ibm-elastic-operator" "$INSTALLATION_NAMESPACE" 
         getOperandRequestStatus "ibm-iam-service" "$INSTALLATION_NAMESPACE" 
         getOperandRequestStatus "operandrequest-kafkauser-iaf-system" "$INSTALLATION_NAMESPACE" 
 
@@ -463,8 +491,14 @@ then
         echo "______________________________________________________________"
         echo "Orchestrator pod current status:" && echo ""   
         INSTANCE=$(oc get pod -A | grep ibm-aiops-orchestrator-controller-manager)
-        POD_NAME=$(oc get pods -o name --no-headers=true -n $INSTALLATION_NAMESPACE | grep ibm-aiops-orchestrator-controller-manager | awk '{ print substr( $0, 5 ) }')         
-        STATUS=$(oc get pod $POD_NAME -n $INSTALLATION_NAMESPACE -o jsonpath='{.status.phase}')
+        if [ "${CLUSTER_SCOPE_INSTALL}" == "false" ];
+        then
+            POD_NAME=$(oc get pods -o name --no-headers=true -n $INSTALLATION_NAMESPACE | grep ibm-aiops-orchestrator-controller-manager | awk '{ print substr( $0, 5 ) }')         
+            STATUS=$(oc get pod $POD_NAME -n $INSTALLATION_NAMESPACE -o jsonpath='{.status.phase}')
+        else
+            POD_NAME=$(oc get pods -o name --no-headers=true -n openshift-operators | grep ibm-aiops-orchestrator-controller-manager | awk '{ print substr( $0, 5 ) }')         
+            STATUS=$(oc get pod $POD_NAME -n openshift-operators -o jsonpath='{.status.phase}')
+        fi
         if [[ $STATUS == "Running" ]]; then
             printf '%s\n' "$green$INSTANCE$normal"
         else
