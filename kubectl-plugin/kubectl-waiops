@@ -25,7 +25,7 @@ CLUSTER_SCOPE_INSTALL=$(if [ $(oc get subscription -A  | grep ibm-aiops-orchestr
 # optional argument handling
 if [[ "$1" == "version" ]]
 then
-    echo "0.0.9"
+    echo "0.0.10"
     exit 0
 fi
 
