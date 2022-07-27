@@ -211,7 +211,7 @@ function checkOCPVersion {
   
   if [[ $OCP_VER == *"4.6"* || $OCP_VER == *"4.8"* || $OCP_VER == *"4.10"* ]]; then
     if [[ $OCP_VER == "4.8"* ]]; then
-      if [[ $OCP_MINOR_VER -ge 43 && -z $ODF_STORAGE ]]; then
+      if [[ $OCP_MINOR_VER -ge 43 && -n $ODF_STORAGE ]]; then
         log $INFO "OCP Version $OCP_VER is compatible with IBM Cloud Pak for Watson AIOps AI Manager"
         OCP_VER_RES=$pass_msg
         return 0
@@ -222,7 +222,7 @@ function checkOCPVersion {
       fi
     fi
     if [[ $OCP_VER == "4.10"* ]]; then
-      if [[ $OCP_MINOR_VER -ge 17 && -z $ODF_STORAGE ]];then
+      if [[ $OCP_MINOR_VER -ge 17 && -n $ODF_STORAGE ]];then
         log $INFO "OCP Version $OCP_VER is compatible with IBM Cloud Pak for Watson AIOps AI Manager"
         OCP_VER_RES=$pass_msg
         return 0
@@ -306,7 +306,7 @@ createTestJob () {
           - name: ibm-entitlement-key
           containers:
           - name: testimage
-            image: cp.icr.io/cp/cp4waiops/ai-platform-api-server@sha256:67635b62af17676d0f09f164d12486a0f9b7dc32c99574709c09e13a99df90ec
+            image: cp.icr.io/cp/cp4waiops/ai-platform-api-server@sha256:640e3ba29f4ec916db60e808382d112dfd96271c0ecd10528c240229f854e627
             imagePullPolicy: Always
             command: [ "echo", "SUCCESS" ]
           restartPolicy: OnFailure
@@ -336,7 +336,7 @@ EOF
                         - amd64
           containers:
           - name: testimage
-            image: cp.icr.io/cp/cp4waiops/ai-platform-api-server@sha256:67635b62af17676d0f09f164d12486a0f9b7dc32c99574709c09e13a99df90ec
+            image: cp.icr.io/cp/cp4waiops/ai-platform-api-server@sha256:640e3ba29f4ec916db60e808382d112dfd96271c0ecd10528c240229f854e627
             imagePullPolicy: Always
             command: [ "echo", "SUCCESS" ]
           restartPolicy: OnFailure
