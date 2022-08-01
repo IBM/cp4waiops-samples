@@ -22,9 +22,13 @@ VERSION_AIOPSORCHESTRATOR=$(oc get $CSV_NAME -n $INSTALLATION_NAMESPACE -o jsonp
 CLUSTER_ADMIN=$(oc auth can-i '*' '*' --all-namespaces)
 CLUSTER_SCOPE_INSTALL=$(if [ $(oc get subscription -A  | grep ibm-aiops-orchestrator | awk '{ print $1 }') == "openshift-operators" ]; then echo "true"; else echo "false"; fi)
 
+
 # optional argument handling
+
+
 if [[ "$1" == "version" ]]
 then
+    echo "hello world, this is a test 2"
     echo "0.0.10"
     exit 0
 fi
@@ -78,6 +82,120 @@ getOperandRequestStatus () {
     printStatus "$STATUS" "Running" "$INSTANCE"
 }
 
+InstallationStatus () {
+    echo "______________________________________________________________"
+    # Installation status
+    echo "Installation instances:" && echo ""
+    INSTANCE=$(oc get installations.orchestrator.aiops.ibm.com)
+    STATUS=$(oc get installations.orchestrator.aiops.ibm.com -o jsonpath='{.items[].status.phase}')
+    printStatus "$STATUS" "Running" "$INSTANCE"
+            
+}
+ZenServiceStatus () {
+    echo "______________________________________________________________"
+    # ZenService status
+    echo "ZenService instances:" && echo ""
+    INSTANCE=$(oc get zenservice iaf-zen-cpdservice -o custom-columns='KIND:.kind,NAME:.metadata.name,NAMESPACE:.metadata.namespace,VERSION:status.currentVersion,STATUS:.status.zenStatus,PROGRESS:.status.Progress,MESSAGE:.status.ProgressMessage')
+    STATUS=$(oc get zenservice iaf-zen-cpdservice -o jsonpath='{.status.zenStatus}')
+    printStatus "$STATUS" "Completed" "$INSTANCE"
+}
+AutomationUIConfigStatus () {
+    echo "______________________________________________________________"
+    echo "AutomationUIConfig, AutomationBase, Cartridge, CartridgeRequirements, and EventProcessor instances:" && echo ""   
+    # AutomationUIConfig status
+    INSTANCE_AUIC=$(oc get automationuiconfig iaf-system -o custom-columns='KIND:.kind,NAMESPACE:.metadata.namespace,NAME:.metadata.name,VERSION:status.versions.reconciled,STATUS:.status.conditions[?(@.type=="Ready")].status,MESSAGE:.status.conditions[?(@.type=="Ready")].message')
+    STATUS_AUIC=$(oc get automationuiconfig iaf-system -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}')
+    printStatus "$STATUS_AUIC" "True" "$INSTANCE_AUIC"
+}
+AutomationBaseStatus () {
+
+    # AutomationBase status
+    INSTANCE_AB=$(oc get automationbase automationbase-sample -o custom-columns='KIND:.kind,NAMESPACE:.metadata.namespace,NAME:.metadata.name,VERSION:status.versions.reconciled,STATUS:.status.conditions[?(@.type=="Ready")].status,MESSAGE:.status.conditions[?(@.type=="Ready")].message')
+    STATUS_AB=$(oc get automationbase automationbase-sample -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}')
+    printStatus "$STATUS_AB" "True" "$INSTANCE_AB"
+}
+CartridgeStatus () {
+    # Cartridge status
+    INSTANCE_CARTRIDGE=$(oc get cartridge cp4waiops-cartridge -o custom-columns='KIND:.kind,NAMESPACE:.metadata.namespace,NAME:.metadata.name,VERSION:status.versions.reconciled,STATUS:.status.conditions[?(@.type=="Ready")].status,MESSAGE:.status.conditions[?(@.type=="Ready")].message')
+    STATUS_CARTRIDGE=$(oc get cartridge cp4waiops-cartridge -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}')
+    printStatus "$STATUS_CARTRIDGE" "True" "$INSTANCE_CARTRIDGE"
+}
+CartridgeRequirementsStatus () {
+    # CartridgeRequirements status
+    INSTANCE_CARTRIDGE_REQS=$(oc get cartridgerequirements cp4waiops-cartridge -o custom-columns='KIND:.kind,NAMESPACE:.metadata.namespace,NAME:.metadata.name,VERSION:status.versions.reconciled,STATUS:.status.conditions[?(@.type=="Ready")].status,MESSAGE:.status.conditions[?(@.type=="Ready")].message')
+    STATUS_CARTRIDGE_REQS=$(oc get cartridgerequirements cp4waiops-cartridge -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}')
+    printStatus "$STATUS_CARTRIDGE_REQS" "True" "$INSTANCE_CARTRIDGE_REQS"
+}
+Aiopaiops-ir-lifecycleEventProcessorStatus () {
+    # aiops-ir-lifecycle EventProcessor status
+    INSTANCE_IR_EP=$(oc get eventprocessor aiops-ir-lifecycle -o custom-columns='KIND:.kind,NAMESPACE:.metadata.namespace,NAME:.metadata.name,VERSION:status.versions.reconciled,STATUS:.status.conditions[?(@.type=="Ready")].status,MESSAGE:.status.conditions[?(@.type=="Ready")].message')
+    STATUS_IR_EP=$(oc get eventprocessor aiops-ir-lifecycle -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}')
+    printStatus "$STATUS_IR_EP" "True" "$INSTANCE_IR_EP"
+}
+Cp4waiops-eventprocessorEventProcessorStatus () {
+    # cp4waiops-eventprocessor EventProcessor status
+    INSTANCE_EP=$(oc get eventprocessor cp4waiops-eventprocessor -o custom-columns='KIND:.kind,NAMESPACE:.metadata.namespace,NAME:.metadata.name,VERSION:status.versions.reconciled,STATUS:.status.conditions[?(@.type=="Ready")].status,MESSAGE:.status.conditions[?(@.type=="Ready")].message')
+    STATUS_EP=$(oc get eventprocessor cp4waiops-eventprocessor -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}')
+    printStatus "$STATUS_EP" "True" "$INSTANCE_EP"
+}
+IRCoreStatus () {
+    echo "______________________________________________________________"
+    echo "IRCore and AIOpsAnalyticsOrchestrator instances:" && echo ""
+    # IRCore status
+    INSTANCE_IRCORE=$(oc get ircore aiops  -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:status.versions.reconciled,STATUS:status.conditions[?(@.type==\"Ready\")].reason,MESSAGE:status.conditions[?(@.type==\"Ready\")].message")
+    STATUS_IRCORE=$(oc get ircore aiops -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}')
+    printStatus "$STATUS_IRCORE" "True" "$INSTANCE_IRCORE"
+}
+AIOpsAnalyticsOrchestratorStatus () {
+    # AIOpsAnalyticsOrchestrator status
+    INSTANCE_ANALYTICS_ORCHESTRATOR=$(oc get AIOpsAnalyticsOrchestrator aiops  -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:status.versions.reconciled,STATUS:status.conditions[?(@.type==\"Ready\")].reason,MESSAGE:status.conditions[?(@.type==\"Ready\")].message")
+    STATUS_ANALYTICS_ORCHESTRATOR=$(oc get AIOpsAnalyticsOrchestrator aiops -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}')
+    printStatus "$STATUS_ANALYTICS_ORCHESTRATOR" "True" "$INSTANCE_ANALYTICS_ORCHESTRATOR"
+}
+LifecycleServiceStatus () {
+    echo "______________________________________________________________"
+    # LifecycleService status
+    echo "LifecycleService instances:" && echo ""
+    INSTANCE=$(oc get lifecycleservice -A -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:status.versions.reconciled,STATUS:status.conditions[?(@.type==\"Lifecycle Service Ready\")].reason,MESSAGE:status.conditions[?(@.type==\"Ready\")].message")
+    STATUS=$(oc get lifecycleservice aiops -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}')
+    printStatus "$STATUS" "True" "$INSTANCE"
+}
+BaseUIStatus (){
+    echo "______________________________________________________________"
+    # BaseUI status
+    echo "BaseUI instances:" && echo ""
+    INSTANCE=$(oc get BaseUI baseui-instance -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:status.versions.reconciled,STATUS:status.conditions[?(@.type==\"Ready\")].status,MESSAGE:status.conditions[?(@.type==\"Ready\")].reason")
+    STATUS=$(oc get BaseUI baseui-instance -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}')
+    printStatus "$STATUS" "True" "$INSTANCE"
+}
+AIManagerStatus () {
+    echo "______________________________________________________________"
+    echo "AIManager, ASM, AIOpsEdge, and AIOpsUI instances:" && echo ""
+    # AIManager status
+    INSTANCE_AIMANAGER=$(oc get AIManager aimanager -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:status.versions.reconciled,STATUS:status.phase,MESSAGE:status.message")
+    STATUS_AIMANAGER=$(oc get AIManager aimanager -o jsonpath='{.status.phase}')
+    printStatus "$STATUS_AIMANAGER" "Completed" "$INSTANCE_AIMANAGER"
+}
+ASMStatus () {
+    # ASM status
+    INSTANCE_ASM=$(oc get asm aiops-topology -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:status.versions.reconciled,STATUS:status.phase")
+    STATUS_ASM=$(oc get asm aiops-topology -o jsonpath='{.status.phase}')
+    printStatus "$STATUS_ASM" "OK" "$INSTANCE_ASM"
+
+}
+AIOpsEdgeStatus () {
+    # AIOpsEdge status
+    INSTANCE_AIOPSEDGE=$(oc get aiopsedge aiopsedge -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,STATUS:status.phase,MESSAGE:status.conditions[?(@.type==\"Ready\")].message")
+    STATUS_AIOPSEDGE=$(oc get aiopsedge aiopsedge -o jsonpath='{.status.phase}')
+    printStatus "$STATUS_AIOPSEDGE" "Configured" "$INSTANCE_AIOPSEDGE"
+}
+AIOpsUIStatus () {
+    # AIOpsUI status
+    INSTANCE_AIOPSUI=$(oc get aiopsui aiopsui-instance -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:status.versions.reconciled,STATUS:status.conditions[?(@.type==\"Ready\")].status,MESSAGE:status.conditions[?(@.type==\"Ready\")].reason")
+    STATUS_AIOPSUI=$(oc get aiopsui aiopsui-instance -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}')
+    printStatus "$STATUS_AIOPSUI" "True" "$INSTANCE_AIOPSUI"
+}
+
 # optional argument handling
 if [[ "$1" == "status" ]]
 then
@@ -87,100 +205,23 @@ then
 
         echo ""
         echo "${blue}${bold}Cloud Pak for Watson AIOps AI Manager v${VERSION_AIOPSORCHESTRATOR} installation status:${normal}"
-        
-        echo "______________________________________________________________"
-        # Installation status
-        echo "Installation instances:" && echo ""
-        INSTANCE=$(oc get installations.orchestrator.aiops.ibm.com)
-        STATUS=$(oc get installations.orchestrator.aiops.ibm.com -o jsonpath='{.items[].status.phase}')
-        printStatus "$STATUS" "Running" "$INSTANCE"
-        
-        echo "______________________________________________________________"
-        # ZenService status
-        echo "ZenService instances:" && echo ""
-        INSTANCE=$(oc get zenservice iaf-zen-cpdservice -o custom-columns='KIND:.kind,NAME:.metadata.name,NAMESPACE:.metadata.namespace,VERSION:status.currentVersion,STATUS:.status.zenStatus,PROGRESS:.status.Progress,MESSAGE:.status.ProgressMessage')
-        STATUS=$(oc get zenservice iaf-zen-cpdservice -o jsonpath='{.status.zenStatus}')
-        printStatus "$STATUS" "Completed" "$INSTANCE"
 
-        echo "______________________________________________________________"
-        echo "AutomationUIConfig, AutomationBase, Cartridge, CartridgeRequirements, and EventProcessor instances:" && echo ""   
-        # AutomationUIConfig status
-        INSTANCE_AUIC=$(oc get automationuiconfig iaf-system -o custom-columns='KIND:.kind,NAMESPACE:.metadata.namespace,NAME:.metadata.name,VERSION:status.versions.reconciled,STATUS:.status.conditions[?(@.type=="Ready")].status,MESSAGE:.status.conditions[?(@.type=="Ready")].message')
-        STATUS_AUIC=$(oc get automationuiconfig iaf-system -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}')
-        printStatus "$STATUS_AUIC" "True" "$INSTANCE_AUIC"
-
-        # AutomationBase status
-        INSTANCE_AB=$(oc get automationbase automationbase-sample -o custom-columns='KIND:.kind,NAMESPACE:.metadata.namespace,NAME:.metadata.name,VERSION:status.versions.reconciled,STATUS:.status.conditions[?(@.type=="Ready")].status,MESSAGE:.status.conditions[?(@.type=="Ready")].message')
-        STATUS_AB=$(oc get automationbase automationbase-sample -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}')
-        printStatus "$STATUS_AB" "True" "$INSTANCE_AB"
-
-        # Cartridge status
-        INSTANCE_CARTRIDGE=$(oc get cartridge cp4waiops-cartridge -o custom-columns='KIND:.kind,NAMESPACE:.metadata.namespace,NAME:.metadata.name,VERSION:status.versions.reconciled,STATUS:.status.conditions[?(@.type=="Ready")].status,MESSAGE:.status.conditions[?(@.type=="Ready")].message')
-        STATUS_CARTRIDGE=$(oc get cartridge cp4waiops-cartridge -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}')
-        printStatus "$STATUS_CARTRIDGE" "True" "$INSTANCE_CARTRIDGE"
-        
-        # CartridgeRequirements status
-        INSTANCE_CARTRIDGE_REQS=$(oc get cartridgerequirements cp4waiops-cartridge -o custom-columns='KIND:.kind,NAMESPACE:.metadata.namespace,NAME:.metadata.name,VERSION:status.versions.reconciled,STATUS:.status.conditions[?(@.type=="Ready")].status,MESSAGE:.status.conditions[?(@.type=="Ready")].message')
-        STATUS_CARTRIDGE_REQS=$(oc get cartridgerequirements cp4waiops-cartridge -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}')
-        printStatus "$STATUS_CARTRIDGE_REQS" "True" "$INSTANCE_CARTRIDGE_REQS"
-
-        # aiops-ir-lifecycle EventProcessor status
-        INSTANCE_IR_EP=$(oc get eventprocessor aiops-ir-lifecycle -o custom-columns='KIND:.kind,NAMESPACE:.metadata.namespace,NAME:.metadata.name,VERSION:status.versions.reconciled,STATUS:.status.conditions[?(@.type=="Ready")].status,MESSAGE:.status.conditions[?(@.type=="Ready")].message')
-        STATUS_IR_EP=$(oc get eventprocessor aiops-ir-lifecycle -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}')
-        printStatus "$STATUS_IR_EP" "True" "$INSTANCE_IR_EP"
-        
-        # cp4waiops-eventprocessor EventProcessor status
-        INSTANCE_EP=$(oc get eventprocessor cp4waiops-eventprocessor -o custom-columns='KIND:.kind,NAMESPACE:.metadata.namespace,NAME:.metadata.name,VERSION:status.versions.reconciled,STATUS:.status.conditions[?(@.type=="Ready")].status,MESSAGE:.status.conditions[?(@.type=="Ready")].message')
-        STATUS_EP=$(oc get eventprocessor cp4waiops-eventprocessor -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}')
-        printStatus "$STATUS_EP" "True" "$INSTANCE_EP"
-
-        echo "______________________________________________________________"
-        echo "IRCore and AIOpsAnalyticsOrchestrator instances:" && echo ""
-        # IRCore status
-        INSTANCE_IRCORE=$(oc get ircore aiops  -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:status.versions.reconciled,STATUS:status.conditions[?(@.type==\"Ready\")].reason,MESSAGE:status.conditions[?(@.type==\"Ready\")].message")
-        STATUS_IRCORE=$(oc get ircore aiops -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}')
-        printStatus "$STATUS_IRCORE" "True" "$INSTANCE_IRCORE"
-
-        # AIOpsAnalyticsOrchestrator status
-        INSTANCE_ANALYTICS_ORCHESTRATOR=$(oc get AIOpsAnalyticsOrchestrator aiops  -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:status.versions.reconciled,STATUS:status.conditions[?(@.type==\"Ready\")].reason,MESSAGE:status.conditions[?(@.type==\"Ready\")].message")
-        STATUS_ANALYTICS_ORCHESTRATOR=$(oc get AIOpsAnalyticsOrchestrator aiops -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}')
-        printStatus "$STATUS_ANALYTICS_ORCHESTRATOR" "True" "$INSTANCE_ANALYTICS_ORCHESTRATOR"
-
-        echo "______________________________________________________________"
-        # LifecycleService status
-        echo "LifecycleService instances:" && echo ""
-        INSTANCE=$(oc get lifecycleservice -A -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:status.versions.reconciled,STATUS:status.conditions[?(@.type==\"Lifecycle Service Ready\")].reason,MESSAGE:status.conditions[?(@.type==\"Ready\")].message")
-        STATUS=$(oc get lifecycleservice aiops -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}')
-        printStatus "$STATUS" "True" "$INSTANCE"
-
-        echo "______________________________________________________________"
-        # BaseUI status
-        echo "BaseUI instances:" && echo ""
-        INSTANCE=$(oc get BaseUI baseui-instance -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:status.versions.reconciled,STATUS:status.conditions[?(@.type==\"Ready\")].status,MESSAGE:status.conditions[?(@.type==\"Ready\")].reason")
-        STATUS=$(oc get BaseUI baseui-instance -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}')
-        printStatus "$STATUS" "True" "$INSTANCE"
-
-        echo "______________________________________________________________"
-        echo "AIManager, ASM, AIOpsEdge, and AIOpsUI instances:" && echo ""
-        # AIManager status
-        INSTANCE_AIMANAGER=$(oc get AIManager aimanager -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:status.versions.reconciled,STATUS:status.phase,MESSAGE:status.message")
-        STATUS_AIMANAGER=$(oc get AIManager aimanager -o jsonpath='{.status.phase}')
-        printStatus "$STATUS_AIMANAGER" "Completed" "$INSTANCE_AIMANAGER"
-
-        # ASM status
-        INSTANCE_ASM=$(oc get asm aiops-topology -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:status.versions.reconciled,STATUS:status.phase")
-        STATUS_ASM=$(oc get asm aiops-topology -o jsonpath='{.status.phase}')
-        printStatus "$STATUS_ASM" "OK" "$INSTANCE_ASM"
-
-        # AIOpsEdge status
-        INSTANCE_AIOPSEDGE=$(oc get aiopsedge aiopsedge -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,STATUS:status.phase,MESSAGE:status.conditions[?(@.type==\"Ready\")].message")
-        STATUS_AIOPSEDGE=$(oc get aiopsedge aiopsedge -o jsonpath='{.status.phase}')
-        printStatus "$STATUS_AIOPSEDGE" "Configured" "$INSTANCE_AIOPSEDGE"
-
-        # AIOpsUI status
-        INSTANCE_AIOPSUI=$(oc get aiopsui aiopsui-instance -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:status.versions.reconciled,STATUS:status.conditions[?(@.type==\"Ready\")].status,MESSAGE:status.conditions[?(@.type==\"Ready\")].reason")
-        STATUS_AIOPSUI=$(oc get aiopsui aiopsui-instance -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}')
-        printStatus "$STATUS_AIOPSUI" "True" "$INSTANCE_AIOPSUI"
+        InstallationStatus
+        ZenServiceStatus
+        AutomationUIConfigStatus
+        AutomationBaseStatus
+        CartridgeStatus
+        CartridgeRequirementsStatus
+        Aiopaiops-ir-lifecycleEventProcessorStatus
+        Cp4waiops-eventprocessorEventProcessorStatus
+        IRCoreStatus
+        AIOpsAnalyticsOrchestratorStatus
+        LifecycleServiceStatus
+        BaseUIStatus
+        AIManagerStatus
+        ASMStatus
+        AIOpsEdgeStatus
+        AIOpsUIStatus
 
         echo "______________________________________________________________"
         printf "
