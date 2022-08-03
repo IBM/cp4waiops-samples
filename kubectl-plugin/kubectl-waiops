@@ -268,53 +268,32 @@ then
         getCartridgeStatus
         getCartridgeRequirementsStatus
         
+        #Database Status
         echo "" && echo "Database instances:" && echo ""
-        # EventProcessor status
         getEventProcessorStatus
-
-        # Elasticsearch status
         getElasticSearchStatus
-
-        # Kafka status
         getKafkaStatus
-
-        # IBM postgres cluster status
         getIBMPostgresClusterStatus
-
-        # EDB postgres cluster status
         getEDBPostgresClusterStatus
-
-        # Redis formation status
         getRedisFormationStatus
-
-        # CouchDB formation status
         getCouchFormationStatus
+
+
+        #CP4Waiops Components Status
         echo "______________________________________________________________"
         echo "CP4WAIOPS COMPONENTS" && echo ""
  
-        # AIOpsAnalyticsOrchestrator status
         getAIOpsAnalyticsOrchestratorStatus
-
-        # IRCore status
         getIRCoreStatus
-
-        # LifecycleService status
         getLifecycleServiceStatus
-
-        # BaseUI status
         getBaseUIStatus
-
-        # AIManager status
         getAIManagerStatus
-
-        # ASM status
         getASMStatus
-
-        # AIOpsEdge status
         getAIOpsEdgeStatus
-
-        # AIOpsUI status
         getAIOpsUIStatus
+
+
+        
         echo "______________________________________________________________"
         printf "
 ${blue}${bold}Hint: for a more detailed printout of component statuses, run \`oc waiops status-all\`.
@@ -356,71 +335,36 @@ then
         getCartridgeStatus
         getCartridgeRequirementsStatus
         
+        #Database Status
         echo "" && echo "Database instances:" && echo ""
-        # EventProcessor status
         getEventProcessorStatus
-
-        # Elasticsearch status
         getElasticSearchStatus
-
-        # Kafka status
         getKafkaStatus
-
-        # IBM postgres cluster status
         getIBMPostgresClusterStatus
-
-        # EDB postgres cluster status
-       getEDBPostgresClusterStatus
-
-        # Redis formation status
+        getEDBPostgresClusterStatus
         getRedisFormationStatus
-        # CouchDB formation status
         getCouchDBFormationStatus
 
+        #CP4Waiops Componets Status
         echo "______________________________________________________________"
         echo "CP4WAIOPS COMPONENTS" && echo ""
  
-        # AIOpsAnalyticsOrchestrator status
         getAIOpsAnalyticsOrchestratorStatus
-
-        # IRCore status
         getIRCoreStatus
-
-        # LifecycleService status
         getLifecycleServiceStatus
-
-        # BaseUI status
         getBaseUIStatus
-
-        # AIManager status
         getAIManagerStatus
-
-        # ASM status
         getASMStatus
-
-        # AIOpsEdge status
         getAIOpsEdgeStatus
-
-        # AIOpsUI status
         getAIOpsUIStatus
-
-        # Kong status-all
         getKongStatus-all 
-
-        # VaultDeploy status-all
         getVaultDeployStatus-all
-        # VaultAccess status-all
         getVaultAccessStatus-all
-
-        # Postgreservices status-all
         getPostgreservicesStatus-all
-
-        # PostgresDB status-all
         getPostgresDBStatus-all
-
-        # Secure Tunnel status-all
         getSecureTunnelStatus-all      
 
+        #CSVs from cp4waiops namespace
         echo "______________________________________________________________"
         echo "CSVs from $INSTALLATION_NAMESPACE namespace:" && echo ""
         
@@ -445,6 +389,7 @@ then
         getCSVStatus "$INSTALLATION_NAMESPACE" "ibm-vault-operator"
         getCSVStatus "$INSTALLATION_NAMESPACE" "ibm-watson-aiops-ui-operator"
 
+        #CSVs from ibm-common-services namespace
         echo "______________________________________________________________"
         echo "CSVs from ibm-common-services namespace:" && echo ""
 
@@ -468,6 +413,8 @@ then
         getCSVStatus "ibm-common-services" "ibm-zen-operator"
         getCSVStatus "ibm-common-services" "operand-deployment-lifecycle-manager"
     
+
+        #Subscriptions from cp4waiops namespace   
         echo "______________________________________________________________"
         echo "Subscriptions from $INSTALLATION_NAMESPACE namespace:" && echo ""
         getSubscriptionStatus "aimanager-operator" "$INSTALLATION_NAMESPACE" 
@@ -491,6 +438,7 @@ then
         getSubscriptionStatus "redis" "$INSTALLATION_NAMESPACE" 
         getSubscriptionStatus "vault" "$INSTALLATION_NAMESPACE" 
         
+        #Subscriptions from cp4waiops namespace
         echo "______________________________________________________________"
         echo "Subscriptions from ibm-common-services namespace:" && echo ""
         if [ "${VERSION_AIOPSORCHESTRATOR}" != "3.3" ];
@@ -513,6 +461,9 @@ then
         getSubscriptionStatus "ibm-zen-operator" "ibm-common-services" 
         getSubscriptionStatus "operand-deployment-lifecycle-manager-app" "ibm-common-services" 
 
+
+    
+        #OperandRequest instances
         echo "______________________________________________________________"
         echo "OperandRequest instances:" && echo ""
         getOperandRequestStatus "ibm-commonui-request" "ibm-common-services" 
@@ -534,6 +485,8 @@ then
         getOperandRequestStatus "ibm-iam-service" "$INSTALLATION_NAMESPACE" 
         getOperandRequestStatus "operandrequest-kafkauser-iaf-system" "$INSTALLATION_NAMESPACE" 
 
+
+        #ODLM pod current status
         echo "______________________________________________________________"
         echo "ODLM pod current status:" && echo ""
         INSTANCE=$(oc get pod -A | grep operand-deployment-lifecycle-manager)
@@ -545,6 +498,8 @@ then
             printf '%s\n' "$red$INSTANCE$normal"
         fi
 
+
+        #ODLM pod current status
         echo "______________________________________________________________"
         echo "Orchestrator pod current status:" && echo ""   
         INSTANCE=$(oc get pod -A | grep ibm-aiops-orchestrator-controller-manager)
