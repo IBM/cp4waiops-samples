@@ -116,7 +116,7 @@ getOperandRequestStatus () {
 }
 getEventProcessorStatus () {
     # EventProcessor status
-    INSTANCE_EP=$(oc get eventprocessor aiops-ir-lifecycle -o custom-columns='KIND:.kind,NAMESPACE:.metadata.namespace,NAME:.metadata.name,VERSION:status.versions.reconciled,STATUS:.status.conditions[?(@.type=="Ready")].status,MESSAGE:.status.conditions[?(@.type=="Ready")].message')
+    INSTANCE_EP=$(oc get eventprocessor -o go-template='{{range $index,$pod := .items}}{{printf "%-25s %-20s %-25s %-15s %-20s %-25s\n" .kind .metadata.namespace .metadata.name .status.versions.reconciled (index .status.conditions 0).status (index .status.conditions 0).message}}{{end}}')
     STATUS_EP=$(oc get eventprocessor aiops-ir-lifecycle -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}')
     printStatus "$STATUS_EP" "True" "$INSTANCE_EP"
 
@@ -270,13 +270,14 @@ then
         
         #Database Status
         echo "" && echo "Database instances:" && echo ""
+        printf "${gray}%-25s %-20s %-25s %-15s %-20s %-25s\n" "KIND" "NAMESPACE" "NAME" "VERSION" "STATUS" "MESSAGE${normal}"
         getEventProcessorStatus
         getElasticSearchStatus
         getKafkaStatus
         getIBMPostgresClusterStatus
         getEDBPostgresClusterStatus
         getRedisFormationStatus
-        getCouchFormationStatus
+        getCouchDBFormationStatus
 
 
         #CP4Waiops Components Status
@@ -291,9 +292,8 @@ then
         getASMStatus
         getAIOpsEdgeStatus
         getAIOpsUIStatus
+    
 
-
-        
         echo "______________________________________________________________"
         printf "
 ${blue}${bold}Hint: for a more detailed printout of component statuses, run \`oc waiops status-all\`.
