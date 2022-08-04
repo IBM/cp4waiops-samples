@@ -858,3 +858,4 @@ get_resource_count () {
   local kind=$1
   echo oc get $kind --no-header | wc -l
 }  
+
