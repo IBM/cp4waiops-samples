@@ -215,10 +215,14 @@ function checkOCPVersion {
         log $INFO "OCP Version $OCP_VER is compatible with IBM Cloud Pak for Watson AIOps AI Manager"
         OCP_VER_RES=$pass_msg
         return 0
-      else
-        log $INFO "OCP Version $OCP_VER is not compatible with IBM Cloud Pak for Watson AIOps AI Manager. If you are using ODF storage, 4.8.43 is the miniumum supported level"
+      elif [[ $OCP_MINOR_VER -le 43 && -n $ODF_STORAGE ]]; then
+        log $INFO "OCP Version $OCP_VER is not compatible with IBM Cloud Pak for Watson AIOps AI Manager. If you are using ODF storage, 4.10.43 is the miniumum supported level"
         OCP_VER_RES=$fail_msg
         return 1
+      else
+        log $INFO "OCP Version $OCP_VER is compatible with IBM Cloud Pak for Watson AIOps AI Manager."
+        OCP_VER_RES=$pass_msg
+        return 0
       fi
     fi
     if [[ $OCP_VER == "4.10"* ]]; then
@@ -226,10 +230,14 @@ function checkOCPVersion {
         log $INFO "OCP Version $OCP_VER is compatible with IBM Cloud Pak for Watson AIOps AI Manager"
         OCP_VER_RES=$pass_msg
         return 0
-      else
+      elif [[ $OCP_MINOR_VER -lt 17 && -n $ODF_STORAGE ]] ;then
         log $INFO "OCP Version $OCP_VER is not compatible with IBM Cloud Pak for Watson AIOps AI Manager. If you are using ODF storage, 4.10.17 is the miniumum supported level"
         OCP_VER_RES=$fail_msg
         return 1
+      else
+        log $INFO "OCP Version $OCP_VER is compatible with IBM Cloud Pak for Watson AIOps AI Manager."
+        OCP_VER_RES=$pass_msg
+        return 0
       fi
     fi
     log $INFO "OCP Version $OCP_VER is compatible with IBM Cloud Pak for Watson AIOps AI Manager"
