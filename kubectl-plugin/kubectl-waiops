@@ -343,7 +343,10 @@ then
         getCSVStatus "$INSTALLATION_NAMESPACE" "aimanager-operator"
         getCSVStatus "$INSTALLATION_NAMESPACE" "aiopsedge-operator"
         getCSVStatus "$INSTALLATION_NAMESPACE" "asm-operator"
-        getCSVStatus "$INSTALLATION_NAMESPACE" "couchdb-operator"
+        if [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.3" ||  "${VERSION_AIOPSORCHESTRATOR}" == "3.4" ]];
+        then 
+            getCSVStatus "$INSTALLATION_NAMESPACE" "couchdb-operator"
+        fi
         getCSVStatus "$INSTALLATION_NAMESPACE" "ibm-aiops-ir-ai"
         getCSVStatus "$INSTALLATION_NAMESPACE" "ibm-aiops-ir-core"
         getCSVStatus "$INSTALLATION_NAMESPACE" "ibm-aiops-ir-lifecycle"
@@ -389,7 +392,10 @@ then
         getSubscriptionStatus "aimanager-operator" "$INSTALLATION_NAMESPACE" 
         getSubscriptionStatus "aiopsedge-operator" "$INSTALLATION_NAMESPACE" 
         getSubscriptionStatus "asm-operator" "$INSTALLATION_NAMESPACE" 
-        getSubscriptionStatus "couchdb" "$INSTALLATION_NAMESPACE" 
+        if [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.3" ||  "${VERSION_AIOPSORCHESTRATOR}" == "3.4" ]];
+        then 
+            getSubscriptionStatus "couchdb" "$INSTALLATION_NAMESPACE" 
+        fi
         if [ "${CLUSTER_SCOPE_INSTALL}" == "false" ];
         then 
             getSubscriptionStatus "ibm-aiops-orchestrator" "$INSTALLATION_NAMESPACE" 
@@ -560,7 +566,7 @@ then
         component-versions-35() {
             MAJORVERSION_AIOPSUI="3.5"
             MAJORVERSION_AIMANAGER="2.6"
-            MAJORVERSION_IRCORE="3.6"
+            MAJORVERSION_IRCORE="3.5"
             MAJORVERSION_LIFECYCLESERVICE="3.5"
             MAJORVERSION_AIOPSANALYTICSORCHESTRATOR="3.5"
             MAJORVERSION_VAULTDEPLOY="3.5"
@@ -792,7 +798,7 @@ then
             component-versions-33
         elif [ "${VERSION_AIOPSORCHESTRATOR}" == "0.1" ]
         then
-            # for developer builds (v0.1), we will check against release-34 versions
+            # for developer builds (v0.1), we will check against release-3.5 versions
             component-versions-35
             echo ""
             echo "${red}${bold}NOTE: ${normal}Your Cloud Pak for Watson AIOps AI Manager install appears to be an internal dev version (v${VERSION_AIOPSORCHESTRATOR})."
