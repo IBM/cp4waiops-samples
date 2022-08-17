@@ -322,7 +322,7 @@ then
         if [[ "${VERSION_AIOPSORCHESTRATOR}" != "3.3" ]];
         then 
             echo "______________________________________________________________"
-            echo "IBM Postgres (Postgreservices and PostgresDB) and EDB Postgres instances:" && echo "" 
+            echo "EDB Postgres and IBM Postgres (Postgreservices and PostgresDB) instances:" && echo "" 
             
             # EDB Postgres status-all
             INSTANCE_EDBPOSTGRES=$(oc get clusters.postgresql.k8s.enterprisedb.io -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,STATUS:status.phase")
