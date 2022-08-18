@@ -25,7 +25,7 @@ CLUSTER_SCOPE_INSTALL=$(if [ $(oc get subscription -A  | grep ibm-aiops-orchestr
 # optional argument handling
 if [[ "$1" == "version" ]]
 then
-    echo "0.0.11"
+    echo "0.0.12"
     exit 0
 fi
 
@@ -318,8 +318,21 @@ then
         STATUS_VAULTACCESS=$(oc get vaultaccess ibm-vault-access -o jsonpath='{.status.conditions[].status}')
         printStatus "$STATUS_VAULTACCESS" "True" "$INSTANCE_VAULTACCESS"
 
-        echo "______________________________________________________________"
-        echo "Postgres (Postgreservices and PostgresDB) instances:" && echo ""  
+        
+        if [[ "${VERSION_AIOPSORCHESTRATOR}" != "3.3" ]];
+        then 
+            echo "______________________________________________________________"
+            echo "EDB Postgres and IBM Postgres (Postgreservices and PostgresDB) instances:" && echo "" 
+            
+            # EDB Postgres status-all
+            INSTANCE_EDBPOSTGRES=$(oc get clusters.postgresql.k8s.enterprisedb.io -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,STATUS:status.phase")
+            STATUS_EDBPOSTGRES=$(oc get clusters.postgresql.k8s.enterprisedb.io -o jsonpath='{.items[].status.phase}')
+            printStatus "$STATUS_EDBPOSTGRES" "Cluster in healthy state" "$INSTANCE_EDBPOSTGRES" 
+        else
+            echo "______________________________________________________________"
+            echo "IBM Postgres (Postgreservices and PostgresDB) instances:" && echo "" 
+        fi 
+        
         # Postgreservices status-all
         INSTANCE_POSTGRESERVICES=$(oc get postgreservices cp4waiops-postgres -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:spec.version,STATUS:status.conditions[?(@.type==\"Completed\")].status,MESSAGE:status.conditions[?(@.type==\"Completed\")].message")
         STATUS_POSTGRESERVICES=$(oc get postgreservices cp4waiops-postgres -o jsonpath='{.status.conditions[].status}')
