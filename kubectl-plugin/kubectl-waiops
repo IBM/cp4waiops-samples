@@ -586,7 +586,7 @@ then
             MAJORVERSION_VAULTACCESS="3.5"
             MAJORVERSION_POSTGRESERVICE="1.0"
             MAJORVERSION_POSTGRESDB="1.0"
-            MAJORVERSION_ASM="2.7"
+            MAJORVERSION_ASM="2.9"
             MAJORVERSION_FLINKEP="4.0"
         }
 
