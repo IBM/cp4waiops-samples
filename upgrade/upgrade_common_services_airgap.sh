@@ -14,6 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+# Original script located at: https://github.com/IBM/ibm-common-service-operator/blob/scripts/upgrade_common_services.sh
 
 # counter to keep track of installation steps
 # set -x
