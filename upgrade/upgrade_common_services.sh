@@ -109,7 +109,7 @@ function check_preqreqs() {
     local controlNS=$3
 
     msg ""
-    title "[${STEP}] Checking prerequesites ..."
+    title "[${STEP}] Checking prerequisites..."
     msg "-----------------------------------------------------------------------"
 
     # checking oc command
@@ -187,6 +187,10 @@ EOF
     fi
 }
 
+# This function checks the current version of the installed bedrock instance automatically
+# so that the user doesn't have to do so manually. If the current version on-cluster 
+# is already higher than the desired one the user indicates, the script will indicate this
+# to the user and abort the script since bedrock is already above the desired version. 
 function compare_channel() {
     local subName=$1
     local namespace=$2
@@ -238,7 +242,7 @@ function switch_channel() {
     STEP=$((STEP + 1 ))
 
     msg ""
-    title "[${STEP}] Compareing given upgrade channel version ${channel} with current one ..."
+    title "[${STEP}] Comparing given upgrade channel version ${channel} with current one..."
     msg "-----------------------------------------------------------------------"
 
     # msg "Updating OperandRegistry common-service in namespace ibm-common-services..."
