@@ -1,0 +1,54 @@
+[INFO] Fri Sep 23 02:57:13 PDT 2022 ############## ElasticSearch backup started ##############
+[INFO] Fri Sep 23 02:57:13 PDT 2022 Running ElasticSearch backup - es-backup.sh, pwd: /root/aiop-bcdr-poc/gitrepo/release-3.5/bcdr/backup/scripts/elasticsearch
+[INFO] Fri Sep 23 02:57:15 PDT 2022 Reading Elastic Search secret: ibm-cp-watson-aiops-elastic-secret
+[INFO] Fri Sep 23 02:57:15 PDT 2022 snapshot_repository_name: bcdr_snapshot_repository | snapshot_repository_location: /usr/share/elasticsearch/snapshots/es-backup | namespace: cp4waiops
+
+[INFO] Fri Sep 23 02:57:15 PDT 2022 Indices to backup:
+algorithmregistry
+trainingdefinition
+dataset
+prechecktrainingdetails
+postchecktrainingdetails
+trainingsrunning
+trainingrun
+trainingstatus
+snowchangerequest
+snowincident
+change_risk_assessments
+1000-1000-changerisk_models_latest
+problematic-changes-v*
+1000-1000-v*-anomalies
+1000-1000-v*-applications
+1000-1000-v*-embedding_pca_fe
+1000-1000-v*-embedding_pca_model
+1000-1000-v*-training_count_vectors
+1000-1000-v*-oob_anomaly_group_id
+1000-1000-v*-pca_anomaly_group_id
+1000-1000-oob_model_update
+1000-1000-reference_oob_websphere
+1000-1000-lad_registration
+1000-1000-v*-pca_fe
+1000-1000-v*-pca_model
+1000-1000-v*-templates
+1000-1000-log_models_latest
+snowproblem
+normalized-incidents-1000-1000
+si_models_latest
+aiops-searchservice_v*
+insights-dashboard-story-*
+
+[INFO] Fri Sep 23 02:57:17 PDT 2022 elasticSearch URL: iaf-system-es-cp4waiops.prickly-673216563e9fe0ab67643c31cc6d533c-0000.us-south.containers.appdomain.cloud
+[INFO] Fri Sep 23 02:57:17 PDT 2022 Register Elasticsearch snapshot repository
+{
+  "acknowledged" : true
+}
+[INFO] Fri Sep 23 02:57:18 PDT 2022 Take Elasticsearch snapshot.  Snapshot name: snapshot-1663927038
+{"accepted":true}[INFO] Fri Sep 23 02:57:19 PDT 2022 Snapshot status is STARTED
+[INFO] Fri Sep 23 02:57:19 PDT 2022 Waiting for 5 sec
+.....[INFO] Fri Sep 23 02:57:24 PDT 2022 Waiting for some time for take snapshot operation to be completed
+..........[INFO] Fri Sep 23 02:57:34 PDT 2022 Snapshot status is STARTED
+[INFO] Fri Sep 23 02:57:34 PDT 2022 Waiting for some time for take snapshot operation to be completed
+..........[INFO] Fri Sep 23 02:57:45 PDT 2022 Snapshot status is null
+[INFO] Fri Sep 23 02:57:45 PDT 2022 Snapshot response is {"error":{"root_cause":[{"type":"snapshot_missing_exception","reason":"[bcdr_snapshot_repository:snapshot-1663927038] is missing"}],"type":"snapshot_missing_exception","reason":"[bcdr_snapshot_repository:snapshot-1663927038] is missing"},"status":404}
+[ERROR] Fri Sep 23 02:57:45 PDT 2022 Elasticsearch take snapshot opeartion failed, hence exiting!
+[WARNING] Fri Sep 23 02:57:45 PDT 2022 Deleting Elasticsearch backup pod
