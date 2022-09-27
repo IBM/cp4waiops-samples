@@ -1,0 +1,58 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: icp-mongodb-backup
+spec:
+  template:
+    spec:
+      containers:
+      - name: icp-mongodb-backup
+        image: MONGODB_DUMP_IMAGE
+        command: ["bash", "-c", "cat /cred/mongo-certs/tls.crt /cred/mongo-certs/tls.key > /dump/mongo.pem; cat /cred/cluster-ca/tls.crt /cred/cluster-ca/tls.key > /dump/ca.pem; mongodump --oplog --out /dump --host mongodb:$MONGODB_SERVICE_PORT --username $ADMIN_USER --password $ADMIN_PASSWORD --authenticationDatabase admin --ssl --sslCAFile /dump/ca.pem --sslPEMKeyFile /dump/mongo.pem"]
+        volumeMounts:
+          - name: mongodump
+            mountPath: "/dump"
+          - name: icp-mongodb-client-cert
+            mountPath: "/cred/mongo-certs"
+          - name: cluster-ca-cert
+            mountPath: "/cred/cluster-ca"
+        env:
+          - name: MONGODB_SERVICE_PORT
+            value: "27017"
+          - name: ADMIN_USER
+            valueFrom:
+              secretKeyRef:
+                name: icp-mongodb-admin
+                key: user
+          - name: ADMIN_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: icp-mongodb-admin
+                key: password
+      volumes:
+      - name: mongodump
+        persistentVolumeClaim:
+          claimName: my-mongodump
+      - name: icp-mongodb-client-cert
+        secret:
+          defaultMode: 0400
+          secretName: icp-mongodb-client-cert
+      - name: cluster-ca-cert
+        secret:
+          defaultMode: 400
+          secretName: mongodb-root-ca-cert
+      restartPolicy: Never
+---
+  apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    name: my-mongodump
+    labels:
+      name: my-mongodump
+  spec:
+    accessModes:
+      - ReadWriteOnce
+    resources:
+      requests:
+        storage: 20Gi
+    storageClassName: STORAGE_CLASS
