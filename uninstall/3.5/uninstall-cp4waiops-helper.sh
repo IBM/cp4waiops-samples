@@ -37,7 +37,7 @@ log () {
 display_help() {
    echo "**************************************** Usage ********************************************"
    echo ""
-   echo " This script is used to uninstall IBM Cloud Pak for Watson AIOps AI Manager version 3.3"
+   echo " This script is used to uninstall IBM Cloud Pak for Watson AIOps AI Manager version 3.5"
    echo " The following prereqs are required before you run this script: "
    echo " - oc CLI is installed and you have logged into the cluster using oc login"
    echo " - Update uninstall-cp4waiops.props with components that you want to uninstall"
