@@ -80,7 +80,7 @@ getOperandRequestStatus () {
 }
 
 checkIfSecureTunnelExists() {
-    if [[ "$(oc api-resources | grep tunnel)" == "" ]];
+    if [[ "$(oc api-resources | grep securetunnel)" == "" ]];
     then 
         SECURE_TUNNEL_EXISTS="false"
     else
