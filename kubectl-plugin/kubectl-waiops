@@ -14,13 +14,14 @@ white=$(tput setaf 7)
 bold=$(tput bold)
 normal=$(tput sgr0) #reset color/bolding
 
-# Get installation namespace (gathered from existing installation instance on the cluster) and version
+# Environment variables including installation info (gathered from existing installation instance on the cluster) and version
 INSTALLATION_NAME=$(oc get installations.orchestrator.aiops.ibm.com -A --no-headers | while read a b c; do echo "$b"; done; 2>/dev/null)
 INSTALLATION_NAMESPACE=$(oc get installations.orchestrator.aiops.ibm.com -A --no-headers | while read a b c; do echo "$a"; done; 2>/dev/null)
 CSV_NAME=$(oc get csvs -o name --no-headers=true -n $INSTALLATION_NAMESPACE | grep ibm-aiops-orchestrator)         
 VERSION_AIOPSORCHESTRATOR=$(oc get $CSV_NAME -n $INSTALLATION_NAMESPACE -o jsonpath='{.spec.version}' | awk '{ print substr( $0, 0, 3 ) }')
 CLUSTER_ADMIN=$(oc auth can-i '*' '*' --all-namespaces)
 CLUSTER_SCOPE_INSTALL=$(if [ $(oc get subscription -A  | grep ibm-aiops-orchestrator | awk '{ print $1 }') == "openshift-operators" ]; then echo "true"; else echo "false"; fi)
+SECURE_TUNNEL_EXISTS=""
 
 # optional argument handling
 if [[ "$1" == "version" ]]
@@ -76,6 +77,15 @@ getOperandRequestStatus () {
     INSTANCE=$(oc get operandrequests $1 -n $2 -o custom-columns="NAMESPACE:metadata.namespace,NAME:metadata.name,PHASE:status.phase,CREATED AT:metadata.creationTimestamp")                    
     STATUS=$(oc get operandrequests $1 -n $2 -o jsonpath='{.status.phase}')
     printStatus "$STATUS" "Running" "$INSTANCE"
+}
+
+checkIfSecureTunnelExists() {
+    if [[ "$(oc api-resources | grep securetunnel)" == "" ]];
+    then 
+        SECURE_TUNNEL_EXISTS="false"
+    else
+        SECURE_TUNNEL_EXISTS="true"
+    fi
 }
 
 # optional argument handling
@@ -343,13 +353,17 @@ then
         STATUS_POSTGRESDB=$(oc get postgresdb cp4waiops-postgresdb -o jsonpath='{.status.conditions[].status}')
         printStatus "$STATUS_POSTGRESDB" "True" "$INSTANCE_POSTGRESDB"
 
-        echo "______________________________________________________________"
-        # Secure Tunnel status-all
-        echo "Secure Tunnel instances:" && echo ""
-        INSTANCE=$(oc get tunnels.sretooling.management.ibm.com -A -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,STATUS:status.conditions[?(@.type==\"Deployed\")].status")
-        STATUS=$(oc get tunnels.sretooling.management.ibm.com -o jsonpath='{.items[].status.versions.status}')
-        printStatus "$STATUS" "Ready" "$INSTANCE"
-
+        # Secure Tunnel status-all (first check if secure tunnel was enabled by running below function)
+        checkIfSecureTunnelExists
+        if [[ "${SECURE_TUNNEL_EXISTS}" == "true" ]];
+        then 
+            echo "______________________________________________________________"
+            echo "Secure Tunnel instances:" && echo ""
+            INSTANCE=$(oc get tunnels.sretooling.management.ibm.com -A -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,STATUS:status.conditions[?(@.type==\"Deployed\")].status")
+            STATUS=$(oc get tunnels.sretooling.management.ibm.com -o jsonpath='{.items[].status.versions.status}')
+            printStatus "$STATUS" "Ready" "$INSTANCE"
+        fi
+        
         echo "______________________________________________________________"
         echo "CSVs from $INSTALLATION_NAMESPACE namespace:" && echo ""
         
@@ -373,7 +387,10 @@ then
         getCSVStatus "$INSTALLATION_NAMESPACE" "ibm-common-service-operator"
         getCSVStatus "$INSTALLATION_NAMESPACE" "ibm-management-kong"
         getCSVStatus "$INSTALLATION_NAMESPACE" "ibm-postgreservice-operator"
-        getCSVStatus "$INSTALLATION_NAMESPACE" "ibm-secure-tunnel-operator"
+        if [[ "${SECURE_TUNNEL_EXISTS}" == "true" ]];
+        then 
+            getCSVStatus "$INSTALLATION_NAMESPACE" "ibm-secure-tunnel-operator"        
+        fi
         getCSVStatus "$INSTALLATION_NAMESPACE" "ibm-vault-operator"
         getCSVStatus "$INSTALLATION_NAMESPACE" "ibm-watson-aiops-ui-operator"
 
@@ -421,7 +438,10 @@ then
         getSubscriptionStatusGrep "ibm-common-service-operator" "$INSTALLATION_NAMESPACE" 
         getSubscriptionStatus "ibm-management-kong" "$INSTALLATION_NAMESPACE" 
         getSubscriptionStatus "ibm-postgreservice-operator" "$INSTALLATION_NAMESPACE" 
-        getSubscriptionStatus "ibm-secure-tunnel-operator" "$INSTALLATION_NAMESPACE" 
+        if [[ "${SECURE_TUNNEL_EXISTS}" == "true" ]];
+        then 
+            getSubscriptionStatus "ibm-secure-tunnel-operator" "$INSTALLATION_NAMESPACE" 
+        fi
         getSubscriptionStatus "ibm-watson-aiops-ui-operator" "$INSTALLATION_NAMESPACE" 
         getSubscriptionStatus "ir-ai-operator" "$INSTALLATION_NAMESPACE" 
         getSubscriptionStatus "ir-core-operator" "$INSTALLATION_NAMESPACE" 
@@ -492,7 +512,10 @@ then
         getOperandRequestStatus "iaf-system-common-service" "$INSTALLATION_NAMESPACE" 
         getOperandRequestStatus "ibm-aiops-ai-manager" "$INSTALLATION_NAMESPACE" 
         getOperandRequestStatus "ibm-aiops-aiops-foundation" "$INSTALLATION_NAMESPACE" 
-        getOperandRequestStatus "ibm-aiops-connection" "$INSTALLATION_NAMESPACE"  
+        if [[ "${SECURE_TUNNEL_EXISTS}" == "true" ]];
+        then 
+            getOperandRequestStatus "ibm-aiops-connection" "$INSTALLATION_NAMESPACE"  
+        fi
         getOperandRequestStatus "ibm-iam-service" "$INSTALLATION_NAMESPACE" 
         getOperandRequestStatus "operandrequest-kafkauser-iaf-system" "$INSTALLATION_NAMESPACE" 
 
@@ -776,26 +799,30 @@ then
         }
 
         secureTunnelUpgradeStatus() {    
-            INITIALIZED=$(oc get tunnels.sretooling.management.ibm.com -o jsonpath='{.items[].status.conditions[?(@.type=="Initialized")].status}')
-            DEPLOYED=$(oc get tunnels.sretooling.management.ibm.com -o jsonpath='{.items[].status.conditions[?(@.type=="Deployed")].status}')
-            
-            NUM_DEPLOYMENT_OPERATORREPLICAS=$(oc get deployment ibm-secure-tunnel-operator -o jsonpath='{.status.replicas}')
-            NUM_DEPLOYMENT_OPERATORAVAILABLEREPLICAS=$(oc get deployment ibm-secure-tunnel-operator -o jsonpath='{.status.availableReplicas}')
-            
-            NUM_DEPLOYMENT_NETWORKAPIREPLICAS=$(oc get deployment sre-tunnel-tunnel-network-api -o jsonpath='{.status.replicas}')
-            NUM_DEPLOYMENT_NETWORKAPIAVAILABLEREPLICAS=$(oc get deployment sre-tunnel-tunnel-network-api -o jsonpath='{.status.availableReplicas}')
-            
-            NUM_DEPLOYMENT_TUNNELUIREPLICAS=$(oc get deployment sre-tunnel-tunnel-ui-mcmtunnelui -o jsonpath='{.status.replicas}')
-            NUM_DEPLOYMENT_TUNNELUIAVAILABLEREPLICAS=$(oc get deployment sre-tunnel-tunnel-ui-mcmtunnelui -o jsonpath='{.status.availableReplicas}')
-            
-            DETAILS=$(oc get tunnels.sretooling.management.ibm.com -A -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,STATUS:status.conditions[?(@.type==\"Deployed\")].status")
-            if [ "${INITIALIZED}" == "True" ] && [ "${DEPLOYED}" == "True" ] && [ "${NUM_DEPLOYMENT_OPERATORREPLICAS}" == "${NUM_DEPLOYMENT_OPERATORAVAILABLEREPLICAS}" ] && [ "${NUM_DEPLOYMENT_NETWORKAPIREPLICAS}" == "${NUM_DEPLOYMENT_NETWORKAPIAVAILABLEREPLICAS}" ] && [ "${NUM_DEPLOYMENT_TUNNELUIREPLICAS}" == "${NUM_DEPLOYMENT_TUNNELUIAVAILABLEREPLICAS}" ];
+            checkIfSecureTunnelExists
+            if [[ "${SECURE_TUNNEL_EXISTS}" == "true" ]];
             then 
-                SUCCESSFULLY_UPGRADED+="${newline}${DETAILS}"
-                return 0;
-            else 
-                FAILING_UPGRADE+="${newline}${DETAILS}"
-                return 1;
+                INITIALIZED=$(oc get tunnels.sretooling.management.ibm.com -o jsonpath='{.items[].status.conditions[?(@.type=="Initialized")].status}' --ignore-not-found)
+                DEPLOYED=$(oc get tunnels.sretooling.management.ibm.com -o jsonpath='{.items[].status.conditions[?(@.type=="Deployed")].status}')
+                
+                NUM_DEPLOYMENT_OPERATORREPLICAS=$(oc get deployment ibm-secure-tunnel-operator -o jsonpath='{.status.replicas}')
+                NUM_DEPLOYMENT_OPERATORAVAILABLEREPLICAS=$(oc get deployment ibm-secure-tunnel-operator -o jsonpath='{.status.availableReplicas}')
+                
+                NUM_DEPLOYMENT_NETWORKAPIREPLICAS=$(oc get deployment sre-tunnel-tunnel-network-api -o jsonpath='{.status.replicas}')
+                NUM_DEPLOYMENT_NETWORKAPIAVAILABLEREPLICAS=$(oc get deployment sre-tunnel-tunnel-network-api -o jsonpath='{.status.availableReplicas}')
+                
+                NUM_DEPLOYMENT_TUNNELUIREPLICAS=$(oc get deployment sre-tunnel-tunnel-ui-mcmtunnelui -o jsonpath='{.status.replicas}')
+                NUM_DEPLOYMENT_TUNNELUIAVAILABLEREPLICAS=$(oc get deployment sre-tunnel-tunnel-ui-mcmtunnelui -o jsonpath='{.status.availableReplicas}')
+                
+                DETAILS=$(oc get tunnels.sretooling.management.ibm.com -A -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,STATUS:status.conditions[?(@.type==\"Deployed\")].status")
+                if [ "${INITIALIZED}" == "True" ] && [ "${DEPLOYED}" == "True" ] && [ "${NUM_DEPLOYMENT_OPERATORREPLICAS}" == "${NUM_DEPLOYMENT_OPERATORAVAILABLEREPLICAS}" ] && [ "${NUM_DEPLOYMENT_NETWORKAPIREPLICAS}" == "${NUM_DEPLOYMENT_NETWORKAPIAVAILABLEREPLICAS}" ] && [ "${NUM_DEPLOYMENT_TUNNELUIREPLICAS}" == "${NUM_DEPLOYMENT_TUNNELUIAVAILABLEREPLICAS}" ];
+                then 
+                    SUCCESSFULLY_UPGRADED+="${newline}${DETAILS}"
+                    return 0;
+                else 
+                    FAILING_UPGRADE+="${newline}${DETAILS}"
+                    return 1;
+                fi
             fi
         }
 
