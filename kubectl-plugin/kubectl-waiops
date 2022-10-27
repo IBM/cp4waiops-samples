@@ -26,7 +26,7 @@ SECURE_TUNNEL_EXISTS=""
 # optional argument handling
 if [[ "$1" == "version" ]]
 then
-    echo "0.0.12"
+    echo "0.0.13"
     exit 0
 fi
 
@@ -613,6 +613,20 @@ then
             MAJORVERSION_FLINKEP="4.0"
         }
 
+        component-versions-36() {
+            MAJORVERSION_AIOPSUI="3.7"
+            MAJORVERSION_AIMANAGER="2.7"
+            MAJORVERSION_IRCORE="3.7"
+            MAJORVERSION_LIFECYCLESERVICE="3.7"
+            MAJORVERSION_AIOPSANALYTICSORCHESTRATOR="3.7"
+            MAJORVERSION_VAULTDEPLOY="3.7"
+            MAJORVERSION_VAULTACCESS="3.7"
+            MAJORVERSION_POSTGRESERVICE="1.0"
+            MAJORVERSION_POSTGRESDB="1.0"
+            MAJORVERSION_ASM="2.10"
+            MAJORVERSION_FLINKEP="4.0"
+        }
+
         aiopsEdgeBaseUpgradeStatus() {    
             UPGRADED=$(oc get aiopsedge aiopsedge -o jsonpath='{.status.conditions[?(@.type=="UpgradeReady")].status}')
             CONFIGURED=$(oc get aiopsedge aiopsedge -o jsonpath='{.status.phase}')
@@ -772,7 +786,13 @@ then
 
         asmUpgradeStatus() {
             ASM_COMPLETED=$(oc get asm aiops-topology -o jsonpath='{.status.phase}')
-            CURRENT_MAJOR_VERSION=$(oc get asm aiops-topology -o jsonpath='{.status.versions.reconciled}' | cut -c1-3)
+            if [ "${VERSION_AIOPSORCHESTRATOR}" != "3.6" ] && [ "${VERSION_AIOPSORCHESTRATOR}" != "0.1" ];
+            then 
+                CURRENT_MAJOR_VERSION=$(oc get asm aiops-topology -o jsonpath='{.status.versions.reconciled}' | cut -c1-3)
+            else           
+                CURRENT_MAJOR_VERSION=$(oc get asm aiops-topology -o jsonpath='{.status.versions.reconciled}' | cut -c1-4)
+            fi
+
             DETAILS=$(oc get asm -A  -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:status.versions.reconciled,STATUS:status.phase")
             if [ "${ASM_COMPLETED}" == "OK" ] && [ "${CURRENT_MAJOR_VERSION}" == "${MAJORVERSION_ASM}" ];
             then 
@@ -827,7 +847,10 @@ then
         }
 
         # Check current instance version and component status checks for that version of CP4WAIOps
-        if [ "${VERSION_AIOPSORCHESTRATOR}" == "3.5" ];
+        if [ "${VERSION_AIOPSORCHESTRATOR}" == "3.6" ];
+        then 
+            component-versions-36
+        elif [ "${VERSION_AIOPSORCHESTRATOR}" == "3.5" ];
         then 
             component-versions-35
         elif [ "${VERSION_AIOPSORCHESTRATOR}" == "3.4" ];
@@ -838,17 +861,17 @@ then
             component-versions-33
         elif [ "${VERSION_AIOPSORCHESTRATOR}" == "0.1" ]
         then
-            # for developer builds (v0.1), we will check against release-3.5 versions
-            component-versions-35
+            # for developer builds (v0.1), we will check against release-3.6 versions
+            component-versions-36
             echo ""
             echo "${red}${bold}NOTE: ${normal}Your Cloud Pak for Watson AIOps AI Manager install appears to be an internal dev version (v${VERSION_AIOPSORCHESTRATOR})."
-            echo "      The status-upgrade command checks the status of upgrades to v3.3, v3.4, and v3.5 only." 
-            echo "      Therefore, the upgrade checks below will be against v3.5 component versions."
-            echo "      This may influence your results below if your dev build is not based on release-3.5.${normal}"
+            echo "      The status-upgrade command checks the status of upgrades to v3.3 to v3.6 only." 
+            echo "      Therefore, the upgrade checks below will be against v3.6 component versions."
+            echo "      This may influence your results below if your dev build is not based on release-3.6.${normal}"
         else
             echo ""
             echo "${red}${bold}ERROR: ${normal}Your Cloud Pak for Watson AIOps AI Manager install appears to be v${VERSION_AIOPSORCHESTRATOR}."
-            echo "       The status-upgrade command checks the status of upgrades to v3.3, v3.4, and v3.5 only." 
+            echo "       The status-upgrade command checks the status of upgrades to v3.3 to v3.6 only." 
             echo "       The version you are using is not supported for use with the status-upgrade command. Exiting."
             echo ""
             exit 0
