@@ -869,13 +869,13 @@ then
             component-versions-36
             echo ""
             echo "${red}${bold}NOTE: ${normal}Your Cloud Pak for Watson AIOps AI Manager install appears to be an internal dev version (v${VERSION_AIOPSORCHESTRATOR})."
-            echo "      The status-upgrade command checks the status of upgrades to v3.3 to v3.6 only." 
+            echo "      The status-upgrade command checks the status of upgrades to v3.3, v3.4, v3.5, and v3.6 only." 
             echo "      Therefore, the upgrade checks below will be against v3.6 component versions."
             echo "      This may influence your results below if your dev build is not based on release-3.6.${normal}"
         else
             echo ""
             echo "${red}${bold}ERROR: ${normal}Your Cloud Pak for Watson AIOps AI Manager install appears to be v${VERSION_AIOPSORCHESTRATOR}."
-            echo "       The status-upgrade command checks the status of upgrades to v3.3 to v3.6 only." 
+            echo "       The status-upgrade command checks the status of upgrades to v3.3, v3.4, v3.5, and v3.6 only." 
             echo "       The version you are using is not supported for use with the status-upgrade command. Exiting."
             echo ""
             exit 0
