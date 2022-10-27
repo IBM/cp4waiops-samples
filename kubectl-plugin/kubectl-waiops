@@ -26,7 +26,7 @@ SECURE_TUNNEL_EXISTS=""
 # optional argument handling
 if [[ "$1" == "version" ]]
 then
-    echo "0.0.13"
+    echo "0.0.14"
     exit 0
 fi
 
@@ -115,13 +115,15 @@ then
         echo "______________________________________________________________"
         echo "AutomationUIConfig, AutomationBase, Cartridge, CartridgeRequirements, and EventProcessor instances:" && echo ""   
         # AutomationUIConfig status
-        INSTANCE_AUIC=$(oc get automationuiconfig iaf-system -o custom-columns='KIND:.kind,NAMESPACE:.metadata.namespace,NAME:.metadata.name,VERSION:status.versions.reconciled,STATUS:.status.conditions[?(@.type=="Ready")].status,MESSAGE:.status.conditions[?(@.type=="Ready")].message')
-        STATUS_AUIC=$(oc get automationuiconfig iaf-system -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}')
+        INSTANCE_AUIC=$(oc get automationuiconfig -o custom-columns='KIND:.kind,NAMESPACE:.metadata.namespace,NAME:.metadata.name,VERSION:status.versions.reconciled,STATUS:.status.conditions[?(@.type=="Ready")].status,MESSAGE:.status.conditions[?(@.type=="Ready")].message')
+        NAME_AUIC=$(oc get automationuiconfig -A --no-headers | while read a b c; do echo "$b"; done; 2>/dev/null)
+        STATUS_AUIC=$(oc get automationuiconfig $NAME_AUIC -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}')
         printStatus "$STATUS_AUIC" "True" "$INSTANCE_AUIC"
 
         # AutomationBase status
-        INSTANCE_AB=$(oc get automationbase automationbase-sample -o custom-columns='KIND:.kind,NAMESPACE:.metadata.namespace,NAME:.metadata.name,VERSION:status.versions.reconciled,STATUS:.status.conditions[?(@.type=="Ready")].status,MESSAGE:.status.conditions[?(@.type=="Ready")].message')
-        STATUS_AB=$(oc get automationbase automationbase-sample -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}')
+        INSTANCE_AB=$(oc get automationbase -o custom-columns='KIND:.kind,NAMESPACE:.metadata.namespace,NAME:.metadata.name,VERSION:status.versions.reconciled,STATUS:.status.conditions[?(@.type=="Ready")].status,MESSAGE:.status.conditions[?(@.type=="Ready")].message')
+        NAME_AB=$(oc get automationbase -A --no-headers | while read a b c; do echo "$b"; done; 2>/dev/null)
+        STATUS_AB=$(oc get automationbase $NAME_AB -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}')
         printStatus "$STATUS_AB" "True" "$INSTANCE_AB"
 
         # Cartridge status
@@ -232,13 +234,15 @@ then
         echo "______________________________________________________________"
         echo "AutomationUIConfig, AutomationBase, Cartridge, CartridgeRequirements, and EventProcessor instances:" && echo ""   
         # AutomationUIConfig status-all
-        INSTANCE_AUIC=$(oc get automationuiconfig iaf-system -o custom-columns='KIND:.kind,NAMESPACE:.metadata.namespace,NAME:.metadata.name,VERSION:status.versions.reconciled,STATUS:.status.conditions[?(@.type=="Ready")].status,MESSAGE:.status.conditions[?(@.type=="Ready")].message')
-        STATUS_AUIC=$(oc get automationuiconfig iaf-system -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}')
+        INSTANCE_AUIC=$(oc get automationuiconfig -o custom-columns='KIND:.kind,NAMESPACE:.metadata.namespace,NAME:.metadata.name,VERSION:status.versions.reconciled,STATUS:.status.conditions[?(@.type=="Ready")].status,MESSAGE:.status.conditions[?(@.type=="Ready")].message')
+        NAME_AUIC=$(oc get automationuiconfig -A --no-headers | while read a b c; do echo "$b"; done; 2>/dev/null)
+        STATUS_AUIC=$(oc get automationuiconfig $NAME_AUIC -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}')
         printStatus "$STATUS_AUIC" "True" "$INSTANCE_AUIC"
 
         # AutomationBase status-all
-        INSTANCE_AB=$(oc get automationbase automationbase-sample -o custom-columns='KIND:.kind,NAMESPACE:.metadata.namespace,NAME:.metadata.name,VERSION:status.versions.reconciled,STATUS:.status.conditions[?(@.type=="Ready")].status,MESSAGE:.status.conditions[?(@.type=="Ready")].message')
-        STATUS_AB=$(oc get automationbase automationbase-sample -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}')
+        INSTANCE_AB=$(oc get automationbase -o custom-columns='KIND:.kind,NAMESPACE:.metadata.namespace,NAME:.metadata.name,VERSION:status.versions.reconciled,STATUS:.status.conditions[?(@.type=="Ready")].status,MESSAGE:.status.conditions[?(@.type=="Ready")].message')
+        NAME_AB=$(oc get automationbase -A --no-headers | while read a b c; do echo "$b"; done; 2>/dev/null)
+        STATUS_AB=$(oc get automationbase $NAME_AB -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}')
         printStatus "$STATUS_AB" "True" "$INSTANCE_AB"
 
         # Cartridge status-all
@@ -865,13 +869,13 @@ then
             component-versions-36
             echo ""
             echo "${red}${bold}NOTE: ${normal}Your Cloud Pak for Watson AIOps AI Manager install appears to be an internal dev version (v${VERSION_AIOPSORCHESTRATOR})."
-            echo "      The status-upgrade command checks the status of upgrades to v3.3 to v3.6 only." 
+            echo "      The status-upgrade command checks the status of upgrades to v3.3, v3.4, v3.5, and v3.6 only." 
             echo "      Therefore, the upgrade checks below will be against v3.6 component versions."
             echo "      This may influence your results below if your dev build is not based on release-3.6.${normal}"
         else
             echo ""
             echo "${red}${bold}ERROR: ${normal}Your Cloud Pak for Watson AIOps AI Manager install appears to be v${VERSION_AIOPSORCHESTRATOR}."
-            echo "       The status-upgrade command checks the status of upgrades to v3.3 to v3.6 only." 
+            echo "       The status-upgrade command checks the status of upgrades to v3.3, v3.4, v3.5, and v3.6 only." 
             echo "       The version you are using is not supported for use with the status-upgrade command. Exiting."
             echo ""
             exit 0
