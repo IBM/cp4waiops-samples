@@ -159,7 +159,7 @@ then
         echo "______________________________________________________________"
         # LifecycleService status
         echo "LifecycleService instances:" && echo ""
-        INSTANCE=$(oc get lifecycleservice -A -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:status.versions.reconciled,STATUS:status.conditions[?(@.type==\"Lifecycle Service Ready\")].reason,MESSAGE:status.conditions[?(@.type==\"Ready\")].message")
+        INSTANCE=$(oc get lifecycleservice -A -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:status.versions.reconciled,STATUS:status.conditions[?(@.type==\"Ready\")].reason,MESSAGE:status.conditions[?(@.type==\"Ready\")].message")
         STATUS=$(oc get lifecycleservice aiops -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}')
         printStatus "$STATUS" "True" "$INSTANCE"
 
@@ -276,7 +276,7 @@ then
         echo "______________________________________________________________"
         # LifecycleService status-all
         echo "LifecycleService instances:" && echo ""
-        INSTANCE=$(oc get lifecycleservice -A -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:status.versions.reconciled,STATUS:status.conditions[?(@.type==\"Lifecycle Service Ready\")].reason,MESSAGE:status.conditions[?(@.type==\"Ready\")].message")
+        INSTANCE=$(oc get lifecycleservice -A -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:status.versions.reconciled,STATUS:status.conditions[?(@.type==\"Ready\")].reason,MESSAGE:status.conditions[?(@.type==\"Ready\")].message")
         STATUS=$(oc get lifecycleservice aiops -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}')
         printStatus "$STATUS" "True" "$INSTANCE"
 
@@ -689,7 +689,7 @@ then
             METADATA_GENERATION=$(oc get lifecycleservices aiops -o jsonpath='{.metadata.generation}')   
             OBSERVED_GENERATION=$(oc get lifecycleservices aiops -o jsonpath='{.status.observedGeneration}')
             CURRENT_MAJOR_VERSION=$(oc get lifecycleservices aiops -o jsonpath='{.status.versions.reconciled}' | cut -c1-3)
-            DETAILS=$(oc get lifecycleservice -A -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:status.versions.reconciled,STATUS:status.conditions[?(@.type==\"Lifecycle Service Ready\")].reason,MESSAGE:status.conditions[?(@.type==\"Ready\")].message")
+            DETAILS=$(oc get lifecycleservice -A -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:status.versions.reconciled,STATUS:status.conditions[?(@.type==\"Ready\")].reason,MESSAGE:status.conditions[?(@.type==\"Ready\")].message")
             if [ "${UPGRADED}" == "True" ] && [ "${OBSERVED_GENERATION}" == ${METADATA_GENERATION} ] && [ "${CURRENT_MAJOR_VERSION}" == "${MAJORVERSION_LIFECYCLESERVICE}" ];
             then 
                 SUCCESSFULLY_UPGRADED+="${newline}${DETAILS}"
