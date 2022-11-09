@@ -344,7 +344,7 @@ then
             printStatus "$STATUS_EDBPOSTGRES" "Cluster in healthy state" "$INSTANCE_EDBPOSTGRES" 
         fi 
         
-        if [[ "${VERSION_AIOPSORCHESTRATOR}" != "3.6" ]] && [[ "${VERSION_AIOPSORCHESTRATOR}" != "0.1" ]];
+        if [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.3" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.4" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.5" ]];
         then
             # Postgreservices status-all
             INSTANCE_POSTGRESERVICES=$(oc get postgreservices cp4waiops-postgres -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:spec.version,STATUS:status.conditions[?(@.type==\"Completed\")].status,MESSAGE:status.conditions[?(@.type==\"Completed\")].message")
@@ -797,7 +797,7 @@ then
 
         asmUpgradeStatus() {
             ASM_COMPLETED=$(oc get asm aiops-topology -o jsonpath='{.status.phase}')
-            if [ "${VERSION_AIOPSORCHESTRATOR}" != "3.6" ] && [ "${VERSION_AIOPSORCHESTRATOR}" != "0.1" ];
+            if [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.3" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.4" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.5" ]];
             then 
                 CURRENT_MAJOR_VERSION=$(oc get asm aiops-topology -o jsonpath='{.status.versions.reconciled}' | cut -c1-3)
             else           
