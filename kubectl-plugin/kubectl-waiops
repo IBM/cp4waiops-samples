@@ -336,26 +336,26 @@ then
         if [[ "${VERSION_AIOPSORCHESTRATOR}" != "3.3" ]];
         then 
             echo "______________________________________________________________"
-            echo "EDB Postgres and IBM Postgres (Postgreservices and PostgresDB) instances:" && echo "" 
+            echo "Postgres instances:" && echo "" 
             
             # EDB Postgres status-all
             INSTANCE_EDBPOSTGRES=$(oc get clusters.postgresql.k8s.enterprisedb.io -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,STATUS:status.phase")
             STATUS_EDBPOSTGRES=$(oc get clusters.postgresql.k8s.enterprisedb.io -o jsonpath='{.items[].status.phase}')
             printStatus "$STATUS_EDBPOSTGRES" "Cluster in healthy state" "$INSTANCE_EDBPOSTGRES" 
-        else
-            echo "______________________________________________________________"
-            echo "IBM Postgres (Postgreservices and PostgresDB) instances:" && echo "" 
         fi 
         
-        # Postgreservices status-all
-        INSTANCE_POSTGRESERVICES=$(oc get postgreservices cp4waiops-postgres -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:spec.version,STATUS:status.conditions[?(@.type==\"Completed\")].status,MESSAGE:status.conditions[?(@.type==\"Completed\")].message")
-        STATUS_POSTGRESERVICES=$(oc get postgreservices cp4waiops-postgres -o jsonpath='{.status.conditions[].status}')
-        printStatus "$STATUS_POSTGRESERVICES" "True" "$INSTANCE_POSTGRESERVICES"
+        if [[ "${VERSION_AIOPSORCHESTRATOR}" != "3.6" ]] && [[ "${VERSION_AIOPSORCHESTRATOR}" != "0.1" ]];
+        then
+            # Postgreservices status-all
+            INSTANCE_POSTGRESERVICES=$(oc get postgreservices cp4waiops-postgres -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:spec.version,STATUS:status.conditions[?(@.type==\"Completed\")].status,MESSAGE:status.conditions[?(@.type==\"Completed\")].message")
+            STATUS_POSTGRESERVICES=$(oc get postgreservices cp4waiops-postgres -o jsonpath='{.status.conditions[].status}')
+            printStatus "$STATUS_POSTGRESERVICES" "True" "$INSTANCE_POSTGRESERVICES"
 
-        # PostgresDB status-all
-        INSTANCE_POSTGRESDB=$(oc get postgresdb cp4waiops-postgresdb -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:spec.version,STATUS:status.conditions[?(@.type==\"Completed\")].status,MESSAGE:status.conditions[?(@.type==\"Completed\")].message")
-        STATUS_POSTGRESDB=$(oc get postgresdb cp4waiops-postgresdb -o jsonpath='{.status.conditions[].status}')
-        printStatus "$STATUS_POSTGRESDB" "True" "$INSTANCE_POSTGRESDB"
+            # PostgresDB status-all
+            INSTANCE_POSTGRESDB=$(oc get postgresdb cp4waiops-postgresdb -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:spec.version,STATUS:status.conditions[?(@.type==\"Completed\")].status,MESSAGE:status.conditions[?(@.type==\"Completed\")].message")
+            STATUS_POSTGRESDB=$(oc get postgresdb cp4waiops-postgresdb -o jsonpath='{.status.conditions[].status}')
+            printStatus "$STATUS_POSTGRESDB" "True" "$INSTANCE_POSTGRESDB"
+        fi
 
         # Secure Tunnel status-all (first check if secure tunnel was enabled by running below function)
         checkIfSecureTunnelExists
@@ -390,7 +390,10 @@ then
         getCSVStatus "$INSTALLATION_NAMESPACE" "ibm-cloud-databases-redis"
         getCSVStatus "$INSTALLATION_NAMESPACE" "ibm-common-service-operator"
         getCSVStatus "$INSTALLATION_NAMESPACE" "ibm-management-kong"
-        getCSVStatus "$INSTALLATION_NAMESPACE" "ibm-postgreservice-operator"
+        if [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.3" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.4" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.5" ]];
+        then
+            getCSVStatus "$INSTALLATION_NAMESPACE" "ibm-postgreservice-operator"
+        fi
         if [[ "${SECURE_TUNNEL_EXISTS}" == "true" ]];
         then 
             getCSVStatus "$INSTALLATION_NAMESPACE" "ibm-secure-tunnel-operator"        
@@ -441,7 +444,10 @@ then
         fi
         getSubscriptionStatusGrep "ibm-common-service-operator" "$INSTALLATION_NAMESPACE" 
         getSubscriptionStatus "ibm-management-kong" "$INSTALLATION_NAMESPACE" 
-        getSubscriptionStatus "ibm-postgreservice-operator" "$INSTALLATION_NAMESPACE" 
+        if [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.3" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.4" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.5" ]];
+        then
+            getSubscriptionStatus "ibm-postgreservice-operator" "$INSTALLATION_NAMESPACE" 
+        fi
         if [[ "${SECURE_TUNNEL_EXISTS}" == "true" ]];
         then 
             getSubscriptionStatus "ibm-secure-tunnel-operator" "$INSTALLATION_NAMESPACE" 
@@ -618,16 +624,14 @@ then
         }
 
         component-versions-36() {
-            MAJORVERSION_AIOPSUI="3.7"
+            MAJORVERSION_AIOPSUI="3.6"
             MAJORVERSION_AIMANAGER="2.7"
-            MAJORVERSION_IRCORE="3.7"
-            MAJORVERSION_LIFECYCLESERVICE="3.7"
+            MAJORVERSION_IRCORE="3.6"
+            MAJORVERSION_LIFECYCLESERVICE="3.6"
             MAJORVERSION_AIOPSANALYTICSORCHESTRATOR="3.7"
-            MAJORVERSION_VAULTDEPLOY="3.7"
-            MAJORVERSION_VAULTACCESS="3.7"
-            MAJORVERSION_POSTGRESERVICE="1.0"
-            MAJORVERSION_POSTGRESDB="1.0"
-            MAJORVERSION_ASM="2.10"
+            MAJORVERSION_VAULTDEPLOY="3.6"
+            MAJORVERSION_VAULTACCESS="3.6"
+            MAJORVERSION_ASM="2.11"
             MAJORVERSION_FLINKEP="4.0"
         }
 
@@ -763,28 +767,31 @@ then
         }
 
         postgresUpgradeStatus() {
-            POSTGRESERVICE_COMPLETED=$(oc get postgreservice cp4waiops-postgres -o jsonpath='{.status.conditions[0].type}')
-            POSTGRESDB_COMPLETED=$(oc get postgresdb cp4waiops-postgresdb -o jsonpath='{.status.conditions[0].type}')
+            if [ "${VERSION_AIOPSORCHESTRATOR}" == "3.3" ] || [ "${VERSION_AIOPSORCHESTRATOR}" == "3.4" ] || [ "${VERSION_AIOPSORCHESTRATOR}" == "3.5" ];
+            then
+                POSTGRESERVICE_COMPLETED=$(oc get postgreservice cp4waiops-postgres -o jsonpath='{.status.conditions[0].type}')
+                POSTGRESDB_COMPLETED=$(oc get postgresdb cp4waiops-postgresdb -o jsonpath='{.status.conditions[0].type}')
 
-            STATEFULSET_REPLICA_COUNT=$(oc get statefulset cp4waiops-postgres-keeper -o jsonpath='{.status.replicas}')
-            STATEFULSET_CURRENT_REPLICA_COUNT=$(oc get statefulset cp4waiops-postgres-keeper -o jsonpath='{.status.currentReplicas}')
+                STATEFULSET_REPLICA_COUNT=$(oc get statefulset cp4waiops-postgres-keeper -o jsonpath='{.status.replicas}')
+                STATEFULSET_CURRENT_REPLICA_COUNT=$(oc get statefulset cp4waiops-postgres-keeper -o jsonpath='{.status.currentReplicas}')
 
-            POSTGRES_PROXY_REPLICA_COUNT=$(oc get deployment cp4waiops-postgres-proxy -o jsonpath='{.status.replicas}')
-            POSTGRES_PROXY_CURRENT_REPLICA_COUNT=$(oc get deployment cp4waiops-postgres-proxy -o jsonpath='{.status.availableReplicas}')
+                POSTGRES_PROXY_REPLICA_COUNT=$(oc get deployment cp4waiops-postgres-proxy -o jsonpath='{.status.replicas}')
+                POSTGRES_PROXY_CURRENT_REPLICA_COUNT=$(oc get deployment cp4waiops-postgres-proxy -o jsonpath='{.status.availableReplicas}')
 
-            POSTGRES_SENTINEL_REPLICA_COUNT=$(oc get deployment cp4waiops-postgres-sentinel -o jsonpath='{.status.replicas}')
-            POSTGRES_SENTINEL_CURRENT_REPLICA_COUNT=$(oc get deployment cp4waiops-postgres-sentinel -o jsonpath='{.status.availableReplicas}')
+                POSTGRES_SENTINEL_REPLICA_COUNT=$(oc get deployment cp4waiops-postgres-sentinel -o jsonpath='{.status.replicas}')
+                POSTGRES_SENTINEL_CURRENT_REPLICA_COUNT=$(oc get deployment cp4waiops-postgres-sentinel -o jsonpath='{.status.availableReplicas}')
 
-            POSTGRESERVICE_CURRENT_MAJOR_VERSION=$(oc get postgreservices cp4waiops-postgres -o jsonpath='{.spec.version}' | cut -c1-3)
-            POSTGRESDB_CURRENT_MAJOR_VERSION=$(oc get postgresdb cp4waiops-postgresdb -o jsonpath='{.spec.version}' | cut -c1-3)
-            DETAILS=$(oc get postgreservices,postgresdb -A  -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:spec.version,STATUS:status.conditions[?(@.type==\"Completed\")].status,MESSAGE:status.conditions[?(@.type==\"Completed\")].message")
-            if [ "${POSTGRESERVICE_COMPLETED}" == "${POSTGRESDB_COMPLETED}" ] && [ "${STATEFULSET_REPLICA_COUNT}" == "${STATEFULSET_CURRENT_REPLICA_COUNT}" ] && [ "${POSTGRES_PROXY_REPLICA_COUNT}" == "${POSTGRES_PROXY_CURRENT_REPLICA_COUNT}" ] && [ "${POSTGRES_SENTINEL_REPLICA_COUNT}" == "${POSTGRES_SENTINEL_CURRENT_REPLICA_COUNT}" ] && [ "${POSTGRESERVICE_CURRENT_MAJOR_VERSION}" == "${MAJORVERSION_POSTGRESERVICE}" ] && [ "${POSTGRESDB_CURRENT_MAJOR_VERSION}" == "${MAJORVERSION_POSTGRESDB}" ];
-            then 
-                SUCCESSFULLY_UPGRADED+="${newline}${DETAILS}"
-                return 0;
-            else 
-                FAILING_UPGRADE+="${newline}${DETAILS}\n* EXPECTED MAJOR VERSION: ${MAJORVERSION_POSTGRESERVICE}${newline}EXPECTED PostgresDB MAJOR VERSION: ${MAJORVERSION_POSTGRESDB}"
-                return 1;
+                POSTGRESERVICE_CURRENT_MAJOR_VERSION=$(oc get postgreservices cp4waiops-postgres -o jsonpath='{.spec.version}' | cut -c1-3)
+                POSTGRESDB_CURRENT_MAJOR_VERSION=$(oc get postgresdb cp4waiops-postgresdb -o jsonpath='{.spec.version}' | cut -c1-3)
+                DETAILS=$(oc get postgreservices,postgresdb -A  -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:spec.version,STATUS:status.conditions[?(@.type==\"Completed\")].status,MESSAGE:status.conditions[?(@.type==\"Completed\")].message")
+                if [ "${POSTGRESERVICE_COMPLETED}" == "${POSTGRESDB_COMPLETED}" ] && [ "${STATEFULSET_REPLICA_COUNT}" == "${STATEFULSET_CURRENT_REPLICA_COUNT}" ] && [ "${POSTGRES_PROXY_REPLICA_COUNT}" == "${POSTGRES_PROXY_CURRENT_REPLICA_COUNT}" ] && [ "${POSTGRES_SENTINEL_REPLICA_COUNT}" == "${POSTGRES_SENTINEL_CURRENT_REPLICA_COUNT}" ] && [ "${POSTGRESERVICE_CURRENT_MAJOR_VERSION}" == "${MAJORVERSION_POSTGRESERVICE}" ] && [ "${POSTGRESDB_CURRENT_MAJOR_VERSION}" == "${MAJORVERSION_POSTGRESDB}" ];
+                then 
+                    SUCCESSFULLY_UPGRADED+="${newline}${DETAILS}"
+                    return 0;
+                else 
+                    FAILING_UPGRADE+="${newline}${DETAILS}\n* EXPECTED MAJOR VERSION: ${MAJORVERSION_POSTGRESERVICE}${newline}EXPECTED PostgresDB MAJOR VERSION: ${MAJORVERSION_POSTGRESDB}"
+                    return 1;
+                fi
             fi
         }
 
