@@ -23,7 +23,6 @@ then
     INSTALLATION_NAMESPACE=$(oc get installations.orchestrator.aiops.ibm.com -A --no-headers | while read a b c; do echo "$a"; done; 2>/dev/null)
     CSV_NAME=$(oc get csvs -o name --no-headers=true -n $INSTALLATION_NAMESPACE | grep ibm-aiops-orchestrator)  
     VERSION_AIOPSORCHESTRATOR=$(oc get $CSV_NAME -n $INSTALLATION_NAMESPACE -o jsonpath='{.spec.version}' | awk '{ print substr( $0, 0, 3 ) }')
-    # Check if it is a cluster-scoped install (a non-cluster-admin install would not be cluster-scoped, so no need to check in that scenario)
     CLUSTER_SCOPE_INSTALL=$(if [ $(oc get subscription -A  | grep ibm-aiops-orchestrator | awk '{ print $1 }') == "openshift-operators" ]; then echo "true"; else echo "false"; fi)
 else
     # ask user if they are in the project namespace. 
@@ -99,7 +98,7 @@ checkIfSecureTunnelExists() {
     fi
 }
 
-# status grabbing commands
+# functions for status command
 checkInstallationStatus() {
     # Installation status
     INSTANCE=$(oc get installations.orchestrator.aiops.ibm.com)
@@ -229,6 +228,96 @@ getAIOpsUIStatus() {
     printStatus "$STATUS_AIOPSUI" "True" "$INSTANCE_AIOPSUI"
 }
 
+# the functions below are for status-all
+getKongStatus() {
+    # Kong status-all
+    INSTANCE=$(oc get kong gateway -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,STATUS:.status.conditions[?(@.type==\"Deployed\")].status,MESSAGE:status.conditions[?(@.type==\"Deployed\")].reason")         
+    STATUS=$(oc get kong gateway -o jsonpath='{.status.conditions[].status}')
+    printStatus "$STATUS" "True" "$INSTANCE"
+}
+
+getVaultDeployStatus() {
+    # VaultDeploy status-all
+    INSTANCE_VAULTDEPLOY=$(oc get vaultdeploy ibm-vault-deploy -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:metadata.annotations.productVersion,STATUS:status.conditions[?(@.type==\"Completed\")].status,MESSAGE:status.conditions[?(@.type==\"Completed\")].message")
+    STATUS_VAULTDEPLOY=$(oc get vaultdeploy ibm-vault-deploy -o jsonpath='{.status.conditions[].status}')
+    printStatus "$STATUS_VAULTDEPLOY" "True" "$INSTANCE_VAULTDEPLOY"
+}
+
+getVaultAccessStatus() {
+    # VaultAccess status-all
+    INSTANCE_VAULTACCESS=$(oc get vaultaccess ibm-vault-access -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:metadata.annotations.productVersion,STATUS:status.conditions[?(@.type==\"Completed\")].status,MESSAGE:status.conditions[?(@.type==\"Completed\")].message")
+    STATUS_VAULTACCESS=$(oc get vaultaccess ibm-vault-access -o jsonpath='{.status.conditions[].status}')
+    printStatus "$STATUS_VAULTACCESS" "True" "$INSTANCE_VAULTACCESS"
+}
+
+getEDBPostgresStatus() {
+    # EDB Postgres status-all
+    INSTANCE_EDBPOSTGRES=$(oc get clusters.postgresql.k8s.enterprisedb.io -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,STATUS:status.phase")
+    STATUS_EDBPOSTGRES=$(oc get clusters.postgresql.k8s.enterprisedb.io -o jsonpath='{.items[].status.phase}')
+    printStatus "$STATUS_EDBPOSTGRES" "Cluster in healthy state" "$INSTANCE_EDBPOSTGRES" 
+}
+
+getPostgreservicesStatus() {
+    # Postgreservices status-all
+    INSTANCE_POSTGRESERVICES=$(oc get postgreservices cp4waiops-postgres -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:spec.version,STATUS:status.conditions[?(@.type==\"Completed\")].status,MESSAGE:status.conditions[?(@.type==\"Completed\")].message")
+    STATUS_POSTGRESERVICES=$(oc get postgreservices cp4waiops-postgres -o jsonpath='{.status.conditions[].status}')
+    printStatus "$STATUS_POSTGRESERVICES" "True" "$INSTANCE_POSTGRESERVICES"
+}
+
+getPostgresDBStatus() {
+    # PostgresDB status-all
+    INSTANCE_POSTGRESDB=$(oc get postgresdb cp4waiops-postgresdb -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:spec.version,STATUS:status.conditions[?(@.type==\"Completed\")].status,MESSAGE:status.conditions[?(@.type==\"Completed\")].message")
+    STATUS_POSTGRESDB=$(oc get postgresdb cp4waiops-postgresdb -o jsonpath='{.status.conditions[].status}')
+    printStatus "$STATUS_POSTGRESDB" "True" "$INSTANCE_POSTGRESDB"
+}
+
+getSecureTunnelStatus() {
+    # Secure Tunnel status-all
+    if [[ "$CLUSTER_ADMIN" == "yes" ]];
+    then
+        INSTANCE=$(oc get tunnels.sretooling.management.ibm.com -A -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,STATUS:status.conditions[?(@.type==\"Deployed\")].status")
+    else    
+        INSTANCE=$(oc get tunnels.sretooling.management.ibm.com -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,STATUS:status.conditions[?(@.type==\"Deployed\")].status")
+    fi
+    STATUS=$(oc get tunnels.sretooling.management.ibm.com -o jsonpath='{.items[].status.versions.status}')
+    printStatus "$STATUS" "Ready" "$INSTANCE"
+}
+
+getODLMPodStatus() {
+    if [[ "$CLUSTER_ADMIN" == "yes" ]];
+    then
+        INSTANCE=$(oc get pod -A | grep operand-deployment-lifecycle-manager)
+        POD_NAME=$(oc get pods -o name --no-headers=true -n ibm-common-services | grep operand-deployment | awk '{ print substr( $0, 5 ) }')         
+        STATUS=$(oc get pod $POD_NAME -n ibm-common-services -o jsonpath='{.status.phase}')
+        if [[ $STATUS == "Running" ]]; then
+            printf '%s\n' "$green$INSTANCE$normal"
+        else
+            printf '%s\n' "$red$INSTANCE$normal"
+        fi
+    fi
+}
+
+getOrchestratorPodStatus() {
+    INSTANCE=$(oc get pod -A | grep ibm-aiops-orchestrator-controller-manager)
+    if [[ "$CLUSTER_ADMIN" == "yes" ]];
+    then
+        if [ "${CLUSTER_SCOPE_INSTALL}" == "false" ];
+        then
+            POD_NAME=$(oc get pods -o name --no-headers=true -n $INSTALLATION_NAMESPACE | grep ibm-aiops-orchestrator-controller-manager | awk '{ print substr( $0, 5 ) }')         
+            STATUS=$(oc get pod $POD_NAME -n $INSTALLATION_NAMESPACE -o jsonpath='{.status.phase}')
+        else
+            POD_NAME=$(oc get pods -o name --no-headers=true -n openshift-operators | grep ibm-aiops-orchestrator-controller-manager | awk '{ print substr( $0, 5 ) }')         
+            STATUS=$(oc get pod $POD_NAME -n openshift-operators -o jsonpath='{.status.phase}')
+        fi
+        
+        if [[ $STATUS == "Running" ]]; then
+            printf '%s\n' "$green$INSTANCE$normal"
+        else
+            printf '%s\n' "$red$INSTANCE$normal"
+        fi
+    fi
+}
+
 # optional argument handling
 if [[ "$1" == "status" ]]
 then
@@ -285,138 +374,113 @@ fi
 # optional argument handling
 if [[ "$1" == "status-all" ]]
 then
-    if [[ "$CLUSTER_ADMIN" == "no" ]]
+    oc project ${INSTALLATION_NAMESPACE}
+
+    echo ""
+    echo "${blue}${bold}Cloud Pak for Watson AIOps AI Manager v${VERSION_AIOPSORCHESTRATOR} installation status:${normal}"
+    
+    echo "______________________________________________________________"
+    echo "Installation instances:" && echo ""
+    checkInstallationStatus
+    
+    echo "______________________________________________________________"
+    echo "ZenService instances:" && echo ""
+    checkZenServiceStatus
+
+    echo "______________________________________________________________"
+    echo "AutomationUIConfig, AutomationBase, Cartridge, CartridgeRequirements, and EventProcessor instances:" && echo ""   
+    checkAUICStatus
+    checkABStatus
+    checkCartridgeStatus
+    checkCartridgeRequirementsStatus        
+    checkIRLifecycleEventProcessorStatus
+    checkAIOpsEventProcessorStatus
+
+    echo "______________________________________________________________"
+    echo "IRCore and AIOpsAnalyticsOrchestrator instances:" && echo ""
+    checkIRCoreStatus
+    checkAIOpsAnalyticsOrchestratorStatus
+
+    echo "______________________________________________________________"
+    echo "LifecycleService instances:" && echo ""
+    checkLifecycleServiceStatus        
+
+    echo "______________________________________________________________"
+    echo "BaseUI instances:" && echo ""
+    getBaseUIStatus
+
+    echo "______________________________________________________________"
+    echo "AIManager, ASM, AIOpsEdge, and AIOpsUI instances:" && echo ""
+    getAIManagerStatus
+    getASMStatus
+    getAIOpsEdgeStatus
+    getAIOpsUIStatus
+
+    echo "______________________________________________________________"
+    echo "Kong instances:" && echo ""
+    getKongStatus
+
+    echo "______________________________________________________________"
+    echo "Vault (VaultDeploy and VaultAccess) instances:" && echo ""
+    getVaultDeployStatus
+    getVaultAccessStatus
+    
+    if [[ "${VERSION_AIOPSORCHESTRATOR}" != "3.3" ]];
+    then 
+        echo "______________________________________________________________"
+        echo "Postgres instances:" && echo "" 
+        getEDBPostgresStatus
+    fi 
+    
+    if [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.3" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.4" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.5" ]];
     then
-        oc project ${INSTALLATION_NAMESPACE}
+        getPostgreservicesStatus
+        getPostgresDBStatus
+    fi
 
-        echo ""
-        echo "${blue}${bold}Cloud Pak for Watson AIOps AI Manager v${VERSION_AIOPSORCHESTRATOR} installation status:${normal}"
-        
+    checkIfSecureTunnelExists
+    if [[ "${SECURE_TUNNEL_EXISTS}" == "true" ]];
+    then 
         echo "______________________________________________________________"
-        echo "Installation instances:" && echo ""
-        checkInstallationStatus
-        
-        echo "______________________________________________________________"
-        echo "ZenService instances:" && echo ""
-        checkZenServiceStatus
+        echo "Secure Tunnel instances:" && echo ""
+        getSecureTunnelStatus
+    fi
+    
+    echo "______________________________________________________________"
+    echo "CSVs from $INSTALLATION_NAMESPACE namespace:" && echo ""
+    
+    getCSVStatus "$INSTALLATION_NAMESPACE" "aimanager-operator"
+    getCSVStatus "$INSTALLATION_NAMESPACE" "aiopsedge-operator"
+    getCSVStatus "$INSTALLATION_NAMESPACE" "asm-operator"
+    if [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.3" ||  "${VERSION_AIOPSORCHESTRATOR}" == "3.4" ]];
+    then 
+        getCSVStatus "$INSTALLATION_NAMESPACE" "couchdb-operator"
+    fi
+    getCSVStatus "$INSTALLATION_NAMESPACE" "ibm-aiops-ir-ai"
+    getCSVStatus "$INSTALLATION_NAMESPACE" "ibm-aiops-ir-core"
+    getCSVStatus "$INSTALLATION_NAMESPACE" "ibm-aiops-ir-lifecycle"
+    getCSVStatus "$INSTALLATION_NAMESPACE" "ibm-aiops-orchestrator"
+    getCSVStatus "$INSTALLATION_NAMESPACE" "ibm-automation-core"
+    getCSVStatus "$INSTALLATION_NAMESPACE" "ibm-automation-elastic"
+    getCSVStatus "$INSTALLATION_NAMESPACE" "ibm-automation-eventprocessing"
+    getCSVStatus "$INSTALLATION_NAMESPACE" "ibm-automation-flink"
+    getCSVStatus "$INSTALLATION_NAMESPACE" "ibm-automation.v"
+    getCSVStatus "$INSTALLATION_NAMESPACE" "ibm-cloud-databases-redis"
+    getCSVStatus "$INSTALLATION_NAMESPACE" "ibm-common-service-operator"
+    getCSVStatus "$INSTALLATION_NAMESPACE" "ibm-management-kong"
+    if [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.3" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.4" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.5" ]];
+    then
+        getCSVStatus "$INSTALLATION_NAMESPACE" "ibm-postgreservice-operator"
+    fi
+    if [[ "${SECURE_TUNNEL_EXISTS}" == "true" ]];
+    then 
+        getCSVStatus "$INSTALLATION_NAMESPACE" "ibm-secure-tunnel-operator"        
+    fi
+    getCSVStatus "$INSTALLATION_NAMESPACE" "ibm-vault-operator"
+    getCSVStatus "$INSTALLATION_NAMESPACE" "ibm-watson-aiops-ui-operator"
 
-        echo "______________________________________________________________"
-        echo "AutomationUIConfig, AutomationBase, Cartridge, CartridgeRequirements, and EventProcessor instances:" && echo ""   
-        checkAUICStatus
-        checkABStatus
-        checkCartridgeStatus
-        checkCartridgeRequirementsStatus        
-        checkIRLifecycleEventProcessorStatus
-        checkAIOpsEventProcessorStatus
-
-        echo "______________________________________________________________"
-        echo "IRCore and AIOpsAnalyticsOrchestrator instances:" && echo ""
-        checkIRCoreStatus
-        checkAIOpsAnalyticsOrchestratorStatus
-
-        echo "______________________________________________________________"
-        echo "LifecycleService instances:" && echo ""
-        checkLifecycleServiceStatus        
-
-        echo "______________________________________________________________"
-        echo "BaseUI instances:" && echo ""
-        getBaseUIStatus
-
-        echo "______________________________________________________________"
-        echo "AIManager, ASM, AIOpsEdge, and AIOpsUI instances:" && echo ""
-        getAIManagerStatus
-        getASMStatus
-        getAIOpsEdgeStatus
-        getAIOpsUIStatus
-
-        echo "______________________________________________________________"
-        # Kong status-all
-        echo "Kong instances:" && echo ""
-        INSTANCE=$(oc get kong gateway -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,STATUS:.status.conditions[?(@.type==\"Deployed\")].status,MESSAGE:status.conditions[?(@.type==\"Deployed\")].reason")         
-        STATUS=$(oc get kong gateway -o jsonpath='{.status.conditions[].status}')
-        printStatus "$STATUS" "True" "$INSTANCE"
-
-        echo "______________________________________________________________"
-        echo "Vault (VaultDeploy and VaultAccess) instances:" && echo ""
-        # VaultDeploy status-all
-        INSTANCE_VAULTDEPLOY=$(oc get vaultdeploy ibm-vault-deploy -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:metadata.annotations.productVersion,STATUS:status.conditions[?(@.type==\"Completed\")].status,MESSAGE:status.conditions[?(@.type==\"Completed\")].message")
-        STATUS_VAULTDEPLOY=$(oc get vaultdeploy ibm-vault-deploy -o jsonpath='{.status.conditions[].status}')
-        printStatus "$STATUS_VAULTDEPLOY" "True" "$INSTANCE_VAULTDEPLOY"
-
-        # VaultAccess status-all
-        INSTANCE_VAULTACCESS=$(oc get vaultaccess ibm-vault-access -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:metadata.annotations.productVersion,STATUS:status.conditions[?(@.type==\"Completed\")].status,MESSAGE:status.conditions[?(@.type==\"Completed\")].message")
-        STATUS_VAULTACCESS=$(oc get vaultaccess ibm-vault-access -o jsonpath='{.status.conditions[].status}')
-        printStatus "$STATUS_VAULTACCESS" "True" "$INSTANCE_VAULTACCESS"
-
-        
-        if [[ "${VERSION_AIOPSORCHESTRATOR}" != "3.3" ]];
-        then 
-            echo "______________________________________________________________"
-            echo "Postgres instances:" && echo "" 
-            
-            # EDB Postgres status-all
-            INSTANCE_EDBPOSTGRES=$(oc get clusters.postgresql.k8s.enterprisedb.io -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,STATUS:status.phase")
-            STATUS_EDBPOSTGRES=$(oc get clusters.postgresql.k8s.enterprisedb.io -o jsonpath='{.items[].status.phase}')
-            printStatus "$STATUS_EDBPOSTGRES" "Cluster in healthy state" "$INSTANCE_EDBPOSTGRES" 
-        fi 
-        
-        if [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.3" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.4" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.5" ]];
-        then
-            # Postgreservices status-all
-            INSTANCE_POSTGRESERVICES=$(oc get postgreservices cp4waiops-postgres -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:spec.version,STATUS:status.conditions[?(@.type==\"Completed\")].status,MESSAGE:status.conditions[?(@.type==\"Completed\")].message")
-            STATUS_POSTGRESERVICES=$(oc get postgreservices cp4waiops-postgres -o jsonpath='{.status.conditions[].status}')
-            printStatus "$STATUS_POSTGRESERVICES" "True" "$INSTANCE_POSTGRESERVICES"
-
-            # PostgresDB status-all
-            INSTANCE_POSTGRESDB=$(oc get postgresdb cp4waiops-postgresdb -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:spec.version,STATUS:status.conditions[?(@.type==\"Completed\")].status,MESSAGE:status.conditions[?(@.type==\"Completed\")].message")
-            STATUS_POSTGRESDB=$(oc get postgresdb cp4waiops-postgresdb -o jsonpath='{.status.conditions[].status}')
-            printStatus "$STATUS_POSTGRESDB" "True" "$INSTANCE_POSTGRESDB"
-        fi
-
-        # Secure Tunnel status-all (first check if secure tunnel was enabled by running below function)
-        checkIfSecureTunnelExists
-        if [[ "${SECURE_TUNNEL_EXISTS}" == "true" ]];
-        then 
-            echo "______________________________________________________________"
-            echo "Secure Tunnel instances:" && echo ""
-            INSTANCE=$(oc get tunnels.sretooling.management.ibm.com -A -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,STATUS:status.conditions[?(@.type==\"Deployed\")].status")
-            STATUS=$(oc get tunnels.sretooling.management.ibm.com -o jsonpath='{.items[].status.versions.status}')
-            printStatus "$STATUS" "Ready" "$INSTANCE"
-        fi
-        
-        echo "______________________________________________________________"
-        echo "CSVs from $INSTALLATION_NAMESPACE namespace:" && echo ""
-        
-        getCSVStatus "$INSTALLATION_NAMESPACE" "aimanager-operator"
-        getCSVStatus "$INSTALLATION_NAMESPACE" "aiopsedge-operator"
-        getCSVStatus "$INSTALLATION_NAMESPACE" "asm-operator"
-        if [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.3" ||  "${VERSION_AIOPSORCHESTRATOR}" == "3.4" ]];
-        then 
-            getCSVStatus "$INSTALLATION_NAMESPACE" "couchdb-operator"
-        fi
-        getCSVStatus "$INSTALLATION_NAMESPACE" "ibm-aiops-ir-ai"
-        getCSVStatus "$INSTALLATION_NAMESPACE" "ibm-aiops-ir-core"
-        getCSVStatus "$INSTALLATION_NAMESPACE" "ibm-aiops-ir-lifecycle"
-        getCSVStatus "$INSTALLATION_NAMESPACE" "ibm-aiops-orchestrator"
-        getCSVStatus "$INSTALLATION_NAMESPACE" "ibm-automation-core"
-        getCSVStatus "$INSTALLATION_NAMESPACE" "ibm-automation-elastic"
-        getCSVStatus "$INSTALLATION_NAMESPACE" "ibm-automation-eventprocessing"
-        getCSVStatus "$INSTALLATION_NAMESPACE" "ibm-automation-flink"
-        getCSVStatus "$INSTALLATION_NAMESPACE" "ibm-automation.v"
-        getCSVStatus "$INSTALLATION_NAMESPACE" "ibm-cloud-databases-redis"
-        getCSVStatus "$INSTALLATION_NAMESPACE" "ibm-common-service-operator"
-        getCSVStatus "$INSTALLATION_NAMESPACE" "ibm-management-kong"
-        if [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.3" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.4" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.5" ]];
-        then
-            getCSVStatus "$INSTALLATION_NAMESPACE" "ibm-postgreservice-operator"
-        fi
-        if [[ "${SECURE_TUNNEL_EXISTS}" == "true" ]];
-        then 
-            getCSVStatus "$INSTALLATION_NAMESPACE" "ibm-secure-tunnel-operator"        
-        fi
-        getCSVStatus "$INSTALLATION_NAMESPACE" "ibm-vault-operator"
-        getCSVStatus "$INSTALLATION_NAMESPACE" "ibm-watson-aiops-ui-operator"
-
+    if [[ "$CLUSTER_ADMIN" == "yes" ]];
+    then
         echo "______________________________________________________________"
         echo "CSVs from ibm-common-services namespace:" && echo ""
 
@@ -439,42 +503,45 @@ then
         getCSVStatus "ibm-common-services" "ibm-platform-api-operator"
         getCSVStatus "ibm-common-services" "ibm-zen-operator"
         getCSVStatus "ibm-common-services" "operand-deployment-lifecycle-manager"
+    fi
+
+    echo "______________________________________________________________"
+    echo "Subscriptions from $INSTALLATION_NAMESPACE namespace:" && echo ""
+    getSubscriptionStatus "aimanager-operator" "$INSTALLATION_NAMESPACE" 
+    getSubscriptionStatus "aiopsedge-operator" "$INSTALLATION_NAMESPACE" 
+    getSubscriptionStatus "asm-operator" "$INSTALLATION_NAMESPACE" 
+    if [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.3" ||  "${VERSION_AIOPSORCHESTRATOR}" == "3.4" ]];
+    then 
+        getSubscriptionStatus "couchdb" "$INSTALLATION_NAMESPACE" 
+    fi
+    if [ "${CLUSTER_SCOPE_INSTALL}" == "false" ];
+    then 
+        getSubscriptionStatus "ibm-aiops-orchestrator" "$INSTALLATION_NAMESPACE" 
+        getSubscriptionStatusSelector "operators.coreos.com/ibm-automation.$INSTALLATION_NAMESPACE" "$INSTALLATION_NAMESPACE" 
+        getSubscriptionStatusGrep "ibm-automation-core" "$INSTALLATION_NAMESPACE" 
+        getSubscriptionStatusGrep "ibm-automation-elastic" "$INSTALLATION_NAMESPACE" 
+        getSubscriptionStatusGrep "ibm-automation-eventprocessing" "$INSTALLATION_NAMESPACE" 
+        getSubscriptionStatusGrep "ibm-automation-flink" "$INSTALLATION_NAMESPACE" 
+    fi
+    getSubscriptionStatusGrep "ibm-common-service-operator" "$INSTALLATION_NAMESPACE" 
+    getSubscriptionStatus "ibm-management-kong" "$INSTALLATION_NAMESPACE" 
+    if [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.3" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.4" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.5" ]];
+    then
+        getSubscriptionStatus "ibm-postgreservice-operator" "$INSTALLATION_NAMESPACE" 
+    fi
+    if [[ "${SECURE_TUNNEL_EXISTS}" == "true" ]];
+    then 
+        getSubscriptionStatus "ibm-secure-tunnel-operator" "$INSTALLATION_NAMESPACE" 
+    fi
+    getSubscriptionStatus "ibm-watson-aiops-ui-operator" "$INSTALLATION_NAMESPACE" 
+    getSubscriptionStatus "ir-ai-operator" "$INSTALLATION_NAMESPACE" 
+    getSubscriptionStatus "ir-core-operator" "$INSTALLATION_NAMESPACE" 
+    getSubscriptionStatus "ir-lifecycle-operator" "$INSTALLATION_NAMESPACE" 
+    getSubscriptionStatus "redis" "$INSTALLATION_NAMESPACE" 
+    getSubscriptionStatus "vault" "$INSTALLATION_NAMESPACE" 
     
-        echo "______________________________________________________________"
-        echo "Subscriptions from $INSTALLATION_NAMESPACE namespace:" && echo ""
-        getSubscriptionStatus "aimanager-operator" "$INSTALLATION_NAMESPACE" 
-        getSubscriptionStatus "aiopsedge-operator" "$INSTALLATION_NAMESPACE" 
-        getSubscriptionStatus "asm-operator" "$INSTALLATION_NAMESPACE" 
-        if [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.3" ||  "${VERSION_AIOPSORCHESTRATOR}" == "3.4" ]];
-        then 
-            getSubscriptionStatus "couchdb" "$INSTALLATION_NAMESPACE" 
-        fi
-        if [ "${CLUSTER_SCOPE_INSTALL}" == "false" ];
-        then 
-            getSubscriptionStatus "ibm-aiops-orchestrator" "$INSTALLATION_NAMESPACE" 
-            getSubscriptionStatusSelector "operators.coreos.com/ibm-automation.$INSTALLATION_NAMESPACE" "$INSTALLATION_NAMESPACE" 
-            getSubscriptionStatusGrep "ibm-automation-core" "$INSTALLATION_NAMESPACE" 
-            getSubscriptionStatusGrep "ibm-automation-elastic" "$INSTALLATION_NAMESPACE" 
-            getSubscriptionStatusGrep "ibm-automation-eventprocessing" "$INSTALLATION_NAMESPACE" 
-            getSubscriptionStatusGrep "ibm-automation-flink" "$INSTALLATION_NAMESPACE" 
-        fi
-        getSubscriptionStatusGrep "ibm-common-service-operator" "$INSTALLATION_NAMESPACE" 
-        getSubscriptionStatus "ibm-management-kong" "$INSTALLATION_NAMESPACE" 
-        if [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.3" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.4" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.5" ]];
-        then
-            getSubscriptionStatus "ibm-postgreservice-operator" "$INSTALLATION_NAMESPACE" 
-        fi
-        if [[ "${SECURE_TUNNEL_EXISTS}" == "true" ]];
-        then 
-            getSubscriptionStatus "ibm-secure-tunnel-operator" "$INSTALLATION_NAMESPACE" 
-        fi
-        getSubscriptionStatus "ibm-watson-aiops-ui-operator" "$INSTALLATION_NAMESPACE" 
-        getSubscriptionStatus "ir-ai-operator" "$INSTALLATION_NAMESPACE" 
-        getSubscriptionStatus "ir-core-operator" "$INSTALLATION_NAMESPACE" 
-        getSubscriptionStatus "ir-lifecycle-operator" "$INSTALLATION_NAMESPACE" 
-        getSubscriptionStatus "redis" "$INSTALLATION_NAMESPACE" 
-        getSubscriptionStatus "vault" "$INSTALLATION_NAMESPACE" 
-        
+    if [[ "$CLUSTER_ADMIN" == "yes" ]];
+    then
         echo "______________________________________________________________"
         echo "Subscriptions from ibm-common-services namespace:" && echo ""
         if [ "${VERSION_AIOPSORCHESTRATOR}" != "3.3" ];
@@ -512,75 +579,61 @@ then
             getSubscriptionStatusGrep "ibm-automation-flink" "openshift-operators"
             getSubscriptionStatusGrep "ibm-common-service-operator" "openshift-operators" 
         fi
+    fi
 
-        echo "______________________________________________________________"
-        echo "OperandRequest instances:" && echo ""
+    echo "______________________________________________________________"
+    echo "OperandRequest instances:" && echo ""
+    if [[ "$CLUSTER_ADMIN" == "yes" ]];
+    then
         getOperandRequestStatus "ibm-commonui-request" "ibm-common-services" 
         getOperandRequestStatus "ibm-iam-request" "ibm-common-services" 
         getOperandRequestStatus "ibm-mongodb-request" "ibm-common-services" 
         getOperandRequestStatus "management-ingress" "ibm-common-services" 
         getOperandRequestStatus "platform-api-request" "ibm-common-services" 
-        getOperandRequestStatus "aiopsedge-base" "$INSTALLATION_NAMESPACE"  
-        getOperandRequestStatus "aiopsedge-cs" "$INSTALLATION_NAMESPACE"  
-        if [ "${CLUSTER_SCOPE_INSTALL}" == "false" ];
-        then 
-            getOperandRequestStatus "iaf-core-operator" "$INSTALLATION_NAMESPACE"  
-            getOperandRequestStatus "iaf-eventprocessing-operator" "$INSTALLATION_NAMESPACE" 
-            getOperandRequestStatus "iaf-operator" "$INSTALLATION_NAMESPACE" 
-            getOperandRequestStatus "ibm-elastic-operator" "$INSTALLATION_NAMESPACE"
-        else
+    fi
+
+    getOperandRequestStatus "aiopsedge-base" "$INSTALLATION_NAMESPACE"  
+    getOperandRequestStatus "aiopsedge-cs" "$INSTALLATION_NAMESPACE"  
+
+    if [ "${CLUSTER_SCOPE_INSTALL}" == "false" ];
+    then 
+        getOperandRequestStatus "iaf-core-operator" "$INSTALLATION_NAMESPACE"  
+        getOperandRequestStatus "iaf-eventprocessing-operator" "$INSTALLATION_NAMESPACE" 
+        getOperandRequestStatus "iaf-operator" "$INSTALLATION_NAMESPACE" 
+        getOperandRequestStatus "ibm-elastic-operator" "$INSTALLATION_NAMESPACE"
+    else
+        if [[ "$CLUSTER_ADMIN" == "true" ]];
+        then
             getOperandRequestStatus "iaf-core-operator" "openshift-operators"  
             getOperandRequestStatus "iaf-eventprocessing-operator" "openshift-operators" 
             getOperandRequestStatus "iaf-operator" "openshift-operators"
             getOperandRequestStatus "ibm-elastic-operator" "openshift-operators"
         fi
-        getOperandRequestStatus "iaf-system" "$INSTALLATION_NAMESPACE" 
-        getOperandRequestStatus "iaf-system-common-service" "$INSTALLATION_NAMESPACE" 
-        getOperandRequestStatus "ibm-aiops-ai-manager" "$INSTALLATION_NAMESPACE" 
-        getOperandRequestStatus "ibm-aiops-aiops-foundation" "$INSTALLATION_NAMESPACE" 
-        if [[ "${SECURE_TUNNEL_EXISTS}" == "true" ]];
-        then 
-            getOperandRequestStatus "ibm-aiops-connection" "$INSTALLATION_NAMESPACE"  
-        fi
-        getOperandRequestStatus "ibm-iam-service" "$INSTALLATION_NAMESPACE" 
-        getOperandRequestStatus "operandrequest-kafkauser-iaf-system" "$INSTALLATION_NAMESPACE" 
+    fi
+    getOperandRequestStatus "iaf-system" "$INSTALLATION_NAMESPACE" 
+    getOperandRequestStatus "iaf-system-common-service" "$INSTALLATION_NAMESPACE" 
+    getOperandRequestStatus "ibm-aiops-ai-manager" "$INSTALLATION_NAMESPACE" 
+    getOperandRequestStatus "ibm-aiops-aiops-foundation" "$INSTALLATION_NAMESPACE" 
+    if [[ "${SECURE_TUNNEL_EXISTS}" == "true" ]];
+    then 
+        getOperandRequestStatus "ibm-aiops-connection" "$INSTALLATION_NAMESPACE"  
+    fi
+    getOperandRequestStatus "ibm-iam-service" "$INSTALLATION_NAMESPACE" 
+    getOperandRequestStatus "operandrequest-kafkauser-iaf-system" "$INSTALLATION_NAMESPACE" 
 
+    if [[ "$CLUSTER_ADMIN" == "true" ]];
+    then
         echo "______________________________________________________________"
         echo "ODLM pod current status:" && echo ""
-        INSTANCE=$(oc get pod -A | grep operand-deployment-lifecycle-manager)
-        POD_NAME=$(oc get pods -o name --no-headers=true -n ibm-common-services | grep operand-deployment | awk '{ print substr( $0, 5 ) }')         
-        STATUS=$(oc get pod $POD_NAME -n ibm-common-services -o jsonpath='{.status.phase}')
-        if [[ $STATUS == "Running" ]]; then
-            printf '%s\n' "$green$INSTANCE$normal"
-        else
-            printf '%s\n' "$red$INSTANCE$normal"
-        fi
-
+        getODLMPodStatus
+    
         echo "______________________________________________________________"
         echo "Orchestrator pod current status:" && echo ""   
-        INSTANCE=$(oc get pod -A | grep ibm-aiops-orchestrator-controller-manager)
-        if [ "${CLUSTER_SCOPE_INSTALL}" == "false" ];
-        then
-            POD_NAME=$(oc get pods -o name --no-headers=true -n $INSTALLATION_NAMESPACE | grep ibm-aiops-orchestrator-controller-manager | awk '{ print substr( $0, 5 ) }')         
-            STATUS=$(oc get pod $POD_NAME -n $INSTALLATION_NAMESPACE -o jsonpath='{.status.phase}')
-        else
-            POD_NAME=$(oc get pods -o name --no-headers=true -n openshift-operators | grep ibm-aiops-orchestrator-controller-manager | awk '{ print substr( $0, 5 ) }')         
-            STATUS=$(oc get pod $POD_NAME -n openshift-operators -o jsonpath='{.status.phase}')
-        fi
-        if [[ $STATUS == "Running" ]]; then
-            printf '%s\n' "$green$INSTANCE$normal"
-        else
-            printf '%s\n' "$red$INSTANCE$normal"
-        fi
-
-        echo ""
-        exit 0
-    else       
-        printf "${blue}${bold}Hint: log into your cluster with CLUSTER_ADMIN credentials and try again.${normal}
-
-"
-        exit 0
+        getOrchestratorPodStatus
     fi
+
+    echo ""
+    exit 0
 fi
 
 # optional argument handling
