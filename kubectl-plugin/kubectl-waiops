@@ -643,339 +643,337 @@ then
     # This script checks to see if your Cloud Pak for Watson AIOps
     # instance is properly configured post-upgrade for v3.3. 
 
-    if [[ "$CLUSTER_ADMIN" == "no" ]]
-    then
-        FAILING_UPGRADE=""
-        SUCCESSFULLY_UPGRADED=""
+    FAILING_UPGRADE=""
+    SUCCESSFULLY_UPGRADED=""
 
-        oc project ${INSTALLATION_NAMESPACE}
+    oc project ${INSTALLATION_NAMESPACE}
 
-        component-versions-33() {
-            MAJORVERSION_AIOPSUI="3.3"
-            MAJORVERSION_AIMANAGER="2.4"
-            MAJORVERSION_IRCORE="3.3"
-            MAJORVERSION_LIFECYCLESERVICE="3.3"
-            MAJORVERSION_AIOPSANALYTICSORCHESTRATOR="3.2"
-            MAJORVERSION_VAULTDEPLOY="3.3"
-            MAJORVERSION_VAULTACCESS="3.3"
-            MAJORVERSION_POSTGRESERVICE="1.0"
-            MAJORVERSION_POSTGRESDB="1.0"
-            MAJORVERSION_ASM="2.5"
-            MAJORVERSION_FLINKEP="4.0"
-        }
+    component-versions-33() {
+        MAJORVERSION_AIOPSUI="3.3"
+        MAJORVERSION_AIMANAGER="2.4"
+        MAJORVERSION_IRCORE="3.3"
+        MAJORVERSION_LIFECYCLESERVICE="3.3"
+        MAJORVERSION_AIOPSANALYTICSORCHESTRATOR="3.2"
+        MAJORVERSION_VAULTDEPLOY="3.3"
+        MAJORVERSION_VAULTACCESS="3.3"
+        MAJORVERSION_POSTGRESERVICE="1.0"
+        MAJORVERSION_POSTGRESDB="1.0"
+        MAJORVERSION_ASM="2.5"
+        MAJORVERSION_FLINKEP="4.0"
+    }
 
-        component-versions-34() {
-            MAJORVERSION_AIOPSUI="3.4"
-            MAJORVERSION_AIMANAGER="2.5"
-            MAJORVERSION_IRCORE="3.4"
-            MAJORVERSION_LIFECYCLESERVICE="3.4"
-            MAJORVERSION_AIOPSANALYTICSORCHESTRATOR="3.4"
-            MAJORVERSION_VAULTDEPLOY="3.4"
-            MAJORVERSION_VAULTACCESS="3.4"
-            MAJORVERSION_POSTGRESERVICE="1.0"
-            MAJORVERSION_POSTGRESDB="1.0"
-            MAJORVERSION_ASM="2.7"
-            MAJORVERSION_FLINKEP="4.0"
-        }
+    component-versions-34() {
+        MAJORVERSION_AIOPSUI="3.4"
+        MAJORVERSION_AIMANAGER="2.5"
+        MAJORVERSION_IRCORE="3.4"
+        MAJORVERSION_LIFECYCLESERVICE="3.4"
+        MAJORVERSION_AIOPSANALYTICSORCHESTRATOR="3.4"
+        MAJORVERSION_VAULTDEPLOY="3.4"
+        MAJORVERSION_VAULTACCESS="3.4"
+        MAJORVERSION_POSTGRESERVICE="1.0"
+        MAJORVERSION_POSTGRESDB="1.0"
+        MAJORVERSION_ASM="2.7"
+        MAJORVERSION_FLINKEP="4.0"
+    }
 
-        component-versions-35() {
-            MAJORVERSION_AIOPSUI="3.5"
-            MAJORVERSION_AIMANAGER="2.6"
-            MAJORVERSION_IRCORE="3.5"
-            MAJORVERSION_LIFECYCLESERVICE="3.5"
-            MAJORVERSION_AIOPSANALYTICSORCHESTRATOR="3.5"
-            MAJORVERSION_VAULTDEPLOY="3.5"
-            MAJORVERSION_VAULTACCESS="3.5"
-            MAJORVERSION_POSTGRESERVICE="1.0"
-            MAJORVERSION_POSTGRESDB="1.0"
-            MAJORVERSION_ASM="2.9"
-            MAJORVERSION_FLINKEP="4.0"
-        }
+    component-versions-35() {
+        MAJORVERSION_AIOPSUI="3.5"
+        MAJORVERSION_AIMANAGER="2.6"
+        MAJORVERSION_IRCORE="3.5"
+        MAJORVERSION_LIFECYCLESERVICE="3.5"
+        MAJORVERSION_AIOPSANALYTICSORCHESTRATOR="3.5"
+        MAJORVERSION_VAULTDEPLOY="3.5"
+        MAJORVERSION_VAULTACCESS="3.5"
+        MAJORVERSION_POSTGRESERVICE="1.0"
+        MAJORVERSION_POSTGRESDB="1.0"
+        MAJORVERSION_ASM="2.9"
+        MAJORVERSION_FLINKEP="4.0"
+    }
 
-        component-versions-36() {
-            MAJORVERSION_AIOPSUI="3.6"
-            MAJORVERSION_AIMANAGER="2.7"
-            MAJORVERSION_IRCORE="3.6"
-            MAJORVERSION_LIFECYCLESERVICE="3.6"
-            MAJORVERSION_AIOPSANALYTICSORCHESTRATOR="3.7"
-            MAJORVERSION_VAULTDEPLOY="3.6"
-            MAJORVERSION_VAULTACCESS="3.6"
-            MAJORVERSION_ASM="2.11"
-            MAJORVERSION_FLINKEP="4.0"
-        }
+    component-versions-36() {
+        MAJORVERSION_AIOPSUI="3.6"
+        MAJORVERSION_AIMANAGER="2.7"
+        MAJORVERSION_IRCORE="3.6"
+        MAJORVERSION_LIFECYCLESERVICE="3.6"
+        MAJORVERSION_AIOPSANALYTICSORCHESTRATOR="3.7"
+        MAJORVERSION_VAULTDEPLOY="3.6"
+        MAJORVERSION_VAULTACCESS="3.6"
+        MAJORVERSION_ASM="2.11"
+        MAJORVERSION_FLINKEP="4.0"
+    }
 
-        aiopsEdgeBaseUpgradeStatus() {    
-            UPGRADED=$(oc get aiopsedge aiopsedge -o jsonpath='{.status.conditions[?(@.type=="UpgradeReady")].status}')
-            CONFIGURED=$(oc get aiopsedge aiopsedge -o jsonpath='{.status.phase}')
-            DETAILS=$(oc get aiopsedge -A  -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,STATUS:status.phase,MESSAGE:status.conditions[?(@.type==\"Ready\")].message")
-            if [ "${UPGRADED}" == "True" ] && [ "${CONFIGURED}" == "Configured" ];
-            then 
-                SUCCESSFULLY_UPGRADED+="${newline}${DETAILS}"
-                return 0;
-            else 
-                FAILING_UPGRADE+="${newline}${DETAILS}"
-                return 1;
-            fi
-        }
-
-        aiopsUIUpgradeStatus() {    
-            CURRENT_MAJOR_VERSION=$(oc get aiopsui aiopsui-instance -o jsonpath='{.status.versions.reconciled}' | cut -c1-3)
-            DETAILS=$(oc get aiopsui -A  -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:status.versions.reconciled,STATUS:status.conditions[?(@.type==\"Ready\")].status,MESSAGE:status.conditions[?(@.type==\"Ready\")].reason")
-            if [ "${CURRENT_MAJOR_VERSION}" == "${MAJORVERSION_AIOPSUI}" ];
-            then 
-                SUCCESSFULLY_UPGRADED+="${newline}${DETAILS}"
-                return 0;
-            else 
-                FAILING_UPGRADE+="${newline}${DETAILS}\n* EXPECTED MAJOR VERSION: ${MAJORVERSION_AIOPSUI}"
-                return 1;
-            fi
-        }
-
-        kongUpgradeStatus() {    
-            INITIALIZED=$(oc get kong gateway -o jsonpath='{.status.conditions[?(@.type=="Initialized")].status}')
-            DEPLOYED=$(oc get kong gateway -o jsonpath='{.status.conditions[?(@.type=="Deployed")].status}')
-            DETAILS=$(oc get kong -A -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,STATUS:.status.conditions[?(@.type==\"Deployed\")].status,MESSAGE:status.conditions[?(@.type==\"Deployed\")].reason" )
-            if [ "${INITIALIZED}" == "True" ] && [ "${DEPLOYED}" == "True" ];
-            then 
-                SUCCESSFULLY_UPGRADED+="${newline}${DETAILS}"
-                return 0;
-            else 
-                FAILING_UPGRADE+="${newline}${DETAILS}"
-                return 1;
-            fi
-        }
-
-        aiManagerUpgradeStatus() {    
-            PHASE_STATUS=$(oc get aimanager aimanager -o jsonpath='{.status.phase}')
-            CURRENT_MAJOR_VERSION=$(oc get aimanager aimanager -o jsonpath='{.status.versions.reconciled}' | cut -c1-3)
-            DETAILS=$(oc get AIManager -A  -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:status.versions.reconciled,STATUS:status.phase,MESSAGE:status.message")
-            if [ "${PHASE_STATUS}" == "Completed" ] && [ "${CURRENT_MAJOR_VERSION}" == "${MAJORVERSION_AIMANAGER}" ];
-            then 
-                SUCCESSFULLY_UPGRADED+="${newline}${DETAILS}"
-                return 0;
-            else 
-                FAILING_UPGRADE+="${newline}${DETAILS}\n* EXPECTED MAJOR VERSION: ${MAJORVERSION_AIMANAGER}"
-                return 1;
-            fi
-        }
-
-        irCoreUpgradeStatus() {
-            UPGRADED=$(oc get ircore aiops -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}')
-            METADATA_GENERATION=$(oc get ircore aiops -o jsonpath='{.metadata.generation}')   
-            OBSERVED_GENERATION=$(oc get ircore aiops -o jsonpath='{.status.conditions[].observedGeneration}')        
-            CURRENT_MAJOR_VERSION=$(oc get ircore aiops -o jsonpath='{.status.versions.reconciled}' | cut -c1-3)
-            DETAILS=$(oc get ircore -A  -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:status.versions.reconciled,STATUS:status.conditions[?(@.type==\"Ready\")].reason,MESSAGE:status.conditions[?(@.type==\"Ready\")].message")
-            if [ "${UPGRADED}" == "True" ] && [ "${OBSERVED_GENERATION}" == ${METADATA_GENERATION} ] && [ "${CURRENT_MAJOR_VERSION}" == "${MAJORVERSION_IRCORE}" ];
-            then 
-                SUCCESSFULLY_UPGRADED+="${newline}${DETAILS}"
-                return 0;
-            else 
-                FAILING_UPGRADE+="${newline}${DETAILS}\n* EXPECTED MAJOR VERSION: ${MAJORVERSION_IRCORE}"
-                return 1;
-            fi
-        }
-
-        lifecycleUpgradeStatus() {      
-            UPGRADED=$(oc get lifecycleservices aiops -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}')
-            METADATA_GENERATION=$(oc get lifecycleservices aiops -o jsonpath='{.metadata.generation}')   
-            OBSERVED_GENERATION=$(oc get lifecycleservices aiops -o jsonpath='{.status.observedGeneration}')
-            CURRENT_MAJOR_VERSION=$(oc get lifecycleservices aiops -o jsonpath='{.status.versions.reconciled}' | cut -c1-3)
-            DETAILS=$(oc get lifecycleservice -A -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:status.versions.reconciled,STATUS:status.conditions[?(@.type==\"Lifecycle Service Ready\")].reason,MESSAGE:status.conditions[?(@.type==\"Ready\")].message")
-            if [ "${UPGRADED}" == "True" ] && [ "${OBSERVED_GENERATION}" == ${METADATA_GENERATION} ] && [ "${CURRENT_MAJOR_VERSION}" == "${MAJORVERSION_LIFECYCLESERVICE}" ];
-            then 
-                SUCCESSFULLY_UPGRADED+="${newline}${DETAILS}"
-                return 0;
-            else 
-                FAILING_UPGRADE+="${newline}${DETAILS}\n* EXPECTED MAJOR VERSION: ${MAJORVERSION_LIFECYCLESERVICE}"
-                return 1;
-            fi
-        }
-
-        aiopsAnalyticsUpgradeStatus() {
-            UPGRADED=$(oc get AIOpsAnalyticsOrchestrator aiops -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}')
-            METADATA_GENERATION=$(oc get AIOpsAnalyticsOrchestrator aiops -o jsonpath='{.metadata.generation}')   
-            OBSERVED_GENERATION=$(oc get AIOpsAnalyticsOrchestrator aiops -o jsonpath='{.status.observedGeneration}')
-            CURRENT_MAJOR_VERSION=$(oc get AIOpsAnalyticsOrchestrator aiops -o jsonpath='{.status.versions.reconciled}' | cut -c1-3)
-            DETAILS=$(oc get AIOpsAnalyticsOrchestrator -A  -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:status.versions.reconciled,STATUS:status.conditions[?(@.type==\"Ready\")].reason,MESSAGE:status.conditions[?(@.type==\"Ready\")].message")
-            if [ "${UPGRADED}" == "True" ] && [ "${OBSERVED_GENERATION}" == ${METADATA_GENERATION} ] && [ "${CURRENT_MAJOR_VERSION}" == "${MAJORVERSION_AIOPSANALYTICSORCHESTRATOR}" ];
-            then 
-                SUCCESSFULLY_UPGRADED+="${newline}${DETAILS}"
-                return 0;
-            else 
-                FAILING_UPGRADE+="${newline}${DETAILS}\n* EXPECTED MAJOR VERSION: ${MAJORVERSION_AIOPSANALYTICSORCHESTRATOR}"
-                return 1;
-            fi
-        }
-
-        vaultDeployUpgradeStatus() {
-            VAULTDEPLOY_COMPLETED=$(oc get vaultdeploy ibm-vault-deploy -o jsonpath='{.status.conditions[?(@.type=="Completed")].status}')
-            CURRENT_MAJOR_VERSION=$(oc get vaultdeploy ibm-vault-deploy -o jsonpath='{.metadata.annotations.productVersion}' | cut -c1-3)
-            DETAILS=$(oc get vaultdeploy -A  -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:metadata.annotations.productVersion,STATUS:status.conditions[?(@.type==\"Completed\")].status,MESSAGE:status.conditions[?(@.type==\"Completed\")].message")
-            if [ "${VAULTDEPLOY_COMPLETED}" == "True" ] && [ "${CURRENT_MAJOR_VERSION}" == "${MAJORVERSION_VAULTDEPLOY}" ];
-            then 
-                SUCCESSFULLY_UPGRADED+="${newline}${DETAILS}"
-                return 0;
-            else 
-                FAILING_UPGRADE+="${newline}${DETAILS}\n* EXPECTED MAJOR VERSION: ${MAJORVERSION_VAULTDEPLOY}"
-                return 1;
-            fi
-        }
-
-        vaultAccessUpgradeStatus() {
-            VAULTACCESS_COMPLETED=$(oc get vaultaccess ibm-vault-access -o jsonpath='{.status.conditions[?(@.type=="Completed")].status}')
-            CURRENT_MAJOR_VERSION=$(oc get vaultaccess ibm-vault-access -o jsonpath='{.metadata.annotations.productVersion}' | cut -c1-3)
-            DETAILS=$(oc get vaultaccess -A  -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:metadata.annotations.productVersion,STATUS:status.conditions[?(@.type==\"Completed\")].status,MESSAGE:status.conditions[?(@.type==\"Completed\")].message")
-            if [ "${VAULTACCESS_COMPLETED}" == "True" ] && [ "${CURRENT_MAJOR_VERSION}" == "${MAJORVERSION_VAULTACCESS}" ];
-            then 
-                SUCCESSFULLY_UPGRADED+="${newline}${DETAILS}"
-                return 0;
-            else 
-                FAILING_UPGRADE+="${newline}${DETAILS}\n* EXPECTED MAJOR VERSION: ${MAJORVERSION_VAULTACCESS}"
-                return 1;
-            fi
-        }
-
-        postgresUpgradeStatus() {
-            if [ "${VERSION_AIOPSORCHESTRATOR}" == "3.3" ] || [ "${VERSION_AIOPSORCHESTRATOR}" == "3.4" ] || [ "${VERSION_AIOPSORCHESTRATOR}" == "3.5" ];
-            then
-                POSTGRESERVICE_COMPLETED=$(oc get postgreservice cp4waiops-postgres -o jsonpath='{.status.conditions[0].type}')
-                POSTGRESDB_COMPLETED=$(oc get postgresdb cp4waiops-postgresdb -o jsonpath='{.status.conditions[0].type}')
-
-                STATEFULSET_REPLICA_COUNT=$(oc get statefulset cp4waiops-postgres-keeper -o jsonpath='{.status.replicas}')
-                STATEFULSET_CURRENT_REPLICA_COUNT=$(oc get statefulset cp4waiops-postgres-keeper -o jsonpath='{.status.currentReplicas}')
-
-                POSTGRES_PROXY_REPLICA_COUNT=$(oc get deployment cp4waiops-postgres-proxy -o jsonpath='{.status.replicas}')
-                POSTGRES_PROXY_CURRENT_REPLICA_COUNT=$(oc get deployment cp4waiops-postgres-proxy -o jsonpath='{.status.availableReplicas}')
-
-                POSTGRES_SENTINEL_REPLICA_COUNT=$(oc get deployment cp4waiops-postgres-sentinel -o jsonpath='{.status.replicas}')
-                POSTGRES_SENTINEL_CURRENT_REPLICA_COUNT=$(oc get deployment cp4waiops-postgres-sentinel -o jsonpath='{.status.availableReplicas}')
-
-                POSTGRESERVICE_CURRENT_MAJOR_VERSION=$(oc get postgreservices cp4waiops-postgres -o jsonpath='{.spec.version}' | cut -c1-3)
-                POSTGRESDB_CURRENT_MAJOR_VERSION=$(oc get postgresdb cp4waiops-postgresdb -o jsonpath='{.spec.version}' | cut -c1-3)
-                DETAILS=$(oc get postgreservices,postgresdb -A  -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:spec.version,STATUS:status.conditions[?(@.type==\"Completed\")].status,MESSAGE:status.conditions[?(@.type==\"Completed\")].message")
-                if [ "${POSTGRESERVICE_COMPLETED}" == "${POSTGRESDB_COMPLETED}" ] && [ "${STATEFULSET_REPLICA_COUNT}" == "${STATEFULSET_CURRENT_REPLICA_COUNT}" ] && [ "${POSTGRES_PROXY_REPLICA_COUNT}" == "${POSTGRES_PROXY_CURRENT_REPLICA_COUNT}" ] && [ "${POSTGRES_SENTINEL_REPLICA_COUNT}" == "${POSTGRES_SENTINEL_CURRENT_REPLICA_COUNT}" ] && [ "${POSTGRESERVICE_CURRENT_MAJOR_VERSION}" == "${MAJORVERSION_POSTGRESERVICE}" ] && [ "${POSTGRESDB_CURRENT_MAJOR_VERSION}" == "${MAJORVERSION_POSTGRESDB}" ];
-                then 
-                    SUCCESSFULLY_UPGRADED+="${newline}${DETAILS}"
-                    return 0;
-                else 
-                    FAILING_UPGRADE+="${newline}${DETAILS}\n* EXPECTED MAJOR VERSION: ${MAJORVERSION_POSTGRESERVICE}${newline}EXPECTED PostgresDB MAJOR VERSION: ${MAJORVERSION_POSTGRESDB}"
-                    return 1;
-                fi
-            fi
-        }
-
-        asmUpgradeStatus() {
-            ASM_COMPLETED=$(oc get asm aiops-topology -o jsonpath='{.status.phase}')
-            if [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.3" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.4" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.5" ]];
-            then 
-                CURRENT_MAJOR_VERSION=$(oc get asm aiops-topology -o jsonpath='{.status.versions.reconciled}' | cut -c1-3)
-            else           
-                CURRENT_MAJOR_VERSION=$(oc get asm aiops-topology -o jsonpath='{.status.versions.reconciled}' | cut -c1-4)
-            fi
-
-            DETAILS=$(oc get asm -A  -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:status.versions.reconciled,STATUS:status.phase")
-            if [ "${ASM_COMPLETED}" == "OK" ] && [ "${CURRENT_MAJOR_VERSION}" == "${MAJORVERSION_ASM}" ];
-            then 
-                SUCCESSFULLY_UPGRADED+="${newline}${DETAILS}"
-                return 0;
-            else 
-                FAILING_UPGRADE+="${newline}${DETAILS}\n* EXPECTED MAJOR VERSION: ${MAJORVERSION_ASM}"
-                return 1;
-            fi
-        }
-
-        FlinkEventProcessorUpgradeStatus() {
-            FLINK_EP_COMPLETED=$(oc get EventProcessor cp4waiops-eventprocessor -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}')
-            CURRENT_MAJOR_VERSION=$(oc get EventProcessor cp4waiops-eventprocessor -o jsonpath='{.status.versions.reconciled}' | cut -c1-3)
-            DETAILS=$(oc get EventProcessor cp4waiops-eventprocessor -o custom-columns='KIND:.kind,NAMESPACE:.metadata.namespace,NAME:.metadata.name,VERSION:status.versions.reconciled,STATUS:.status.conditions[?(@.type=="Ready")].status,MESSAGE:.status.conditions[?(@.type=="Ready")].message')
-            if [ "${FLINK_EP_COMPLETED}" == "True" ] && [ "${CURRENT_MAJOR_VERSION}" == "${MAJORVERSION_FLINKEP}" ];
-            then 
-                SUCCESSFULLY_UPGRADED+="${newline}${DETAILS}"
-                return 0;
-            else 
-                FAILING_UPGRADE+="${newline}${DETAILS}\n* EXPECTED MAJOR VERSION: ${MAJORVERSION_FLINKEP}"
-                return 1;
-            fi
-        }
-
-        secureTunnelUpgradeStatus() {    
-            checkIfSecureTunnelExists
-            if [[ "${SECURE_TUNNEL_EXISTS}" == "true" ]];
-            then 
-                INITIALIZED=$(oc get tunnels.sretooling.management.ibm.com -o jsonpath='{.items[].status.conditions[?(@.type=="Initialized")].status}' --ignore-not-found)
-                DEPLOYED=$(oc get tunnels.sretooling.management.ibm.com -o jsonpath='{.items[].status.conditions[?(@.type=="Deployed")].status}')
-                
-                NUM_DEPLOYMENT_OPERATORREPLICAS=$(oc get deployment ibm-secure-tunnel-operator -o jsonpath='{.status.replicas}')
-                NUM_DEPLOYMENT_OPERATORAVAILABLEREPLICAS=$(oc get deployment ibm-secure-tunnel-operator -o jsonpath='{.status.availableReplicas}')
-                
-                NUM_DEPLOYMENT_NETWORKAPIREPLICAS=$(oc get deployment sre-tunnel-tunnel-network-api -o jsonpath='{.status.replicas}')
-                NUM_DEPLOYMENT_NETWORKAPIAVAILABLEREPLICAS=$(oc get deployment sre-tunnel-tunnel-network-api -o jsonpath='{.status.availableReplicas}')
-                
-                NUM_DEPLOYMENT_TUNNELUIREPLICAS=$(oc get deployment sre-tunnel-tunnel-ui-mcmtunnelui -o jsonpath='{.status.replicas}')
-                NUM_DEPLOYMENT_TUNNELUIAVAILABLEREPLICAS=$(oc get deployment sre-tunnel-tunnel-ui-mcmtunnelui -o jsonpath='{.status.availableReplicas}')
-                
-                DETAILS=$(oc get tunnels.sretooling.management.ibm.com -A -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,STATUS:status.conditions[?(@.type==\"Deployed\")].status")
-                if [ "${INITIALIZED}" == "True" ] && [ "${DEPLOYED}" == "True" ] && [ "${NUM_DEPLOYMENT_OPERATORREPLICAS}" == "${NUM_DEPLOYMENT_OPERATORAVAILABLEREPLICAS}" ] && [ "${NUM_DEPLOYMENT_NETWORKAPIREPLICAS}" == "${NUM_DEPLOYMENT_NETWORKAPIAVAILABLEREPLICAS}" ] && [ "${NUM_DEPLOYMENT_TUNNELUIREPLICAS}" == "${NUM_DEPLOYMENT_TUNNELUIAVAILABLEREPLICAS}" ];
-                then 
-                    SUCCESSFULLY_UPGRADED+="${newline}${DETAILS}"
-                    return 0;
-                else 
-                    FAILING_UPGRADE+="${newline}${DETAILS}"
-                    return 1;
-                fi
-            fi
-        }
-
-        # Check current instance version and component status checks for that version of CP4WAIOps
-        if [ "${VERSION_AIOPSORCHESTRATOR}" == "3.6" ];
+    aiopsEdgeBaseUpgradeStatus() {    
+        UPGRADED=$(oc get aiopsedge aiopsedge -o jsonpath='{.status.conditions[?(@.type=="UpgradeReady")].status}')
+        CONFIGURED=$(oc get aiopsedge aiopsedge -o jsonpath='{.status.phase}')
+        DETAILS=$(oc get aiopsedge -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,STATUS:status.phase,MESSAGE:status.conditions[?(@.type==\"Ready\")].message")
+        if [ "${UPGRADED}" == "True" ] && [ "${CONFIGURED}" == "Configured" ];
         then 
-            component-versions-36
-        elif [ "${VERSION_AIOPSORCHESTRATOR}" == "3.5" ];
+            SUCCESSFULLY_UPGRADED+="${newline}${DETAILS}"
+            return 0;
+        else 
+            FAILING_UPGRADE+="${newline}${DETAILS}"
+            return 1;
+        fi
+    }
+
+    aiopsUIUpgradeStatus() {    
+        CURRENT_MAJOR_VERSION=$(oc get aiopsui aiopsui-instance -o jsonpath='{.status.versions.reconciled}' | cut -c1-3)
+        DETAILS=$(oc get aiopsui -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:status.versions.reconciled,STATUS:status.conditions[?(@.type==\"Ready\")].status,MESSAGE:status.conditions[?(@.type==\"Ready\")].reason")
+        if [ "${CURRENT_MAJOR_VERSION}" == "${MAJORVERSION_AIOPSUI}" ];
         then 
-            component-versions-35
-        elif [ "${VERSION_AIOPSORCHESTRATOR}" == "3.4" ];
+            SUCCESSFULLY_UPGRADED+="${newline}${DETAILS}"
+            return 0;
+        else 
+            FAILING_UPGRADE+="${newline}${DETAILS}\n* EXPECTED MAJOR VERSION: ${MAJORVERSION_AIOPSUI}"
+            return 1;
+        fi
+    }
+
+    kongUpgradeStatus() {    
+        INITIALIZED=$(oc get kong gateway -o jsonpath='{.status.conditions[?(@.type=="Initialized")].status}')
+        DEPLOYED=$(oc get kong gateway -o jsonpath='{.status.conditions[?(@.type=="Deployed")].status}')
+        DETAILS=$(oc get kong -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,STATUS:.status.conditions[?(@.type==\"Deployed\")].status,MESSAGE:status.conditions[?(@.type==\"Deployed\")].reason" )
+        if [ "${INITIALIZED}" == "True" ] && [ "${DEPLOYED}" == "True" ];
         then 
-            component-versions-34
-        elif [ "${VERSION_AIOPSORCHESTRATOR}" == "3.3" ]; 
+            SUCCESSFULLY_UPGRADED+="${newline}${DETAILS}"
+            return 0;
+        else 
+            FAILING_UPGRADE+="${newline}${DETAILS}"
+            return 1;
+        fi
+    }
+
+    aiManagerUpgradeStatus() {    
+        PHASE_STATUS=$(oc get aimanager aimanager -o jsonpath='{.status.phase}')
+        CURRENT_MAJOR_VERSION=$(oc get aimanager aimanager -o jsonpath='{.status.versions.reconciled}' | cut -c1-3)
+        DETAILS=$(oc get AIManager -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:status.versions.reconciled,STATUS:status.phase,MESSAGE:status.message")
+        if [ "${PHASE_STATUS}" == "Completed" ] && [ "${CURRENT_MAJOR_VERSION}" == "${MAJORVERSION_AIMANAGER}" ];
+        then 
+            SUCCESSFULLY_UPGRADED+="${newline}${DETAILS}"
+            return 0;
+        else 
+            FAILING_UPGRADE+="${newline}${DETAILS}\n* EXPECTED MAJOR VERSION: ${MAJORVERSION_AIMANAGER}"
+            return 1;
+        fi
+    }
+
+    irCoreUpgradeStatus() {
+        UPGRADED=$(oc get ircore aiops -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}')
+        METADATA_GENERATION=$(oc get ircore aiops -o jsonpath='{.metadata.generation}')   
+        OBSERVED_GENERATION=$(oc get ircore aiops -o jsonpath='{.status.conditions[].observedGeneration}')        
+        CURRENT_MAJOR_VERSION=$(oc get ircore aiops -o jsonpath='{.status.versions.reconciled}' | cut -c1-3)
+        DETAILS=$(oc get ircore -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:status.versions.reconciled,STATUS:status.conditions[?(@.type==\"Ready\")].reason,MESSAGE:status.conditions[?(@.type==\"Ready\")].message")
+        if [ "${UPGRADED}" == "True" ] && [ "${OBSERVED_GENERATION}" == ${METADATA_GENERATION} ] && [ "${CURRENT_MAJOR_VERSION}" == "${MAJORVERSION_IRCORE}" ];
+        then 
+            SUCCESSFULLY_UPGRADED+="${newline}${DETAILS}"
+            return 0;
+        else 
+            FAILING_UPGRADE+="${newline}${DETAILS}\n* EXPECTED MAJOR VERSION: ${MAJORVERSION_IRCORE}"
+            return 1;
+        fi
+    }
+
+    lifecycleUpgradeStatus() {      
+        UPGRADED=$(oc get lifecycleservices aiops -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}')
+        METADATA_GENERATION=$(oc get lifecycleservices aiops -o jsonpath='{.metadata.generation}')   
+        OBSERVED_GENERATION=$(oc get lifecycleservices aiops -o jsonpath='{.status.observedGeneration}')
+        CURRENT_MAJOR_VERSION=$(oc get lifecycleservices aiops -o jsonpath='{.status.versions.reconciled}' | cut -c1-3)
+        DETAILS=$(oc get lifecycleservice -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:status.versions.reconciled,STATUS:status.conditions[?(@.type==\"Lifecycle Service Ready\")].reason,MESSAGE:status.conditions[?(@.type==\"Ready\")].message")
+        if [ "${UPGRADED}" == "True" ] && [ "${OBSERVED_GENERATION}" == ${METADATA_GENERATION} ] && [ "${CURRENT_MAJOR_VERSION}" == "${MAJORVERSION_LIFECYCLESERVICE}" ];
+        then 
+            SUCCESSFULLY_UPGRADED+="${newline}${DETAILS}"
+            return 0;
+        else 
+            FAILING_UPGRADE+="${newline}${DETAILS}\n* EXPECTED MAJOR VERSION: ${MAJORVERSION_LIFECYCLESERVICE}"
+            return 1;
+        fi
+    }
+
+    aiopsAnalyticsUpgradeStatus() {
+        UPGRADED=$(oc get AIOpsAnalyticsOrchestrator aiops -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}')
+        METADATA_GENERATION=$(oc get AIOpsAnalyticsOrchestrator aiops -o jsonpath='{.metadata.generation}')   
+        OBSERVED_GENERATION=$(oc get AIOpsAnalyticsOrchestrator aiops -o jsonpath='{.status.observedGeneration}')
+        CURRENT_MAJOR_VERSION=$(oc get AIOpsAnalyticsOrchestrator aiops -o jsonpath='{.status.versions.reconciled}' | cut -c1-3)
+        DETAILS=$(oc get AIOpsAnalyticsOrchestrator  -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:status.versions.reconciled,STATUS:status.conditions[?(@.type==\"Ready\")].reason,MESSAGE:status.conditions[?(@.type==\"Ready\")].message")
+        if [ "${UPGRADED}" == "True" ] && [ "${OBSERVED_GENERATION}" == ${METADATA_GENERATION} ] && [ "${CURRENT_MAJOR_VERSION}" == "${MAJORVERSION_AIOPSANALYTICSORCHESTRATOR}" ];
+        then 
+            SUCCESSFULLY_UPGRADED+="${newline}${DETAILS}"
+            return 0;
+        else 
+            FAILING_UPGRADE+="${newline}${DETAILS}\n* EXPECTED MAJOR VERSION: ${MAJORVERSION_AIOPSANALYTICSORCHESTRATOR}"
+            return 1;
+        fi
+    }
+
+    vaultDeployUpgradeStatus() {
+        VAULTDEPLOY_COMPLETED=$(oc get vaultdeploy ibm-vault-deploy -o jsonpath='{.status.conditions[?(@.type=="Completed")].status}')
+        CURRENT_MAJOR_VERSION=$(oc get vaultdeploy ibm-vault-deploy -o jsonpath='{.metadata.annotations.productVersion}' | cut -c1-3)
+        DETAILS=$(oc get vaultdeploy  -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:metadata.annotations.productVersion,STATUS:status.conditions[?(@.type==\"Completed\")].status,MESSAGE:status.conditions[?(@.type==\"Completed\")].message")
+        if [ "${VAULTDEPLOY_COMPLETED}" == "True" ] && [ "${CURRENT_MAJOR_VERSION}" == "${MAJORVERSION_VAULTDEPLOY}" ];
+        then 
+            SUCCESSFULLY_UPGRADED+="${newline}${DETAILS}"
+            return 0;
+        else 
+            FAILING_UPGRADE+="${newline}${DETAILS}\n* EXPECTED MAJOR VERSION: ${MAJORVERSION_VAULTDEPLOY}"
+            return 1;
+        fi
+    }
+
+    vaultAccessUpgradeStatus() {
+        VAULTACCESS_COMPLETED=$(oc get vaultaccess ibm-vault-access -o jsonpath='{.status.conditions[?(@.type=="Completed")].status}')
+        CURRENT_MAJOR_VERSION=$(oc get vaultaccess ibm-vault-access -o jsonpath='{.metadata.annotations.productVersion}' | cut -c1-3)
+        DETAILS=$(oc get vaultaccess -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:metadata.annotations.productVersion,STATUS:status.conditions[?(@.type==\"Completed\")].status,MESSAGE:status.conditions[?(@.type==\"Completed\")].message")
+        if [ "${VAULTACCESS_COMPLETED}" == "True" ] && [ "${CURRENT_MAJOR_VERSION}" == "${MAJORVERSION_VAULTACCESS}" ];
+        then 
+            SUCCESSFULLY_UPGRADED+="${newline}${DETAILS}"
+            return 0;
+        else 
+            FAILING_UPGRADE+="${newline}${DETAILS}\n* EXPECTED MAJOR VERSION: ${MAJORVERSION_VAULTACCESS}"
+            return 1;
+        fi
+    }
+
+    postgresUpgradeStatus() {
+        if [ "${VERSION_AIOPSORCHESTRATOR}" == "3.3" ] || [ "${VERSION_AIOPSORCHESTRATOR}" == "3.4" ] || [ "${VERSION_AIOPSORCHESTRATOR}" == "3.5" ];
         then
-            component-versions-33
-        elif [ "${VERSION_AIOPSORCHESTRATOR}" == "0.1" ]
-        then
-            # for developer builds (v0.1), we will check against release-3.6 versions
-            component-versions-36
-            echo ""
-            echo "${red}${bold}NOTE: ${normal}Your Cloud Pak for Watson AIOps AI Manager install appears to be an internal dev version (v${VERSION_AIOPSORCHESTRATOR})."
-            echo "      The status-upgrade command checks the status of upgrades to v3.3, v3.4, v3.5, and v3.6 only." 
-            echo "      Therefore, the upgrade checks below will be against v3.6 component versions."
-            echo "      This may influence your results below if your dev build is not based on release-3.6.${normal}"
-        else
-            echo ""
-            echo "${red}${bold}ERROR: ${normal}Your Cloud Pak for Watson AIOps AI Manager install appears to be v${VERSION_AIOPSORCHESTRATOR}."
-            echo "       The status-upgrade command checks the status of upgrades to v3.3, v3.4, v3.5, and v3.6 only." 
-            echo "       The version you are using is not supported for use with the status-upgrade command. Exiting."
-            echo ""
-            exit 0
+            POSTGRESERVICE_COMPLETED=$(oc get postgreservice cp4waiops-postgres -o jsonpath='{.status.conditions[0].type}')
+            POSTGRESDB_COMPLETED=$(oc get postgresdb cp4waiops-postgresdb -o jsonpath='{.status.conditions[0].type}')
+
+            STATEFULSET_REPLICA_COUNT=$(oc get statefulset cp4waiops-postgres-keeper -o jsonpath='{.status.replicas}')
+            STATEFULSET_CURRENT_REPLICA_COUNT=$(oc get statefulset cp4waiops-postgres-keeper -o jsonpath='{.status.currentReplicas}')
+
+            POSTGRES_PROXY_REPLICA_COUNT=$(oc get deployment cp4waiops-postgres-proxy -o jsonpath='{.status.replicas}')
+            POSTGRES_PROXY_CURRENT_REPLICA_COUNT=$(oc get deployment cp4waiops-postgres-proxy -o jsonpath='{.status.availableReplicas}')
+
+            POSTGRES_SENTINEL_REPLICA_COUNT=$(oc get deployment cp4waiops-postgres-sentinel -o jsonpath='{.status.replicas}')
+            POSTGRES_SENTINEL_CURRENT_REPLICA_COUNT=$(oc get deployment cp4waiops-postgres-sentinel -o jsonpath='{.status.availableReplicas}')
+
+            POSTGRESERVICE_CURRENT_MAJOR_VERSION=$(oc get postgreservices cp4waiops-postgres -o jsonpath='{.spec.version}' | cut -c1-3)
+            POSTGRESDB_CURRENT_MAJOR_VERSION=$(oc get postgresdb cp4waiops-postgresdb -o jsonpath='{.spec.version}' | cut -c1-3)
+            DETAILS=$(oc get postgreservices,postgresdb -A  -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:spec.version,STATUS:status.conditions[?(@.type==\"Completed\")].status,MESSAGE:status.conditions[?(@.type==\"Completed\")].message")
+            if [ "${POSTGRESERVICE_COMPLETED}" == "${POSTGRESDB_COMPLETED}" ] && [ "${STATEFULSET_REPLICA_COUNT}" == "${STATEFULSET_CURRENT_REPLICA_COUNT}" ] && [ "${POSTGRES_PROXY_REPLICA_COUNT}" == "${POSTGRES_PROXY_CURRENT_REPLICA_COUNT}" ] && [ "${POSTGRES_SENTINEL_REPLICA_COUNT}" == "${POSTGRES_SENTINEL_CURRENT_REPLICA_COUNT}" ] && [ "${POSTGRESERVICE_CURRENT_MAJOR_VERSION}" == "${MAJORVERSION_POSTGRESERVICE}" ] && [ "${POSTGRESDB_CURRENT_MAJOR_VERSION}" == "${MAJORVERSION_POSTGRESDB}" ];
+            then 
+                SUCCESSFULLY_UPGRADED+="${newline}${DETAILS}"
+                return 0;
+            else 
+                FAILING_UPGRADE+="${newline}${DETAILS}\n* EXPECTED MAJOR VERSION: ${MAJORVERSION_POSTGRESERVICE}${newline}EXPECTED PostgresDB MAJOR VERSION: ${MAJORVERSION_POSTGRESDB}"
+                return 1;
+            fi
+        fi
+    }
+
+    asmUpgradeStatus() {
+        ASM_COMPLETED=$(oc get asm aiops-topology -o jsonpath='{.status.phase}')
+        if [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.3" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.4" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.5" ]];
+        then 
+            CURRENT_MAJOR_VERSION=$(oc get asm aiops-topology -o jsonpath='{.status.versions.reconciled}' | cut -c1-3)
+        else           
+            CURRENT_MAJOR_VERSION=$(oc get asm aiops-topology -o jsonpath='{.status.versions.reconciled}' | cut -c1-4)
         fi
 
+        DETAILS=$(oc get asm -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:status.versions.reconciled,STATUS:status.phase")
+        if [ "${ASM_COMPLETED}" == "OK" ] && [ "${CURRENT_MAJOR_VERSION}" == "${MAJORVERSION_ASM}" ];
+        then 
+            SUCCESSFULLY_UPGRADED+="${newline}${DETAILS}"
+            return 0;
+        else 
+            FAILING_UPGRADE+="${newline}${DETAILS}\n* EXPECTED MAJOR VERSION: ${MAJORVERSION_ASM}"
+            return 1;
+        fi
+    }
+
+    FlinkEventProcessorUpgradeStatus() {
+        FLINK_EP_COMPLETED=$(oc get EventProcessor cp4waiops-eventprocessor -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}')
+        CURRENT_MAJOR_VERSION=$(oc get EventProcessor cp4waiops-eventprocessor -o jsonpath='{.status.versions.reconciled}' | cut -c1-3)
+        DETAILS=$(oc get EventProcessor cp4waiops-eventprocessor -o custom-columns='KIND:.kind,NAMESPACE:.metadata.namespace,NAME:.metadata.name,VERSION:status.versions.reconciled,STATUS:.status.conditions[?(@.type=="Ready")].status,MESSAGE:.status.conditions[?(@.type=="Ready")].message')
+        if [ "${FLINK_EP_COMPLETED}" == "True" ] && [ "${CURRENT_MAJOR_VERSION}" == "${MAJORVERSION_FLINKEP}" ];
+        then 
+            SUCCESSFULLY_UPGRADED+="${newline}${DETAILS}"
+            return 0;
+        else 
+            FAILING_UPGRADE+="${newline}${DETAILS}\n* EXPECTED MAJOR VERSION: ${MAJORVERSION_FLINKEP}"
+            return 1;
+        fi
+    }
+
+    secureTunnelUpgradeStatus() {    
+        checkIfSecureTunnelExists
+        if [[ "${SECURE_TUNNEL_EXISTS}" == "true" ]];
+        then 
+            INITIALIZED=$(oc get tunnels.sretooling.management.ibm.com -o jsonpath='{.items[].status.conditions[?(@.type=="Initialized")].status}' --ignore-not-found)
+            DEPLOYED=$(oc get tunnels.sretooling.management.ibm.com -o jsonpath='{.items[].status.conditions[?(@.type=="Deployed")].status}')
+            
+            NUM_DEPLOYMENT_OPERATORREPLICAS=$(oc get deployment ibm-secure-tunnel-operator -o jsonpath='{.status.replicas}')
+            NUM_DEPLOYMENT_OPERATORAVAILABLEREPLICAS=$(oc get deployment ibm-secure-tunnel-operator -o jsonpath='{.status.availableReplicas}')
+            
+            NUM_DEPLOYMENT_NETWORKAPIREPLICAS=$(oc get deployment sre-tunnel-tunnel-network-api -o jsonpath='{.status.replicas}')
+            NUM_DEPLOYMENT_NETWORKAPIAVAILABLEREPLICAS=$(oc get deployment sre-tunnel-tunnel-network-api -o jsonpath='{.status.availableReplicas}')
+            
+            NUM_DEPLOYMENT_TUNNELUIREPLICAS=$(oc get deployment sre-tunnel-tunnel-ui-mcmtunnelui -o jsonpath='{.status.replicas}')
+            NUM_DEPLOYMENT_TUNNELUIAVAILABLEREPLICAS=$(oc get deployment sre-tunnel-tunnel-ui-mcmtunnelui -o jsonpath='{.status.availableReplicas}')
+            
+            DETAILS=$(oc get tunnels.sretooling.management.ibm.com -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,STATUS:status.conditions[?(@.type==\"Deployed\")].status")
+            if [ "${INITIALIZED}" == "True" ] && [ "${DEPLOYED}" == "True" ] && [ "${NUM_DEPLOYMENT_OPERATORREPLICAS}" == "${NUM_DEPLOYMENT_OPERATORAVAILABLEREPLICAS}" ] && [ "${NUM_DEPLOYMENT_NETWORKAPIREPLICAS}" == "${NUM_DEPLOYMENT_NETWORKAPIAVAILABLEREPLICAS}" ] && [ "${NUM_DEPLOYMENT_TUNNELUIREPLICAS}" == "${NUM_DEPLOYMENT_TUNNELUIAVAILABLEREPLICAS}" ];
+            then 
+                SUCCESSFULLY_UPGRADED+="${newline}${DETAILS}"
+                return 0;
+            else 
+                FAILING_UPGRADE+="${newline}${DETAILS}"
+                return 1;
+            fi
+        fi
+    }
+
+    # Check current instance version and component status checks for that version of CP4WAIOps
+    if [ "${VERSION_AIOPSORCHESTRATOR}" == "3.6" ];
+    then 
+        component-versions-36
+    elif [ "${VERSION_AIOPSORCHESTRATOR}" == "3.5" ];
+    then 
+        component-versions-35
+    elif [ "${VERSION_AIOPSORCHESTRATOR}" == "3.4" ];
+    then 
+        component-versions-34
+    elif [ "${VERSION_AIOPSORCHESTRATOR}" == "3.3" ]; 
+    then
+        component-versions-33
+    elif [ "${VERSION_AIOPSORCHESTRATOR}" == "0.1" ]
+    then
+        # for developer builds (v0.1), we will check against release-3.6 versions
+        component-versions-36
         echo ""
-        echo "${blue}${bold}Cloud Pak for Watson AIOps AI Manager v${VERSION_AIOPSORCHESTRATOR} upgrade status:${normal}"
+        echo "${red}${bold}NOTE: ${normal}Your Cloud Pak for Watson AIOps AI Manager install appears to be an internal dev version (v${VERSION_AIOPSORCHESTRATOR})."
+        echo "      The status-upgrade command checks the status of upgrades to v3.3, v3.4, v3.5, and v3.6 only." 
+        echo "      Therefore, the upgrade checks below will be against v3.6 component versions."
+        echo "      This may influence your results below if your dev build is not based on release-3.6.${normal}"
+    else
+        echo ""
+        echo "${red}${bold}ERROR: ${normal}Your Cloud Pak for Watson AIOps AI Manager install appears to be v${VERSION_AIOPSORCHESTRATOR}."
+        echo "       The status-upgrade command checks the status of upgrades to v3.3, v3.4, v3.5, and v3.6 only." 
+        echo "       The version you are using is not supported for use with the status-upgrade command. Exiting."
+        echo ""
+        exit 0
+    fi
 
-        aiopsEdgeBaseUpgradeStatus
-        lifecycleUpgradeStatus
-        aiopsUIUpgradeStatus
-        kongUpgradeStatus
-        aiManagerUpgradeStatus
-        irCoreUpgradeStatus
-        aiopsAnalyticsUpgradeStatus
-        vaultDeployUpgradeStatus
-        vaultAccessUpgradeStatus
-        postgresUpgradeStatus
-        secureTunnelUpgradeStatus
-        asmUpgradeStatus
-        FlinkEventProcessorUpgradeStatus
+    echo ""
+    echo "${blue}${bold}Cloud Pak for Watson AIOps AI Manager v${VERSION_AIOPSORCHESTRATOR} upgrade status:${normal}"
 
-        # Print out results of status checks
-        printf "
+    aiopsEdgeBaseUpgradeStatus
+    lifecycleUpgradeStatus
+    aiopsUIUpgradeStatus
+    kongUpgradeStatus
+    aiManagerUpgradeStatus
+    irCoreUpgradeStatus
+    aiopsAnalyticsUpgradeStatus
+    vaultDeployUpgradeStatus
+    vaultAccessUpgradeStatus
+    postgresUpgradeStatus
+    secureTunnelUpgradeStatus
+    asmUpgradeStatus
+    FlinkEventProcessorUpgradeStatus
+
+    # Print out results of status checks
+    printf "
 ${normal}______________________________________________________________
 
 The following component(s) have finished upgrading:
@@ -983,9 +981,9 @@ ${green}${SUCCESSFULLY_UPGRADED}
 
 ${normal}______________________________________________________________
 "
-        if [ "$FAILING_UPGRADE" != "" ];
-        then 
-            printf "
+    if [ "$FAILING_UPGRADE" != "" ];
+    then 
+        printf "
 ${normal}______________________________________________________________
 
 Meanwhile, the following component(s) have not upgraded yet:
@@ -998,19 +996,13 @@ the troubleshooting docs or open a support case.
 
 ${normal}______________________________________________________________
 ";
-        fi
+    fi
 
-        printf "
+    printf "
 ${blue}${bold}Hint: for a more detailed printout of component statuses, run \`oc waiops status\` or \`oc waiops status-all\`.
 ${normal}
 "
-        exit 0
-    else
-        printf "${blue}${bold}Hint: log into your cluster with CLUSTER_ADMIN credentials and try again.${normal}
-
-"
-        exit 0
-    fi
+    exit 0
 fi
 
 echo "kubectl-waiops" 
