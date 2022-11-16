@@ -320,7 +320,7 @@ Hint: for a more detailed printout of each operator's components' statuses, run 
 ### Requirements
 - You must have an installation of Cloud Pak for Watson AIOps AI Manager v3.3, v3.4 or v3.5 on your cluster. 
 
-Note: while this tool does not require you to be logged in as a cluster admin, `oc waiops status-all`'s output will be limited if you are not. If possible, it is recommended to be logged in as a cluster admin to receive a more complete view of your install status.
+**Note**: while this tool does not require you to be logged in as a cluster admin, `oc waiops status-all`'s output will be limited if you are not. If possible, it is recommended to be logged in as a cluster admin to receive a more complete view of your install status.
 
 ### Dependencies
 - `oc` cli
