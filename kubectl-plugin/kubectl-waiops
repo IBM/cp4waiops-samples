@@ -386,7 +386,8 @@ then
     if [[ "$CLUSTER_ADMIN" == "no" ]];
     then
         echo ""
-        clusterAdminSkipMessage "[INFO] User does not have CLUSTER_ADMIN credentials. Output will be limited. (Hint: log in with CLUSTER_ADMIN credentials to view full output)"
+        printf "${gray}[INFO] User does not have CLUSTER_ADMIN credentials. Output will be limited.${normal}\n"
+        printf "${gray}[INFO] Hint: log in with CLUSTER_ADMIN credentials to view the full output.${normal}${newline}"
     fi
 
     echo "______________________________________________________________"
@@ -514,8 +515,7 @@ then
         getCSVStatus "ibm-common-services" "ibm-zen-operator"
         getCSVStatus "ibm-common-services" "operand-deployment-lifecycle-manager"
     else
-        MESSAGE="[INFO] Skipping the following components (Hint: log in with CLUSTER_ADMIN credentials to view):"
-        clusterAdminSkipMessage "$MESSAGE"
+        printf "${gray}[INFO] Skipping the following components (Hint: log in with CLUSTER_ADMIN credentials to view):${normal}${newline}"
         if [ "${VERSION_AIOPSORCHESTRATOR}" != "3.3" ];
         then 
             clusterAdminSkipMessage "cloud-native-postgresql"
@@ -613,8 +613,7 @@ then
             getSubscriptionStatusGrep "ibm-common-service-operator" "openshift-operators" 
         fi
     else
-        MESSAGE="[INFO] Skipping the following components (Hint: log in with CLUSTER_ADMIN credentials to view):"
-        clusterAdminSkipMessage "$MESSAGE"
+        printf "${gray}[INFO] Skipping the following components (Hint: log in with CLUSTER_ADMIN credentials to view):${normal}${newline}"
         if [ "${VERSION_AIOPSORCHESTRATOR}" != "3.3" ];
         then 
             clusterAdminSkipMessage "cloud-native-postgresql"
@@ -692,8 +691,7 @@ then
         getOperandRequestStatus "management-ingress" "ibm-common-services" 
         getOperandRequestStatus "platform-api-request" "ibm-common-services" 
     else
-        MESSAGE="[INFO] Skipping the following components (Hint: log in with CLUSTER_ADMIN credentials to view):"
-        clusterAdminSkipMessage "$MESSAGE"
+        printf "${gray}[INFO] Skipping the following components (Hint: log in with CLUSTER_ADMIN credentials to view):${normal}${newline}"
         clusterAdminSkipMessage "iaf-core-operator"
         clusterAdminSkipMessage "iaf-eventprocessing-operator"
         clusterAdminSkipMessage "iaf-operator"
@@ -711,8 +709,7 @@ then
     then
         getODLMPodStatus
     else
-        MESSAGE="[INFO] Skipping the following component (Hint: log in with CLUSTER_ADMIN credentials to view):"
-        clusterAdminSkipMessage "$MESSAGE"
+        printf "${gray}[INFO] Skipping the following component (Hint: log in with CLUSTER_ADMIN credentials to view):${normal}${newline}"
         clusterAdminSkipMessage "operand-deployment-lifecycle-manager"
     fi
 
@@ -722,8 +719,7 @@ then
     then
         getOrchestratorPodStatus
     else
-        MESSAGE="[INFO] Skipping the following component (Hint: log in with CLUSTER_ADMIN credentials to view):"
-        clusterAdminSkipMessage "$MESSAGE"
+        printf "${gray}[INFO] Skipping the following component (Hint: log in with CLUSTER_ADMIN credentials to view):${normal}${newline}"
         clusterAdminSkipMessage "ibm-aiops-orchestrator-controller-manager"
     fi
 
