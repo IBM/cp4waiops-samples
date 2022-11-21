@@ -17,6 +17,7 @@ normal=$(tput sgr0) #reset color/bolding
 # Environment variables including installation info (gathered from existing installation instance on the cluster) and version     
 CLUSTER_ADMIN=$(oc auth can-i '*' '*' --all-namespaces)
 SECURE_TUNNEL_EXISTS=""
+SUMMARY_FAILURE=""
 if [[ "$CLUSTER_ADMIN" == "yes" ]];
 then 
     INSTALLATION_NAME=$(oc get installations.orchestrator.aiops.ibm.com -A --no-headers | while read a b c; do echo "$b"; done; 2>/dev/null)
@@ -53,6 +54,7 @@ printStatus() {
     then
         printf '%s\n\n' "$green$3$normal"
     else
+        SUMMARY_FAILURE+="${newline}${DETAILS}"
         printf '%s\n\n' "$red$3$normal"
     fi
 }
@@ -1093,6 +1095,20 @@ ${normal}______________________________________________________________
 ${blue}${bold}Hint: for a more detailed printout of component statuses, run \`oc waiops status\` or \`oc waiops status-all\`.
 ${normal}
 "
+    exit 0
+fi
+
+# optional argument handling
+if [[ "$1" == "status-summary" ]]
+then
+    if [[ "$SUMMARY_FAILURE" == "" ]];
+    then
+        printf '%s\n\n' "${green}The status of the components in ``oc waiops status`` currently appear healthy.${normal}"
+        printf '%s\n\n' "For details, please run ``oc waiops status`` or ``oc waiops status-all``.${normal}"
+    else
+        printf '%s\n\n' "${red}The following components are either currently failing or incomplete:${newline}${red}${SUMMARY_FAILURE}${normal}"
+        printf '%s\n\n' "For details, please run ``oc waiops status`` or ``oc waiops status-all``.${normal}"
+    fi
     exit 0
 fi
 
