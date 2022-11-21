@@ -23,7 +23,7 @@ then
     INSTALLATION_NAMESPACE=$(oc get installations.orchestrator.aiops.ibm.com -A --no-headers | while read a b c; do echo "$a"; done; 2>/dev/null)
     CSV_NAME=$(oc get csvs -o name --no-headers=true -n $INSTALLATION_NAMESPACE | grep ibm-aiops-orchestrator)  
     VERSION_AIOPSORCHESTRATOR=$(oc get $CSV_NAME -n $INSTALLATION_NAMESPACE -o jsonpath='{.spec.version}' | awk '{ print substr( $0, 0, 3 ) }')
-    CLUSTER_SCOPE_INSTALL=$(if [ $(oc get subscription -A  | grep ibm-aiops-orchestrator | awk '{ print $1 }') == "openshift-operators" ]; then echo "true"; else echo "false"; fi)
+    CLUSTER_SCOPE_INSTALL=$(if [[ $(oc get subscription.operators.coreos.com -A  | grep ibm-aiops-orchestrator | awk '{ print $1 }') == "openshift-operators" ]]; then echo "true"; else echo "false"; fi)
 else
     # ask user if they are in the project namespace. 
     # if they are, set INSTALLATION_NAMESPACE=current project
@@ -36,7 +36,7 @@ fi
 # optional argument handling
 if [[ "$1" == "version" ]]
 then
-    echo "0.0.15"
+    echo "0.0.16"
     exit 0
 fi
 
@@ -65,21 +65,21 @@ getCSVStatus () {
 }
 
 getSubscriptionStatus () {
-    INSTANCE=$(oc get subscription $1 -n $2)                    
-    STATUS=$(oc get subscription $1 -n $2 -o jsonpath='{.status.catalogHealth[].healthy}')
+    INSTANCE=$(oc get subscription.operators.coreos.com $1 -n $2)                    
+    STATUS=$(oc get subscription.operators.coreos.com $1 -n $2 -o jsonpath='{.status.catalogHealth[].healthy}')
     printStatus "$STATUS" "true" "$INSTANCE"
 }
 
 getSubscriptionStatusGrep () {
-    SUBSCRIPTION=$(oc get subscription -o name --no-headers=true -n $2 | grep $1)   
+    SUBSCRIPTION=$(oc get subscription.operators.coreos.com -o name --no-headers=true -n $2 | grep $1)   
     INSTANCE=$(oc get $SUBSCRIPTION -n $2)                    
     STATUS=$(oc get $SUBSCRIPTION -n $2 -o jsonpath='{.status.catalogHealth[].healthy}')
     printStatus "$STATUS" "true" "$INSTANCE"
 }
 
 getSubscriptionStatusSelector () {
-    INSTANCE=$(oc get subscription --selector=$1 -n $2) 
-    STATUS=$(oc get subscription --selector=$1 -n $2 -o jsonpath='{.items[].status.catalogHealth[].healthy}')
+    INSTANCE=$(oc get subscription.operators.coreos.com --selector=$1 -n $2) 
+    STATUS=$(oc get subscription.operators.coreos.com --selector=$1 -n $2 -o jsonpath='{.items[].status.catalogHealth[].healthy}')
     printStatus "$STATUS" "true" "$INSTANCE"
 }
 
