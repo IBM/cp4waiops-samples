@@ -95,7 +95,8 @@ CP4WAIOPS_INTERNAL_SECRETS=("secret/aiops-installation-edb-secret"
                             "secret/sre-tunnel-tunnel-ui-secret"
                             "secret/connector-manager-cert-secret"
                             "secret/connector-local-orchestrator"
-                            "secret/connector-credential-encryption-cert-secret")
+                            "secret/connector-credential-encryption-cert-secret"
+                            "secret/aiopsedgeca-cert-secret")
 
 
 CP4WAIOPS_CONFIGMAPS_INTERNAL_LABELS=("app=cp4waiops-eventprocessor-eve-29ee-ep")
