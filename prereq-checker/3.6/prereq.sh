@@ -499,19 +499,15 @@ function checkStorage {
   log $INFO "Checking storage providers"
 
   # Check if Portworx, ODF, or IBMC-file-gold-gid exist
-  STORAGE_CLUSTER_NAMES=$(oc get storagecluster.core.libopenstorage.org -n kube-system --ignore-not-found=true --no-headers=true 2>>/dev/null | awk '{print $1}')
-  for sc in "${STORAGE_CLUSTER_NAMES[@]}"; do
-    scPhase=$(oc get storagecluster.core.libopenstorage.org $sc -n kube-system -o jsonpath='{.status.phase}' --ignore-not-found=true 2>>/dev/null)
-    if [[ "$scPhase" == "Online"  ]]; then
-      log $INFO "Portworx Found. StorageCluster instance \"$sc\" is Online."
-      PORTWORX_FOUND="true"
-      break
-    else
-      echo
-      log $WARNING "StorageCluster instance is not Online. In order for Portworx to work, an instance of StorageCluster must have a status of \"Online\"."
-      PORTWORX_FOUND="false"
-    fi
-  done
+  STORAGE_CLUSTER=$(oc get storagecluster.core.libopenstorage.org -A --ignore-not-found=true --no-headers=true 2>>/dev/null)
+  if [[ "$STORAGE_CLUSTER" == *"Online"* ]]; then
+    log $INFO "Portworx Found. StorageCluster instance in \"Online\" status found."
+    PORTWORX_FOUND="true"
+  else
+    echo
+    log $WARNING "No StorageClusters found with \"Online\" status found. In order for Portworx to work, an instance of StorageCluster must have a status of \"Online\"."
+    PORTWORX_FOUND="false"
+  fi
 
   ODF_PODS=($(oc get pods -n openshift-storage --no-headers=true | awk '{print $1}'))
   if [[ "$ODF_PODS" == "" ]]; then
