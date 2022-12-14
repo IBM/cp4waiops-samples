@@ -22,7 +22,7 @@ Clone the following GitHub repository:
 
 ```
   git clone https://github.com/IBM/cp4waiops-samples
-  cd prereq-checker/3.4
+  cd cp4waiops-samples/prereq-checker/3.4
 ```
 
 ## Running the prerequisite & upgrade checker tool script
