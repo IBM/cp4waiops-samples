@@ -300,7 +300,7 @@ createTestJob () {
           - name: ibm-entitlement-key
           containers:
           - name: testimage
-            image: cp.icr.io/cp/cp4waiops/ai-platform-api-server@sha256:83c9576849c96ed83899906bff2af85301df438c5b995638bde0f810146211b6
+            image: cp.icr.io/cp/cp4waiops/ai-platform-api-server@sha256:0aee31ec0b21789fd6c7cd904da60eaf4127fd1b342d9a195d2eada0cf123fc9
             imagePullPolicy: Always
             command: [ "echo", "SUCCESS" ]
           restartPolicy: OnFailure
@@ -330,7 +330,7 @@ EOF
                         - amd64
           containers:
           - name: testimage
-            image: cp.icr.io/cp/cp4waiops/ai-platform-api-server@sha256:83c9576849c96ed83899906bff2af85301df438c5b995638bde0f810146211b6
+            image: cp.icr.io/cp/cp4waiops/ai-platform-api-server@sha256:0aee31ec0b21789fd6c7cd904da60eaf4127fd1b342d9a195d2eada0cf123fc9
             imagePullPolicy: Always
             command: [ "echo", "SUCCESS" ]
           restartPolicy: OnFailure
