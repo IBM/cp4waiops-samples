@@ -300,7 +300,7 @@ createTestJob () {
           - name: ibm-entitlement-key
           containers:
           - name: testimage
-            image: cp.icr.io/cp/cp4waiops/ai-platform-api-server@sha256:83c9576849c96ed83899906bff2af85301df438c5b995638bde0f810146211b6
+            image: cp.icr.io/cp/cp4waiops/ai-platform-api-server@sha256:0aee31ec0b21789fd6c7cd904da60eaf4127fd1b342d9a195d2eada0cf123fc9
             imagePullPolicy: Always
             command: [ "echo", "SUCCESS" ]
           restartPolicy: OnFailure
@@ -330,7 +330,7 @@ EOF
                         - amd64
           containers:
           - name: testimage
-            image: cp.icr.io/cp/cp4waiops/ai-platform-api-server@sha256:83c9576849c96ed83899906bff2af85301df438c5b995638bde0f810146211b6
+            image: cp.icr.io/cp/cp4waiops/ai-platform-api-server@sha256:0aee31ec0b21789fd6c7cd904da60eaf4127fd1b342d9a195d2eada0cf123fc9
             imagePullPolicy: Always
             command: [ "echo", "SUCCESS" ]
           restartPolicy: OnFailure
@@ -499,19 +499,15 @@ function checkStorage {
   log $INFO "Checking storage providers"
 
   # Check if Portworx, ODF, or IBMC-file-gold-gid exist
-  STORAGE_CLUSTER_NAMES=$(oc get storagecluster.core.libopenstorage.org -n kube-system --ignore-not-found=true --no-headers=true 2>>/dev/null | awk '{print $1}')
-  for sc in "${STORAGE_CLUSTER_NAMES[@]}"; do
-    scPhase=$(oc get storagecluster.core.libopenstorage.org $sc -n kube-system -o jsonpath='{.status.phase}' --ignore-not-found=true 2>>/dev/null)
-    if [[ "$scPhase" == "Online"  ]]; then
-      log $INFO "Portworx Found. StorageCluster instance \"$sc\" is Online."
-      PORTWORX_FOUND="true"
-      break
-    else
-      echo
-      log $WARNING "StorageCluster instance is not Online. In order for Portworx to work, an instance of StorageCluster must have a status of \"Online\"."
-      PORTWORX_FOUND="false"
-    fi
-  done
+  STORAGE_CLUSTER=$(oc get storagecluster.core.libopenstorage.org -A --ignore-not-found=true --no-headers=true 2>>/dev/null)
+  if [[ "$STORAGE_CLUSTER" == *"Online"* ]]; then
+    log $INFO "Portworx Found. StorageCluster instance in \"Online\" status found."
+    PORTWORX_FOUND="true"
+  else
+    echo
+    log $WARNING "No StorageClusters found with \"Online\" status found. In order for Portworx to work, an instance of StorageCluster must have a status of \"Online\"."
+    PORTWORX_FOUND="false"
+  fi
 
   ODF_PODS=($(oc get pods -n openshift-storage --no-headers=true | awk '{print $1}'))
   if [[ "$ODF_PODS" == "" ]]; then
