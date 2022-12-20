@@ -1,0 +1,6 @@
+{
+  "aiopsNamespace": "cp4waiops",
+  "csNamespace": "ibm-common-services",
+  "veleroNamespace": "velero",
+  "backupNameSuffix": "1"
+}
