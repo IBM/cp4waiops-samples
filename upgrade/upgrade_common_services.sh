@@ -290,7 +290,7 @@ function switch_channel() {
 
     # remove all chars before "v"
     trimmed_channel="$(echo $channel | awk -Fv '{print $NF}')"
-    opreg_version=$(oc get opreg common-service -n ${csNS} -o jsonpath='{.metadata.annotations.version}')
+    opreg_version=$(oc get operandregistry common-service -n ${csNS} -o jsonpath='{.metadata.annotations.version}')
     msg "existing OperandRegistry version is ${opreg_version}"
 
     # get odlm replicas number
