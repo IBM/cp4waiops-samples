@@ -237,7 +237,7 @@ ZEN_PVCS_LABELS=("app.kubernetes.io/component=zen-metastoredb"
 
 IAF_PVCS_LABELS=("app.kubernetes.io/instance=iaf-system")
 #### IBM Automation Foundation ####
-IAF_MISC=("client.oidc.security.ibm.com/zenclient-$IAF_NAMESPACE"
+IAF_MISC=("client.oidc.security.ibm.com/zenclient-$IAF_PROJECT"
           "operatorgroup.operators.coreos.com/operand-deployment-lifecycle-manager-operatorgroup"
           "automationuiconfig.core.automation.ibm.com/iaf-system")
 

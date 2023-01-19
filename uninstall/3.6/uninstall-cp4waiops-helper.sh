@@ -180,7 +180,6 @@ unsubscribe () {
 # If any custom instances created by users for below CRD's
 # "eventmanagergateways.ai-manager.watson-aiops.ibm.com": None of the instance is expected to be present with install
 # "kongs.management.ibm.com" : Expected custom resource to be ignored named 'gateway' that gets created with install.
-# Will automatically delete insightsuis.consoleui.aiops.ibm.com CR
 aiops_custom_instance_exists () {
   
   local namespace=$1
@@ -189,10 +188,6 @@ aiops_custom_instance_exists () {
   if [ `oc get kongs.management.ibm.com -n $namespace --ignore-not-found --no-headers -o name | grep -v "gateway" | wc -l` -gt 0 ] ||
      [ `oc get eventmanagergateways.ai-manager.watson-aiops.ibm.com -n $namespace --ignore-not-found --no-headers -o name | wc -l` -gt 0 ]; then
      custom_instance_exists=true
-  fi
-  if [ `oc get insightsuis.consoleui.aiops.ibm.com -n $namespace --ignore-not-found --no-headers -o name | wc -l` -gt 0 ]; then
-    log $INFO "Automatically deleting user-created instances of insightuis.consoleui.aiops.ibm.com in namespace $namespace"
-    oc get insightsuis.consoleui.aiops.ibm.com -n $namespace --no-headers -o name | while read a b; do oc delete "$a" -n $namespace --ignore-not-found; done
   fi
 }
 
@@ -507,6 +502,26 @@ analyze_script_properties(){
 if [[ $DELETE_ALL == "true" ]]; then
    DELETE_PVCS="true"
    DELETE_CRDS="true"
+fi
+
+if [[ $DELETE_ALL != "true" ]] && [[ $DELETE_ALL != "false" ]]; then
+    log $ERROR "The DELETE_ALL flag must have a value of either \"true\" or \"false\". Please review the uninstall-cp4waiops.props file."
+    exit 1
+fi
+
+if [[ $ONLY_CLOUDPAK != "true" ]] && [[ $ONLY_CLOUDPAK != "false" ]]; then
+    log $ERROR "The ONLY_CLOUDPAK flag must have a value of either \"true\" or \"false\". Please review the uninstall-cp4waiops.props file."
+    exit 1
+fi
+
+if [[ $DELETE_PVCS != "true" ]] && [[ $DELETE_PVCS != "false" ]]; then
+    log $ERROR "The DELETE_PVCS flag must have a value of either \"true\" or \"false\". Please review the uninstall-cp4waiops.props file."
+    exit 1
+fi
+
+if [[ $DELETE_CRDS != "true" ]] && [[ $DELETE_CRDS != "false" ]]; then
+    log $ERROR "The DELETE_CRDS flag must have a value of either \"true\" or \"false\". Please review the uninstall-cp4waiops.props file."
+    exit 1
 fi
 
 }
