@@ -4,7 +4,7 @@
 #
 ##################################################################################################
 ##### This is the configuration file for the uninstall-cp4waiops.sh script that uninstalls   #####
-##### IBM Cloud Pak for Watson AIOps AI Manager (CP4WAIOps) v3.5 from your cluster.          #####
+##### IBM Cloud Pak for Watson AIOps AI Manager (CP4WAIOps) v3.6 from your cluster.          #####
 #####                                                                                        #####
 ##### Review and update each of the properties below to indicate what you want to uninstall. #####
 ##### This script also removes dependencies that may be shared by other IBM Cloud Paks on    #####
