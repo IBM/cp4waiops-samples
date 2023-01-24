@@ -4,9 +4,9 @@ The prerequisite checker tool can be used to validate whether a Red Hat OpenShif
 
 **Pre-Install Checker::**
 
-- **OpenShift version check** : Checks whether the Red Hat OpenShift Container Platform cluster version is a fully supported Extended Update Support (EUS) version and compatible for installing IBM Cloud Pak for Watson AIOps AI Manager. OpenShift Container Platform 4.8.43+ and 4.10.17+ are currently under full support and compatible.
+- **OpenShift version check** : Checks whether the Red Hat OpenShift Container Platform cluster version is a fully supported Extended Update Support (EUS) version and compatible for installing IBM Cloud Pak for Watson AIOps AI Manager. OpenShift Container Platform 4.8.43+ and 4.10.46+ are currently under full support and compatible.
 
-- **Storage check**: Checks whether a storage class that uses a supported storage provider (Portworx, Red Hat Openshift Data Foundation (ODF), or IBMC-file-gold-gid) is available on the cluster. For more information, see the IBM Documentation [Storage considerations](https://ibm.biz/storage_consideration_360).
+- **Storage check**: Checks whether a storage class that uses a supported storage provider (Portworx, Red Hat Openshift Data Foundation (ODF), IBM Spectrum Fusion / Spectrum Scale Container Native, or IBMC-file-gold-gid) is available on the cluster. For more information, see the IBM Documentation [Storage considerations](https://ibm.biz/storage_consideration_360).
 
 - **Network policy check**: Checks whether the network policy is configured for the AI Manager routes, which allow external traffic to reach the routes. For more information about how the network policy is configured, see the IBM Documentation [Configure network policies](https://ibm.biz/aiops_netpolicy_360).
 
