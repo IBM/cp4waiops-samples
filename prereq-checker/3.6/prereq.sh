@@ -5,11 +5,11 @@
 # 'AI Manager - Hardware requirements' https://ibm.biz/aiops_hardware_360
 # Minimum resource values for small profile 3.6.x
 NODE_COUNT_SMALL_3_6=3
-VCPU_SMALL_3_6=60
-MEMORY_SMALL_3_6=144
+VCPU_SMALL_3_6=56
+MEMORY_SMALL_3_6=140
 # Minimum resource values for large profile 3.6.x
 NODE_COUNT_LARGE_3_6=10
-VCPU_LARGE_3_6=160
+VCPU_LARGE_3_6=156
 MEMORY_LARGE_3_6=360
 
  
@@ -54,6 +54,9 @@ fail_msg=`printf "$fail_color FAIL $color_end"`
 pass_msg=`printf "$pass_color PASS $color_end\n"`
 warning_msg=`printf "$warn_color WARNING $color_end"`
 skip_msg=`printf "$warn_color SKIP $color_end"`
+
+# array to hold all storage check results
+storageCheckRes=()
 }
 
 display_help() {
@@ -209,18 +212,14 @@ function checkOCPVersion {
       fi
     fi
     if [[ $OCP_VER == "4.10"* ]]; then
-      if [[ $OCP_MINOR_VER -ge 17 && -n $ODF_STORAGE ]];then
+      if [[ $OCP_MINOR_VER -ge 46 ]];then
         log $INFO "OCP Version $OCP_VER is compatible with IBM Cloud Pak for Watson AIOps AI Manager"
         OCP_VER_RES=$pass_msg
         return 0
-      elif [[ $OCP_MINOR_VER -lt 17 && -n $ODF_STORAGE ]] ;then
-        log $INFO "OCP Version $OCP_VER is not compatible with IBM Cloud Pak for Watson AIOps AI Manager. If you are using ODF storage, 4.10.17 is the miniumum supported level"
+      else
+        log $INFO "OCP Version $OCP_VER is not compatible with IBM Cloud Pak for Watson AIOps AI Manager. Please use v4.10.46+"
         OCP_VER_RES=$fail_msg
         return 1
-      else
-        log $INFO "OCP Version $OCP_VER is compatible with IBM Cloud Pak for Watson AIOps AI Manager."
-        OCP_VER_RES=$pass_msg
-        return 0
       fi
     fi
     log $INFO "OCP Version $OCP_VER is compatible with IBM Cloud Pak for Watson AIOps AI Manager"
@@ -228,7 +227,7 @@ function checkOCPVersion {
     startEndSection "Openshift Container Platform Version Check"
     return 0
   else
-    log $ERROR "OCP Version is incompatible. Required Version: v4.8.43+ or v4.10.17+"
+    printf " $fail_color OCP Version is incompatible. Required Version: v4.8.43+ or v4.10.46+ $color_end\n"
     log $ERROR "Your Version: v$OCP_VER"
     echo
     OCP_VER_RES=$fail_msg
@@ -250,7 +249,7 @@ checkEntitlementSecret () {
   
 
   if [[ -z $ENTITLEMENT_SECRET && -z $GLOBAL_PULL_SECRET ]] ; then
-    log $ERROR "Ensure that you have either a '$SECRET_NAME' secret or a global pull secret 'pull-secret' configured in the namespace 'openshift-config'."
+    printf " $fail_color Ensure that you have either a '$SECRET_NAME' secret or a global pull secret 'pull-secret' configured in the namespace 'openshift-config'. $color_end\n"
     PS_RES=$fail_msg
     startEndSection "Entitlement Pull Secret"
     return 1
@@ -300,7 +299,7 @@ createTestJob () {
           - name: ibm-entitlement-key
           containers:
           - name: testimage
-            image: cp.icr.io/cp/cp4waiops/ai-platform-api-server@sha256:0aee31ec0b21789fd6c7cd904da60eaf4127fd1b342d9a195d2eada0cf123fc9
+            image: cp.icr.io/cp/cp4waiops/ai-platform-api-server@sha256:4c682ed06e9742d84d3145df316487f62460ab17377c48d3f5c2668bb2bceed6
             imagePullPolicy: Always
             command: [ "echo", "SUCCESS" ]
           restartPolicy: OnFailure
@@ -330,7 +329,7 @@ EOF
                         - amd64
           containers:
           - name: testimage
-            image: cp.icr.io/cp/cp4waiops/ai-platform-api-server@sha256:0aee31ec0b21789fd6c7cd904da60eaf4127fd1b342d9a195d2eada0cf123fc9
+            image: cp.icr.io/cp/cp4waiops/ai-platform-api-server@sha256:4c682ed06e9742d84d3145df316487f62460ab17377c48d3f5c2668bb2bceed6
             imagePullPolicy: Always
             command: [ "echo", "SUCCESS" ]
           restartPolicy: OnFailure
@@ -371,7 +370,7 @@ checkEntitlementCred () {
         LOOP_COUNT=`expr $LOOP_COUNT + 1`
     done
   else
-    log $ERROR "Some error occured while '$JOB_NAME' job creation for testing entitlement secret configuration."
+    printf " $fail_color Some error occured while '$JOB_NAME' job creation for testing entitlement secret configuration. $color_end\n"
     startEndSection "Entitlement Pull Secret"
     exit 1
   fi
@@ -383,13 +382,13 @@ checkEntitlementCred () {
         log $INFO "SUCCESS! Entitlement secret is configured correctly."
         PS_RES=$pass_msg
      else
-        log $ERROR "Some error occured in validating job '$JOB_NAME' logs, error validating the entitlement secret"
+        printf " $fail_color Some error occured in validating job '$JOB_NAME' logs, error validating the entitlement secret $color_end\n"
         PS_RES=$fail_msg
      fi
   else
      PS_RES=$fail_msg
-     log $ERROR "The pod '$POD_NAME' failed with container_status='$container_status'"
-     log $ERROR "Entitlement secret is not configured correctly."
+     printf " $fail_color The pod '$POD_NAME' failed with container_status='$container_status' $color_end\n"
+     printf " $fail_color Entitlement secret is not configured correctly. $color_end\n"
   fi
   
   #cleaning the job in case if script reaches here.
@@ -407,8 +406,8 @@ function checkODF {
     if [[ "$podStatus" == "Running" || "$podStatus" == "Succeeded" ]]; then
       continue
     else
-      log $ERROR "Pod in openshift-storage project namespace found not \"Running\" or \"Completed\": $p"
-      STORAGE_PROVIDER_RES=$fail_msg
+      printf " $fail_color Pod in openshift-storage project namespace found not \"Running\" or \"Completed\": $p $color_end\n"
+      storageCheckRes+=("fail")
       return 1
     fi
   done
@@ -421,21 +420,22 @@ function checkODF {
     if [[ "$?" == "0" ]]; then
       log $INFO "$s exists."
     else
-      log $ERROR "$s does not exist."
-      STORAGE_PROVIDER_RES=$fail_msg
+      printf " $fail_color $s does not exist. $color_end\n"
+      storageCheckRes+=("fail")
       return 1
     fi
   done
 
-  STORAGE_PROVIDER_RES=$pass_msg
+  storageCheckRes+=("pass")
   return 0
 }
+
 
 function checkPortworx {
   PORTWORX_WARNING="false"
   printf "\nChecking Portworx Configuration...\n"
+
   printf "Checking for storageclass \"portworx-fs\"...\n"
-  
   oc get storageclass portworx-fs > /dev/null 2>&1
   if [[ "$?" == "0" ]]; then
     log $INFO "StorageClass \"portworx-fs\" exists."
@@ -456,34 +456,57 @@ function checkPortworx {
   fi
   
   if [[ "$PORTWORX_WARNING" == "false" ]]; then
-    STORAGE_PROVIDER_RES=$pass_msg
+    storageCheckRes+=("pass")
   else
-    STORAGE_PROVIDER_RES=$warning_msg
+    storageCheckRes+=("warn")
   fi
   
   return 0
 }
 
 function checkIBMCFileGoldGidStorage {
-  printf "Checking for storageclass \"ibmc-file-gold-gid\"...\n"
+  printf "Checking if IBM Cloud Storage is configured properly...\n"
 
   file=$(oc get storageclass ibmc-file-gold-gid --ignore-not-found=true)
-  if [[ "$file" != "" ]]; then
-    log $INFO "StorageClass \"ibmc-file-gold-gid\" exists."
-    IBMC_FILE_GOLD_GID="true"
-    STORAGE_PROVIDER_RES=$pass_msg
-  else
-    log $WARNING "StorageClass \"ibmc-file-gold-gid\" does not exist. See \"Storage\" section in https://ibm.biz/storage_consideration_360 for details.\n"
+  block=$(oc get storageclass ibmc-block-gold-gid --ignore-not-found=true)
+
+  if [[ "$file" != "" && "$block" != "" ]]; then
+    log $INFO "Both ibmc-block-gold-gid and ibmc-file-gold-gid exist."
+    storageCheckRes+=("pass")
+    return 0 
   fi
 
-  return 0
+  printf " $fail_color Both ibmc-block-gold-gid and ibmc-file-gold-gid need to exist to use IBM Cloud Storage. See \"Storage\" section in https://ibm.biz/storage_consideration_360 for details. $color_end\n"
+  storageCheckRes+=("fail")
+}
+
+function checkIBMSpectrum {
+  OCP_VERSION_FLAG="false"
+
+  printf "Checking if IBM Spectrum Fusion / IBM Spectrum Scale Container Native is configured properly...\n"
+
+  # Spectrum Fusion can only work on OCP 4.8
+  OCP_VER=$(oc get clusterversion version -o=jsonpath='{.status.desired.version}')
+  if [[ "$OCP_VER" != "4.8"* ]]; then
+    OCP_VERSION_FLAG="true"
+  fi
+
+  IBM_SPEC=$(oc get storageclass ibm-spectrum-scale-sc --ignore-not-found=true)
+  if [[ "$IBM_SPEC" != "" && "$OCP_VERSION_FLAG" == "false" ]]; then
+    log $INFO "StorageClass \"ibm-spectrum-scale-sc\" exists and meets OCP version criteria."
+    storageCheckRes+=("pass")
+    return 0
+  elif [[ "$IBM_SPEC" != "" || "$OCP_VERSION_FLAG" == "true" ]]; then
+    printf " $fail_color IBM Spectrum Fusion / IBM Spectrum Scale Container Native, only Red Hat OpenShift Container Platform 4.8 is supported.$color_end\n"
+    log $WARNING "See \"Storage\" section in https://ibm.biz/storage_consideration_360 for details.\n"
+    storageCheckRes+=("fail")
+    return 1
+  fi
 }
 
 function checkStorage {
-  ODF_FOUND="false"
-  PORTWORX_FOUND="false"
-  IBMC_FILE_GOLD_GID_FOUND="false"
-
+  # Initialize an empty array. If storage provider is found, append the name as an element...
+  storageFound=()
 
   if [[ $SKIP_STORAGE_CHECK == "true" ]]; then
     echo
@@ -498,57 +521,99 @@ function checkStorage {
   startEndSection "Storage Provider"
   log $INFO "Checking storage providers"
 
-  # Check if Portworx, ODF, or IBMC-file-gold-gid exist
+  # Check for any hints portworx is deployed. In this scenario, we look for any storage clusters that are deployed in all namespaces. Then
+  # we check if the keyword "Online"
   STORAGE_CLUSTER=$(oc get storagecluster.core.libopenstorage.org -A --ignore-not-found=true --no-headers=true 2>>/dev/null)
   if [[ "$STORAGE_CLUSTER" == *"Online"* ]]; then
     log $INFO "Portworx Found. StorageCluster instance in \"Online\" status found."
-    PORTWORX_FOUND="true"
+    storageFound+=("portworx")
   else
     echo
-    log $WARNING "No StorageClusters found with \"Online\" status found. In order for Portworx to work, an instance of StorageCluster must have a status of \"Online\"."
-    PORTWORX_FOUND="false"
+    log $WARNING "No StorageClusters found with \"Online\" status found. In order for Portworx to work, an instance of StorageCluster must have a status of \"Online\". Skipping configuration check for Portworx."
   fi
 
+  # Check for ODF...
   ODF_PODS=($(oc get pods -n openshift-storage --no-headers=true | awk '{print $1}'))
   if [[ "$ODF_PODS" == "" ]]; then
     echo
     log $INFO "Openshift Data Foundation not running."
-    ODF_FOUND="false"
   else
-    log $INFO "Openshift Data Foundation found."
-    ODF_FOUND="true"
+    log $INFO "Openshift Data Foundation found. Skipping configuration check for ODF."
+    storageFound+=("odf")
   fi
 
+  # Check for IBM Cloud Storage...
   IBMC_FILE_GOLD_GID=$(oc get storageclass ibmc-file-gold-gid --ignore-not-found=true)
-  if [[ "$IBMC_FILE_GOLD_GID" == "" ]]; then
+  IBMC_BLOCK_GOLD_GID=$(oc get storageclass ibmc-block-gold-gid --ignore-not-found=true)
+  if [[ "$IBMC_FILE_GOLD_GID" != "" || "$IBMC_BLOCK_GOLD_GID" != ""  ]]; then
     echo
-    log $INFO "IBM Cloud Storage does not exist."
-    IBMC_FILE_GOLD_GID="false"
+    log $INFO "IBM Cloud Storage found."
+    storageFound+=("ibmc")
   else
-    log $INFO "IBM Cloud Storage exists."
-    IBMC_FILE_GOLD_GID="true"
+    log $INFO "No IBM Cloud Storage not found... Skipping configuration check for IBM Cloud Storage Check."
   fi
 
+  # Check for IBM Spectrum Fusion / IBM Spectrum Scale Container Native
+  IBM_SPEC_FUSION=$(oc get storageclass ibm-spectrum-scale-sc --ignore-not-found=true)
+  if [[ "$IBM_SPEC_FUSION" != "" ]]; then
+    echo
+    log $INFO "A storage class related to IBM Spectrum Fusion or IBM Spectrum Scale Container Native was found."
+    storageFound+=("ibm-spec")
+  else
+    log $INFO "No IBM Spectrum Fusion or IBM Spectrum Scale Container Native... Skipping configuration check for IBM Spectrum."
+  fi
 
-  if [[ "$PORTWORX_FOUND" == "false" && "$ODF_FOUND" == "false" && "$IBMC_FILE_GOLD_GID" == "false" ]]; then
-    log $ERROR "At least one of the three Storage Providers are required"
-    log $ERROR "The supported Storage Providers are Portworx, Openshift Data Foundation, or IBMC File Gold Gid. See https://ibm.biz/storage_consideration_360 for details."
+  # If no storageProviders were found, print an error...
+  if [ ${#storageFound[@]} -eq 0 ]; then
+    STORAGE_PROVIDER_RES=$fail_msg
+    printf " $fail_color At least one of the four Storage Providers are required$color_end\n"
+    printf " $fail_color The supported Storage Providers are Portworx, Openshift Data Foundation, IBM Cloud Storage for ROKS, or IBM Spectrum Fusion/IBM Spectrum Scale Container Native. See https://ibm.biz/storage_consideration_360 for details.$color_end\n"
     STORAGE_PROVIDER_RES=$fail_msg
     startEndSection "Storage Provider"
     return 1
-  elif [[ "$PORTWORX_FOUND" == "true" && "$ODF_FOUND" == "false" && "$IBMC_FILE_GOLD_GID" == "false" ]]; then
-    checkPortworx
-  elif [[ "$PORTWORX_FOUND" == "false" && "$ODF_FOUND" == "true" && "$IBMC_FILE_GOLD_GID" == "false" ]]; then
-    checkODF $ODF_PODS
-  elif [[ "$PORTWORX_FOUND" == "false" && "$ODF_FOUND" == "false" && "$IBMC_FILE_GOLD_GID" == "true" ]]; then
-    checkIBMCFileGoldGidStorage
-  elif [[ "$PORTWORX_FOUND" == "true" && "$ODF_FOUND" == "true" && "$IBMC_FILE_GOLD_GID" == "true"  ]]; then
-    checkPortworx
-    checkODF $ODF_PODS
+  fi
+
+  # Check the storageFound Array if ibm cloud storage is there, if run the function to check for that storageclass
+  if [[ " ${storageFound[*]} " =~ "ibmc" ]]; then
     checkIBMCFileGoldGidStorage
   fi
+
+  # Check the storageFound Array if ibm spectrum was found. If so, run the function to check for the expected storgeclasses
+  if [[ " ${storageFound[*]} " =~ "ibm-spec" ]]; then
+    checkIBMSpectrum
+  fi
+
+  # Check the storageFound Array if openshift data foundation was found. If so, run the function to check for the expected storgeclasses
+  if [[ " ${storageFound[*]} " =~ "odf" ]]; then
+    checkODF $ODF_PODS
+  fi
+
+  # Check the storageFound Array if portworx was found. If so, run the function to check for the expected storgeclasses
+  if [[ " ${storageFound[*]} " =~ "portworx" ]]; then
+    checkPortworx
+  fi
+
+  # Check if there are any failing configurations, if so we can automatically send a failure result for this check
+  if [[ "${storageCheckRes[*]}" =~ "fail" ]]; then
+    STORAGE_PROVIDER_RES=$fail_msg
+    log $INFO "One or more errors found when checking for Storage Providers."
+    startEndSection "Storage Provider"
+    return 1
+  fi
+
+  # If we did not find any strings with "fail", then we can assume we assume we only have warnings and/or passes. First, check if
+  # there are any warnings. If found we can warn the user there was one warning message that was found. Otherwise, show "Pass" for overall 
+  # storage check.
+  if [[ "${storageCheckRes[*]}" =~ "warn"  ]]; then
+    STORAGE_PROVIDER_RES=$warning_msg
+    log $INFO "One of more warnings found when checking for Storage Providers."
+  else
+    STORAGE_PROVIDER_RES=$pass_msg
+    log $INFO "No warnings or failures found when checking for Storage Providers."
+  fi
+
   startEndSection "Storage Provider"
-  return 0
+  return 0 
 }
 
 function checkNetworkPolicy {
@@ -570,7 +635,7 @@ function checkNetworkPolicy {
       log $INFO "Namespace default has expected metadata label. Network policy configured correctly."
       NP_RES=$pass_msg
     else
-      log $ERROR "Namespace default DOES NOT have the expected metadata label"
+      printf " $fail_color Namespace default DOES NOT have the expected metadata label $color_end\n"
       printf "Please see https://ibm.biz/aiops_netpolicy_36 to configure a network policy\n"
       NP_RES=$fail_msg
       startEndSection "Network Policy"
