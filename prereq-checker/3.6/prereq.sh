@@ -1,4 +1,5 @@
 #!/bin/bash
+set -eo pipefail
 
 ## Resource size for 3.6
 # These defaults are given in section 'AI Manager only Hardware requirement totals' under
@@ -41,7 +42,6 @@ ERROR="[ERROR]"
 OCP_VER_RES=""
 STORAGE_PROVIDER_RES=""
 NP_RES=""
-INT_REG_RES=""
 PROFILE_RES=""
 PS_RES=""
 
@@ -227,7 +227,7 @@ function checkOCPVersion {
     startEndSection "Openshift Container Platform Version Check"
     return 0
   else
-    printf " $fail_color OCP Version is incompatible. Required Version: v4.8.43+ or v4.10.46+ $color_end\n"
+    printf " $fail_color $ERROR OCP Version is incompatible. Required Version: v4.8.43+ or v4.10.46+ $color_end\n"
     log $ERROR "Your Version: v$OCP_VER"
     echo
     OCP_VER_RES=$fail_msg
@@ -249,7 +249,7 @@ checkEntitlementSecret () {
   
 
   if [[ -z $ENTITLEMENT_SECRET && -z $GLOBAL_PULL_SECRET ]] ; then
-    printf " $fail_color Ensure that you have either a '$SECRET_NAME' secret or a global pull secret 'pull-secret' configured in the namespace 'openshift-config'. $color_end\n"
+    printf " $fail_color $ERROR Ensure that you have either a '$SECRET_NAME' secret or a global pull secret 'pull-secret' configured in the namespace 'openshift-config'. $color_end\n"
     PS_RES=$fail_msg
     startEndSection "Entitlement Pull Secret"
     return 1
@@ -341,7 +341,7 @@ EOF
 
 checkEntitlementCred () {
   
-  SLEEP_LOOP=5s
+  SLEEP_LOOP=5
   IMAGE_PULL_STATUS_FLAG="false"
   log $INFO "Verifying if the job '$JOB_NAME' completed successfully.."
   POD_NAME=$(oc get pod -o name | grep $JOB_NAME)
@@ -370,9 +370,9 @@ checkEntitlementCred () {
         LOOP_COUNT=`expr $LOOP_COUNT + 1`
     done
   else
-    printf " $fail_color Some error occured while '$JOB_NAME' job creation for testing entitlement secret configuration. $color_end\n"
+    printf " $fail_color $ERROR Some error occured while '$JOB_NAME' job creation for testing entitlement secret configuration. $color_end\n"
     startEndSection "Entitlement Pull Secret"
-    exit 1
+    return 1
   fi
   
   #Checking the job pod logs, where we chose to just print 'SUCCESS' message.
@@ -382,13 +382,13 @@ checkEntitlementCred () {
         log $INFO "SUCCESS! Entitlement secret is configured correctly."
         PS_RES=$pass_msg
      else
-        printf " $fail_color Some error occured in validating job '$JOB_NAME' logs, error validating the entitlement secret $color_end\n"
+        printf "$fail_color $ERROR Some error occured in validating job '$JOB_NAME' logs, error validating the entitlement secret $color_end\n"
         PS_RES=$fail_msg
      fi
   else
      PS_RES=$fail_msg
-     printf " $fail_color The pod '$POD_NAME' failed with container_status='$container_status' $color_end\n"
-     printf " $fail_color Entitlement secret is not configured correctly. $color_end\n"
+     printf "$fail_color $ERROR The pod '$POD_NAME' failed with container_status='$container_status' $color_end\n"
+     printf "$fail_color $ERROR Entitlement secret is not configured correctly. $color_end\n"
   fi
   
   #cleaning the job in case if script reaches here.
@@ -406,7 +406,7 @@ function checkODF {
     if [[ "$podStatus" == "Running" || "$podStatus" == "Succeeded" ]]; then
       continue
     else
-      printf " $fail_color Pod in openshift-storage project namespace found not \"Running\" or \"Completed\": $p $color_end\n"
+      printf "$fail_color $ERROR Pod in openshift-storage project namespace found not \"Running\" or \"Completed\": $p $color_end\n"
       storageCheckRes+=("fail")
       return 1
     fi
@@ -414,13 +414,13 @@ function checkODF {
 
   log $INFO "Pods in openshift-storage project are \"Running\" or \"Completed\""
 
-  ODF_STORAGECLASSES=("ocs-storagecluster-ceph-rbd" "ocs-storagecluster-cephfs" "openshift-storage.noobaa.io")
+  ODF_STORAGECLASSES=("ocs-storagecluster-ceph-rbd" "ocs-storagecluster-cephfs")
   for s in "${ODF_STORAGECLASSES[@]}"; do
     oc get storageclass $s > /dev/null 2>&1
     if [[ "$?" == "0" ]]; then
       log $INFO "$s exists."
     else
-      printf " $fail_color $s does not exist. $color_end\n"
+      printf "$fail_color $ERROR $s does not exist. $color_end\n"
       storageCheckRes+=("fail")
       return 1
     fi
@@ -476,7 +476,7 @@ function checkIBMCFileGoldGidStorage {
     return 0 
   fi
 
-  printf " $fail_color Both ibmc-block-gold-gid and ibmc-file-gold-gid need to exist to use IBM Cloud Storage. See \"Storage\" section in https://ibm.biz/storage_consideration_360 for details. $color_end\n"
+  printf "$fail_color $ERROR Both ibmc-block-gold-gid and ibmc-file-gold-gid need to exist to use IBM Cloud Storage. See \"Storage\" section in https://ibm.biz/storage_consideration_360 for details. $color_end\n"
   storageCheckRes+=("fail")
 }
 
@@ -497,7 +497,7 @@ function checkIBMSpectrum {
     storageCheckRes+=("pass")
     return 0
   elif [[ "$IBM_SPEC" != "" || "$OCP_VERSION_FLAG" == "true" ]]; then
-    printf " $fail_color IBM Spectrum Fusion / IBM Spectrum Scale Container Native, only Red Hat OpenShift Container Platform 4.8 is supported.$color_end\n"
+    printf " $fail_color $ERROR IBM Spectrum Fusion / IBM Spectrum Scale Container Native, only Red Hat OpenShift Container Platform 4.8 is supported.$color_end\n"
     log $WARNING "See \"Storage\" section in https://ibm.biz/storage_consideration_360 for details.\n"
     storageCheckRes+=("fail")
     return 1
@@ -529,16 +529,16 @@ function checkStorage {
     storageFound+=("portworx")
   else
     echo
-    log $WARNING "No StorageClusters found with \"Online\" status found. In order for Portworx to work, an instance of StorageCluster must have a status of \"Online\". Skipping configuration check for Portworx."
+    log $INFO "No Portworx StorageClusters found with \"Online\" status. Skipping configuration check for Portworx."
   fi
 
   # Check for ODF...
   ODF_PODS=($(oc get pods -n openshift-storage --no-headers=true | awk '{print $1}'))
   if [[ "$ODF_PODS" == "" ]]; then
     echo
-    log $INFO "Openshift Data Foundation not running."
+    log $INFO "Openshift Data Foundation not running. Skipping configuration check for ODF."
   else
-    log $INFO "Openshift Data Foundation found. Skipping configuration check for ODF."
+    log $INFO "Openshift Data Foundation found."
     storageFound+=("odf")
   fi
 
@@ -550,7 +550,7 @@ function checkStorage {
     log $INFO "IBM Cloud Storage found."
     storageFound+=("ibmc")
   else
-    log $INFO "No IBM Cloud Storage not found... Skipping configuration check for IBM Cloud Storage Check."
+    log $INFO "No IBM Cloud Storage found... Skipping configuration check for IBM Cloud Storage Check."
   fi
 
   # Check for IBM Spectrum Fusion / IBM Spectrum Scale Container Native
@@ -566,8 +566,8 @@ function checkStorage {
   # If no storageProviders were found, print an error...
   if [ ${#storageFound[@]} -eq 0 ]; then
     STORAGE_PROVIDER_RES=$fail_msg
-    printf " $fail_color At least one of the four Storage Providers are required$color_end\n"
-    printf " $fail_color The supported Storage Providers are Portworx, Openshift Data Foundation, IBM Cloud Storage for ROKS, or IBM Spectrum Fusion/IBM Spectrum Scale Container Native. See https://ibm.biz/storage_consideration_360 for details.$color_end\n"
+    printf "$fail_color $ERROR At least one of the four Storage Providers are required$color_end\n"
+    printf "$fail_color $ERROR The supported Storage Providers are Portworx, Openshift Data Foundation, IBM Cloud Storage for ROKS, or IBM Spectrum Fusion/IBM Spectrum Scale Container Native. See https://ibm.biz/storage_consideration_360 for details.$color_end\n"
     STORAGE_PROVIDER_RES=$fail_msg
     startEndSection "Storage Provider"
     return 1
@@ -635,8 +635,8 @@ function checkNetworkPolicy {
       log $INFO "Namespace default has expected metadata label. Network policy configured correctly."
       NP_RES=$pass_msg
     else
-      printf " $fail_color Namespace default DOES NOT have the expected metadata label $color_end\n"
-      printf "Please see https://ibm.biz/aiops_netpolicy_36 to configure a network policy\n"
+      printf " $fail_color $ERROR Namespace default DOES NOT have the expected metadata label $color_end\n"
+      printf "Please see https://ibm.biz/aiops_netpolicy_360 to configure a network policy\n"
       NP_RES=$fail_msg
       startEndSection "Network Policy"
       return 1
@@ -914,13 +914,16 @@ startEndSection() {
 function main {
   initialize
 
-  checkOCPVersion
-  checkEntitlementSecret
-  checkStorage
-  checkNetworkPolicy
-  checkSmallOrLargeProfileInstall
+  fail_found=0
+  checkOCPVersion || fail_found=1
+  checkEntitlementSecret || fail_found=1
+  checkStorage || fail_found=1
+  checkNetworkPolicy || fail_found=1
+  checkSmallOrLargeProfileInstall || fail_found=1
 
   showSummary
+
+  return $fail_found
 }
 
-main
+main || exit 1
