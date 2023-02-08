@@ -468,15 +468,15 @@ function checkIBMCFileGoldGidStorage {
   printf "Checking if IBM Cloud Storage is configured properly...\n"
 
   file=$(oc get storageclass ibmc-file-gold-gid --ignore-not-found=true)
-  block=$(oc get storageclass ibmc-block-gold-gid --ignore-not-found=true)
+  block=$(oc get storageclass ibmc-block-gold --ignore-not-found=true)
 
   if [[ "$file" != "" && "$block" != "" ]]; then
-    log $INFO "Both ibmc-block-gold-gid and ibmc-file-gold-gid exist."
+    log $INFO "Both ibmc-block-gold and ibmc-file-gold-gid exist."
     storageCheckRes+=("pass")
     return 0 
   fi
 
-  printf "$fail_color $ERROR Both ibmc-block-gold-gid and ibmc-file-gold-gid need to exist to use IBM Cloud Storage. See \"Storage\" section in https://ibm.biz/storage_consideration_360 for details. $color_end\n"
+  printf "$fail_color $ERROR Both ibmc-block-gold and ibmc-file-gold-gid need to exist to use IBM Cloud Storage. See \"Storage\" section in https://ibm.biz/storage_consideration_360 for details. $color_end\n"
   storageCheckRes+=("fail")
 }
 
@@ -544,7 +544,7 @@ function checkStorage {
 
   # Check for IBM Cloud Storage...
   IBMC_FILE_GOLD_GID=$(oc get storageclass ibmc-file-gold-gid --ignore-not-found=true)
-  IBMC_BLOCK_GOLD_GID=$(oc get storageclass ibmc-block-gold-gid --ignore-not-found=true)
+  IBMC_BLOCK_GOLD_GID=$(oc get storageclass ibmc-block-gold --ignore-not-found=true)
   if [[ "$IBMC_FILE_GOLD_GID" != "" || "$IBMC_BLOCK_GOLD_GID" != ""  ]]; then
     echo
     log $INFO "IBM Cloud Storage found."
