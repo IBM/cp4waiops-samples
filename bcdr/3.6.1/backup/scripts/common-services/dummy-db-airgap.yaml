@@ -1,0 +1,24 @@
+kind: Pod
+apiVersion: v1
+metadata:
+  name: dummy-db
+  labels:
+    app: dummy-db
+spec:
+  containers:
+    - image: quay.io/libpod/ubuntu
+      command: ["sleep"]
+      args: ["infinity"]
+      imagePullPolicy: Never
+      name: ubuntu
+      volumeMounts:
+        - name: mongodump
+          mountPath: "/dump"
+      lifecycle:
+            postStart:
+              exec:
+                command: ["bash", "-c", "rm -rf /dump/.velero"]
+  volumes:
+    - name: mongodump
+      persistentVolumeClaim:
+        claimName: my-mongodump
