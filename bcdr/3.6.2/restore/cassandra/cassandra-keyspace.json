@@ -1,0 +1,28 @@
+{
+  "name": "Cassandra-Keyspaces",
+  "squad": "",
+  "owner": "",
+  "release-updates": "",
+  "keyspaces": [
+    {
+      "name": "tararam",
+      "description": "It is required for resoure topology"
+    },
+    {
+      "name": "janusgraph",
+      "description": "It is required for metric anamoly detector model"
+    },
+    {
+      "name": "aiops",
+      "description": ""
+    },
+    {
+      "name": "aiops_policies",
+      "description": ""
+    },
+    {
+      "name": "mime_config",
+      "description": ""
+    }
+  ]
+}
