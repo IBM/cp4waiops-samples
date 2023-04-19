@@ -25,7 +25,7 @@ MANAGED_BY_REFERENCE="aiops-analytics-operator"; CR_REFERENCE="aiopsanalyticsorc
 # Logging Constants
 CRITICAL_LOG_LEVEL=1; ERROR_LOG_LEVEL=2; WARN_LOG_LEVEL=3; OP_SUCC_LEVEL=4;
 INFO_LOG_LEVEL=5; DEBUG_LOG_LEVEL=6; STDOUT_RED='\033[0;31m'; STDOUT_GREEN='\033[0;32m';
-STDOUT_YELLOW='\033[0;33m'; STDOUT_PURPLE='\033[0;35m'; STDOUT_WHITE='\033[0;97m';
+STDOUT_YELLOW='\033[0;33m'; STDOUT_PURPLE='\033[0;35m';
 STDOUT_RESET_CODE='\033[0m';
 
 # Global variables
@@ -37,7 +37,7 @@ ROLLOUTS_FAILED=""
 function logcrit    () { LOG_LEVEL=$CRITICAL_LOG_LEVEL fmtlog "${STDOUT_RED}FATAL   - $@${STDOUT_RESET_CODE}" ;}
 function logerr     () { LOG_LEVEL=$ERROR_LOG_LEVEL    fmtlog "${STDOUT_RED}ERROR   - $@${STDOUT_RESET_CODE}" ;}
 function logdebug   () { LOG_LEVEL=$DEBUG_LOG_LEVEL    fmtlog "${STDOUT_PURPLE}DEBUG   - $@${STDOUT_RESET_CODE}" ;}
-function loginfo    () { LOG_LEVEL=$INFO_LOG_LEVEL     fmtlog "${STDOUT_WHITE}INFO    - $@${STDOUT_RESET_CODE}" ;}
+function loginfo    () { LOG_LEVEL=$INFO_LOG_LEVEL     fmtlog "INFO    - $@" ;}
 function logwarn    () { LOG_LEVEL=$WARN_LOG_LEVEL     fmtlog "${STDOUT_YELLOW}WARNING - $@${STDOUT_RESET_CODE}" ;}
 function logok      () { LOG_LEVEL=$OP_SUCC_LEVEL      fmtlog "${STDOUT_GREEN}SUCCESS - $@${STDOUT_RESET_CODE}" ;}
 function fmtlog     () {
@@ -194,9 +194,34 @@ fi
 # Rotate the deployments over, to cycle certificates and secrets
 logdebug "Detected deployments ${DEPLOYMENTS[@]}"
 loginfo "Starting service rotation for $ORCHESTRATOR_CR_INSTANCE"
-echo ${DEPLOYMENTS[1]}
 rotate_deployments_for_dependency "${DEPLOYMENTS[@]}"
 
+# Finalise by checking if this is version 3.7.0, where spark STS does not gracefully handle rotation
+# Post 3.7.0 spark ought to handle certificate rotation automatically.
+RECONCILED_VERSION=$(
+  $KUBECTL_CMD get aiopsanalyticsorchestrator $ORCHESTRATOR_CR_INSTANCE \
+    --no-headers=true -o custom-columns=":status.versions.reconciled"
+)
+if [[ "$RECONCILED_VERSION" == "3.7.0" ]] || [[ "$RECONCILED_VERSION" == "3.7" ]]; then
+  # Attempt to find the spark STS. If upgrade could or was not complete,
+  # it will be a deployment and handled via the rollout of deployments executed prior.
+  loginfo "detected version 3.7.0/3.7, attempting to rollout Spark STS"
+  STS=()
+  while read -r line; do
+    STS+=("$line")
+  done <<< "$($KUBECTL_CMD get statefulset \
+    --selector=app.kubernetes.io/managed-by=$MANAGED_BY_REFERENCE,app.kubernetes.io/instance=$ORCHESTRATOR_CR_INSTANCE \
+    --no-headers=true -o name)"
+  STS_COUNT==$(echo "${STS[@]}" | awk '{print gsub("[ \t]",""); exit}')
+  if [ $DEPLOY_COUNT -ge 0 ]; then
+    logdebug "Detected statefulsets ${STS[@]}"
+    rotate_deployments_for_dependency "${STS[@]}"
+  else
+    logdebug "Spark is assumed to still be in the deploy state from version 3.6 - no work to do"
+  fi
+fi
+
+# Finalise and show status...
 if [ $TRAPPED_STATUS_EXIT -eq 0 ]; then
   loginfo "Rollouts succeeded for:"
   echo $ROLLOUTS_SUCCEEDED
