@@ -141,6 +141,26 @@ function rotate_deployments_for_dependency() {
     done
 }
 
+# clear_crt_cache_for_dependency is a function that will attempt to clear files in the global `$CERT_DIR`
+# directory where the files match the pattern "$CERT_CACHE_PATTERN". This function assumes the STS members
+# are numerically named according to the count of replicas. eg. abc-0, abc-1 for a count of 2.
+function clear_crt_cache_for_dependency() {
+  arr=("$@")
+  for i in "${arr[@]}";
+    do
+      loginfo "Fetching replicas count for statefulset $i"
+      REPLICA_COUNT_FOR_STS=$($KUBECTL_CMD get $i --no-headers=true -o custom-columns=":spec.replicas")
+      echo "Found $REPLICA_COUNT_FOR_STS replicas for statefulset $i"
+      REPLICA_COUNT_TO_ITTER_TO_FOR_STS=$((REPLICA_COUNT_FOR_STS - 1))
+      STS_POD_TPL="$(echo $i |  awk -F'/' '{print $2}')"
+      for replicaindex in $(seq 0 $REPLICA_COUNT_TO_ITTER_TO_FOR_STS); do
+       echo "attempting to clear cert cache for replica $i-$z";
+       $KUBECTL_CMD exec -ti $STS_POD_TPL-$replicaindex -- rm -rf /tmp/*-cert-sum \
+          || echo "No work to do";
+      done
+    done
+}
+
 # Debug Information
 logdebug "executing with oc client cmd: $KUBECTL_CMD"
 USER_RUNNING_SCRIPT=$($KUBECTL_CMD whoami)
@@ -196,16 +216,16 @@ logdebug "Detected deployments ${DEPLOYMENTS[@]}"
 loginfo "Starting service rotation for $ORCHESTRATOR_CR_INSTANCE"
 rotate_deployments_for_dependency "${DEPLOYMENTS[@]}"
 
-# Finalise by checking if this is version 3.7.0, where spark STS does not gracefully handle rotation
-# Post 3.7.0 spark ought to handle certificate rotation automatically.
+# Finalise by checking if this is version 3.7, 3.7.0 or 3.7.1, where spark STS does not gracefully handle rotation
+# Post 3.7.1 spark ought to handle certificate rotation automatically with grace.
 RECONCILED_VERSION=$(
   $KUBECTL_CMD get aiopsanalyticsorchestrator $ORCHESTRATOR_CR_INSTANCE \
     --no-headers=true -o custom-columns=":status.versions.reconciled"
 )
-if [[ "$RECONCILED_VERSION" == "3.7.0" ]] || [[ "$RECONCILED_VERSION" == "3.7" ]]; then
+if [[ "$RECONCILED_VERSION" == "3.7.0" ]] || [[ "$RECONCILED_VERSION" == "3.7" ]] || [[ "$RECONCILED_VERSION" == "3.7.1" ]]; then
   # Attempt to find the spark STS. If upgrade could or was not complete,
   # it will be a deployment and handled via the rollout of deployments executed prior.
-  loginfo "detected version 3.7.0/3.7, attempting to rollout Spark STS"
+  loginfo "detected version 3.7.0/3.7.1, attempting to rollout Spark STS"
   STS=()
   while read -r line; do
     STS+=("$line")
@@ -215,6 +235,8 @@ if [[ "$RECONCILED_VERSION" == "3.7.0" ]] || [[ "$RECONCILED_VERSION" == "3.7" ]
   STS_COUNT==$(echo "${STS[@]}" | awk '{print gsub("[ \t]",""); exit}')
   if [ $DEPLOY_COUNT -ge 0 ]; then
     logdebug "Detected statefulsets ${STS[@]}"
+    # Prior to rolling out the updates, lets clear the cert cache that is persistent in 3.7.0/3.7.1
+    clear_crt_cache_for_dependency "${STS[@]}"
     rotate_deployments_for_dependency "${STS[@]}"
   else
     logdebug "Spark is assumed to still be in the deploy state from version 3.6 - no work to do"
