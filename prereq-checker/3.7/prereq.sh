@@ -3,7 +3,7 @@ set -eo pipefail
 
 ## Resource size for 3.7
 # These defaults are given in section 'AI Manager only Hardware requirement totals' under
-# 'AI Manager - Hardware requirements' https://ibm.biz/aiops_hardware_370
+# 'AI Manager - Hardware requirements' https://ibm.biz/aiops_hardware_371
 # Minimum resource values for small profile 3.7.x
 NODE_COUNT_SMALL_3_7=3
 VCPU_SMALL_3_7=56
@@ -108,7 +108,7 @@ log $INFO "Starting IBM Cloud Pak for Watson AIOps AI Manager prerequisite check
 echo
 
 # This function checks to see if user's OCP version meets our requirements by checking if 
-# substring "4.8", and "4.10" is in variable OCP_VER.
+# substring "4.10" or "4.12" is in variable OCP_VER.
 function checkOCPVersion {
   
   OCP_VER=$(oc get clusterversion version -o=jsonpath='{.status.desired.version}')
@@ -119,41 +119,32 @@ function checkOCPVersion {
   
   echo
   startEndSection "Openshift Container Platform Version Check"
-  log $INFO "Checking OCP Version. Compatible Versions of OCP are v4.8 and v4.10."
+  log $INFO "Checking OCP Version. Compatible Versions of OCP are v4.10.46+ and v4.12.x "
   
-  if [[ $OCP_VER == *"4.8"* || $OCP_VER == *"4.10"* ]]; then
-    if [[ $OCP_VER == "4.8"* ]]; then
-      if [[ $OCP_MINOR_VER -ge 43 && -n $ODF_STORAGE ]]; then
-        log $INFO "OCP Version $OCP_VER is compatible with IBM Cloud Pak for Watson AIOps AI Manager"
-        OCP_VER_RES=$pass_msg
-        return 0
-      elif [[ $OCP_MINOR_VER -lt 43 && -n $ODF_STORAGE ]]; then
-        log $INFO "OCP Version $OCP_VER is not compatible with IBM Cloud Pak for Watson AIOps AI Manager. If you are using ODF storage, 4.10.43 is the miniumum supported level"
-        OCP_VER_RES=$fail_msg
-        return 1
-      else
-        log $INFO "OCP Version $OCP_VER is compatible with IBM Cloud Pak for Watson AIOps AI Manager."
-        OCP_VER_RES=$pass_msg
-        return 0
-      fi
-    fi
+  if [[ $OCP_VER == *"4.10"* || $OCP_VER == *"4.12"* ]]; then
+    
     if [[ $OCP_VER == "4.10"* ]]; then
       if [[ $OCP_MINOR_VER -ge 46 ]];then
         log $INFO "OCP Version $OCP_VER is compatible with IBM Cloud Pak for Watson AIOps AI Manager"
-        OCP_VER_RES=$pass_msg
-        return 0
       else
         log $INFO "OCP Version $OCP_VER is not compatible with IBM Cloud Pak for Watson AIOps AI Manager. Please use v4.10.46+"
         OCP_VER_RES=$fail_msg
         return 1
       fi
     fi
-    log $INFO "OCP Version $OCP_VER is compatible with IBM Cloud Pak for Watson AIOps AI Manager"
+
+    if [[ $OCP_VER == "4.12"* ]]; then
+      printf "$warn_color${WARNING} We've detected you are using OCP 4.12... For CP4WAIOPS v3.7.1, only fresh installs are supported for OCP v4.12. See the Readme for more context. $color_end \n"
+      OCP_VER_RES=$warning_msg
+      startEndSection "Openshift Container Platform Version Check"
+      return 0
+    fi
+
     OCP_VER_RES=$pass_msg
     startEndSection "Openshift Container Platform Version Check"
     return 0
   else
-    printf " $fail_color $ERROR OCP Version is incompatible. Required Version: v4.8.43+ or v4.10.46+ $color_end\n"
+    printf " $fail_color $ERROR OCP Version is incompatible. Required Version: v4.10.46+ or v4.12.x $color_end\n"
     log $ERROR "Your Version: v$OCP_VER"
     echo
     OCP_VER_RES=$fail_msg
@@ -200,6 +191,8 @@ createTestJob () {
 
   if [[ $ENTITLEMENT_SECRET ]] ; then
     log $INFO "Creating the job '$JOB_NAME' "
+    exec 3>&2
+    exec 2> /dev/null
     cat <<EOF | oc apply -f -
     apiVersion: batch/v1
     kind: Job
@@ -225,13 +218,16 @@ createTestJob () {
           - name: ibm-entitlement-key
           containers:
           - name: testimage
-            image: cp.icr.io/cp/cp4waiops/ai-platform-api-server@sha256:96510ec1d878b3815e514beb5c63b846029b26dda7cec65fc0c6e2c06c9a60da
+            image: cp.icr.io/cp/cp4waiops/ai-platform-api-server@sha256:cf7ae925a50e7f6ecad20430ad38c42bfe1b51734ebf4ddd0b0afbcd8b73d8fa
             imagePullPolicy: Always
             command: [ "echo", "SUCCESS" ]
           restartPolicy: OnFailure
 EOF
+  exec 2>&3
   else
     log $INFO "Creating the job '$JOB_NAME' "
+    exec 3>&2
+    exec 2> /dev/null
     cat <<EOF | oc apply -f -
     apiVersion: batch/v1
     kind: Job
@@ -255,11 +251,12 @@ EOF
                         - amd64
           containers:
           - name: testimage
-            image: cp.icr.io/cp/cp4waiops/ai-platform-api-server@sha256:96510ec1d878b3815e514beb5c63b846029b26dda7cec65fc0c6e2c06c9a60da
+            image: cp.icr.io/cp/cp4waiops/ai-platform-api-server@sha256:cf7ae925a50e7f6ecad20430ad38c42bfe1b51734ebf4ddd0b0afbcd8b73d8fa
             imagePullPolicy: Always
             command: [ "echo", "SUCCESS" ]
           restartPolicy: OnFailure
 EOF
+  exec 2>&3
   fi
   sleep 3
   checkEntitlementCred
@@ -368,7 +365,7 @@ function checkODF {
   for s in "${ODF_STORAGECLASSES[@]}"; do
     VE_CHECK=$(checkAllowVolumeExpansion $s)
     if [[ "$?" == "1" ]]; then
-      printf " $fail_color $ERROR StorageClass $s does not have allowedVolumeExpansion enabled. This is required for all large profile installs and strongly recommended for small profile installs. See \"Storage Class Requirements\" section in https://ibm.biz/storage_consideration_370 for details.$color_end\n"
+      printf " $fail_color $ERROR StorageClass $s does not have allowedVolumeExpansion enabled. This is required for all large profile installs and strongly recommended for small profile installs. See \"Storage Class Requirements\" section in https://ibm.biz/storage_consideration_371 for details.$color_end\n"
       ODF_VE_FLAG="true"
     fi
   done
@@ -396,7 +393,7 @@ function checkPortworx {
   else
     PORTWORX_WARNING="true"
     echo
-    log $WARNING "StorageClass \"portworx-fs\" does not exist. See \"Portworx Storage\" section in https://ibm.biz/storage_consideration_370 for details.\n"
+    log $WARNING "StorageClass \"portworx-fs\" does not exist. See \"Portworx Storage\" section in https://ibm.biz/storage_consideration_371 for details.\n"
   fi
 
   printf "Checking for storageclass \"portworx-aiops\"...\n"
@@ -406,13 +403,13 @@ function checkPortworx {
   else
     PORTWORX_WARNING="true"
     echo
-    log $WARNING "StorageClass \"portworx-aiops\" does not exist. See \"Portworx Storage\" section in https://ibm.biz/storage_consideration_370 for details.\n"
+    log $WARNING "StorageClass \"portworx-aiops\" does not exist. See \"Portworx Storage\" section in https://ibm.biz/storage_consideration_371 for details.\n"
   fi
   
   portworx_fs=$(checkAllowVolumeExpansion portworx-aiops)
   if [[ "$?" == "1" ]]; then
     echo
-    printf " $fail_color $ERROR StorageClass portworx-aiops does not have allowedVolumeExpansion enabled. This is required for all large profile installs and strongly recommended for small profile installs. See \"Storage Class Requirements\" section in https://ibm.biz/storage_consideration_370 for details.$color_end\n"
+    printf " $fail_color $ERROR StorageClass portworx-aiops does not have allowedVolumeExpansion enabled. This is required for all large profile installs and strongly recommended for small profile installs. See \"Storage Class Requirements\" section in https://ibm.biz/storage_consideration_371 for details.$color_end\n"
     storageCheckRes+=("fail")
     return 1
   fi
@@ -420,7 +417,7 @@ function checkPortworx {
   portworx_block=$(checkAllowVolumeExpansion portworx-fs)
   if [[ "$?" == "1" ]]; then
     echo
-    printf " $fail_color $ERROR StorageClass portworx-fs does not have allowedVolumeExpansion enabled. This is required for all large profile installs and strongly recommended for small profile installs. See \"Storage Class Requirements\" section in https://ibm.biz/storage_consideration_370 for details.$color_end\n"
+    printf " $fail_color $ERROR StorageClass portworx-fs does not have allowedVolumeExpansion enabled. This is required for all large profile installs and strongly recommended for small profile installs. See \"Storage Class Requirements\" section in https://ibm.biz/storage_consideration_371 for details.$color_end\n"
     storageCheckRes+=("fail")
     return 1
   fi
@@ -441,58 +438,26 @@ function checkIBMCFileGoldGidStorage {
   block=$(oc get storageclass ibmc-block-gold --ignore-not-found=true)
 
   if [[ "$file" == "" || "$block" == "" ]]; then
-    printf "$fail_color $ERROR Both ibmc-block-gold and ibmc-file-gold-gid need to exist to use IBM Cloud Storage. See \"Storage\" section in https://ibm.biz/storage_consideration_370 for details. $color_end\n"
+    printf "$fail_color $ERROR Both ibmc-block-gold and ibmc-file-gold-gid need to exist to use IBM Cloud Storage. See \"Storage\" section in https://ibm.biz/storage_consideration_371 for details. $color_end\n"
     storageCheckRes+=("fail")
     return 1 
   fi
 
   VE_BLOCK=$(checkAllowVolumeExpansion ibmc-block-gold)
   if [[ "$?" == "1" ]]; then
-    printf " $fail_color $ERROR StorageClass ibmc-block-gold does not have allowedVolumeExpansion enabled. This is required for all large profile installs and strongly recommended for small profile installs. See \"Storage Class Requirements\" section in https://ibm.biz/storage_consideration_370 for details.$color_end\n"
+    printf " $fail_color $ERROR StorageClass ibmc-block-gold does not have allowedVolumeExpansion enabled. This is required for all large profile installs and strongly recommended for small profile installs. See \"Storage Class Requirements\" section in https://ibm.biz/storage_consideration_371 for details.$color_end\n"
     storageCheckRes+=("fail")
     return 1
   fi
 
   VE_FILE=$(checkAllowVolumeExpansion ibmc-file-gold-gid)
   if [[ "$?" == "1" ]]; then
-    printf " $fail_color $ERROR StorageClass ibmc-file-gold-gid does not have allowedVolumeExpansion enabled. This is required for all large profile installs and strongly recommended for small profile installs. See \"Storage Class Requirements\" section in https://ibm.biz/storage_consideration_370 for details.$color_end\n"
+    printf " $fail_color $ERROR StorageClass ibmc-file-gold-gid does not have allowedVolumeExpansion enabled. This is required for all large profile installs and strongly recommended for small profile installs. See \"Storage Class Requirements\" section in https://ibm.biz/storage_consideration_371 for details.$color_end\n"
     storageCheckRes+=("fail")
     return 1
   fi
 
   storageCheckRes+=("pass")
-}
-
-function checkIBMSpectrum {
-  OCP_VERSION_FLAG="false"
-
-  printf "Checking if IBM Spectrum Fusion / IBM Spectrum Scale Container Native is configured properly...\n"
-
-  # Spectrum Fusion can only work on OCP 4.8
-  OCP_VER=$(oc get clusterversion version -o=jsonpath='{.status.desired.version}')
-  if [[ "$OCP_VER" != "4.8"* ]]; then
-    OCP_VERSION_FLAG="true"
-  fi
-
-  IBM_SPEC=$(oc get storageclass ibm-spectrum-scale-sc --ignore-not-found=true)
-  if [[ "$IBM_SPEC" != "" && "$OCP_VERSION_FLAG" == "false" ]]; then
-    log $INFO "StorageClass \"ibm-spectrum-scale-sc\" exists and meets OCP version criteria."
-  elif [[ "$IBM_SPEC" != "" || "$OCP_VERSION_FLAG" == "true" ]]; then
-    printf " $fail_color $ERROR IBM Spectrum Fusion / IBM Spectrum Scale Container Native, only Red Hat OpenShift Container Platform 4.8 is supported.$color_end\n"
-    log $WARNING "See \"Storage\" section in https://ibm.biz/storage_consideration_370 for details.\n"
-    storageCheckRes+=("fail")
-    return 1
-  fi
-
-  IBM_SPEC_VE=$(checkAllowVolumeExpansion ibm-spectrum-scale-sc)
-  if [[ "$?" == "1" ]]; then
-    printf " $fail_color $ERROR StorageClass ibm-spectrum-scale-sc does not have allowedVolumeExpansion enabled. This is required for all large profile installs and strongly recommended for small profile installs. See \"Storage Class Requirements\" section in https://ibm.biz/storage_consideration_370 for details.$color_end\n"
-    storageCheckRes+=("fail")
-    return 1
-  fi
-
-  storageCheckRes+=("pass")
-  return 0
 }
 
 function checkStorage {
@@ -544,21 +509,11 @@ function checkStorage {
     log $INFO "No IBM Cloud Storage found... Skipping configuration check for IBM Cloud Storage Check."
   fi
 
-  # Check for IBM Spectrum Fusion / IBM Spectrum Scale Container Native
-  IBM_SPEC_FUSION=$(oc get storageclass ibm-spectrum-scale-sc --ignore-not-found=true)
-  if [[ "$IBM_SPEC_FUSION" != "" ]]; then
-    echo
-    log $INFO "A storage class related to IBM Spectrum Fusion or IBM Spectrum Scale Container Native was found."
-    storageFound+=("ibm-spec")
-  else
-    log $INFO "No IBM Spectrum Fusion or IBM Spectrum Scale Container Native... Skipping configuration check for IBM Spectrum."
-  fi
-
   # If no storageProviders were found, print an error...
   if [ ${#storageFound[@]} -eq 0 ]; then
     STORAGE_PROVIDER_RES=$fail_msg
     printf "$fail_color $ERROR At least one of the four Storage Providers are required$color_end\n"
-    printf "$fail_color $ERROR The supported Storage Providers are Portworx, Openshift Data Foundation, IBM Cloud Storage for ROKS, or IBM Spectrum Fusion/IBM Spectrum Scale Container Native. See https://ibm.biz/storage_consideration_370 for details.$color_end\n"
+    printf "$fail_color $ERROR The supported Storage Providers are Portworx, Openshift Data Foundation, IBM Cloud Storage for ROKS, or IBM Spectrum Fusion/IBM Spectrum Scale Container Native. See https://ibm.biz/storage_consideration_371 for details.$color_end\n"
     STORAGE_PROVIDER_RES=$fail_msg
     startEndSection "Storage Provider"
     return 1
@@ -567,11 +522,6 @@ function checkStorage {
   # Check the storageFound Array if ibm cloud storage is there, if run the function to check for that storageclass
   if [[ " ${storageFound[*]} " =~ "ibmc" ]]; then
     checkIBMCFileGoldGidStorage
-  fi
-
-  # Check the storageFound Array if ibm spectrum was found. If so, run the function to check for the expected storgeclasses
-  if [[ " ${storageFound[*]} " =~ "ibm-spec" ]]; then
-    checkIBMSpectrum
   fi
 
   # Check the storageFound Array if openshift data foundation was found. If so, run the function to check for the expected storgeclasses
@@ -627,7 +577,7 @@ function checkNetworkPolicy {
       NP_RES=$pass_msg
     else
       printf " $fail_color $ERROR Namespace default DOES NOT have the expected metadata label $color_end\n"
-      printf "Please see https://ibm.biz/aiops_netpolicy_370 to configure a network policy\n"
+      printf "Please see https://ibm.biz/aiops_netpolicy_371 to configure a network policy\n"
       NP_RES=$fail_msg
       startEndSection "Network Policy"
       return 1
