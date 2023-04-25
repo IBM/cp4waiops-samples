@@ -330,6 +330,34 @@ function checkAllowVolumeExpansion() {
   return 0
 }
 
+function checkIBMSpectrum {
+  MEETS_OCP_VERSION="false"
+
+  printf "\nChecking if IBM Storage Fusion is configured properly...\n"
+
+  # Check OCP version is 4.10 or 4.12
+  OCP_VER=$(oc get clusterversion version -o=jsonpath='{.status.desired.version}')
+  if [[ "$OCP_VER" == *"4.10"* || "$OCP_VER" == *"4.12"* ]]; then
+    # If it meets the ocp version requirement... check if ibm-spectrum-scale-sc storageclass has volume expansion enabled
+    IBM_SPEC_VE=$(checkAllowVolumeExpansion ibm-spectrum-scale-sc)
+    if [[ "$?" == "1" ]]; then
+      printf "${fail_color}${ERROR} StorageClass ibm-spectrum-scale-sc does not have allowedVolumeExpansion enabled. This is required for all large profile installs and strongly recommended for small profile installs. See \"Storage Class Requirements\" section in https://ibm.biz/storage_consideration_370 for details.$color_end\n"
+      storageCheckRes+=("fail")
+      return 1
+    fi
+    
+    storageCheckRes+=("pass")
+    printf "IBM Storage Fusion looks fine."
+    return 0
+  else
+    # OCP 4.10 or 4.12 was not found... fail this check
+    printf "${fail_color}${ERROR}If you intend to use Storage Fusion with AIOPS 3.7, you must have OCP 4.10 or 4.12 $color_end\n"
+    log $INFO "See Readme for more info about this."
+    storageCheckRes+=("fail")
+    return 1
+  fi
+}
+
 function checkODF {
   ODF_PODS=$1
   printf "\nChecking Openshift Data Foundation Configuration...\n"
@@ -477,6 +505,16 @@ function checkStorage {
   startEndSection "Storage Provider"
   log $INFO "Checking storage providers"
 
+  # Check for Storage Fusion
+  IBM_SPEC_FUSION=$(oc get storageclass ibm-spectrum-scale-sc --ignore-not-found=true)
+  if [[ "$IBM_SPEC_FUSION" != "" ]]; then
+    echo
+    log $INFO "A storage class related to Storage Fusion was found."
+    storageFound+=("ibm-spec")
+  else
+    log $INFO "No IBM Storage Fusion Found... Skipping configuration check."
+  fi
+
   # Check for any hints portworx is deployed. In this scenario, we look for any storage clusters that are deployed in all namespaces. Then
   # we check if the keyword "Online"
   STORAGE_CLUSTER=$(oc get storagecluster.core.libopenstorage.org -A --ignore-not-found=true --no-headers=true 2>>/dev/null)
@@ -532,6 +570,10 @@ function checkStorage {
   # Check the storageFound Array if portworx was found. If so, run the function to check for the expected storgeclasses
   if [[ " ${storageFound[*]} " =~ "portworx" ]]; then
     checkPortworx
+  fi
+
+  if [[ " ${storageFound[*]} " =~ "ibm-spec" ]]; then
+    checkIBMSpectrum
   fi
 
   # Check if there are any failing configurations, if so we can automatically send a failure result for this check
