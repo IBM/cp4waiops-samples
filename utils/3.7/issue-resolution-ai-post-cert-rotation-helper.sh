@@ -141,8 +141,8 @@ function rotate_deployments_for_dependency() {
     done
 }
 
-# clear_crt_cache_for_dependency is a function that will attempt to clear files in the global `$CERT_DIR`
-# directory where the files match the pattern "$CERT_CACHE_PATTERN". This function assumes the STS members
+# clear_crt_cache_for_dependency is a function that will attempt to clear files in the global cert
+# directory where the files match the pattern *-cert-sum. This function assumes the STS members
 # are numerically named according to the count of replicas. eg. abc-0, abc-1 for a count of 2.
 function clear_crt_cache_for_dependency() {
   arr=("$@")
