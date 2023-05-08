@@ -770,11 +770,14 @@ then
         then 
             echo "______________________________________________________________"
             echo "Subscriptions from openshift-operators namespace:" && echo ""
+            if [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.3" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.4" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.5" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.6" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.7" ]];
+            then
+                clusterAdminSkipMessage "ibm-automation-core"
+                clusterAdminSkipMessage "ibm-automation-eventprocessing"
+                clusterAdminSkipMessage "operators.coreos.com/ibm-automation.openshift-operators" 
+            fi
             clusterAdminSkipMessage "ibm-aiops-orchestrator"
-            clusterAdminSkipMessage "operators.coreos.com/ibm-automation.openshift-operators"
-            clusterAdminSkipMessage "ibm-automation-core"
             clusterAdminSkipMessage "ibm-automation-elastic" 
-            clusterAdminSkipMessage "ibm-automation-eventprocessing" 
             clusterAdminSkipMessage "ibm-automation-flink"
             clusterAdminSkipMessage "ibm-common-service-operator"
         fi
@@ -830,10 +833,13 @@ then
         getOperandRequestStatus "platform-api-request" "ibm-common-services" 
     else
         printf "${gray}[INFO] Skipping the following components (Hint: log in with CLUSTER_ADMIN credentials to view):${normal}${newline}"
-        clusterAdminSkipMessage "iaf-core-operator"
-        clusterAdminSkipMessage "iaf-eventprocessing-operator"
-        clusterAdminSkipMessage "iaf-operator"
-        clusterAdminSkipMessage "ibm-elastic-operator"
+        if [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.3" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.4" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.5" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.6" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.7" ]];
+        then
+            clusterAdminSkipMessage "iaf-core-operator"
+            clusterAdminSkipMessage "iaf-eventprocessing-operator"
+            clusterAdminSkipMessage "iaf-operator"
+            clusterAdminSkipMessage "ibm-elastic-operator"
+        fi
         clusterAdminSkipMessage "ibm-commonui-request"
         clusterAdminSkipMessage "ibm-iam-request"
         clusterAdminSkipMessage "ibm-mongodb-request"
