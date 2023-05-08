@@ -440,15 +440,18 @@ then
     echo "ZenService instances:" && echo ""
     getZenServiceStatus
 
-    echo "______________________________________________________________"
-    echo "AutomationUIConfig, AutomationBase, Cartridge, CartridgeRequirements, and EventProcessor instances:" && echo ""   
-    getAUICStatus
-    getABStatus
-    getCartridgeStatus
-    getCartridgeRequirementsStatus        
-    getIRLifecycleEventProcessorStatus
-    getAIOpsEventProcessorStatus
-
+    if [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.3" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.4" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.5" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.6" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.7" ]];
+    then 
+        echo "______________________________________________________________"
+        echo "AutomationUIConfig, AutomationBase, Cartridge, CartridgeRequirements, and EventProcessor instances:" && echo ""   
+        getAUICStatus
+        getABStatus
+        getCartridgeStatus
+        getCartridgeRequirementsStatus        
+        getIRLifecycleEventProcessorStatus
+        getAIOpsEventProcessorStatus
+    fi
+    
     echo "______________________________________________________________"
     echo "IRCore and AIOpsAnalyticsOrchestrator instances:" && echo ""
     getIRCoreStatus
@@ -500,14 +503,17 @@ then
     echo "ZenService instances:" && echo ""
     getZenServiceStatus
 
-    echo "______________________________________________________________"
-    echo "AutomationUIConfig, AutomationBase, Cartridge, CartridgeRequirements, and EventProcessor instances:" && echo ""   
-    getAUICStatus
-    getABStatus
-    getCartridgeStatus
-    getCartridgeRequirementsStatus        
-    getIRLifecycleEventProcessorStatus
-    getAIOpsEventProcessorStatus
+    if [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.3" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.4" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.5" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.6" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.7" ]];
+    then 
+        echo "______________________________________________________________"
+        echo "AutomationUIConfig, AutomationBase, Cartridge, CartridgeRequirements, and EventProcessor instances:" && echo ""   
+        getAUICStatus
+        getABStatus
+        getCartridgeStatus
+        getCartridgeRequirementsStatus        
+        getIRLifecycleEventProcessorStatus
+        getAIOpsEventProcessorStatus
+    fi
 
     echo "______________________________________________________________"
     echo "IRCore and AIOpsAnalyticsOrchestrator instances:" && echo ""
@@ -573,11 +579,14 @@ then
     getCSVStatus "$INSTALLATION_NAMESPACE" "ibm-aiops-ir-core"
     getCSVStatus "$INSTALLATION_NAMESPACE" "ibm-aiops-ir-lifecycle"
     getCSVStatus "$INSTALLATION_NAMESPACE" "ibm-aiops-orchestrator"
-    getCSVStatus "$INSTALLATION_NAMESPACE" "ibm-automation-core"
+    if [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.3" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.4" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.5" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.6" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.7" ]];
+    then 
+        getCSVStatus "$INSTALLATION_NAMESPACE" "ibm-automation-core"
+        getCSVStatus "$INSTALLATION_NAMESPACE" "ibm-automation-eventprocessing"
+        getCSVStatus "$INSTALLATION_NAMESPACE" "ibm-automation.v"
+    fi
     getCSVStatus "$INSTALLATION_NAMESPACE" "ibm-automation-elastic"
-    getCSVStatus "$INSTALLATION_NAMESPACE" "ibm-automation-eventprocessing"
     getCSVStatus "$INSTALLATION_NAMESPACE" "ibm-automation-flink"
-    getCSVStatus "$INSTALLATION_NAMESPACE" "ibm-automation.v"
     getCSVStatus "$INSTALLATION_NAMESPACE" "ibm-cloud-databases-redis"
     getCSVStatus "$INSTALLATION_NAMESPACE" "ibm-common-service-operator"
     getCSVStatus "$INSTALLATION_NAMESPACE" "ibm-management-kong"
@@ -604,8 +613,11 @@ then
         getCSVStatus "ibm-common-services" "ibm-cert-manager-operator"
         getCSVStatus "ibm-common-services" "ibm-common-service-operator"
         getCSVStatus "ibm-common-services" "ibm-commonui-operator"
-        getCSVStatus "ibm-common-services" "ibm-crossplane-operator"
-        getCSVStatus "ibm-common-services" "ibm-crossplane-provider-kubernetes-operator"
+        if [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.3" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.4" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.5" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.6" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.7" ]];
+        then 
+            getCSVStatus "ibm-common-services" "ibm-crossplane-operator"
+            getCSVStatus "ibm-common-services" "ibm-crossplane-provider-kubernetes-operator"
+        fi
         getCSVStatus "ibm-common-services" "ibm-events-operator"
         getCSVStatus "ibm-common-services" "ibm-iam-operator"
         getCSVStatus "ibm-common-services" "ibm-ingress-nginx-operator"
@@ -625,8 +637,11 @@ then
         clusterAdminSkipMessage "ibm-cert-manager-operator"
         clusterAdminSkipMessage "ibm-common-service-operator"
         clusterAdminSkipMessage "ibm-commonui-operator"
-        clusterAdminSkipMessage "ibm-crossplane-operator"
-        clusterAdminSkipMessage "ibm-crossplane-provider-kubernetes-operator"
+        if [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.3" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.4" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.5" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.6" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.7" ]];
+        then 
+            clusterAdminSkipMessage "ibm-crossplane-operator"
+            clusterAdminSkipMessage "ibm-crossplane-provider-kubernetes-operator"
+        fi
         clusterAdminSkipMessage "ibm-events-operator"
         clusterAdminSkipMessage "ibm-iam-operator"
         clusterAdminSkipMessage "ibm-ingress-nginx-operator"
@@ -651,10 +666,13 @@ then
     if [ "${CLUSTER_SCOPE_INSTALL}" == "false" ];
     then 
         getSubscriptionStatus "ibm-aiops-orchestrator" "$INSTALLATION_NAMESPACE" 
-        getSubscriptionStatusSelector "operators.coreos.com/ibm-automation.$INSTALLATION_NAMESPACE" "$INSTALLATION_NAMESPACE" 
-        getSubscriptionStatusGrep "ibm-automation-core" "$INSTALLATION_NAMESPACE" 
+        if [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.3" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.4" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.5" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.6" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.7" ]];
+        then 
+            getSubscriptionStatusSelector "operators.coreos.com/ibm-automation.$INSTALLATION_NAMESPACE" "$INSTALLATION_NAMESPACE" 
+            getSubscriptionStatusGrep "ibm-automation-core" "$INSTALLATION_NAMESPACE"
+            getSubscriptionStatusGrep "ibm-automation-eventprocessing" "$INSTALLATION_NAMESPACE" 
+        fi
         getSubscriptionStatusGrep "ibm-automation-elastic" "$INSTALLATION_NAMESPACE" 
-        getSubscriptionStatusGrep "ibm-automation-eventprocessing" "$INSTALLATION_NAMESPACE" 
         getSubscriptionStatusGrep "ibm-automation-flink" "$INSTALLATION_NAMESPACE" 
     fi
     getSubscriptionStatusGrep "ibm-common-service-operator" "$INSTALLATION_NAMESPACE" 
@@ -689,8 +707,11 @@ then
             getSubscriptionStatusGrep "ibm-common-service-operator" "ibm-common-services" 
         fi
         getSubscriptionStatus "ibm-commonui-operator" "ibm-common-services" 
-        getSubscriptionStatus "ibm-crossplane-operator-app" "ibm-common-services" 
-        getSubscriptionStatus "ibm-crossplane-provider-kubernetes-operator-app" "ibm-common-services" 
+        if [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.3" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.4" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.5" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.6" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.7" ]];
+        then
+            getSubscriptionStatus "ibm-crossplane-operator-app" "ibm-common-services" 
+            getSubscriptionStatus "ibm-crossplane-provider-kubernetes-operator-app" "ibm-common-services" 
+        fi
         getSubscriptionStatus "ibm-events-operator" "ibm-common-services" 
         getSubscriptionStatus "ibm-iam-operator" "ibm-common-services" 
         getSubscriptionStatus "ibm-ingress-nginx-operator" "ibm-common-services" 
@@ -707,10 +728,13 @@ then
             echo "______________________________________________________________"
             echo "Subscriptions from openshift-operators namespace:" && echo ""
             getSubscriptionStatus "ibm-aiops-orchestrator" "openshift-operators" 
-            getSubscriptionStatusSelector "operators.coreos.com/ibm-automation.openshift-operators" "openshift-operators" 
-            getSubscriptionStatusGrep "ibm-automation-core" "openshift-operators" 
+            if [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.3" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.4" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.5" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.6" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.7" ]];
+            then
+                getSubscriptionStatusSelector "operators.coreos.com/ibm-automation.openshift-operators" "openshift-operators" 
+                getSubscriptionStatusGrep "ibm-automation-core" "openshift-operators" 
+                getSubscriptionStatusGrep "ibm-automation-eventprocessing" "openshift-operators" 
+            fi
             getSubscriptionStatusGrep "ibm-automation-elastic" "openshift-operators" 
-            getSubscriptionStatusGrep "ibm-automation-eventprocessing" "openshift-operators" 
             getSubscriptionStatusGrep "ibm-automation-flink" "openshift-operators"
             getSubscriptionStatusGrep "ibm-common-service-operator" "openshift-operators" 
         fi
@@ -726,8 +750,11 @@ then
             clusterAdminSkipMessage "ibm-common-service-operator"
         fi
         clusterAdminSkipMessage "ibm-commonui-operator" 
-        clusterAdminSkipMessage "ibm-crossplane-operator-app"
-        clusterAdminSkipMessage "ibm-crossplane-provider-kubernetes-operator-app"
+        if [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.3" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.4" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.5" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.6" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.7" ]];
+        then
+            clusterAdminSkipMessage "ibm-crossplane-operator-app"
+            clusterAdminSkipMessage "ibm-crossplane-provider-kubernetes-operator-app"
+        fi
         clusterAdminSkipMessage "ibm-events-operator"
         clusterAdminSkipMessage "ibm-iam-operator"
         clusterAdminSkipMessage "ibm-ingress-nginx-operator"
@@ -761,21 +788,31 @@ then
 
     if [ "${CLUSTER_SCOPE_INSTALL}" == "false" ];
     then 
-        getOperandRequestStatus "iaf-core-operator" "$INSTALLATION_NAMESPACE"  
-        getOperandRequestStatus "iaf-eventprocessing-operator" "$INSTALLATION_NAMESPACE" 
-        getOperandRequestStatus "iaf-operator" "$INSTALLATION_NAMESPACE" 
-        getOperandRequestStatus "ibm-elastic-operator" "$INSTALLATION_NAMESPACE"
+        if [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.3" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.4" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.5" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.6" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.7" ]];
+        then
+            getOperandRequestStatus "iaf-core-operator" "$INSTALLATION_NAMESPACE"  
+            getOperandRequestStatus "iaf-eventprocessing-operator" "$INSTALLATION_NAMESPACE" 
+            getOperandRequestStatus "iaf-operator" "$INSTALLATION_NAMESPACE" 
+            getOperandRequestStatus "ibm-elastic-operator" "$INSTALLATION_NAMESPACE"
+        fi
     else
         if [[ "$CLUSTER_ADMIN" == "yes" ]];
         then
-            getOperandRequestStatus "iaf-core-operator" "openshift-operators"  
-            getOperandRequestStatus "iaf-eventprocessing-operator" "openshift-operators" 
-            getOperandRequestStatus "iaf-operator" "openshift-operators"
-            getOperandRequestStatus "ibm-elastic-operator" "openshift-operators"
+            if [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.3" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.4" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.5" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.6" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.7" ]];
+            then
+                getOperandRequestStatus "iaf-core-operator" "openshift-operators"  
+                getOperandRequestStatus "iaf-eventprocessing-operator" "openshift-operators" 
+                getOperandRequestStatus "iaf-operator" "openshift-operators"
+                getOperandRequestStatus "ibm-elastic-operator" "openshift-operators"
+            fi
         fi
     fi
-    getOperandRequestStatus "iaf-system" "$INSTALLATION_NAMESPACE" 
-    getOperandRequestStatus "iaf-system-common-service" "$INSTALLATION_NAMESPACE" 
+    if [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.3" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.4" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.5" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.6" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.7" ]];
+    then
+        getOperandRequestStatus "iaf-system" "$INSTALLATION_NAMESPACE" 
+        getOperandRequestStatus "iaf-system-common-service" "$INSTALLATION_NAMESPACE"
+        getOperandRequestStatus "operandrequest-kafkauser-iaf-system" "$INSTALLATION_NAMESPACE"
+    fi 
     getOperandRequestStatus "ibm-aiops-ai-manager" "$INSTALLATION_NAMESPACE" 
     getOperandRequestStatus "ibm-aiops-aiops-foundation" "$INSTALLATION_NAMESPACE" 
     if [[ "${SECURE_TUNNEL_EXISTS}" == "true" ]];
@@ -783,7 +820,6 @@ then
         getOperandRequestStatus "ibm-aiops-connection" "$INSTALLATION_NAMESPACE"  
     fi
     getOperandRequestStatus "ibm-iam-service" "$INSTALLATION_NAMESPACE" 
-    getOperandRequestStatus "operandrequest-kafkauser-iaf-system" "$INSTALLATION_NAMESPACE" 
 
     if [[ "$CLUSTER_ADMIN" == "yes" ]];
     then
