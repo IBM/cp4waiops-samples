@@ -323,4 +323,9 @@ BEDROCK_CRDS=(#Bedrock shim CRDS
                 "secretwatchers.operator.ibm.com"
                 "securityonboardings.operator.ibm.com"
                 "switcheritems.operators.ibm.com"
-                "zenservices.zen.cpd.ibm.com")
+                "zenservices.zen.cpd.ibm.com"
+                "ibmlicensingdefinitions.operator.ibm.com"
+                "ibmlicensingmetadatas.operator.ibm.com "
+                "ibmlicensingquerysources.operator.ibm.com"
+                "strimzipodsets.core.ibmevents.ibm.com"
+                "zenextensions.zen.cpd.ibm.com ")
