@@ -16,6 +16,31 @@
 # limitations under the License.
 #
 
+# usage is a function to show usage information
+function usage() {
+  echo "Usage: `basename $0`"
+  echo "Arguments: -h (show help prompt and exit)"
+  describe
+}
+
+# describe is a function describing script capabilities.
+function describe() {
+  echo "Description:
+ This script will execute a rollout for all ir-ai deployments, and optionally statefulsets.
+ In order to execute this script you must be logged in to the target cluster and project, with
+ commands available for oc, awk, and nc installed on the path. The user executing the script must
+ have administration permissions over statefulsets and deployments in the project, as well as exec
+ access for pods in the project. The script has no rollback function as rollouts are perceived to be
+ none-destructive and should not cause downtime to API endpoints or critical functions within the system."
+}
+
+# Did the user execute with the help arg set?
+if [[ "$1" == "-h" ]]; then
+  usage
+  exit 0
+fi
+
+
 # Parameter Constants
 LOGGING_VERBOSITY=6;
 KUBECTL_CMD="oc";
@@ -24,9 +49,17 @@ MANAGED_BY_REFERENCE="aiops-analytics-operator"; CR_REFERENCE="aiopsanalyticsorc
 
 # Logging Constants
 CRITICAL_LOG_LEVEL=1; ERROR_LOG_LEVEL=2; WARN_LOG_LEVEL=3; OP_SUCC_LEVEL=4;
-INFO_LOG_LEVEL=5; DEBUG_LOG_LEVEL=6; STDOUT_RED='\033[0;31m'; STDOUT_GREEN='\033[0;32m';
-STDOUT_YELLOW='\033[0;33m'; STDOUT_PURPLE='\033[0;35m';
-STDOUT_RESET_CODE='\033[0m';
+INFO_LOG_LEVEL=5; DEBUG_LOG_LEVEL=6;
+
+# If the output location is the terminal and we have colours available to idx 5
+if test -t 1; then
+  COL_RANGE=$(tput colors)
+  if test -n "$COL_RANGE" && test $COL_RANGE -ge 5; then
+    STDOUT_RED="$(tput setaf 1)"; STDOUT_GREEN="$(tput setaf 2)";
+    STDOUT_YELLOW="$(tput setaf 3)"; STDOUT_PURPLE="$(tput setaf 5)";
+    STDOUT_RESET_CODE="$(tput sgr0)";
+  fi
+fi
 
 # Global variables
 TRAPPED_STATUS_EXIT=0
@@ -43,7 +76,7 @@ function logok      () { LOG_LEVEL=$OP_SUCC_LEVEL      fmtlog "${STDOUT_GREEN}SU
 function fmtlog     () {
   if [ $LOGGING_VERBOSITY -ge $LOG_LEVEL ]; then
     datestring=`date +"%Y-%m-%d %H:%M:%S"`
-    echo "$datestring - $@"
+    echo  -e "$datestring - $@"
   fi
 }
 
@@ -84,6 +117,7 @@ function test_can_find_orchestrators_in_namespace() {
     logok "Found $CR_REFERENCE within target namespace $2"
   else
     logwarn "Could not find expected number of instances of the CR $CR_REFERENCE in namespace $2"
+    logwarn "You may be using the wrong openshift project, or may not have necessary permisions to execute this script"
     logcrit "Ensure there is exactly one instance of $CR_REFERENCE in namespace $2 to use this script"
     exit 1
   fi
@@ -161,6 +195,29 @@ function clear_crt_cache_for_dependency() {
     done
 }
 
+# Execute trivial tests to ensure all pre-reqs are satisfied
+
+test_for_client $KUBECTL_CMD
+test_client_logged_in $KUBECTL_CMD
+
+# Provide a prompt to the user to let them confirm execution.
+describe
+echo "Please confirm the current context listed below is correct:"
+echo "  o- Cluster:     " \
+  $($KUBECTL_CMD config view -o "jsonpath={.contexts[?(@.name==\"$(oc config view -o "jsonpath={\$.current-context}")\")].context.cluster}")
+echo "  o- Namespace:   " \
+  $($KUBECTL_CMD config view -o "jsonpath={.contexts[?(@.name==\"$(oc config view -o "jsonpath={\$.current-context}")\")].context.namespace}")
+echo "  o- User:        " \
+  $($KUBECTL_CMD config view -o "jsonpath={.contexts[?(@.name==\"$(oc config view -o "jsonpath={\$.current-context}")\")].context.user}")
+read -p "Would you like to continue? <y/N> " prompt
+if [[ $prompt == "y" || $prompt == "Y" || $prompt == "yes" || $prompt == "Yes" ]];
+then
+  echo "User "
+else
+  echo "User did not accept. Execution halted, preparing to exit with status 0"
+  exit 0
+fi
+
 # Debug Information
 logdebug "executing with oc client cmd: $KUBECTL_CMD"
 USER_RUNNING_SCRIPT=$($KUBECTL_CMD whoami)
@@ -168,9 +225,7 @@ logdebug "executing script as $USER_RUNNING_SCRIPT"
 CURRENT_NAMESPACE=$($KUBECTL_CMD config view --minify -o jsonpath='{..namespace}')
 logdebug "executing against target namespace $CURRENT_NAMESPACE"
 
-# Execute trivial tests to ensure all pre-reqs are satisfied
-test_for_client $KUBECTL_CMD
-test_client_logged_in $KUBECTL_CMD
+
 test_can_find_orchestrators_in_namespace $KUBECTL_CMD $CURRENT_NAMESPACE
 test_for_awk_wc
 
