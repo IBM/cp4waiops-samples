@@ -909,7 +909,7 @@ fi
 if [[ "$1" == "status-upgrade" ]]
 then
     # This command checks the status of CP4WAIOps upgrades
-    # to v3.3, v3.4, v3.5, v3.6, and v3.7.
+    # to v3.3, v3.4, v3.5, v3.6, v3.7, and v4.1.
 
     FAILING_UPGRADE=""
     SUCCESSFULLY_UPGRADED=""
