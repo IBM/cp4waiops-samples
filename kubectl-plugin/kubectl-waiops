@@ -209,6 +209,30 @@ getCartridgeRequirementsStatus() {
     fi
 }
 
+getKafkaStatus() {
+    # Kafka status
+    INSTANCE_KAFKA=$(oc get kafka iaf-system -o custom-columns='KIND:.kind,NAMESPACE:.metadata.namespace,NAME:.metadata.name,STATUS:.status.conditions[?(@.type=="Ready")].status')
+    STATUS_KAFKA=$(oc get kafka iaf-system -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}')
+    if [[ "$1" == "status-summary" ]];
+    then
+        printStatus "$STATUS_KAFKA" "True" "$INSTANCE_KAFKA" "status-summary"
+    else    
+        printStatus "$STATUS_KAFKA" "True" "$INSTANCE_KAFKA"
+    fi
+}
+
+getElasticsearchStatus() {
+    # Elastic status
+    INSTANCE_ELASTIC=$(oc get elasticsearches.elastic.automation.ibm.com iaf-system -o custom-columns='KIND:.kind,NAMESPACE:.metadata.namespace,NAME:.metadata.name,STATUS:.status.conditions[?(@.type=="Ready")].status')
+    STATUS_ELASTIC=$(oc get elasticsearches.elastic.automation.ibm.com iaf-system -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}')
+    if [[ "$1" == "status-summary" ]];
+    then
+        printStatus "$STATUS_ELASTIC" "True" "$INSTANCE_ELASTIC" "status-summary"
+    else    
+        printStatus "$STATUS_ELASTIC" "True" "$INSTANCE_ELASTIC"
+    fi
+}
+
 getIRLifecycleEventProcessorStatus() {
     # aiops-ir-lifecycle EventProcessor status
     INSTANCE_IR_EP=$(oc get eventprocessor aiops-ir-lifecycle -o custom-columns='KIND:.kind,NAMESPACE:.metadata.namespace,NAME:.metadata.name,VERSION:status.versions.reconciled,STATUS:.status.conditions[?(@.type=="Ready")].status,MESSAGE:.status.conditions[?(@.type=="Ready")].message')
@@ -450,6 +474,11 @@ then
         getCartridgeRequirementsStatus        
         getIRLifecycleEventProcessorStatus
         getAIOpsEventProcessorStatus
+    else
+        echo "______________________________________________________________"
+        echo "Kafka and Elasticsearch instances:" && echo ""   
+        getKafkaStatus
+        getElasticsearchStatus
     fi
     
     echo "______________________________________________________________"
@@ -513,6 +542,11 @@ then
         getCartridgeRequirementsStatus        
         getIRLifecycleEventProcessorStatus
         getAIOpsEventProcessorStatus
+    else
+        echo "______________________________________________________________"
+        echo "Kafka and Elasticsearch instances:" && echo ""   
+        getKafkaStatus
+        getElasticsearchStatus
     fi
 
     echo "______________________________________________________________"
@@ -948,6 +982,17 @@ then
         MAJORVERSION_FLINKEP="4.0"
     }
 
+    component-versions-41() {
+        MAJORVERSION_AIOPSUI="4.1"
+        MAJORVERSION_AIMANAGER="2.8"
+        MAJORVERSION_IRCORE="4.1"
+        MAJORVERSION_LIFECYCLESERVICE="4.1"
+        MAJORVERSION_AIOPSANALYTICSORCHESTRATOR="4.1"
+        MAJORVERSION_VAULTDEPLOY="4.1"
+        MAJORVERSION_VAULTACCESS="4.1"
+        MAJORVERSION_ASM="2.13"
+    }
+
     aiopsEdgeBaseUpgradeStatus() {    
         UPGRADED=$(oc get aiopsedge aiopsedge -o jsonpath='{.status.conditions[?(@.type=="UpgradeReady")].status}')
         CONFIGURED=$(oc get aiopsedge aiopsedge -o jsonpath='{.status.phase}')
@@ -1171,7 +1216,10 @@ then
     }
 
     # Check current instance version and component status checks for that version of CP4WAIOps
-    if [ "${VERSION_AIOPSORCHESTRATOR}" == "3.7" ];
+    if [ "${VERSION_AIOPSORCHESTRATOR}" == "4.1" ];
+    then 
+        component-versions-41
+    elif [ "${VERSION_AIOPSORCHESTRATOR}" == "3.7" ];
     then 
         component-versions-37
     elif [ "${VERSION_AIOPSORCHESTRATOR}" == "3.6" ];
@@ -1188,17 +1236,17 @@ then
         component-versions-33
     elif [ "${VERSION_AIOPSORCHESTRATOR}" == "0.1" ]
     then
-        # for developer builds (v0.1), we will check against release-3.7 versions
-        component-versions-37
+        # for developer builds (v0.1), we will check against release-4.1 versions
+        component-versions-41
         echo ""
         echo "${red}${bold}NOTE: ${normal}Your Cloud Pak for Watson AIOps AI Manager install appears to be an internal dev version (v${VERSION_AIOPSORCHESTRATOR})."
-        echo "      The status-upgrade command checks the status of upgrades to v3.3, v3.4, v3.5, v3.6, and v3.7 only." 
-        echo "      Therefore, the upgrade checks below will be against v3.7 component versions."
-        echo "      This may influence your results below if your dev build is not based on release-3.7.${normal}"
+        echo "      The status-upgrade command checks the status of upgrades to v3.3, v3.4, v3.5, v3.6, v3.7, and v4.1 only." 
+        echo "      Therefore, the upgrade checks below will be against v4.1 component versions."
+        echo "      This may influence your results below if your dev build is not based on release-4.1.${normal}"
     else
         echo ""
         echo "${red}${bold}ERROR: ${normal}Your Cloud Pak for Watson AIOps AI Manager install appears to be v${VERSION_AIOPSORCHESTRATOR}."
-        echo "       The status-upgrade command checks the status of upgrades to v3.3, v3.4, v3.5, v3.6, and v3.7 only." 
+        echo "       The status-upgrade command checks the status of upgrades to v3.3, v3.4, v3.5, v3.6, v3.7, and v4.1 only." 
         echo "       The version you are using is not supported for use with the status-upgrade command. Exiting."
         echo ""
         exit 0
@@ -1219,7 +1267,10 @@ then
     postgresUpgradeStatus
     secureTunnelUpgradeStatus
     asmUpgradeStatus
-    FlinkEventProcessorUpgradeStatus
+    if [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.3" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.4" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.5" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.6" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.7" ]];
+    then
+        FlinkEventProcessorUpgradeStatus
+    fi
 
     # Print out results of status checks
     printf "
@@ -1258,15 +1309,17 @@ fi
 if [[ "$1" == "status-summary" ]]
 then
     oc project ${INSTALLATION_NAMESPACE}
-
+    if [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.3" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.4" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.5" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.6" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.7" ]];
+    then
+        getAUICStatus "status-summary"
+        getABStatus "status-summary"
+        getCartridgeStatus "status-summary"
+        getCartridgeRequirementsStatus "status-summary"        
+        getIRLifecycleEventProcessorStatus "status-summary"
+        getAIOpsEventProcessorStatus "status-summary"
+    fi
     getInstallationStatus "status-summary"
     getZenServiceStatus "status-summary"
-    getAUICStatus "status-summary"
-    getABStatus "status-summary"
-    getCartridgeStatus "status-summary"
-    getCartridgeRequirementsStatus "status-summary"        
-    getIRLifecycleEventProcessorStatus "status-summary"
-    getAIOpsEventProcessorStatus "status-summary"
     getIRCoreStatus "status-summary"
     getAIOpsAnalyticsOrchestratorStatus "status-summary"
     getLifecycleServiceStatus "status-summary"        
@@ -1275,6 +1328,8 @@ then
     getASMStatus "status-summary"
     getAIOpsEdgeStatus "status-summary"
     getAIOpsUIStatus "status-summary"
+    getKafkaStatus "status-summary"
+    getElasticsearchStatus "status-summary"
     
     if [[ "$SUMMARY_FAILURE" == "" ]];
     then
