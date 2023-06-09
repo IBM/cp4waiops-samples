@@ -151,37 +151,69 @@ getZenServiceStatus() {
 
 getAUICStatus() {
     # AutomationUIConfig status
-    INSTANCE_AUIC=$(oc get automationuiconfig -o custom-columns='KIND:.kind,NAMESPACE:.metadata.namespace,NAME:.metadata.name,VERSION:status.versions.reconciled,STATUS:.status.conditions[?(@.type=="Ready")].status,MESSAGE:.status.conditions[?(@.type=="Ready")].message')
     if [[ "$CLUSTER_ADMIN" == "yes" ]];
     then
-        NAME_AUIC=$(oc get automationuiconfig -A --no-headers | while read a b c; do echo "$b"; done; 2>/dev/null)
-    else    
-        NAME_AUIC=$(oc get automationuiconfig --no-headers | while read a b c; do echo "$a"; done; 2>/dev/null)
-    fi
-    STATUS_AUIC=$(oc get automationuiconfig $NAME_AUIC -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}')
-    if [[ "$1" == "status-summary" ]];
-    then
-        printStatus "$STATUS_AUIC" "True" "$INSTANCE_AUIC" "status-summary"
+        AUIC_INSTANCES=$(oc get automationuiconfig -A --no-headers | while read a b c; do echo "$a $b"; done; 2>/dev/null)
+        AUICS=()
+        while IFS= read -r line; do
+            AUICS+=("$line")
+        done <<< "$AUIC_INSTANCES"
+
+        for string in "${AUICS[@]}"; do
+            read -r NAMESPACE AUIC <<< "$string"
+            INSTANCE_AUIC=$(oc get automationuiconfig -n $NAMESPACE -o custom-columns='KIND:.kind,NAMESPACE:.metadata.namespace,NAME:.metadata.name,VERSION:status.versions.reconciled,STATUS:.status.conditions[?(@.type=="Ready")].status,MESSAGE:.status.conditions[?(@.type=="Ready")].message')
+            STATUS_AUIC=$(oc get automationuiconfig $AUIC -n $NAMESPACE -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}')
+            if [[ "$1" == "status-summary" ]];
+            then
+                printStatus "$STATUS_AUIC" "True" "$INSTANCE_AUIC" "status-summary"
+            else
+                printStatus "$STATUS_AUIC" "True" "$INSTANCE_AUIC"
+            fi
+        done
     else
-        printStatus "$STATUS_AUIC" "True" "$INSTANCE_AUIC"
+        INSTANCE_AUIC=$(oc get automationuiconfig -o custom-columns='KIND:.kind,NAMESPACE:.metadata.namespace,NAME:.metadata.name,VERSION:status.versions.reconciled,STATUS:.status.conditions[?(@.type=="Ready")].status,MESSAGE:.status.conditions[?(@.type=="Ready")].message')
+        NAME_AUIC=$(oc get automationuiconfig --no-headers | while read a b c; do echo "$a"; done; 2>/dev/null)
+        STATUS_AUIC=$(oc get automationuiconfig $NAME_AUIC -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}')
+        if [[ "$1" == "status-summary" ]];
+        then
+            printStatus "$STATUS_AUIC" "True" "$INSTANCE_AUIC" "status-summary"
+        else
+            printStatus "$STATUS_AUIC" "True" "$INSTANCE_AUIC"
+        fi
     fi
 }
 
 getABStatus() {
-    # AutomationBase status
-    INSTANCE_AB=$(oc get automationbase -o custom-columns='KIND:.kind,NAMESPACE:.metadata.namespace,NAME:.metadata.name,VERSION:status.versions.reconciled,STATUS:.status.conditions[?(@.type=="Ready")].status,MESSAGE:.status.conditions[?(@.type=="Ready")].message')
+    # AutomationBase status    
     if [[ "$CLUSTER_ADMIN" == "yes" ]];
     then
-        NAME_AB=$(oc get automationbase -A --no-headers | while read a b c; do echo "$b"; done; 2>/dev/null)
-    else    
-        NAME_AB=$(oc get automationbase --no-headers | while read a b c; do echo "$a"; done; 2>/dev/null)
-    fi
-    STATUS_AB=$(oc get automationbase $NAME_AB -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}')
-    if [[ "$1" == "status-summary" ]];
-    then
-        printStatus "$STATUS_AB" "True" "$INSTANCE_AB" "status-summary"
+        AB_INSTANCES=$(oc get automationbase -A --no-headers | while read a b c; do echo "$a $b"; done; 2>/dev/null)
+        ABS=()
+        while IFS= read -r line; do
+            ABS+=("$line")
+        done <<< "$AB_INSTANCES"
+
+        for string in "${ABS[@]}"; do
+            read -r NAMESPACE AB <<< "$string"
+            INSTANCE_AB=$(oc get automationbase -n $NAMESPACE -o custom-columns='KIND:.kind,NAMESPACE:.metadata.namespace,NAME:.metadata.name,VERSION:status.versions.reconciled,STATUS:.status.conditions[?(@.type=="Ready")].status,MESSAGE:.status.conditions[?(@.type=="Ready")].message')
+            STATUS_AB=$(oc get automationbase $AB -n $NAMESPACE -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}')
+            if [[ "$1" == "status-summary" ]];
+            then
+                printStatus "$STATUS_AB" "True" "$INSTANCE_AB" "status-summary"
+            else
+                printStatus "$STATUS_AB" "True" "$INSTANCE_AB"
+            fi
+        done       
     else
-        printStatus "$STATUS_AB" "True" "$INSTANCE_AB"
+        INSTANCE_AB=$(oc get automationbase -o custom-columns='KIND:.kind,NAMESPACE:.metadata.namespace,NAME:.metadata.name,VERSION:status.versions.reconciled,STATUS:.status.conditions[?(@.type=="Ready")].status,MESSAGE:.status.conditions[?(@.type=="Ready")].message')    
+        NAME_AB=$(oc get automationbase --no-headers | while read a b c; do echo "$a"; done; 2>/dev/null)
+        STATUS_AB=$(oc get automationbase $NAME_AB -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}')
+        if [[ "$1" == "status-summary" ]];
+        then
+            printStatus "$STATUS_AB" "True" "$INSTANCE_AB" "status-summary"
+        else
+            printStatus "$STATUS_AB" "True" "$INSTANCE_AB"
+        fi
     fi
 }
 
