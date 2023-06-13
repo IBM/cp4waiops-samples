@@ -862,7 +862,6 @@ then
             getOperandRequestStatus "iaf-core-operator" "$INSTALLATION_NAMESPACE"  
             getOperandRequestStatus "iaf-eventprocessing-operator" "$INSTALLATION_NAMESPACE" 
             getOperandRequestStatus "iaf-operator" "$INSTALLATION_NAMESPACE" 
-            getOperandRequestStatus "ibm-elastic-operator" "$INSTALLATION_NAMESPACE"
         fi
     else
         if [[ "$CLUSTER_ADMIN" == "yes" ]];
@@ -872,7 +871,6 @@ then
                 getOperandRequestStatus "iaf-core-operator" "openshift-operators"  
                 getOperandRequestStatus "iaf-eventprocessing-operator" "openshift-operators" 
                 getOperandRequestStatus "iaf-operator" "openshift-operators"
-                getOperandRequestStatus "ibm-elastic-operator" "openshift-operators"
             fi
         fi
     fi
@@ -904,7 +902,6 @@ then
             clusterAdminSkipMessage "iaf-core-operator"
             clusterAdminSkipMessage "iaf-eventprocessing-operator"
             clusterAdminSkipMessage "iaf-operator"
-            clusterAdminSkipMessage "ibm-elastic-operator"
         fi
         clusterAdminSkipMessage "ibm-commonui-request"
         clusterAdminSkipMessage "ibm-iam-request"
