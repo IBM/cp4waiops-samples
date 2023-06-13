@@ -1,0 +1,8 @@
+apiVersion: securityenforcement.admission.cloud.ibm.com/v1beta1
+kind: ClusterImagePolicy
+metadata:
+  name: mongo-image-policy
+spec:
+ repositories:
+  - name: "MONGODB_DUMP_IMAGE"
+    policy:

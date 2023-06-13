@@ -494,6 +494,12 @@ delete_crd_group () {
             oc delete crd $CRD --ignore-not-found
         done
     ;;
+    "ASM_CRDS")
+        for CRD in ${ASM_CRDS[@]}; do
+            log $INFO "Deleting CRD $CRD.."
+            oc delete crd $CRD --ignore-not-found
+        done
+    ;;
     esac
 }
 
@@ -561,8 +567,8 @@ check_additional_installation_exists(){
 
 check_additional_asm_exists(){
     log $INFO "Checking if any additional ASM resources (ie from Event Manager installation) are on the cluster."
-    if [ `oc get asms.asm.ibm.com -A --no-headers | while read a b; do echo $a | grep -vw $CP4WAIOPS_PROJECT; done | wc -l`  -gt 0 ] ||
-     [ `oc get asmformations.asm.ibm.com -A --no-headers | while read a b; do echo $a | grep -vw $CP4WAIOPS_PROJECT; done | wc -l` -gt 0 ] ; then
+    if [ `oc get asms.asm.ibm.com -A --no-headers --ignore-not-found=true | while read a b; do echo $a | grep -vw $CP4WAIOPS_PROJECT; done | wc -l`  -gt 0 ] ||
+     [ `oc get asmformations.asm.ibm.com -A --no-headers --ignore-not-found=true | while read a b; do echo $a | grep -vw $CP4WAIOPS_PROJECT; done | wc -l` -gt 0 ] ; then
         log $INFO "ASM resource instances were found outside the $CP4WAIOPS_PROJECT namespace"
         DELETE_ASM="false"
     else

@@ -170,7 +170,7 @@ getAUICStatus() {
                 printStatus "$STATUS_AUIC" "True" "$INSTANCE_AUIC"
             fi
         done
-    else    
+    else
         INSTANCE_AUIC=$(oc get automationuiconfig -o custom-columns='KIND:.kind,NAMESPACE:.metadata.namespace,NAME:.metadata.name,VERSION:status.versions.reconciled,STATUS:.status.conditions[?(@.type=="Ready")].status,MESSAGE:.status.conditions[?(@.type=="Ready")].message')
         NAME_AUIC=$(oc get automationuiconfig --no-headers | while read a b c; do echo "$a"; done; 2>/dev/null)
         STATUS_AUIC=$(oc get automationuiconfig $NAME_AUIC -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}')
@@ -184,7 +184,7 @@ getAUICStatus() {
 }
 
 getABStatus() {
-    # AutomationBase status
+    # AutomationBase status    
     if [[ "$CLUSTER_ADMIN" == "yes" ]];
     then
         AB_INSTANCES=$(oc get automationbase -A --no-headers | while read a b c; do echo "$a $b"; done; 2>/dev/null)
@@ -203,7 +203,7 @@ getABStatus() {
             else
                 printStatus "$STATUS_AB" "True" "$INSTANCE_AB"
             fi
-        done
+        done       
     else
         INSTANCE_AB=$(oc get automationbase -o custom-columns='KIND:.kind,NAMESPACE:.metadata.namespace,NAME:.metadata.name,VERSION:status.versions.reconciled,STATUS:.status.conditions[?(@.type=="Ready")].status,MESSAGE:.status.conditions[?(@.type=="Ready")].message')    
         NAME_AB=$(oc get automationbase --no-headers | while read a b c; do echo "$a"; done; 2>/dev/null)
