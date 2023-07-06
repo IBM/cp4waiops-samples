@@ -1,0 +1,60 @@
+{
+  "details": [
+
+    {
+      "namespace": "CS_NAMESPACE",
+      "pod": "dummy-db",
+      "volume": "mongodump"
+    },
+    {
+      "namespace": "AIOPS_NAMESPACE",
+      "pod": "es-backup",
+      "volume": "elasticsearch-backups"
+    },
+    {
+      "namespace": "AIOPS_NAMESPACE",
+      "pod": "backup-back-aiops-topology-cassandra",
+      "volume": "backup"
+    },
+    {
+      "namespace": "AIOPS_NAMESPACE",
+      "pod": "backup-data-c-example-couchdbcluster-m",
+      "volume": "backup"
+    },
+    {
+      "namespace": "AIOPS_NAMESPACE",
+      "pod": "backup-data-c-example-redis-m",
+      "volume": "backup"
+    },
+    {
+      "namespace": "AIOPS_NAMESPACE",
+      "pod": "backup-export-aimanager-ibm-minio",
+      "volume": "backup"
+    },
+    {
+      "namespace": "AIOPS_NAMESPACE",
+      "pod": "backup-metastore",
+      "volume": "data"
+    },
+
+    {
+      "namespace": "AIOPS_NAMESPACE",
+      "pod": "backup-postgres",
+      "volume": "backup"
+    },
+
+    {
+      "namespace": "AIOPS_NAMESPACE",
+      "pod": "backup-other-resources",
+      "volume": "data"
+    },
+
+    {
+      "namespace": "AIOPS_NAMESPACE",
+      "pod": "backup-cam",
+      "volume": "data"
+    }
+    
+
+  ]
+}

@@ -1,0 +1,27 @@
+{
+  "spec": {
+    "snapshotStores": [
+      {
+        "name": "es-backup",
+        "storage": {
+          "type": "persistent-claim",
+          "volumeClaimTemplate": {
+            "spec": {
+              "accessModes": [
+                "ReadWriteMany"
+              ],
+              "resources": {
+                "requests": {
+                  "storage": "50Gi"
+                }
+              },
+              "storageClassName": "STORAGE_CLASS",
+              "volumeMode": "Filesystem"
+            }
+          }
+        }
+      }
+    ]
+  }
+}
+
