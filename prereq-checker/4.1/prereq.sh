@@ -41,7 +41,6 @@ ERROR="[ERROR]"
 # For Summary method
 OCP_VER_RES=""
 STORAGE_PROVIDER_RES=""
-NP_RES=""
 PROFILE_RES=""
 PS_RES=""
 
@@ -592,40 +591,6 @@ function checkStorage {
   return 0 
 }
 
-function checkNetworkPolicy {
-  endpointPubStrat=$(oc get ingresscontroller default -n openshift-ingress-operator -o jsonpath='{.status.endpointPublishingStrategy.type}')
-  
-  echo
-  startEndSection "Network Policy"
-  log $INFO "Checking Network Policy configuration"
-
-  if [[ "$endpointPubStrat" == "HostNetwork" ]]; then    
-    # A comparison will be run against two different expected labels. Certain versions of OC cli
-    # have different outputs
-    policygroupLabel=$(oc get namespace default -o jsonpath='{.metadata.labels}')
-    expectedLabel="network.openshift.io/policy-group:ingress"   # Result in OC v4.4.13
-    altExpectedLabel="\"network.openshift.io/policy-group\":\"ingress\"" # Result in OC v4.31+
-    
-    # Check if expectedLabel exists as a substring in policygroupLabel
-    if [[ "$policygroupLabel" == *"$expectedLabel"* || "$policygroupLabel" == *"$altExpectedLabel"* ]]; then
-      log $INFO "Namespace default has expected metadata label. Network policy configured correctly."
-      NP_RES=$pass_msg
-    else
-      printf " $fail_color $ERROR Namespace default DOES NOT have the expected metadata label $color_end\n"
-      printf "Please see https://ibm.biz/aiops_netpolicy_41 to configure a network policy\n"
-      NP_RES=$fail_msg
-      startEndSection "Network Policy"
-      return 1
-    fi
-  else
-    # ROKS -  Extra configuration is not required
-    log $INFO "HostNetwork endpoint publishing strategy is not used."
-    NP_RES=$pass_msg
-  fi
-  startEndSection "Network Policy"
-  return 0
-}
-
 get_worker_node_list() {
 
   if [ -z "${all_node_list}" ] ; then
@@ -897,8 +862,6 @@ showSummary() {
   printf "${string}\n"
   string=`printf "      [ %s ] Storage Provider\n" "${STORAGE_PROVIDER_RES}"`
   printf "${string}\n"
-  string=`printf "      [ %s ] Network Policy" "${NP_RES}"`
-  printf "${string}\n"
   string=`printf "      [ %s ] Small or Large Profile Install Resources" "${PROFILE_RES}"`
   printf "${string}\n"
   startEndSection "Prerequisite Checker Tool Summary"
@@ -916,7 +879,6 @@ function main {
   checkOCPVersion || fail_found=1
   checkEntitlementSecret || fail_found=1
   checkStorage || fail_found=1
-  checkNetworkPolicy || fail_found=1
   checkSmallOrLargeProfileInstall || fail_found=1
 
   showSummary
