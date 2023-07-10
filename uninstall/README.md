@@ -12,7 +12,7 @@ Note: For uninstall scripts v3.x, the script includes optionally uninstalling th
 
 Clone this repo.
 ```
-  git clone https://github.ibm.com/katamari/katamari-util.git 
+  git clone https://github.com/IBM/cp4waiops-samples.git
   cd uninstall/
 ```
 
