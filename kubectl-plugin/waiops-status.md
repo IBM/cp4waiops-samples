@@ -1,4 +1,4 @@
-#### ***NOTE**: <u>from CP4WAIOps v4.1.0 onwards, the use of this status-checking tool is now considered **optional**.</u> Please primarily refer to the installation status messages provided directly in the `ibm-aiops-orchestrator` CR of your cluster's installation.*
+#### ***NOTE**: from CP4WAIOps v4.1.0 onwards, the use of this status-checking tool is now considered **optional**. Please primarily refer to the installation status messages provided directly in the `ibm-aiops-orchestrator` CR of your cluster's installation.*
 
 # kubectl-waiops
 
