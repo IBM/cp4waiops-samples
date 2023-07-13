@@ -5,13 +5,13 @@ set -eo pipefail
 # These defaults are given in section 'AI Manager only Hardware requirement totals' under
 # 'AI Manager - Hardware requirements' https://ibm.biz/aiops_hardware_41
 # Minimum resource values for small profile 4.1.x
-NODE_COUNT_SMALL_3_7=3
-VCPU_SMALL_3_7=56
-MEMORY_SMALL_3_7=140
+NODE_COUNT_SMALL_4_1=3
+VCPU_SMALL_4_1=62
+MEMORY_SMALL_4_1=140
 # Minimum resource values for large profile 4.1.x
-NODE_COUNT_LARGE_3_7=10
-VCPU_LARGE_3_7=156
-MEMORY_LARGE_3_7=360
+NODE_COUNT_LARGE_4_1=10
+VCPU_LARGE_4_1=162
+MEMORY_LARGE_4_1=360
 
  
 log () {
@@ -768,19 +768,19 @@ check_available_cpu_and_memory() {
 analyze_resource_display() {
 
 ## Display for regular install
-if [[ $worker_node_count -ge $NODE_COUNT_LARGE_3_7 ]]; then
+if [[ $worker_node_count -ge $NODE_COUNT_LARGE_4_1 ]]; then
    large_worker_node_count_string=`printf "$pass_color $worker_node_count $color_end\n"`
 else
    large_worker_node_count_string=`printf "$fail_color $worker_node_count $color_end\n"`
 fi
   
-if [[ $total_cpu_unrequested -ge $VCPU_LARGE_3_7 ]]; then
+if [[ $total_cpu_unrequested -ge $VCPU_LARGE_4_1 ]]; then
    large_total_cpu_unrequested_string=`printf "$pass_color $total_cpu_unrequested $color_end\n"`
 else
    large_total_cpu_unrequested_string=`printf "$fail_color $total_cpu_unrequested $color_end\n"`
 fi
 
-if [[ $total_memory_unrequested_GB -ge $MEMORY_LARGE_3_7 ]]; then
+if [[ $total_memory_unrequested_GB -ge $MEMORY_LARGE_4_1 ]]; then
    large_total_memory_unrequested_GB_string=`printf "$pass_color $total_memory_unrequested_GB $color_end\n"`
 elif [[ $total_memory_unrequested_GB -le 0 && "$unitNotSupported" -eq "true"  ]]; then
    large_total_memory_unrequested_GB_string=`printf "$fail_color DNE $color_end\n"`
@@ -788,19 +788,19 @@ else
    large_total_memory_unrequested_GB_string=`printf "$fail_color $total_memory_unrequested_GB $color_end\n"`
 fi
 
-if [[ $worker_node_count -ge $NODE_COUNT_SMALL_3_7 ]]; then
+if [[ $worker_node_count -ge $NODE_COUNT_SMALL_4_1 ]]; then
    small_worker_node_count_string=`printf "$pass_color $worker_node_count $color_end\n"`
 else
    small_worker_node_count_string=`printf "$fail_color $worker_node_count $color_end\n"`
 fi
   
-if [[ $total_cpu_unrequested -ge $VCPU_SMALL_3_7 ]]; then
+if [[ $total_cpu_unrequested -ge $VCPU_SMALL_4_1 ]]; then
    small_total_cpu_unrequested_string=`printf "$pass_color $total_cpu_unrequested $color_end\n"`
 else
    small_total_cpu_unrequested_string=`printf "$fail_color $total_cpu_unrequested $color_end\n"`
 fi
   
-if [[ $total_memory_unrequested_GB -ge $MEMORY_SMALL_3_7 ]]; then
+if [[ $total_memory_unrequested_GB -ge $MEMORY_SMALL_4_1 ]]; then
    small_total_memory_unrequested_GB_string=`printf "$pass_color $total_memory_unrequested_GB $color_end\n"`
 elif [[ $total_memory_unrequested_GB -le 0 && "$unitNotSupported" -eq "true"  ]]; then
    small_total_memory_unrequested_GB_string=`printf "$fail_color DNE $color_end\n"`
@@ -823,9 +823,9 @@ checkSmallOrLargeProfileInstall() {
   log $INFO "==================================Resource Summary====================================================="
   header=`printf "   %40s   |      %s      |     %s" "Nodes" "vCPU" "Memory(GB)"`
   log $INFO "${header}"
-  string=`printf "Small profile(available/required)  [ %s/ %s ]   [ %s/ %s ]       [ %s/ %s ]" "$small_worker_node_count_string" "$NODE_COUNT_SMALL_3_7" "$small_total_cpu_unrequested_string" "$VCPU_SMALL_3_7" "$small_total_memory_unrequested_GB_string" "$MEMORY_SMALL_3_7"`
+  string=`printf "Small profile(available/required)  [ %s/ %s ]   [ %s/ %s ]       [ %s/ %s ]" "$small_worker_node_count_string" "$NODE_COUNT_SMALL_4_1" "$small_total_cpu_unrequested_string" "$VCPU_SMALL_4_1" "$small_total_memory_unrequested_GB_string" "$MEMORY_SMALL_4_1"`
   log $INFO "${string}"
-  string=`printf "Large profile(available/required)  [ %s/ %s ]   [ %s/ %s ]       [ %s/ %s ]" "$large_worker_node_count_string" "$NODE_COUNT_LARGE_3_7" "$large_total_cpu_unrequested_string" "$VCPU_LARGE_3_7" "$large_total_memory_unrequested_GB_string" "$MEMORY_LARGE_3_7"`
+  string=`printf "Large profile(available/required)  [ %s/ %s ]   [ %s/ %s ]       [ %s/ %s ]" "$large_worker_node_count_string" "$NODE_COUNT_LARGE_4_1" "$large_total_cpu_unrequested_string" "$VCPU_LARGE_4_1" "$large_total_memory_unrequested_GB_string" "$MEMORY_LARGE_4_1"`
   log $INFO "${string}"
   
   # Script need to output a message if memory cant be calculated. This script only supports Ki, Mi, Gi, Ti, Ei, Pi, bytes, and m.
@@ -835,9 +835,9 @@ checkSmallOrLargeProfileInstall() {
 
   log $INFO "==================================Resource Summary====================================================="
      
-  if [[ ($worker_node_count -ge $NODE_COUNT_LARGE_3_7) && ($total_cpu_unrequested -ge $VCPU_LARGE_3_7) && ($total_memory_unrequested_GB -ge $MEMORY_LARGE_3_7)  ]] ; then
+  if [[ ($worker_node_count -ge $NODE_COUNT_LARGE_4_1) && ($total_cpu_unrequested -ge $VCPU_LARGE_4_1) && ($total_memory_unrequested_GB -ge $MEMORY_LARGE_4_1)  ]] ; then
      log $INFO "Cluster currently has resources available to create a large profile of Cloud Pak for Watson AIOps AI Manager"
-  elif [[ $worker_node_count -ge $NODE_COUNT_SMALL_3_7 && ($total_cpu_unrequested -ge $VCPU_SMALL_3_7) && ($total_memory_unrequested_GB -ge $MEMORY_SMALL_3_7) ]] ; then
+  elif [[ $worker_node_count -ge $NODE_COUNT_SMALL_4_1 && ($total_cpu_unrequested -ge $VCPU_SMALL_4_1) && ($total_memory_unrequested_GB -ge $MEMORY_SMALL_4_1) ]] ; then
      log $INFO "Cluster currently has resources available to create a small profile of Cloud Pak for Watson AIOps AI Manager"
      echo
   else
