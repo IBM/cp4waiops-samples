@@ -174,12 +174,6 @@ if [[ ! -z "$CP4WAIOPS_PROJECT"  ]]; then
             log $INFO "Deleting cert $CERT.."
             oc delete $CERT -n $CP4WAIOPS_PROJECT --ignore-not-found
       done
-
-      log $INFO "Deleting Postgres Cluster $INSTALLATION_NAME-edb-postgres in $CP4WAIOPS_PROJECT"
-      oc delete cluster.postgresql.k8s.enterprisedb.io/${INSTALLATION_NAME}-edb-postgres -n $CP4WAIOPS_PROJECT
-
-      log $INFO "Deleting FlinkCluster cp4waiops-eventprocessor-eve-29ee-ep in $CP4WAIOPS_PROJECT"
-      oc delete flinkcluster cp4waiops-eventprocessor-eve-29ee-ep -n $CP4WAIOPS_PROJECT
    fi
 
    # Start cleaning up remaining resources in the project that CP4WAIOps created 
@@ -213,6 +207,12 @@ if [[ ! -z "$CP4WAIOPS_PROJECT"  ]]; then
       oc patch configmap aiops-custom-size-profile -n $CP4WAIOPS_PROJECT --type merge -p '{"metadata":{"finalizers": [null]}}'
       oc delete configmap aiops-custom-size-profile -n $CP4WAIOPS_PROJECT
    fi
+
+   log $INFO "Deleting Postgres Cluster $INSTALLATION_NAME-edb-postgres in $CP4WAIOPS_PROJECT"
+   oc delete cluster.postgresql.k8s.enterprisedb.io/${INSTALLATION_NAME}-edb-postgres -n $CP4WAIOPS_PROJECT
+
+   log $INFO "Deleting FlinkCluster cp4waiops-eventprocessor-eve-29ee-ep in $CP4WAIOPS_PROJECT"
+   oc delete flinkcluster cp4waiops-eventprocessor-eve-29ee-ep -n $CP4WAIOPS_PROJECT
 
    #Delete these PVC's always without user's consent
    log $INFO "Deleting Internal PVCs in $CP4WAIOPS_PROJECT"

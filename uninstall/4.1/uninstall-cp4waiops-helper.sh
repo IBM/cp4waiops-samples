@@ -256,6 +256,14 @@ delete_zenservice_instance () {
     if  [ `oc get zenservice $zenservice_name -n $project --ignore-not-found | wc -l` -gt 0 ] ; then
         log $INFO "Found zenservice CR $zenservice_name to delete."
 
+        log $INFO "Checking for ZenClient"
+        oc get client.oidc.security.ibm.com -n $CP4WAIOPS_PROJECT zenclient-cp4waiops 2>>/dev/null
+        if [[ "$?" == "0" ]]; then
+            log $INFO "Deleting ZenClient found"
+            oc patch -n $CP4WAIOPS_PROJECT client.oidc.security.ibm.com zenclient-cp4waiops  --type=json --patch='[ { "op": "remove", "path": "/metadata/finalizers" } ]'
+            oc delete client.oidc.security.ibm.com -n $CP4WAIOPS_PROJECT zenclient-cp4waiops
+        fi
+
         oc delete zenservice $zenservice_name -n $project --ignore-not-found;
     
         log $INFO "Waiting for $resource instances to be deleted...."
@@ -296,7 +304,6 @@ delete_zenservice_instance () {
         fi
         done
         log $INFO "Expected operandrequests got deleted successfully!"
-
     else
         log $INFO "The $zenservice_name zenservice instance is not found, skipping the deletion of $zenservice_name."
     fi
@@ -362,11 +369,13 @@ delete_iaf_bedrock () {
             unsubscribe "" $CP4WAIOPS_PROJECT "operators.coreos.com/ibm-automation-flink.$CP4WAIOPS_PROJECT"
         fi
 
-        subscription_check=$(oc get subscription.operators.coreos.com -n $CP4WAIOPS_PROJECT -l operators.coreos.com/ibm-common-service-operator.$CP4WAIOPS_PROJECT --ignore-not-found)
-        if [[ "$subscription_check" == "" ]]; then
-            unsubscribe "" $OPERATORS_PROJECT "operators.coreos.com/ibm-common-service-operator.$OPERATORS_PROJECT"
-        else
-            unsubscribe "" $CP4WAIOPS_PROJECT "operators.coreos.com/ibm-common-service-operator.$CP4WAIOPS_PROJECT"
+        unsubscribe "" $CP4WAIOPS_PROJECT "operators.coreos.com/ibm-common-service-operator.$CP4WAIOPS_PROJECT"
+        unsubscribe "" $OPERATORS_PROJECT "operators.coreos.com/ibm-common-service-operator.$OPERATORS_PROJECT"
+
+        # check if additional subscription exists in CS namespace. If found, unsub and delete csv
+        subscription_check=$(oc get subscription.operators.coreos.com -n $IBM_COMMON_SERVICES_PROJECT -l operators.coreos.com/ibm-common-service-operator.$IBM_COMMON_SERVICES_PROJECT --ignore-not-found)
+        if [[ "$subscription_check" != "" ]]; then
+            unsubscribe "" $IBM_COMMON_SERVICES_PROJECT "operators.coreos.com/ibm-common-service-operator.$IBM_COMMON_SERVICES_PROJECT"
         fi
               
         # Note :  Verify there are no operandrequests & operandbindinfo at this point before proceeding.  It may take a few minutes for them to go away.
