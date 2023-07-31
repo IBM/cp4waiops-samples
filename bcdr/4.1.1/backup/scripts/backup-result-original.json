@@ -1,0 +1,50 @@
+{
+  "cassandraBackupStatus": {
+    "nativebackup": false,
+    "velerobackup": false
+  },
+  "commonservicesBackupStatus": {
+    "nativebackup": false,
+    "velerobackup": false
+  },
+  "metastoreBackupStatus": {
+    "nativebackup": false,
+    "velerobackup": false
+  },
+  "edbPostgresBackupStatus": {
+    "nativebackup": false,
+    "velerobackup": false
+  },
+  "elasticsearchBackupStatus": {
+    "nativebackup": false,
+    "velerobackup": false
+  },
+  "couchdbBackupStatus": {
+    "nativebackup": "na",
+    "velerobackup": false
+  },
+  "tunnelCRBackupStatus": {
+    "nativebackup": false,
+    "velerobackup": "na"
+  },
+  "ibmVaultBackupStatus": {
+    "nativebackup": false,
+    "velerobackup": "na"
+  },
+  "minioBackupStatus": {
+    "nativebackup": "na",
+    "velerobackup": false
+  },
+  "redisBackupStatus": {
+    "nativebackup": "na",
+    "velerobackup": false
+  },
+  "manageservicesBackupStatus": {
+    "nativebackup": "na",
+    "velerobackup": false
+  },
+  "imBackupStatus": {
+    "nativebackup": "na",
+    "velerobackup": false
+  }
+}

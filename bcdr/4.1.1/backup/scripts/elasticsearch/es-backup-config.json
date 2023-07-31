@@ -1,0 +1,5 @@
+{
+
+    "snapshotRepositoryName":"bcdr_snapshot_repository",
+    "snapshotRepositoryLocaltion": "/usr/share/elasticsearch/snapshots/es-backup"
+}
