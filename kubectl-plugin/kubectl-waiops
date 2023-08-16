@@ -486,7 +486,7 @@ then
     oc project ${INSTALLATION_NAMESPACE}
 
     echo ""
-    echo "${blue}${bold}Cloud Pak for Watson AIOps AI Manager v${VERSION_AIOPSORCHESTRATOR} installation status:${normal}"
+    echo "${blue}${bold}Cloud Pak for AIOps v${VERSION_AIOPSORCHESTRATOR} installation status:${normal}"
     
     echo "______________________________________________________________"
     echo "Installation instances:" && echo ""
@@ -547,7 +547,7 @@ then
     oc project ${INSTALLATION_NAMESPACE}
 
     echo ""
-    echo "${blue}${bold}Cloud Pak for Watson AIOps AI Manager v${VERSION_AIOPSORCHESTRATOR} installation status:${normal}"
+    echo "${blue}${bold}Cloud Pak for AIOps v${VERSION_AIOPSORCHESTRATOR} installation status:${normal}"
     
     if [[ "$CLUSTER_ADMIN" == "no" ]];
     then
@@ -1268,13 +1268,13 @@ then
         # for developer builds (v0.1), we will check against release-4.1 versions
         component-versions-41
         echo ""
-        echo "${red}${bold}NOTE: ${normal}Your Cloud Pak for Watson AIOps AI Manager install appears to be an internal dev version (v${VERSION_AIOPSORCHESTRATOR})."
+        echo "${red}${bold}NOTE: ${normal}Your Cloud Pak for AIOps install appears to be an internal dev version (v${VERSION_AIOPSORCHESTRATOR})."
         echo "      The status-upgrade command checks the status of upgrades to v3.3, v3.4, v3.5, v3.6, v3.7, and v4.1 only." 
         echo "      Therefore, the upgrade checks below will be against v4.1 component versions."
         echo "      This may influence your results below if your dev build is not based on release-4.1.${normal}"
     else
         echo ""
-        echo "${red}${bold}ERROR: ${normal}Your Cloud Pak for Watson AIOps AI Manager install appears to be v${VERSION_AIOPSORCHESTRATOR}."
+        echo "${red}${bold}ERROR: ${normal}Your Cloud Pak for AIOps install appears to be v${VERSION_AIOPSORCHESTRATOR}."
         echo "       The status-upgrade command checks the status of upgrades to v3.3, v3.4, v3.5, v3.6, v3.7, and v4.1 only." 
         echo "       The version you are using is not supported for use with the status-upgrade command. Exiting."
         echo ""
@@ -1282,7 +1282,7 @@ then
     fi
 
     echo ""
-    echo "${blue}${bold}Cloud Pak for Watson AIOps AI Manager v${VERSION_AIOPSORCHESTRATOR} upgrade status:${normal}"
+    echo "${blue}${bold}Cloud Pak for AIOps v${VERSION_AIOPSORCHESTRATOR} upgrade status:${normal}"
 
     aiopsEdgeBaseUpgradeStatus
     lifecycleUpgradeStatus
