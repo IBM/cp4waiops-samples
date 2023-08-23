@@ -8,6 +8,7 @@
 #
 
 source $WORKDIR/common/common-utils.sh
+veleroNamespace=$(cat $WORKDIR/common/aiops-config.json | jq -r '.veleroNamespace')
 
 # Retrieving list of enabled namespaces
 ENABLED_NAMESPACES=$(cat enabled-namespaces.json | jq -r '.[]')
@@ -54,14 +55,14 @@ waitTillBackupCompletion(){
    backupName=$1
    echo "[INFO] $(date) Waiting for backup $backupName to complete"
    wait "10"
-   backupStatus=$(velero describe backup $backupName --details | grep Phase | cut -d " " -f 3)
+   backupStatus=$(velero describe backup $backupName --details -n $veleroNamespace | grep Phase | cut -d " " -f 3)
    echo "[INFO] $(date) Backup $backupName status is $backupStatus"
    
    while [ "$backupStatus" == "InProgress" ] || [ "$backupStatus" == "New" ]
    do
      echo "[INFO] $(date) Wating for 1 min"
      wait "60"
-     backupStatus=$(velero describe backup $backupName --details | grep Phase | cut -d " " -f 3)
+     backupStatus=$(velero describe backup $backupName --details -n $veleroNamespace | grep Phase | cut -d " " -f 3)
      echo "[INFO] $(date) Velero Backup status is: $backupStatus"
    done
 }

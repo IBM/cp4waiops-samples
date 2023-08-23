@@ -18,6 +18,7 @@ echo $CURRENT
 
 source $CURRENT/utils.sh
 source $WORKDIR/common/common-utils.sh
+veleroNamespace=$(cat $WORKDIR/common/aiops-config.json | jq -r '.veleroNamespace')
 V_TRUE=TRUE
 IS_AIOPS_COMPONENT_ENABLED=$(IsComponentEnabled "AIOPS")
 IS_IA_COMPONENT_ENABLED=$(IsComponentEnabled "IA")
@@ -37,7 +38,7 @@ if [ "$IS_AIOPS_COMPONENT_ENABLED" = "$V_TRUE" ]; then
 fi
 
 
-res=$(velero describe backup $backupName --details |grep  -A10000 -m1 -e 'Restic Backups')
+res=$(velero describe backup $backupName --details -n $veleroNamespace |grep  -A10000 -m1 -e 'Restic Backups')
 echo "[INFO] $(date) ####### Restic backup status is $res #######"
 
 # Cassandra velero-backup status update:-

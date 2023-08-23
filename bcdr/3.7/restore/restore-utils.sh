@@ -14,7 +14,7 @@ CURRENT=$(pwd)
 log_file="$CURRENT/restore.log"
 
 source $WORKDIR/common/common-utils.sh
-veleronamespace=$(cat $WORKDIR/common/aiops-config.json | jq -r '.veleroNamespace')
+veleroNamespace=$(cat $WORKDIR/common/aiops-config.json | jq -r '.veleroNamespace')
 
 echo "=============================================" | tee -a "$log_file"
 
@@ -35,7 +35,7 @@ printRestoreStatus() {
 checkBackup() {
    echo "[INFO] $(date) Backup name is $backupName"
    backupCheckValue=0
-   velero get backup $backupName
+   velero get backup $backupName -n $veleroNamespace
    if [ $? -eq 0 ]; then
       echo "[INFO] $(date) Backup exists" | tee -a "$log_file"
    else
@@ -50,14 +50,14 @@ waitTillRestoreCompletion() {
    restoreName=$1
    echo "[INFO] $(date) Restore name passed to func waitTillRestoreCompletion is: $restoreName" | tee -a "$log_file"
    wait "10"
-   restoreStatus=$(oc get restore $restoreName -n $veleronamespace -o=jsonpath='{.status.phase}')
+   restoreStatus=$(oc get restore $restoreName -n $veleroNamespace -o=jsonpath='{.status.phase}')
    echo "[INFO] $(date) Initial velero restore status is: $restoreStatus" | tee -a "$log_file"
    
    while [ "$restoreStatus" == "InProgress" ] || [ "$restoreStatus" == "New" ]
    do
      echo "[INFO] $(date) Waiting for 1 min" | tee -a "$log_file"
      wait "60"
-     restoreStatus=$(oc get restore $restoreName -n $veleronamespace -o=jsonpath='{.status.phase}')
+     restoreStatus=$(oc get restore $restoreName -n $veleroNamespace -o=jsonpath='{.status.phase}')
      echo "[INFO] $(date) Velero restore status is: $restoreStatus" | tee -a "$log_file"
    done
 }
@@ -65,7 +65,7 @@ waitTillRestoreCompletion() {
 # Function to check if a particular restore exists or not
 checkRestoreExistsOrNot() {
    restoreName=$1
-   command="velero get restore $restoreName"
+   command="velero get restore $restoreName -n $veleroNamespace"
    $(echo $command)
    op=$(echo $?)
 
@@ -94,24 +94,24 @@ performVeleroRestore() {
       restoreNamePrefix=$restoreNamePrefix-$(date '+%Y%m%d%H%M%S')
       if [ "$i" == "0" ] || [[ "$restoreStatus" == 'PartiallyFailed' ]]; then
          printRestoreStatus
-         restoreCommand="velero restore create $restoreNamePrefix --from-backup $backupName --include-namespaces $namespace -l $restoreLabel"
+         restoreCommand="velero restore create $restoreNamePrefix --from-backup $backupName --include-namespaces $namespace -l $restoreLabel -n $veleroNamespace"
          $(echo $restoreCommand)
          # Wait for restore completion
          waitTillRestoreCompletion "$restoreNamePrefix"
       fi
    
    done
-   restoreStatus=$(oc get restore $restoreName -n $veleronamespace -o=jsonpath='{.status.phase}')
+   restoreStatus=$(oc get restore $restoreName -n $veleroNamespace -o=jsonpath='{.status.phase}')
    if [[ $restoreStatus == "Completed" ]]; then
         echo "[INFO] $(date) Velero restore has finsihed with status $restoreStatus!"
 	echo "[INFO] $(date) #########Velero restore details#########"
-	velero describe restore $restoreName --details
+	velero describe restore $restoreName --details -n $veleroNamespace
 	return $restoreCheckValue
    else
         echo "[ERROR] $(date) Velero restore has failed with status $restoreStatus! Hence terminating the restore flow"
 	#exit 1
 	echo "[INFO] $(date) #########Velero restore details#########"
-	velero describe restore $restoreName --details
+	velero describe restore $restoreName --details -n $veleroNamespace
 	restoreCheckValue=1
 	return $restoreCheckValue
    fi
