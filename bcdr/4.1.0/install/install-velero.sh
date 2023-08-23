@@ -35,11 +35,17 @@ installVelero() {
  echo "aws_access_key_id="$accessKeyId >>credentials-velero
  echo "aws_secret_access_key="$secretAccessKey >>credentials-velero
 
- echo "[INFO] $(date) Creating project for velero installation" | tee -a "$log_file"
- oc new-project $namespace
+echo "[INFO] $(date) Creating project for velero installation" | tee -a "$log_file"
+#oc new-project $namespace
+cat << EOF | oc apply -f -
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: ${namespace}
+EOF
 
  echo "[INFO] $(date) Creating secret for velero" | tee -a "$log_file"
- oc create secret generic cloud-credentials -n velero --from-file cloud=credentials-velero
+ oc create secret generic cloud-credentials -n $namespace --from-file cloud=credentials-velero
 
 echo "[INFO] $(date) Creating operator group" | tee -a "$log_file"
 cat << EOF | oc apply -f -
