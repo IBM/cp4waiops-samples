@@ -391,26 +391,6 @@ getAIOpsUIStatus() {
 }
 
 # the functions below are for status-all
-getKongStatus() {
-    # Kong status-all
-    INSTANCE=$(oc get kong gateway -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,STATUS:.status.conditions[?(@.type==\"Deployed\")].status,MESSAGE:status.conditions[?(@.type==\"Deployed\")].reason")         
-    STATUS=$(oc get kong gateway -o jsonpath='{.status.conditions[].status}')
-    printStatus "$STATUS" "True" "$INSTANCE"
-}
-
-getVaultDeployStatus() {
-    # VaultDeploy status-all
-    INSTANCE_VAULTDEPLOY=$(oc get vaultdeploy ibm-vault-deploy -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:metadata.annotations.productVersion,STATUS:status.conditions[?(@.type==\"Completed\")].status,MESSAGE:status.conditions[?(@.type==\"Completed\")].message")
-    STATUS_VAULTDEPLOY=$(oc get vaultdeploy ibm-vault-deploy -o jsonpath='{.status.conditions[].status}')
-    printStatus "$STATUS_VAULTDEPLOY" "True" "$INSTANCE_VAULTDEPLOY"
-}
-
-getVaultAccessStatus() {
-    # VaultAccess status-all
-    INSTANCE_VAULTACCESS=$(oc get vaultaccess ibm-vault-access -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:metadata.annotations.productVersion,STATUS:status.conditions[?(@.type==\"Completed\")].status,MESSAGE:status.conditions[?(@.type==\"Completed\")].message")
-    STATUS_VAULTACCESS=$(oc get vaultaccess ibm-vault-access -o jsonpath='{.status.conditions[].status}')
-    printStatus "$STATUS_VAULTACCESS" "True" "$INSTANCE_VAULTACCESS"
-}
 
 getEDBPostgresStatus() {
     # EDB Postgres status-all
@@ -604,11 +584,6 @@ then
     echo "______________________________________________________________"
     echo "Kong instances:" && echo ""
     getKongStatus
-
-    echo "______________________________________________________________"
-    echo "Vault (VaultDeploy and VaultAccess) instances:" && echo ""
-    getVaultDeployStatus
-    getVaultAccessStatus
     
     if [[ "${VERSION_AIOPSORCHESTRATOR}" != "3.3" ]];
     then 
@@ -664,7 +639,6 @@ then
     then 
         getCSVStatus "$INSTALLATION_NAMESPACE" "ibm-secure-tunnel-operator"        
     fi
-    getCSVStatus "$INSTALLATION_NAMESPACE" "ibm-vault-operator"
     getCSVStatus "$INSTALLATION_NAMESPACE" "ibm-watson-aiops-ui-operator"
 
     echo "______________________________________________________________"
@@ -756,7 +730,6 @@ then
     getSubscriptionStatus "ir-core-operator" "$INSTALLATION_NAMESPACE" 
     getSubscriptionStatus "ir-lifecycle-operator" "$INSTALLATION_NAMESPACE" 
     getSubscriptionStatus "redis" "$INSTALLATION_NAMESPACE" 
-    getSubscriptionStatus "vault" "$INSTALLATION_NAMESPACE" 
     
     echo "______________________________________________________________"
     echo "Subscriptions from ibm-common-services namespace:" && echo ""
@@ -1022,6 +995,15 @@ then
         MAJORVERSION_ASM="2.15"
     }
 
+        component-versions-42() {
+        MAJORVERSION_AIOPSUI="4.2"
+        MAJORVERSION_AIMANAGER="4.2"
+        MAJORVERSION_IRCORE="4.2"
+        MAJORVERSION_LIFECYCLESERVICE="4.2"
+        MAJORVERSION_AIOPSANALYTICSORCHESTRATOR="4.2"
+        MAJORVERSION_ASM="2.15"
+    }
+
     aiopsEdgeBaseUpgradeStatus() {    
         UPGRADED=$(oc get aiopsedge aiopsedge -o jsonpath='{.status.conditions[?(@.type=="UpgradeReady")].status}')
         CONFIGURED=$(oc get aiopsedge aiopsedge -o jsonpath='{.status.phase}')
@@ -1125,33 +1107,6 @@ then
         fi
     }
 
-    vaultDeployUpgradeStatus() {
-        VAULTDEPLOY_COMPLETED=$(oc get vaultdeploy ibm-vault-deploy -o jsonpath='{.status.conditions[?(@.type=="Completed")].status}')
-        CURRENT_MAJOR_VERSION=$(oc get vaultdeploy ibm-vault-deploy -o jsonpath='{.metadata.annotations.productVersion}' | cut -c1-3)
-        DETAILS=$(oc get vaultdeploy  -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:metadata.annotations.productVersion,STATUS:status.conditions[?(@.type==\"Completed\")].status,MESSAGE:status.conditions[?(@.type==\"Completed\")].message")
-        if [ "${VAULTDEPLOY_COMPLETED}" == "True" ] && [ "${CURRENT_MAJOR_VERSION}" == "${MAJORVERSION_VAULTDEPLOY}" ];
-        then 
-            SUCCESSFULLY_UPGRADED+="${newline}${DETAILS}"
-            return 0;
-        else 
-            FAILING_UPGRADE+="${newline}${DETAILS}\n* EXPECTED MAJOR VERSION: ${MAJORVERSION_VAULTDEPLOY}"
-            return 1;
-        fi
-    }
-
-    vaultAccessUpgradeStatus() {
-        VAULTACCESS_COMPLETED=$(oc get vaultaccess ibm-vault-access -o jsonpath='{.status.conditions[?(@.type=="Completed")].status}')
-        CURRENT_MAJOR_VERSION=$(oc get vaultaccess ibm-vault-access -o jsonpath='{.metadata.annotations.productVersion}' | cut -c1-3)
-        DETAILS=$(oc get vaultaccess -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:metadata.annotations.productVersion,STATUS:status.conditions[?(@.type==\"Completed\")].status,MESSAGE:status.conditions[?(@.type==\"Completed\")].message")
-        if [ "${VAULTACCESS_COMPLETED}" == "True" ] && [ "${CURRENT_MAJOR_VERSION}" == "${MAJORVERSION_VAULTACCESS}" ];
-        then 
-            SUCCESSFULLY_UPGRADED+="${newline}${DETAILS}"
-            return 0;
-        else 
-            FAILING_UPGRADE+="${newline}${DETAILS}\n* EXPECTED MAJOR VERSION: ${MAJORVERSION_VAULTACCESS}"
-            return 1;
-        fi
-    }
 
     postgresUpgradeStatus() {
         if [ "${VERSION_AIOPSORCHESTRATOR}" == "3.3" ] || [ "${VERSION_AIOPSORCHESTRATOR}" == "3.4" ] || [ "${VERSION_AIOPSORCHESTRATOR}" == "3.5" ];
@@ -1291,8 +1246,6 @@ then
     aiManagerUpgradeStatus
     irCoreUpgradeStatus
     aiopsAnalyticsUpgradeStatus
-    vaultDeployUpgradeStatus
-    vaultAccessUpgradeStatus
     postgresUpgradeStatus
     secureTunnelUpgradeStatus
     asmUpgradeStatus
