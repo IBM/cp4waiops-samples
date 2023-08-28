@@ -60,30 +60,27 @@ function toggleDataFlow() {
 
 function getDataFromStorage(){
     title "Checking connector storage for data extraction."
-    info "Events for GitApp: $gitappName"
-    CMD="oc get event --namespace $NS --field-selector involvedObject.name=$gitappName,type==Warning"
-    printAndExecute "$CMD"
 
-    backupDataRequired=false
     if [[ $gitappStatus != "Configured" ]]; then
         # Check for specific error when an upgrade changes an immutable field.
         msg "Checking for error updating connector resources ..."
+        info "Events for GitApp: $gitappName"
+        CMD="oc get event --namespace $NS --field-selector involvedObject.name=$gitappName,type==Warning"
+        printAndExecute "$CMD"
         backupDataRequired=true
         if [[ $($CMD -o json | jq '.items[] | select(.message | test("Forbidden: updates to statefulset spec for fields other than.*")) | .message' | wc -l) -gt 0 ]]; then
             msg "\"Unable to update Statefulset error\" event found."
         else
-            warning "WARNING: Did not find any event that indicate Statefulset update error occurred because it may have been updated. Proceeding anyway ..."
+            warning "WARNING: Did not find any event that indicate Statefulset update error occurred because the event may have rolled. Proceeding anyway ..."
         fi
-    fi
-
-    if [[ $backupDataRequired != "true" ]]; then
-        msg "No need to extract data from PVC"
-        return;
+    else
+        msg "GitApp: $gitappName status is $gitappStatus"
+        backupDataRequired=false
     fi
 
     connectorPvc=$(oc get pvc --namespace $NS --no-headers -l instance=connector-$connconfigUid -o jsonpath='{.items[*].metadata.name}')
     if [[ -z $connectorPvc ]]; then
-        echo "Connector does not use storage. Skip data extraction."
+        echo "Connector does not use storage."
         backupDataRequired=false
         return
     fi
@@ -91,9 +88,14 @@ function getDataFromStorage(){
     msg "Connector PVC: $connectorPvc"
     pvcAccessMode=$(oc get pvc --namespace $NS $connectorPvc -o jsonpath='{.spec.accessModes[]}' | grep ReadWriteOnce | wc -l)
     if [[ $pvcAccessMode -ne 0 ]]; then
-        echo "Connector storage access mode is already using ReadWriteOnce (RWO). Skip data extraction."
+        echo "Connector storage access mode is already using ReadWriteOnce (RWO)."
         backupDataRequired=false
         return
+    fi
+
+    if [[ $backupDataRequired != "true" ]]; then
+        msg "No need to extract data from PVC"
+        return;
     fi
 
     connectorPod=$(oc get pod --namespace $NS --no-headers -l instance=connector-$connconfigUid -o jsonpath='{.items[*].metadata.name}')
@@ -186,8 +188,7 @@ function insertConnectorData(){
     volumeName=$(oc get statefulset --namespace $NS $connectorWorkload -o jsonpath='{.spec.volumeClaimTemplates[].metadata.name}')
     volumeMountPath=$(oc get statefulset --namespace $NS $connectorWorkload -o jsonpath='{.spec.template.spec.containers[0].volumeMounts[?(@.name=="'$volumeName'")].mountPath }')
 
-    info "Found statefulset: $connectorWorkload"
-    info "Found PVC: $connectorPvc"
+    info "Found statefulset: $connectorWorkload, PVC: $connectorPvc"
     info "Making sure rollout is complete ..."
     CMD="oc rollout status --namespace $NS statefulset/$connectorWorkload --timeout=300s"
     printAndExecute "$CMD"
@@ -281,6 +282,14 @@ function recreateStorage(){
 
 }
 
+function checkLoggedIn(){
+
+    msg "Login check"
+    if [ ! $(oc whoami) ]; then
+        errorAndExit "You are not logged in to the cluster. Please make sure you are logged in."
+    fi
+}
+
 function printAndExecute() {
     local cmd=$1
     msg "$cmd"
@@ -297,6 +306,11 @@ function success() {
 
 function error() {
     msg "\33[31m[✘] ${1}\33[0m"
+}
+
+function errorAndExit() {
+    msg "\33[31m[✘] ${1}\33[0m"
+    exit 1
 }
 
 function title() {
@@ -354,6 +368,7 @@ function main(){
         return
     fi
 
+    checkLoggedIn
     recreateStorage "$@"
 
     success "Complete ..."
