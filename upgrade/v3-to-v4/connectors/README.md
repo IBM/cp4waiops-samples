@@ -1,4 +1,4 @@
-# Resolve "red status" issue in AIOps Connectors after upgrading from AIOPs 3.x to 4.x
+# Resolve "red status" issue in AIOps connections after upgrading from AIOPs 3.x to 4.x
 
 If one or more connectors are showing a red status icon in the Connections UI after upgrading from AIOps v3.x to v4.x, it could be caused by a problem when the operator failed to update a resource in the cluster. The issue is seen in metrics connector because they use a persistent storage and starting from AIOps 4.1, the access mode has been updated to `ReadWriteOnce` from `ReadWriteMany`.
 
