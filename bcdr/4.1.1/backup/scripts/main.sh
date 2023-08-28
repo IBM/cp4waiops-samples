@@ -20,6 +20,7 @@ source $WORKDIR/common/prereq-check.sh
 source utils.sh
 source $WORKDIR/common/common-utils.sh
 source $WORKDIR/common/stop-ai-training.sh
+source $WORKDIR/common/check-aiops-version.sh
 
 V_FALSE=FALSE
 IS_AIOPS_COMPONENT_ENABLED=$(IsComponentEnabled "AIOPS")
@@ -36,6 +37,12 @@ cp backup-result-original.json /tmp/backup-result.json
 if [ "$IS_AIOPS_COMPONENT_ENABLED" = "$V_FALSE" ]; then
    echo "[INFO] $(date) Component [AIOPS] is not enabled, hence skipping AIOPS related backup steps"
 else
+   echo "[INFO] $(date) Validating AIOPS version with respect to BCDR artefacts version" 
+   checkAiopsVersion
+   if [ $versionCheckValue -ne 0 ]; then
+      oc patch configmap backup-job-execution -p '{"data": {"status": "Completed"}}' -n $velero_namespace
+      exit 1
+   fi
    echo "[INFO] $(date) Component [AIOPS] is enabled, hence performing AIOPS related backup steps"
    echo "[INFO] $(date) Stopping AI running training definition name where runtimeName is LUIGI before taking the backup"
    stopAiTraining $namespace
