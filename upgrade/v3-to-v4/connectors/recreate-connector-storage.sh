@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
+#
+# Copyright 2023 IBM Inc. All rights reserved
+# SPDX-License-Identifier: Apache2.0
+#
 set -euo pipefail
-# set -o xtrace
+# set -o xtrace # Uncomment for debugging.
 
 # ---------- Defaults -------------------
 : ${AWK:=awk}
