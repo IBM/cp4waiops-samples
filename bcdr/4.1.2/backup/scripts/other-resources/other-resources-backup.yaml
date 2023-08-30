@@ -1,0 +1,41 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: backup-other-resources
+  labels:
+    restic-backup-pod: t
+    component: backup-other-resources
+spec:
+  containers:
+  - name: backup
+    image: redhat/ubi8:8.6-754
+    command: ["sleep"]
+    args: ["infinity"]
+    volumeMounts:
+            - name: data
+              mountPath: /usr/share/backup
+    imagePullPolicy: IfNotPresent
+    securityContext:
+        allowPrivilegeEscalation: false
+        runAsNonRoot: true
+        capabilities:
+          drop: ["ALL"]
+        seccompProfile:
+          type: RuntimeDefault
+  volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: other-resources-backup-data
+  restartPolicy: Always
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: other-resources-backup-data
+spec:
+  accessModes:
+  - ReadWriteMany
+  resources:
+    requests:
+      storage: 500Mi
+  storageClassName: STORAGE_CLASS
