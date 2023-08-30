@@ -1,0 +1,29 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: BACKUP_POD_NAME
+  namespace: BACKUP_NAMESPACE
+  labels:
+    restic-backup-pod: t
+spec:
+  containers:
+  - name: backup
+    image: redhat/ubi8:8.6-754
+    command: ["sleep"]
+    args: ["infinity"]
+    volumeMounts:
+            - name: backup
+              mountPath: /usr/share/backup
+    imagePullPolicy: IfNotPresent
+    securityContext:
+        allowPrivilegeEscalation: false
+        runAsNonRoot: true
+        capabilities:
+          drop: ["ALL"]
+        seccompProfile:
+          type: RuntimeDefault
+  volumes:
+        - name: backup
+          persistentVolumeClaim:
+            claimName: BACKUP_CLAIM_NAME
+  restartPolicy: Always
