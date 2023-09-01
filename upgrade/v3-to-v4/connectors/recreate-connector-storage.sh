@@ -112,7 +112,7 @@ function getDataFromStorage(){
 
     if [[ -z $dataFilePath ]]; then
         backupDataRequired=false
-        return
+        proceedRecreate=true;
     fi      
 
     # Check if there's files to backup
@@ -120,22 +120,26 @@ function getDataFromStorage(){
     if [ $fileCount -eq 0 ]; then
         echo "No files found in PVC to extract."
         backupDataRequired=false
-        return
+        proceedRecreate=true;
     fi
-
-    targetDir=/tmp/$connconfig/$dataFilePath
-    rm -rf $targetDir
-    mkdir -p $targetDir
 
     # Disable dataflow
     toggleDataFlow "$connconfig" "off"
 
-    CMD="oc cp --retries=3 --namespace $NS $connectorPod:$dataFilePath $targetDir/"
-    info "Extracting data $dataFilePath file from pod: $connectorPod"
-    printAndExecute "$CMD"
+    if [[ $backupDataRequired == "true" ]]; then
 
-    msg "Files extracted"
-    ls -R $targetDir
+        targetDir=/tmp/$connconfig/$dataFilePath
+        rm -rf $targetDir
+        mkdir -p $targetDir
+
+        CMD="oc cp --retries=3 --namespace $NS $connectorPod:$dataFilePath $targetDir/"
+        info "Extracting data $dataFilePath file from pod: $connectorPod"
+        printAndExecute "$CMD"
+
+        msg "Files extracted"
+        ls -R $targetDir
+
+    fi
     
     connectorWorkload=$(oc get statefulset --namespace $NS --no-headers -l connectors.aiops.ibm.com/git-app-name=$gitappName -o jsonpath='{.items[*].metadata.name}')
     info "Scaling down connector workload: $connectorWorkload and delete PVC"
@@ -146,11 +150,10 @@ function getDataFromStorage(){
     CMD="oc rollout status statefulset/$connectorWorkload --namespace $NS --timeout=300s"
     printAndExecute "$CMD"
 
-
-    podStatus=$(oc get pod $connectorPod --namespace $NS --no-headers -o custom-columns=":status.phase")
-    if [[ -n $podStatus ]]; then
-        warning "Pod $connectorPod current status: $podStatus."
-    fi
+    # podStatus=$(oc get pod $connectorPod --namespace $NS --no-headers -o custom-columns=":status.phase" || true)
+    # if [[ -n "$podStatus" ]]; then
+    #     warning "Pod $connectorPod current status: $podStatus."
+    # fi
 
     info "Deleting Statefulset: $connectorWorkload"
     CMD="oc delete statefulset/$connectorWorkload --namespace $NS --timeout=60s"
@@ -159,67 +162,63 @@ function getDataFromStorage(){
 
 function insertConnectorData(){
 
-    if [[ $backupDataRequired != "true" ]]; then
-        return;
-    fi
-
-    if [[ -z ${targetDir:-} ]]; then
-        msg "No data to insert in persistent storage."
-        return;
-    fi
-
-    title "Preparing to insert backup data."
-    info "Checking for workload and PVC creation"
-
-    local cycle=1
-    local maxRetry=$((6 * 5)) # 5 minutes
-    while [[ ! $(oc get statefulset --namespace $NS --no-headers -l connectors.aiops.ibm.com/git-app-name=$gitappName) ]]; do
-        sleep 10
-        cycle=$(( $cycle + 1 ))
-        if [ $cycle -gt $maxRetry ]; then
-            exit 1
-        fi
-    done
     connectorWorkload=$(oc get statefulset --namespace $NS --no-headers -l connectors.aiops.ibm.com/git-app-name=$gitappName -o jsonpath='{.items[*].metadata.name}')
-    connectorPvc=$(oc get pvc --namespace $NS --no-headers -l instance=connector-$connconfigUid -o jsonpath='{.items[*].metadata.name}')
-    volumeName=$(oc get statefulset --namespace $NS $connectorWorkload -o jsonpath='{.spec.volumeClaimTemplates[].metadata.name}')
-    volumeMountPath=$(oc get statefulset --namespace $NS $connectorWorkload -o jsonpath='{.spec.template.spec.containers[0].volumeMounts[?(@.name=="'$volumeName'")].mountPath }')
 
-    info "Found statefulset: $connectorWorkload, PVC: $connectorPvc"
-    info "Making sure rollout is complete ..."
-    CMD="oc rollout status --namespace $NS statefulset/$connectorWorkload --timeout=300s"
-    printAndExecute "$CMD"
+    if [[ $backupDataRequired == "true" ]]; then
+        title "Preparing to insert backup data."
+        info "Checking for workload and PVC creation"
 
-    local cycle=1
-    local maxRetry=$((6 * 5)) # 5 minutes
-    while [[ ! $(oc get pvc --namespace $NS --no-headers -l instance=connector-$connconfigUid) ]]; do
-        sleep 10
-        cycle=$(( $cycle + 1 ))
-        if [ $cycle -gt $maxRetry ]; then
-            error "Timeout waiting for PVC to be created. Exit."
-            exit 1
-        fi
-    done
+        local cycle=1
+        local maxRetry=$((6 * 5)) # 5 minutes
+        while [[ ! $(oc get statefulset --namespace $NS --no-headers -l connectors.aiops.ibm.com/git-app-name=$gitappName) ]]; do
+            sleep 10
+            cycle=$(( $cycle + 1 ))
+            if [ $cycle -gt $maxRetry ]; then
+                exit 1
+            fi
+        done
 
-    connectorPod=$(oc get pod --no-headers --namespace $NS -l instance=connector-$connconfigUid -o jsonpath='{.items[*].metadata.name}')
-    
-    local cycle=1
-    local maxRetry=$((6 * 5)) # 5 minutes
-    while [[ $(oc get pod $connectorPod --namespace $NS --no-headers -o custom-columns=":status.phase") != "Running" ]]; do
-        sleep 10
-        cycle=$(( $cycle + 1 ))
-        if [ $cycle -gt $maxRetry ]; then
-            error "Timeout waiting for pod $connectorPod to run. Exit."
-            exit 1
-        fi
-    done
-    
-    CMD="oc cp --retries=3 $targetDir $connectorPod:$volumeMountPath/.."
-    info "Inserting data $targetDir directory into pod: $connectorPod"
-    printAndExecute "$CMD"
+        connectorPvc=$(oc get pvc --namespace $NS --no-headers -l instance=connector-$connconfigUid -o jsonpath='{.items[*].metadata.name}')
+        volumeName=$(oc get statefulset --namespace $NS $connectorWorkload -o jsonpath='{.spec.volumeClaimTemplates[].metadata.name}')
+        volumeMountPath=$(oc get statefulset --namespace $NS $connectorWorkload -o jsonpath='{.spec.template.spec.containers[0].volumeMounts[?(@.name=="'$volumeName'")].mountPath }')
 
-    CMD="oc exec --namespace $NS $connectorPod -- /bin/bash -c \"find $volumeMountPath -type f\""
-    printAndExecute "$CMD"
+        info "Found statefulset: $connectorWorkload, PVC: $connectorPvc"
+        info "Making sure rollout is complete ..."
+        CMD="oc rollout status --namespace $NS statefulset/$connectorWorkload --timeout=300s"
+        printAndExecute "$CMD"
+
+        local cycle=1
+        local maxRetry=$((6 * 5)) # 5 minutes
+        while [[ ! $(oc get pvc --namespace $NS --no-headers -l instance=connector-$connconfigUid) ]]; do
+            sleep 10
+            cycle=$(( $cycle + 1 ))
+            if [ $cycle -gt $maxRetry ]; then
+                error "Timeout waiting for PVC to be created. Exit."
+                exit 1
+            fi
+        done
+
+        connectorPod=$(oc get pod --no-headers --namespace $NS -l instance=connector-$connconfigUid -o jsonpath='{.items[*].metadata.name}')
+        
+        local cycle=1
+        local maxRetry=$((6 * 5)) # 5 minutes
+        while [[ $(oc get pod $connectorPod --namespace $NS --no-headers -o custom-columns=":status.phase") != "Running" ]]; do
+            sleep 10
+            cycle=$(( $cycle + 1 ))
+            if [ $cycle -gt $maxRetry ]; then
+                error "Timeout waiting for pod $connectorPod to run. Exit."
+                exit 1
+            fi
+        done
+        
+        CMD="oc cp --retries=3 $targetDir $connectorPod:$volumeMountPath/.."
+        info "Inserting data $targetDir directory into pod: $connectorPod"
+        printAndExecute "$CMD"
+
+        CMD="oc exec --namespace $NS $connectorPod -- /bin/bash -c \"find $volumeMountPath -type f\""
+        printAndExecute "$CMD"
+
+    fi
     
     info "Scaling down connector workload $connectorWorkload to restart pod."
     CMD="oc scale statefulset/$connectorWorkload --namespace $NS --replicas 0"
