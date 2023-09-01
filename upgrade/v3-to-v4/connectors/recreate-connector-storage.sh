@@ -72,7 +72,7 @@ function getDataFromStorage(){
         CMD="oc get event --namespace $NS --field-selector involvedObject.name=$gitappName,type==Warning"
         printAndExecute "$CMD"
         backupDataRequired=true
-        if [[ $($CMD -o json | jq '.items[] | select(.message | test("Forbidden: updates to statefulset spec for fields other than.*")) | .message' | wc -l) -gt 0 ]]; then
+        if [ $($CMD -o json | jq '.items[] | select(.message | test("Forbidden: updates to statefulset spec for fields other than.*")) | .message' | wc -l) -gt 0 ]; then
             msg "\"Unable to update Statefulset error\" event found."
         else
             warning "WARNING: Did not find any event that indicate Statefulset update error occurred because the event may have rolled. Proceeding anyway ..."
@@ -90,8 +90,8 @@ function getDataFromStorage(){
     fi
 
     msg "Connector PVC: $connectorPvc"
-    pvcAccessMode=$(oc get pvc --namespace $NS $connectorPvc -o jsonpath='{.spec.accessModes[]}' | grep ReadWriteOnce | wc -l)
-    if [[ $pvcAccessMode -ne 0 ]]; then
+    pvcAccessMode=$(oc get pvc --namespace $NS $connectorPvc -o jsonpath='{.spec.accessModes[]}')
+    if [[ $pvcAccessMode =~ ReadWriteOnce ]]; then
         echo "Connector storage access mode is already using ReadWriteOnce (RWO)."
         backupDataRequired=false
         return
@@ -146,18 +146,11 @@ function getDataFromStorage(){
     CMD="oc rollout status statefulset/$connectorWorkload --namespace $NS --timeout=300s"
     printAndExecute "$CMD"
 
-    local cycle=1
-    local maxRetry=$((12 * 5)) # 5 minutes
-    while [[ ! $(oc get pod $connectorPod --namespace $NS --no-headers) ]]; do
-        msg "Checking pod $connectorPod"
-        sleep 5
-        cycle=$(( $cycle + 1 ))
-        if [ $cycle  -gt $maxRetry ]; then
-            podStatus=$(oc get pod $connectorPod --namespace $NS --no-headers -o custom-columns=":status.phase")
-            error "Pod $connectorPod status is still not yet deleted, current status: $podStatus. Pod may be stuck and could not be deleted. Exit."
-            exit 1
-        fi
-    done
+
+    podStatus=$(oc get pod $connectorPod --namespace $NS --no-headers -o custom-columns=":status.phase")
+    if [[ -n $podStatus ]]; then
+        warning "Pod $connectorPod current status: $podStatus."
+    fi
 
     info "Deleting Statefulset: $connectorWorkload"
     CMD="oc delete statefulset/$connectorWorkload --namespace $NS --timeout=60s"
