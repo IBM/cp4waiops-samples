@@ -65,6 +65,10 @@ function toggleDataFlow() {
 function getDataFromStorage(){
     title "Checking connector storage for data extraction."
 
+    # initialize
+    proceedRecreate=false
+    backupDataRequired=false
+
     if [[ $gitappStatus != "Configured" ]]; then
         # Check for specific error when an upgrade changes an immutable field.
         msg "Checking for error updating connector resources ..."
@@ -74,6 +78,7 @@ function getDataFromStorage(){
         backupDataRequired=true
         if [ $($CMD -o json | jq '.items[] | select(.message | test("Forbidden: updates to statefulset spec for fields other than.*")) | .message' | wc -l) -gt 0 ]; then
             msg "\"Unable to update Statefulset error\" event found."
+            proceedRecreate=true
         else
             warning "WARNING: Did not find any event that indicate Statefulset update error occurred because the event may have rolled. Proceeding anyway ..."
         fi
@@ -90,10 +95,11 @@ function getDataFromStorage(){
     fi
 
     msg "Connector PVC: $connectorPvc"
-    pvcAccessMode=$(oc get pvc --namespace $NS $connectorPvc -o jsonpath='{.spec.accessModes[]}')
+    pvcAccessMode=$(getStorageAccessMode $connectorPvc)
     if [[ $pvcAccessMode =~ ReadWriteOnce ]]; then
         echo "Connector storage access mode is already using ReadWriteOnce (RWO)."
         backupDataRequired=false
+        proceedRecreate=false;
         return
     fi
 
@@ -106,6 +112,14 @@ function getDataFromStorage(){
 
     # Get the data file path
     connectorWorkload=$(oc get statefulset --namespace $NS --no-headers -l connectors.aiops.ibm.com/git-app-name=$gitappName -o jsonpath='{.items[*].metadata.name}')
+
+    if [[ -z $connectorWorkload ]]; then
+        msg "Connector is not a Statefulset workload type."
+        backupDataRequired=false
+        proceedRecreate=false
+        return;
+    fi
+
     volumeName=$(oc get statefulset --namespace $NS $connectorWorkload -o jsonpath='{.spec.volumeClaimTemplates[].metadata.name}')
     volumeMountPath=$(oc get statefulset --namespace $NS $connectorWorkload -o jsonpath='{.spec.template.spec.containers[0].volumeMounts[?(@.name=="'$volumeName'")].mountPath }')
     dataFilePath=$volumeMountPath
@@ -120,7 +134,11 @@ function getDataFromStorage(){
     if [ $fileCount -eq 0 ]; then
         echo "No files found in PVC to extract."
         backupDataRequired=false
-        proceedRecreate=true;
+    fi
+
+    if [[ $proceedRecreate != "true" ]]; then
+        msg "Connector looks OK."
+        return;
     fi
 
     # Disable dataflow
@@ -150,18 +168,28 @@ function getDataFromStorage(){
     CMD="oc rollout status statefulset/$connectorWorkload --namespace $NS --timeout=300s"
     printAndExecute "$CMD"
 
-    # podStatus=$(oc get pod $connectorPod --namespace $NS --no-headers -o custom-columns=":status.phase" || true)
-    # if [[ -n "$podStatus" ]]; then
-    #     warning "Pod $connectorPod current status: $podStatus."
-    # fi
-
     info "Deleting Statefulset: $connectorWorkload"
     CMD="oc delete statefulset/$connectorWorkload --namespace $NS --timeout=60s"
     printAndExecute "$CMD"
+
+    local cycle=1
+    local maxRetry=$((6 * 5)) # 5 minutes
+    while [[ ! $(oc get statefulset --namespace $NS --no-headers -l connectors.aiops.ibm.com/git-app-name=$gitappName) ]]; do
+        msg "Waiting for Statefulset to be created."
+        sleep 10
+        cycle=$(( $cycle + 1 ))
+        if [ $cycle -gt $maxRetry ]; then
+            errorAndExit "Timed out waiting for Statefulset to be created."
+        fi
+    done
 }
 
 function insertConnectorData(){
 
+    if [[ $proceedRecreate != "true" ]]; then
+        # No action required.
+        return;
+    fi
     connectorWorkload=$(oc get statefulset --namespace $NS --no-headers -l connectors.aiops.ibm.com/git-app-name=$gitappName -o jsonpath='{.items[*].metadata.name}')
 
     if [[ $backupDataRequired == "true" ]]; then
@@ -237,6 +265,11 @@ function insertConnectorData(){
 
     ## Enable dataflow
     toggleDataFlow "$connconfig" "on"
+
+    connectorPvc=$(oc get pvc --namespace $NS --no-headers -l instance=connector-$connconfigUid -o jsonpath='{.items[*].metadata.name}')
+    accessMode=$(getStorageAccessMode "$connectorPvc")
+
+    msg "Connector PVC access mode: $accessMode"
 }
 
 function getConnectorInfo(){
@@ -275,7 +308,12 @@ function recreateStorage(){
             count=$((count + 1))
         done
     fi
+}
 
+function getStorageAccessMode(){
+    local connectorPvc=$1
+    pvcAccessMode=$(oc get pvc --namespace $NS $connectorPvc -o jsonpath='{.spec.accessModes[]}')
+    echo $pvcAccessMode
 }
 
 function checkLoggedIn(){
