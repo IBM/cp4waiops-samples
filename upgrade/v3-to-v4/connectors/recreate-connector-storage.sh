@@ -69,7 +69,7 @@ function getDataFromStorage(){
     proceedRecreate=false
     backupDataRequired=false
 
-    if [[ $gitappStatus != "ConfiguredXX" ]]; then
+    if [[ $gitappStatus != "Configured" ]]; then
         # Check for specific error when an upgrade changes an immutable field.
         msg "Checking for error updating connector resources ..."
         info "Events for GitApp: $gitappName"
@@ -96,7 +96,7 @@ function getDataFromStorage(){
 
     msg "Connector PVC: $connectorPvc"
     pvcAccessMode=$(getStorageAccessMode $connectorPvc)
-    if [[ $pvcAccessMode =~ ReadWriteOnceXX ]]; then
+    if [[ $pvcAccessMode =~ ReadWriteOnce ]]; then
         echo "Connector storage access mode is already using ReadWriteOnce (RWO)."
         backupDataRequired=false
         proceedRecreate=false;
