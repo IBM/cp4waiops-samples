@@ -56,7 +56,7 @@ function toggleDataFlow() {
         fi
     fi
     if [[ ${doSleep:-} == "true" ]]; then
-        info "Giving time for connector to pause data flow" 
+        info "Giving time for connector to pause or resume data flow" 
         sleep 30
     fi
 }
@@ -69,7 +69,7 @@ function getDataFromStorage(){
     proceedRecreate=false
     backupDataRequired=false
 
-    if [[ $gitappStatus != "Configured" ]]; then
+    if [[ $gitappStatus != "ConfiguredXX" ]]; then
         # Check for specific error when an upgrade changes an immutable field.
         msg "Checking for error updating connector resources ..."
         info "Events for GitApp: $gitappName"
@@ -96,7 +96,7 @@ function getDataFromStorage(){
 
     msg "Connector PVC: $connectorPvc"
     pvcAccessMode=$(getStorageAccessMode $connectorPvc)
-    if [[ $pvcAccessMode =~ ReadWriteOnce ]]; then
+    if [[ $pvcAccessMode =~ ReadWriteOnceXX ]]; then
         echo "Connector storage access mode is already using ReadWriteOnce (RWO)."
         backupDataRequired=false
         proceedRecreate=false;
