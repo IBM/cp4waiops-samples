@@ -6,6 +6,7 @@
 # 
 # 
 #
+source $WORKDIR/common/check-aiops-version.sh
 
 echo "[INFO] $(date) ############## Restore process started ##############"
 BASEDIR=$(dirname "$0")
@@ -143,6 +144,11 @@ case "$1" in
    imRestore
    ;;
 -aiops | --aiops-restore)
+   echo "[INFO] $(date) Validating AIOPS version with respect to BCDR artefacts version" 
+   checkAiopsVersion
+   if [ $versionCheckValue -ne 0 ]; then
+           exit 1
+   fi
    echo "[INFO] $(date) ##### Starting restore for all the CP4WAIOPS components #####"
    csRestore
    metastoreRestore
