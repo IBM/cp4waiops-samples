@@ -8,7 +8,8 @@ data:
     {
       "aiopsNamespace": "{{ .Values.aiopsNamespace }}",
       "csNamespace": "{{ .Values.csNamespace }}",
-      "veleroNamespace": "{{ .Values.veleroNamespace }}"
+      "veleroNamespace": "{{ .Values.veleroNamespace }}",
+      "aiopsVersion": "4.1.0"
     }
 kind: ConfigMap
 metadata:
