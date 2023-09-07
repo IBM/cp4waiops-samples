@@ -1,14 +1,6 @@
 #!/bin/bash
 
-#*===================================================================
-#*
-#   IBM Confidential
-#   5737-M96
-#   (C) Copyright IBM Corporation 2021-2023 All Rights Reserved.
-#   
-#   
-#*
-#*===================================================================
+# © Copyright IBM Corp. 2020, 2022
 
 
 # Function to wait for a specific time, it requires one positional argument i.e timeout
