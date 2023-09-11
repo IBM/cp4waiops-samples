@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Copyright 2020- IBM Inc. All rights reserved
+# © Copyright IBM Corp. 2020, 2023
 # SPDX-License-Identifier: Apache2.0
 #
 # This script can be used to uninstall the IBM Cloud Pak for Watson AIOps AI Manager v3.3 product and

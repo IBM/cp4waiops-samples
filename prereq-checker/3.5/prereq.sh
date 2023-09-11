@@ -1,4 +1,6 @@
 #!/bin/bash
+# © Copyright IBM Corp. 2020, 2023
+
 
 
 ## Resource size for 3.3 **No change for 3.5**

@@ -1,4 +1,6 @@
 #!/bin/bash
+# © Copyright IBM Corp. 2020, 2023
+
 
 
 

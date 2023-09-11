@@ -1,3 +1,5 @@
+<!-- © Copyright IBM Corp. 2021 -->
+
 # Install Strimzi for an IBM Cloud Pak Watson AIOps air-gapped installation that uses a Bastion host
 
 This script can be used to install Strimzi version 0.19.0 as a prerequisite for installing IBM Cloud Pak Watson AIOps in an air-gapped environment.

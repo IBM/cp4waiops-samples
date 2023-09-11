@@ -1,3 +1,4 @@
+<!-- © Copyright IBM Corp. 2020, 2023-->
 
 ## Uninstall Secure Tunnel as a standalone installation and uninstall Tunnel connector
 This script provided here can be used to uninstall Secure Tunnel as a standalone installation and can also be used to uninstall the Tunnel connector.

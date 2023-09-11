@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# © Copyright IBM Corp. 2020, 2023
+
 # The CP4WAIOps status checker tool prints out several components to indicate the status of your install.
 # In a successful install, the components below should all have a successful STATUS/PROGRESS/PHASE indicator.
 # If any of the components are incomplete or are not reconciled after a significant period of time, 

@@ -1,5 +1,5 @@
 #!/bin/bash
-
+# © Copyright IBM Corp. 2020, 2023
 usage() {
    cat<<EOF
    This script is used to uninstall the Secure Tunnel as a standalone installation and can also be used to uninstall the Tunnel connector.

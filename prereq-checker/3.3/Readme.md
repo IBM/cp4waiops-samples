@@ -1,3 +1,5 @@
+<!-- # © Copyright IBM Corp. 2020, 2023 -->
+
 # IBM Cloud Pak for Watson AIOps AI Manager prerequisite checker tool
 
 The prerequisite checker tool can be used to validate whether a Red Hat OpenShift Container Platform cluster has the required resources and prerequisites available to enable a successful installation or upgrade of IBM Cloud Pak for Watson AIOps AI Manager. This tool completes the following checks and generates an installation readiness report:

@@ -1,5 +1,5 @@
 #
-# Copyright 2020- IBM Inc. All rights reserved
+# © Copyright IBM Corp. 2020, 2023
 # SPDX-License-Identifier: Apache2.0
 #
 ##################################################################################################

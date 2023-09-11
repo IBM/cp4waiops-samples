@@ -1,3 +1,4 @@
+# © Copyright IBM Corp. 2021
 
 strimzi_kafka_image="strimzi/kafka"
 strimzi_operator_image="strimzi/operator"

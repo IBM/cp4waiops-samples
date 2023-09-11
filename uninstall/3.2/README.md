@@ -1,3 +1,5 @@
+<!-- © Copyright IBM Corp. 2020, 2023-->
+
 # Uninstall IBM Cloud Pak for Watson AIOps AI Manager version 3.2
 
 The scripts provided here can be used to uninstall Cloud Pak for Watson AIOps and delete resources created by it.  This includes optionally uninstalling the Cloud Pak Platform, a common layer shared by Cloud Paks. Most of the Cloud Pak Platform components fall under IBM Automation Foundation (IAF) name.
