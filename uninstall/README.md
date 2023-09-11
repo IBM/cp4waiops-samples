@@ -1,3 +1,5 @@
+<!-- © Copyright IBM Corp. 2020, 2023-->
+
 # Uninstall Cloud Pak for Watson AIOps
 
 The scripts provided here can be used to uninstall Cloud Pak for Watson AIOps and delete resources created by it.  

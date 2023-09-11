@@ -1,3 +1,5 @@
+<!-- © Copyright IBM Corp. 2020, 2023-->
+
 # Uninstall Cloud Pak for Watson AIOps AI Manager
 
 The scripts provided here can be used to uninstall Cloud Pak for Watson AIOps AI Manager and delete resources created by it.  This does not uninstall Event Manager. These scripts also provide utilities to uninstall the Cloud Pak Platform (IAF and Common Services components).
