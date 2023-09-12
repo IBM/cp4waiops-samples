@@ -2,9 +2,7 @@
 
 #*===================================================================
 #*
-#   IBM Confidential
-#   5737-M96
-#   (C) Copyright IBM Corporation 2021-2023 All Rights Reserved.
+#   © Copyright IBM Corp. 2021, 2023
 #   
 #   
 #*
