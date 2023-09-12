@@ -50,7 +50,7 @@ fi
 # optional argument handling
 if [[ "$1" == "version" ]]
 then
-    echo "0.0.20"
+    echo "0.0.21"
     exit 0
 fi
 
@@ -607,11 +607,14 @@ then
     echo "Kong instances:" && echo ""
     getKongStatus
 
-    echo "______________________________________________________________"
-    echo "Vault (VaultDeploy and VaultAccess) instances:" && echo ""
-    getVaultDeployStatus
-    getVaultAccessStatus
-    
+    if [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.3" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.4" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.5" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.6" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.7" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "4.1" ]];
+    then
+        echo "______________________________________________________________"
+        echo "Vault (VaultDeploy and VaultAccess) instances:" && echo ""
+        getVaultDeployStatus
+        getVaultAccessStatus
+    fi
+
     if [[ "${VERSION_AIOPSORCHESTRATOR}" != "3.3" ]];
     then 
         echo "______________________________________________________________"
@@ -666,7 +669,12 @@ then
     then 
         getCSVStatus "$INSTALLATION_NAMESPACE" "ibm-secure-tunnel-operator"        
     fi
+    
+    if [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.3" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.4" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.5" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.6" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.7" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "4.1" ]];
+    then
     getCSVStatus "$INSTALLATION_NAMESPACE" "ibm-vault-operator"
+    fi
+
     getCSVStatus "$INSTALLATION_NAMESPACE" "ibm-watson-aiops-ui-operator"
 
     echo "______________________________________________________________"
@@ -758,8 +766,11 @@ then
     getSubscriptionStatus "ir-core-operator" "$INSTALLATION_NAMESPACE" 
     getSubscriptionStatus "ir-lifecycle-operator" "$INSTALLATION_NAMESPACE" 
     getSubscriptionStatus "redis" "$INSTALLATION_NAMESPACE" 
-    getSubscriptionStatus "vault" "$INSTALLATION_NAMESPACE" 
-    
+    if [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.3" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.4" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.5" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.6" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.7" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "4.1" ]];
+    then
+        getSubscriptionStatus "vault" "$INSTALLATION_NAMESPACE" 
+    fi
+
     echo "______________________________________________________________"
     echo "Subscriptions from ibm-common-services namespace:" && echo ""
     
@@ -854,8 +865,11 @@ then
     echo "______________________________________________________________"
     echo "OperandRequest instances:" && echo ""
 
-    getOperandRequestStatus "aiopsedge-base" "$INSTALLATION_NAMESPACE"  
-    getOperandRequestStatus "aiopsedge-cs" "$INSTALLATION_NAMESPACE"  
+    if [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.3" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.4" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.5" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.6" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.7" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "4.1" ]];
+    then
+        getOperandRequestStatus "aiopsedge-base" "$INSTALLATION_NAMESPACE"  
+        getOperandRequestStatus "aiopsedge-cs" "$INSTALLATION_NAMESPACE"  
+    fi
 
     if [ "${CLUSTER_SCOPE_INSTALL}" == "false" ];
     then 
@@ -940,7 +954,7 @@ fi
 if [[ "$1" == "status-upgrade" ]]
 then
     # This command checks the status of CP4WAIOps upgrades
-    # to v3.3, v3.4, v3.5, v3.6, v3.7, and v4.1.
+    # to v3.3, v3.4, v3.5, v3.6, v3.7, v4.1, and v4.2.
 
     FAILING_UPGRADE=""
     SUCCESSFULLY_UPGRADED=""
@@ -1022,6 +1036,15 @@ then
         MAJORVERSION_VAULTDEPLOY="4.1"
         MAJORVERSION_VAULTACCESS="4.1"
         MAJORVERSION_ASM="2.15"
+    }
+
+    component-versions-42() {
+        MAJORVERSION_AIOPSUI="4.2"
+        MAJORVERSION_AIMANAGER="4.2"
+        MAJORVERSION_IRCORE="4.2"
+        MAJORVERSION_LIFECYCLESERVICE="4.2"
+        MAJORVERSION_AIOPSANALYTICSORCHESTRATOR="4.2"
+        MAJORVERSION_ASM="2.17"
     }
 
     aiopsEdgeBaseUpgradeStatus() {    
@@ -1247,7 +1270,10 @@ then
     }
 
     # Check current instance version and component status checks for that version of CP4WAIOps
-    if [ "${VERSION_AIOPSORCHESTRATOR}" == "4.1" ];
+    if [ "${VERSION_AIOPSORCHESTRATOR}" == "4.2" ];
+    then
+        component-versions-42
+    elif [ "${VERSION_AIOPSORCHESTRATOR}" == "4.1" ];
     then 
         component-versions-41
     elif [ "${VERSION_AIOPSORCHESTRATOR}" == "3.7" ];
@@ -1267,17 +1293,17 @@ then
         component-versions-33
     elif [ "${VERSION_AIOPSORCHESTRATOR}" == "0.1" ]
     then
-        # for developer builds (v0.1), we will check against release-4.1 versions
+        # for developer builds (v0.1), we will check against release-4.2 versions
         component-versions-41
         echo ""
         echo "${red}${bold}NOTE: ${normal}Your Cloud Pak for Watson AIOps AI Manager install appears to be an internal dev version (v${VERSION_AIOPSORCHESTRATOR})."
-        echo "      The status-upgrade command checks the status of upgrades to v3.3, v3.4, v3.5, v3.6, v3.7, and v4.1 only." 
-        echo "      Therefore, the upgrade checks below will be against v4.1 component versions."
-        echo "      This may influence your results below if your dev build is not based on release-4.1.${normal}"
+        echo "      The status-upgrade command checks the status of upgrades to v3.3, v3.4, v3.5, v3.6, v3.7, v4.1, and v4.2 only." 
+        echo "      Therefore, the upgrade checks below will be against v4.2 component versions."
+        echo "      This may influence your results below if your dev build is not based on release-4.2.${normal}"
     else
         echo ""
         echo "${red}${bold}ERROR: ${normal}Your Cloud Pak for Watson AIOps AI Manager install appears to be v${VERSION_AIOPSORCHESTRATOR}."
-        echo "       The status-upgrade command checks the status of upgrades to v3.3, v3.4, v3.5, v3.6, v3.7, and v4.1 only." 
+        echo "       The status-upgrade command checks the status of upgrades to v3.3, v3.4, v3.5, v3.6, v3.7, v4.1, and v4.2 only." 
         echo "       The version you are using is not supported for use with the status-upgrade command. Exiting."
         echo ""
         exit 0
@@ -1293,8 +1319,11 @@ then
     aiManagerUpgradeStatus
     irCoreUpgradeStatus
     aiopsAnalyticsUpgradeStatus
-    vaultDeployUpgradeStatus
-    vaultAccessUpgradeStatus
+    if [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.3" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.4" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.5" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.6" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.7" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "4.1" ]];
+    then
+        vaultDeployUpgradeStatus
+        vaultAccessUpgradeStatus
+    fi
     postgresUpgradeStatus
     secureTunnelUpgradeStatus
     asmUpgradeStatus
@@ -1302,6 +1331,7 @@ then
     then
         FlinkEventProcessorUpgradeStatus
     fi
+
 
     # Print out results of status checks
     printf "
