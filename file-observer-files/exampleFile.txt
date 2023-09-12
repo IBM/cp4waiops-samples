@@ -1,3 +1,8 @@
+#
+#
+#   © Copyright IBM Corp. 2020, 2023
+#
+
 V:{"uniqueId":"Matt","entityTypes":["person"],"matchTokens":["Matt","Matty Duggan"],"name":"Matt Duggan", "role":"dev", "g":9.80665, "string":"value", "int":1, "map":{"boolean":true,"key":"value"}}
 V:{"uniqueId":"Scott","entityTypes":["person"],"matchTokens":["Scott","Scott McQuillan"],"name":"Scott McQuillan", "role":"dev", "pi":3.14159265359, "array":[1,2,3] }
 V:{"uniqueId":"Steph","entityTypes":["person"],"matchTokens":["Steph","Stephane Millar"],"name":"Stephane Millar", "role":"dev", "c":299792458}
