@@ -1,4 +1,7 @@
 #
+#   © Copyright IBM Corp. 2020, 2023
+#
+#
 #   The following example data demonstrates an example of Zabbix environment.
 #
 #   In general, resources observed by the  Zabbix observer consists of:
