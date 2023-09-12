@@ -1,4 +1,6 @@
 #
+#   © Copyright IBM Corp. 2020, 2023
+#
 #   The following example data demonstrates an example of ALM environment.
 #
 #   In general, resources observed by the ALM observer consists of:

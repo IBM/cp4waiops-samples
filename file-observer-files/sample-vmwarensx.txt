@@ -1,4 +1,7 @@
 #
+#   © Copyright IBM Corp. 2020, 2023
+#
+#
 #   The following example data demonstrates an example of NSX environment.
 #
 #

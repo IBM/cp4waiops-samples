@@ -1,4 +1,7 @@
 #
+#   © Copyright IBM Corp. 2020, 2023
+#
+#
 #  The accompanying example data demonstrates an example of microservice demo app deployed on Kubernetes cluster called 'Sock Shop' (https://github.com/microservices-demo/microservices-demo) 
 #
 #  In general, resources observed by the Kubernetes observer consists of:

@@ -1,3 +1,6 @@
+#
+#   © Copyright IBM Corp. 2020, 2023
+#
 #  The following example data demonstrates an example of a telco network.
 #
 #  In general, resources observed by the OpenStack observer consists of:

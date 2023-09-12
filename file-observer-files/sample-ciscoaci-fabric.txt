@@ -1,4 +1,7 @@
 #
+#   © Copyright IBM Corp. 2020, 2023
+#
+#
 #   The following data demonstrates an example of subset of CiscoACI fabric topology environment.
 #
 #   In general, resources observed by the CiscoACI observer on fabric topology consists of following objects:
