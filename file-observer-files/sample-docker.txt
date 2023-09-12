@@ -1,4 +1,7 @@
 #
+#   © Copyright IBM Corp. 2020, 2023
+#
+#
 #   The following example data demonstrates an example of environment where Docker service is running
 #
 #   In general, resources observed by the Docker observer consists of:
