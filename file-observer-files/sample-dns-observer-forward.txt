@@ -1,4 +1,7 @@
 #
+#   © Copyright IBM Corp. 2020, 2023
+#
+#
 #   The following example data demonstrates an example of DNS forward job using Google Public DNS (IPv4) service
 #
 #   In general, resources observed by the DNS observer in a forward job consists of:
