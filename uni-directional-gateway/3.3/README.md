@@ -1,3 +1,4 @@
+<!-- © Copyright IBM Corp. 2020, 2023-->
 # Configure the uni-directional gateway for connecting with on-premises probes
 
 This directory contains a package for setting up a uni-directional gateway between IBM Cloud Pak for Watson AIOps Event Manager and existing on-premises probes. With this gateway events can be sent from these probes to IBM Cloud Pak for Watson AIOps to become alerts.
