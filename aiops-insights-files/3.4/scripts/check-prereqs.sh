@@ -1,4 +1,9 @@
 #!/bin/bash
+#
+# © Copyright IBM Corp. 2022, 2023
+# 
+# 
+#
 
 ERROR_COUNT=0
 

@@ -1,4 +1,9 @@
 #!/bin/bash
+#
+# © Copyright IBM Corp. 2022, 2023
+# 
+# 
+#
 
 ## enable-insights
 # this script will enable insights UI
