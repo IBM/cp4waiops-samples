@@ -1,3 +1,7 @@
+#
+# © Copyright IBM Corp. 2020, 2023
+# SPDX-License-Identifier: Apache2.0
+#
 #!/bin/sh
 envsubst << EOF
 apiVersion: v1
