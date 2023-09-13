@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# © Copyright IBM Corp. 2020, 2023
+# © Copyright IBM Corp. 2023
 # SPDX-License-Identifier: Apache2.0
 #
 set -euo pipefail
@@ -56,7 +56,7 @@ function toggleDataFlow() {
         fi
     fi
     if [[ ${doSleep:-} == "true" ]]; then
-        info "Giving time for connector to pause data flow" 
+        info "Giving time for connector to pause or resume data flow" 
         sleep 30
     fi
 }
@@ -65,6 +65,10 @@ function toggleDataFlow() {
 function getDataFromStorage(){
     title "Checking connector storage for data extraction."
 
+    # initialize
+    proceedRecreate=false
+    backupDataRequired=false
+
     if [[ $gitappStatus != "Configured" ]]; then
         # Check for specific error when an upgrade changes an immutable field.
         msg "Checking for error updating connector resources ..."
@@ -72,8 +76,9 @@ function getDataFromStorage(){
         CMD="oc get event --namespace $NS --field-selector involvedObject.name=$gitappName,type==Warning"
         printAndExecute "$CMD"
         backupDataRequired=true
-        if [[ $($CMD -o json | jq '.items[] | select(.message | test("Forbidden: updates to statefulset spec for fields other than.*")) | .message' | wc -l) -gt 0 ]]; then
+        if [ $($CMD -o json | jq '.items[] | select(.message | test("Forbidden: updates to statefulset spec for fields other than.*")) | .message' | wc -l) -gt 0 ]; then
             msg "\"Unable to update Statefulset error\" event found."
+            proceedRecreate=true
         else
             warning "WARNING: Did not find any event that indicate Statefulset update error occurred because the event may have rolled. Proceeding anyway ..."
         fi
@@ -90,10 +95,11 @@ function getDataFromStorage(){
     fi
 
     msg "Connector PVC: $connectorPvc"
-    pvcAccessMode=$(oc get pvc --namespace $NS $connectorPvc -o jsonpath='{.spec.accessModes[]}' | grep ReadWriteOnce | wc -l)
-    if [[ $pvcAccessMode -ne 0 ]]; then
+    pvcAccessMode=$(getStorageAccessMode $connectorPvc)
+    if [[ $pvcAccessMode =~ ReadWriteOnce ]]; then
         echo "Connector storage access mode is already using ReadWriteOnce (RWO)."
         backupDataRequired=false
+        proceedRecreate=false;
         return
     fi
 
@@ -106,13 +112,21 @@ function getDataFromStorage(){
 
     # Get the data file path
     connectorWorkload=$(oc get statefulset --namespace $NS --no-headers -l connectors.aiops.ibm.com/git-app-name=$gitappName -o jsonpath='{.items[*].metadata.name}')
+
+    if [[ -z $connectorWorkload ]]; then
+        msg "Connector is not a Statefulset workload type."
+        backupDataRequired=false
+        proceedRecreate=false
+        return;
+    fi
+
     volumeName=$(oc get statefulset --namespace $NS $connectorWorkload -o jsonpath='{.spec.volumeClaimTemplates[].metadata.name}')
     volumeMountPath=$(oc get statefulset --namespace $NS $connectorWorkload -o jsonpath='{.spec.template.spec.containers[0].volumeMounts[?(@.name=="'$volumeName'")].mountPath }')
     dataFilePath=$volumeMountPath
 
     if [[ -z $dataFilePath ]]; then
         backupDataRequired=false
-        return
+        proceedRecreate=true;
     fi      
 
     # Check if there's files to backup
@@ -120,22 +134,30 @@ function getDataFromStorage(){
     if [ $fileCount -eq 0 ]; then
         echo "No files found in PVC to extract."
         backupDataRequired=false
-        return
     fi
 
-    targetDir=/tmp/$connconfig/$dataFilePath
-    rm -rf $targetDir
-    mkdir -p $targetDir
+    if [[ $proceedRecreate != "true" ]]; then
+        msg "Connector looks OK."
+        return;
+    fi
 
     # Disable dataflow
     toggleDataFlow "$connconfig" "off"
 
-    CMD="oc cp --retries=3 --namespace $NS $connectorPod:$dataFilePath $targetDir/"
-    info "Extracting data $dataFilePath file from pod: $connectorPod"
-    printAndExecute "$CMD"
+    if [[ $backupDataRequired == "true" ]]; then
 
-    msg "Files extracted"
-    ls -R $targetDir
+        targetDir=/tmp/$connconfig/$dataFilePath
+        rm -rf $targetDir
+        mkdir -p $targetDir
+
+        CMD="oc cp --retries=3 --namespace $NS $connectorPod:$dataFilePath $targetDir/"
+        info "Extracting data $dataFilePath file from pod: $connectorPod"
+        printAndExecute "$CMD"
+
+        msg "Files extracted"
+        ls -R $targetDir
+
+    fi
     
     connectorWorkload=$(oc get statefulset --namespace $NS --no-headers -l connectors.aiops.ibm.com/git-app-name=$gitappName -o jsonpath='{.items[*].metadata.name}')
     info "Scaling down connector workload: $connectorWorkload and delete PVC"
@@ -146,87 +168,85 @@ function getDataFromStorage(){
     CMD="oc rollout status statefulset/$connectorWorkload --namespace $NS --timeout=300s"
     printAndExecute "$CMD"
 
-    local cycle=1
-    local maxRetry=$((12 * 5)) # 5 minutes
-    while [[ ! $(oc get pod $connectorPod --namespace $NS --no-headers) ]]; do
-        msg "Checking pod $connectorPod"
-        sleep 5
-        cycle=$(( $cycle + 1 ))
-        if [ $cycle  -gt $maxRetry ]; then
-            podStatus=$(oc get pod $connectorPod --namespace $NS --no-headers -o custom-columns=":status.phase")
-            error "Pod $connectorPod status is still not yet deleted, current status: $podStatus. Pod may be stuck and could not be deleted. Exit."
-            exit 1
-        fi
-    done
-
     info "Deleting Statefulset: $connectorWorkload"
     CMD="oc delete statefulset/$connectorWorkload --namespace $NS --timeout=60s"
     printAndExecute "$CMD"
-}
-
-function insertConnectorData(){
-
-    if [[ $backupDataRequired != "true" ]]; then
-        return;
-    fi
-
-    if [[ -z ${targetDir:-} ]]; then
-        msg "No data to insert in persistent storage."
-        return;
-    fi
-
-    title "Preparing to insert backup data."
-    info "Checking for workload and PVC creation"
 
     local cycle=1
     local maxRetry=$((6 * 5)) # 5 minutes
     while [[ ! $(oc get statefulset --namespace $NS --no-headers -l connectors.aiops.ibm.com/git-app-name=$gitappName) ]]; do
+        msg "Waiting for Statefulset to be created."
         sleep 10
         cycle=$(( $cycle + 1 ))
         if [ $cycle -gt $maxRetry ]; then
-            exit 1
+            errorAndExit "Timed out waiting for Statefulset to be created."
         fi
     done
+}
+
+function insertConnectorData(){
+
+    if [[ $proceedRecreate != "true" ]]; then
+        # No action required.
+        return;
+    fi
     connectorWorkload=$(oc get statefulset --namespace $NS --no-headers -l connectors.aiops.ibm.com/git-app-name=$gitappName -o jsonpath='{.items[*].metadata.name}')
-    connectorPvc=$(oc get pvc --namespace $NS --no-headers -l instance=connector-$connconfigUid -o jsonpath='{.items[*].metadata.name}')
-    volumeName=$(oc get statefulset --namespace $NS $connectorWorkload -o jsonpath='{.spec.volumeClaimTemplates[].metadata.name}')
-    volumeMountPath=$(oc get statefulset --namespace $NS $connectorWorkload -o jsonpath='{.spec.template.spec.containers[0].volumeMounts[?(@.name=="'$volumeName'")].mountPath }')
 
-    info "Found statefulset: $connectorWorkload, PVC: $connectorPvc"
-    info "Making sure rollout is complete ..."
-    CMD="oc rollout status --namespace $NS statefulset/$connectorWorkload --timeout=300s"
-    printAndExecute "$CMD"
+    if [[ $backupDataRequired == "true" ]]; then
+        title "Preparing to insert backup data."
+        info "Checking for workload and PVC creation"
 
-    local cycle=1
-    local maxRetry=$((6 * 5)) # 5 minutes
-    while [[ ! $(oc get pvc --namespace $NS --no-headers -l instance=connector-$connconfigUid) ]]; do
-        sleep 10
-        cycle=$(( $cycle + 1 ))
-        if [ $cycle -gt $maxRetry ]; then
-            error "Timeout waiting for PVC to be created. Exit."
-            exit 1
-        fi
-    done
+        local cycle=1
+        local maxRetry=$((6 * 5)) # 5 minutes
+        while [[ ! $(oc get statefulset --namespace $NS --no-headers -l connectors.aiops.ibm.com/git-app-name=$gitappName) ]]; do
+            sleep 10
+            cycle=$(( $cycle + 1 ))
+            if [ $cycle -gt $maxRetry ]; then
+                exit 1
+            fi
+        done
 
-    connectorPod=$(oc get pod --no-headers --namespace $NS -l instance=connector-$connconfigUid -o jsonpath='{.items[*].metadata.name}')
-    
-    local cycle=1
-    local maxRetry=$((6 * 5)) # 5 minutes
-    while [[ $(oc get pod $connectorPod --namespace $NS --no-headers -o custom-columns=":status.phase") != "Running" ]]; do
-        sleep 10
-        cycle=$(( $cycle + 1 ))
-        if [ $cycle -gt $maxRetry ]; then
-            error "Timeout waiting for pod $connectorPod to run. Exit."
-            exit 1
-        fi
-    done
-    
-    CMD="oc cp --retries=3 $targetDir $connectorPod:$volumeMountPath/.."
-    info "Inserting data $targetDir directory into pod: $connectorPod"
-    printAndExecute "$CMD"
+        connectorPvc=$(oc get pvc --namespace $NS --no-headers -l instance=connector-$connconfigUid -o jsonpath='{.items[*].metadata.name}')
+        volumeName=$(oc get statefulset --namespace $NS $connectorWorkload -o jsonpath='{.spec.volumeClaimTemplates[].metadata.name}')
+        volumeMountPath=$(oc get statefulset --namespace $NS $connectorWorkload -o jsonpath='{.spec.template.spec.containers[0].volumeMounts[?(@.name=="'$volumeName'")].mountPath }')
 
-    CMD="oc exec --namespace $NS $connectorPod -- /bin/bash -c \"find $volumeMountPath -type f\""
-    printAndExecute "$CMD"
+        info "Found statefulset: $connectorWorkload, PVC: $connectorPvc"
+        info "Making sure rollout is complete ..."
+        CMD="oc rollout status --namespace $NS statefulset/$connectorWorkload --timeout=300s"
+        printAndExecute "$CMD"
+
+        local cycle=1
+        local maxRetry=$((6 * 5)) # 5 minutes
+        while [[ ! $(oc get pvc --namespace $NS --no-headers -l instance=connector-$connconfigUid) ]]; do
+            sleep 10
+            cycle=$(( $cycle + 1 ))
+            if [ $cycle -gt $maxRetry ]; then
+                error "Timeout waiting for PVC to be created. Exit."
+                exit 1
+            fi
+        done
+
+        connectorPod=$(oc get pod --no-headers --namespace $NS -l instance=connector-$connconfigUid -o jsonpath='{.items[*].metadata.name}')
+        
+        local cycle=1
+        local maxRetry=$((6 * 5)) # 5 minutes
+        while [[ $(oc get pod $connectorPod --namespace $NS --no-headers -o custom-columns=":status.phase") != "Running" ]]; do
+            sleep 10
+            cycle=$(( $cycle + 1 ))
+            if [ $cycle -gt $maxRetry ]; then
+                error "Timeout waiting for pod $connectorPod to run. Exit."
+                exit 1
+            fi
+        done
+        
+        CMD="oc cp --retries=3 $targetDir $connectorPod:$volumeMountPath/.."
+        info "Inserting data $targetDir directory into pod: $connectorPod"
+        printAndExecute "$CMD"
+
+        CMD="oc exec --namespace $NS $connectorPod -- /bin/bash -c \"find $volumeMountPath -type f\""
+        printAndExecute "$CMD"
+
+    fi
     
     info "Scaling down connector workload $connectorWorkload to restart pod."
     CMD="oc scale statefulset/$connectorWorkload --namespace $NS --replicas 0"
@@ -245,6 +265,11 @@ function insertConnectorData(){
 
     ## Enable dataflow
     toggleDataFlow "$connconfig" "on"
+
+    connectorPvc=$(oc get pvc --namespace $NS --no-headers -l instance=connector-$connconfigUid -o jsonpath='{.items[*].metadata.name}')
+    accessMode=$(getStorageAccessMode "$connectorPvc")
+
+    msg "Connector PVC access mode: $accessMode"
 }
 
 function getConnectorInfo(){
@@ -283,7 +308,12 @@ function recreateStorage(){
             count=$((count + 1))
         done
     fi
+}
 
+function getStorageAccessMode(){
+    local connectorPvc=$1
+    pvcAccessMode=$(oc get pvc --namespace $NS $connectorPvc -o jsonpath='{.spec.accessModes[]}')
+    echo $pvcAccessMode
 }
 
 function checkLoggedIn(){
