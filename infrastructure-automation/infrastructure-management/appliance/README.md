@@ -1,4 +1,5 @@
 # IM Appliance Link Installer
+<!-- © Copyright IBM Corp. 2020, 2023 -->
 
 Configures Infrastructure Management (IM) appliance navigation links in Infrastructure Automation.
 The result will be an Automation folder and IM link with a user supplied server URL.
