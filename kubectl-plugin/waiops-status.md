@@ -1,10 +1,10 @@
 <!-- © Copyright IBM Corp. 2020, 2023-->
 
-#### ***NOTE**: from CP4WAIOps v4.1.0 onwards, the use of this status-checking tool is now considered **optional**. Please primarily refer to the installation status messages provided directly in the `ibm-aiops-orchestrator` CR of your cluster's installation.*
+#### ***NOTE**: from CP4AIOps v4.1.0 onwards, the use of this status-checking tool is now considered **optional**. Please primarily refer to the installation status messages provided directly in the `ibm-aiops-orchestrator` CR of your cluster's installation.*
 
 # kubectl-waiops
 
-A kubectl plugin for CP4WAIOps
+A kubectl plugin for CP4AIOps
 
 https://kubernetes.io/docs/tasks/extend-kubectl/kubectl-plugins/
 
@@ -23,7 +23,7 @@ ______________________________________________________________
 Installation instances:
 
 NAMESPACE   NAME                  PHASE     LICENSE    STORAGECLASS   STORAGECLASSLARGEBLOCK   AGE
-cp4waiops   ibm-cp-watson-aiops   Running   Accepted   rook-cephfs    rook-ceph-block          63m
+cp4waiops   ibm-cp-aiops   Running   Accepted   rook-cephfs    rook-ceph-block          63m
 ______________________________________________________________
 ZenService instances:
 
@@ -81,7 +81,7 @@ ______________________________________________________________
 Installation instances:
 
 NAMESPACE   NAME                  PHASE     LICENSE    STORAGECLASS   STORAGECLASSLARGEBLOCK   AGE
-cp4waiops   ibm-cp-watson-aiops   Running   Accepted   rook-cephfs    rook-ceph-block          63m
+cp4waiops   ibm-cp-aiops   Running   Accepted   rook-cephfs    rook-ceph-block          63m
 ______________________________________________________________
 ZenService instances:
 
@@ -153,8 +153,8 @@ ______________________________________________________________
 CSVs from cp4waiops namespace:
 
 NAME                                    DISPLAY                                            VERSION   REPLACES                                PHASE
-aimanager-operator.v3.3.0               IBM Watson AIOps AI Manager                        3.3.0                                             Succeeded
-aiopsedge-operator.v3.3.0               IBM Watson AIOps Edge                              3.3.0                                             Succeeded
+aimanager-operator.v3.3.0               IBM AIOps AI Manager                        3.3.0                                             Succeeded
+aiopsedge-operator.v3.3.0               IBM AIOps Edge                              3.3.0                                             Succeeded
 asm-operator.v3.3.0                     IBM Netcool Agile Service Manager                  3.3.0                                             Succeeded
 couchdb-operator.v2.2.1                 Operator for Apache CouchDB                        2.2.1     couchdb-operator.v2.2.0                 Succeeded
 ibm-aiops-ir-ai.v3.3.0                  IBM Watson AIOps Issue Resolution AI & Analytics   3.3.0                                             Succeeded
@@ -322,7 +322,7 @@ Hint: for a more detailed printout of each operator's components' statuses, run 
 ## How to use
 
 ### Requirements
-- You must have an installation of Cloud Pak for Watson AIOps AI Manager v3.3, v3.4, v3.5, v3.6, v3.7, v4.1, or v4.2 on your cluster. 
+- You must have an installation of Cloud Pak for AIOps v3.3, v3.4, v3.5, v3.6, v3.7, v4.1, or v4.2 on your cluster. 
 
 **Note**: while this tool does not require you to be logged in as a cluster admin, `oc waiops status-all`'s output will be limited if you are not. If possible, it is recommended to be logged in as a cluster admin to receive a more complete view of your install status.
 
