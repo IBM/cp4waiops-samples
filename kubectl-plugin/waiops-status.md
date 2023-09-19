@@ -53,7 +53,7 @@ ______________________________________________________________
 LifecycleService instances:
 
 KIND               NAMESPACE   NAME    VERSION   STATUS   MESSAGE
-LifecycleService   katamari    aiops   4.2.0     <none>   All Services Ready
+LifecycleService   katamari    aiops   4.2.0     Ready   All Services Ready
 
 ______________________________________________________________
 BaseUI instances:
@@ -119,7 +119,7 @@ ______________________________________________________________
 LifecycleService instances:
 
 KIND               NAMESPACE   NAME    VERSION   STATUS   MESSAGE
-LifecycleService   katamari    aiops   4.2.0     <none>   Update in progress
+LifecycleService   katamari    aiops   4.2.0     Ready    All Services Ready
 
 ______________________________________________________________
 BaseUI instances:
@@ -396,21 +396,8 @@ AIOpsAnalyticsOrchestrator   katamari    aiops   4.2.0     Ready    All Services
 KIND   NAMESPACE   NAME             VERSION   STATUS
 ASM    katamari    aiops-topology   2.17.0    OK
 
-______________________________________________________________
-
-______________________________________________________________
-
-Meanwhile, the following component(s) have not upgraded yet:
-
-
 KIND               NAMESPACE   NAME    VERSION   STATUS   MESSAGE
-LifecycleService   katamari    aiops   4.2.0     <none>   Update in progress
-* EXPECTED MAJOR VERSION: 4.2
-
-If only a short time has passed since the upgrade was started, the components may
-need more time to complete upgrading. If you have waited a significant amount of time
-and the statuses of the components listed above are not changing, please refer to
-the troubleshooting docs or open a support case.
+LifecycleService   katamari    aiops   4.2.0     Ready    All Services Ready
 
 ______________________________________________________________
 
