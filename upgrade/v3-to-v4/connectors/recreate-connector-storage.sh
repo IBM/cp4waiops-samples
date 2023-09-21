@@ -242,9 +242,8 @@ function insertConnectorData(){
             fi
         done
 
-        # check for directory name
-        # source is targetDir=/tmp/$connconfig/$dataFilePath , needs to be same as $volumeMountPath
-        # /tmp/awshis/awscw compared with /bindings/awscloudwatch/..
+        # check for directory name and move the files to new directory 
+        # with the correct name before inserting it into the PVC.
         normalizedTargetDir=$targetDir
         if [[ $(basename $targetDir) != $(basename $volumeMountPath) ]]; then
             normalizedTargetDir="$(dirname $targetDir)/$(basename $volumeMountPath)"
@@ -253,7 +252,6 @@ function insertConnectorData(){
             info "Moving file from $targetDir/ to $normalizedTargetDir"
             cp -R $targetDir/ $normalizedTargetDir
             ls -R $normalizedTargetDir
-            normalizedTargetDir="$(dirname $targetDir)/$(basename $volumeMountPath)"
         fi
         
         
