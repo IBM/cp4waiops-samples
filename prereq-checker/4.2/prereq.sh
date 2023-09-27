@@ -13,7 +13,7 @@ MEMORY_SMALL_4_2=140
 # Minimum resource values for large profile 4.2.x
 NODE_COUNT_LARGE_4_2=10
 VCPU_LARGE_4_2=162
-MEMORY_LARGE_4_2=360
+MEMORY_LARGE_4_2=372
 
  
 log () {
