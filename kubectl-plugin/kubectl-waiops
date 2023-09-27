@@ -2,7 +2,7 @@
 
 # © Copyright IBM Corp. 2020, 2023
 
-# The CP4WAIOps status checker tool prints out several components to indicate the status of your install.
+# The CP4AIOps status checker tool prints out several components to indicate the status of your install.
 # In a successful install, the components below should all have a successful STATUS/PROGRESS/PHASE indicator.
 # If any of the components are incomplete or are not reconciled after a significant period of time, 
 # please refer to the IBM troubleshooting docs online or open a support case. 
@@ -24,7 +24,7 @@ USER_LEVEL=$(oc whoami) # to check if the user is running the tool at higher tha
 if [[ "$USER_LEVEL" == "basic" ]]
 then
     echo ""
-    echo "${red}${bold}NOTE: ${normal}You do not have the appropriate permissions to run the CP4WAIOps status checker tool."
+    echo "${red}${bold}NOTE: ${normal}You do not have the appropriate permissions to run the CP4AIOps status checker tool."
     echo "      It appears you are logged in as a basic user. Please log in again" 
     echo "      with credentials that have more permissions.${normal}"
     echo ""
@@ -488,7 +488,7 @@ then
     oc project ${INSTALLATION_NAMESPACE}
 
     echo ""
-    echo "${blue}${bold}Cloud Pak for Watson AIOps AI Manager v${VERSION_AIOPSORCHESTRATOR} installation status:${normal}"
+    echo "${blue}${bold}Cloud Pak for AIOps v${VERSION_AIOPSORCHESTRATOR} installation status:${normal}"
     
     echo "______________________________________________________________"
     echo "Installation instances:" && echo ""
@@ -549,7 +549,7 @@ then
     oc project ${INSTALLATION_NAMESPACE}
 
     echo ""
-    echo "${blue}${bold}Cloud Pak for Watson AIOps AI Manager v${VERSION_AIOPSORCHESTRATOR} installation status:${normal}"
+    echo "${blue}${bold}Cloud Pak for AIOps v${VERSION_AIOPSORCHESTRATOR} installation status:${normal}"
     
     if [[ "$CLUSTER_ADMIN" == "no" ]];
     then
@@ -953,7 +953,7 @@ fi
 # optional argument handling
 if [[ "$1" == "status-upgrade" ]]
 then
-    # This command checks the status of CP4WAIOps upgrades
+    # This command checks the status of CP4AIOps upgrades
     # to v3.3, v3.4, v3.5, v3.6, v3.7, v4.1, and v4.2.
 
     FAILING_UPGRADE=""
@@ -1269,7 +1269,7 @@ then
         fi
     }
 
-    # Check current instance version and component status checks for that version of CP4WAIOps
+    # Check current instance version and component status checks for that version of CP4AIOps
     if [ "${VERSION_AIOPSORCHESTRATOR}" == "4.2" ];
     then
         component-versions-42
@@ -1296,13 +1296,13 @@ then
         # for developer builds (v0.1), we will check against release-4.2 versions
         component-versions-41
         echo ""
-        echo "${red}${bold}NOTE: ${normal}Your Cloud Pak for Watson AIOps AI Manager install appears to be an internal dev version (v${VERSION_AIOPSORCHESTRATOR})."
+        echo "${red}${bold}NOTE: ${normal}Your Cloud Pak for AIOps install appears to be an internal dev version (v${VERSION_AIOPSORCHESTRATOR})."
         echo "      The status-upgrade command checks the status of upgrades to v3.3, v3.4, v3.5, v3.6, v3.7, v4.1, and v4.2 only." 
         echo "      Therefore, the upgrade checks below will be against v4.2 component versions."
         echo "      This may influence your results below if your dev build is not based on release-4.2.${normal}"
     else
         echo ""
-        echo "${red}${bold}ERROR: ${normal}Your Cloud Pak for Watson AIOps AI Manager install appears to be v${VERSION_AIOPSORCHESTRATOR}."
+        echo "${red}${bold}ERROR: ${normal}Your Cloud Pak for AIOps install appears to be v${VERSION_AIOPSORCHESTRATOR}."
         echo "       The status-upgrade command checks the status of upgrades to v3.3, v3.4, v3.5, v3.6, v3.7, v4.1, and v4.2 only." 
         echo "       The version you are using is not supported for use with the status-upgrade command. Exiting."
         echo ""
@@ -1310,7 +1310,7 @@ then
     fi
 
     echo ""
-    echo "${blue}${bold}Cloud Pak for Watson AIOps AI Manager v${VERSION_AIOPSORCHESTRATOR} upgrade status:${normal}"
+    echo "${blue}${bold}Cloud Pak for AIOps v${VERSION_AIOPSORCHESTRATOR} upgrade status:${normal}"
 
     aiopsEdgeBaseUpgradeStatus
     lifecycleUpgradeStatus
