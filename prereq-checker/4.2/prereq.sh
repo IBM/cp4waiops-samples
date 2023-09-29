@@ -82,10 +82,10 @@ function initialize() {
     pass_color="\e[32m"
     color_end="\x1b[0m"
 
-    fail_msg=`printf "$fail_color FAIL $color_end"`
-    pass_msg=`printf "$pass_color PASS $color_end\n"`
-    warning_msg=`printf "$warn_color WARNING $color_end"`
-    skip_msg=`printf "$warn_color SKIP $color_end"`
+    fail_msg=$(printf "$fail_color FAIL $color_end")
+    pass_msg=$(printf "$pass_color PASS $color_end\n")
+    warning_msg=$(printf "$warn_color WARNING $color_end")
+    skip_msg=$(printf "$warn_color SKIP $color_end")
 
     # array to hold all storage check results
     storageCheckRes=()
@@ -113,7 +113,7 @@ function checkOCPVersion {
 
     ODF_STORAGE=$(${command} get storageclass ocs-storagecluster-cephfs --ignore-not-found=true)
 
-    OCP_MINOR_VER=`echo $OCP_VER | awk '{split($0,a,"."); print a[3]}'`
+    OCP_MINOR_VER=$(echo $OCP_VER | awk '{split($0,a,"."); print a[3]}')
     
     echo
     startEndSection "Openshift Container Platform Version Check"
@@ -162,7 +162,7 @@ function createTestJob () {
     JOB_NAME="cp4waiops-entitlement-key-test-job"
 
     # Use return the word count of "oc get jobs $JOB_NAME"
-    wc=`${command} get job $JOB_NAME --no-headers=true --ignore-not-found=true | wc -l`
+    wc=$(${command} get job $JOB_NAME --no-headers=true --ignore-not-found=true | wc -l)
 
     log $INFO "Checking if the job '$JOB_NAME' already exists."
     if [ "${wc}" -gt 0  ]; then
@@ -273,7 +273,7 @@ function checkEntitlementCred () {
             fi
             # log $INFO "Waiting for $SLEEP_LOOP, and checking the job '$JOB_NAME' status again"
             sleep $SLEEP_LOOP
-            LOOP_COUNT=`expr $LOOP_COUNT + 1`
+            LOOP_COUNT=$(expr $LOOP_COUNT + 1)
 	done
     else
 	printf " $fail_color $ERROR Some error occured while '$JOB_NAME' job creation for testing entitlement secret configuration. $color_end\n"
@@ -585,16 +585,16 @@ function checkStorage {
 function get_worker_node_list() {
 
     if [ -z "${all_node_list}" ] ; then
-	all_node_list=`${command} get nodes | grep -v NAME | awk '{ print $1 }' | sort -V | tr "\n" ' ' | tr -s ' '`
+	all_node_list=$(${command} get nodes | grep -v NAME | awk '{ print $1 }' | sort -V | tr "\n" ' ' | tr -s ' ')
     fi	
     
     if [ -z ${notop} ] ; then
-	top=`${command} ${adm} top nodes`
+	top=$(${command} ${adm} top nodes)
     fi
     
     for node in ${all_node_list} ; do
-	describe=`${command} describe node ${node} 2> /dev/null`
-	NoSchedule=`echo ${describe} | grep NoSchedule`
+	describe=$(${command} describe node ${node} 2> /dev/null)
+	NoSchedule=$(echo ${describe} | grep NoSchedule)
 	if [ -z "${NoSchedule}" ] ; then
             worker_node_count=$((${worker_node_count}+1))
 	else
@@ -667,7 +667,7 @@ function covert_cpu_unit() {
     
     converted_cpu=0
     if [[ "${cpu_before_conversion}" =~ "m" ]] ; then
-	converted_cpu=`echo ${cpu_before_conversion} | sed 's/[^0-9]*//g'`
+	converted_cpu=$(echo ${cpu_before_conversion} | sed 's/[^0-9]*//g')
     else
 	converted_cpu=$((${cpu_before_conversion}*1000))
     fi
@@ -681,16 +681,16 @@ function calculate_memory_unrequested() {
     KiToMB=$(awk "BEGIN{print 2 ^ 10 / 10 ^ 6}")
     
     #Allocatable raw memory of a node with unit value. eg 30998112Ki
-    node_mem_raw_Ki=`echo ${node_resources} | awk '{ print $4 }'`
-    node_mem_allocatable_Ki=`echo ${node_mem_raw_Ki} | sed 's/[^0-9]*//g'`
+    node_mem_raw_Ki=$(echo ${node_resources} | awk '{ print $4 }')
+    node_mem_allocatable_Ki=$(echo ${node_mem_raw_Ki} | sed 's/[^0-9]*//g')
 
     #Allocatable memory converted in MB
     convert_memory_in_MB $node_mem_raw_Ki $node_mem_allocatable_Ki
     node_mem_allocatable_MB=$mem_MB
     
     #Requested memory for current node eg: 26958Mi or 30998112Ki
-    node_mem_request_raw=`echo "${node_describe}" | grep 'memory ' -a | tail -1 | awk '{ print $2 }'`
-    node_mem_request_without_unit=`echo ${node_mem_request_raw} | sed 's/[^0-9]*//g'`
+    node_mem_request_raw=$(echo "${node_describe}" | grep 'memory ' -a | tail -1 | awk '{ print $2 }')
+    node_mem_request_without_unit=$(echo ${node_mem_request_raw} | sed 's/[^0-9]*//g')
 
     #Requested memory converted to MB
     convert_memory_in_MB $node_mem_request_raw $node_mem_request_without_unit
@@ -707,10 +707,10 @@ function calculate_memory_unrequested() {
 function calculate_cpu_unrequested() {
 
     #Allocatable raw cpu from node resource
-    node_cpu_raw=`echo ${node_resources} | awk '{ print $2 }'`
+    node_cpu_raw=$(echo ${node_resources} | awk '{ print $2 }')
     
     #Requested cpu resource from node resource
-    node_cpu_request=`echo "${node_describe}" | grep 'cpu ' -a | tail -1 | awk '{ print $2 }' `
+    node_cpu_request=$(echo "${node_describe}" | grep 'cpu ' -a | tail -1 | awk '{ print $2 }')
 
     covert_cpu_unit $node_cpu_raw
     node_cpu_allocatable=$converted_cpu
@@ -733,8 +733,8 @@ function check_available_cpu_and_memory() {
 
     #For each node calculate cpu and memory resource.
     for node in ${all_node_list} ; do
-	node_describe=`${command} describe node ${node}`
-	node_resources=`echo "${node_describe}" | grep 'Allocatable' -A 6 -a | egrep 'cpu|memory' -a | tr "\n" ' ' | tr -s ' '`
+	node_describe=$(${command} describe node ${node})
+	node_resources=$(echo "${node_describe}" | grep 'Allocatable' -A 6 -a | egrep 'cpu|memory' -a | tr "\n" ' ' | tr -s ' ')
 	
 	#Calculate cpu resource available for each node
 	calculate_cpu_unrequested
@@ -760,43 +760,43 @@ function analyze_resource_display() {
 
     ## Display for regular install
     if [[ $worker_node_count -ge $NODE_COUNT_LARGE_4_2 ]]; then
-	large_worker_node_count_string=`printf "$pass_color $worker_node_count $color_end\n"`
+	large_worker_node_count_string=$(printf "$pass_color $worker_node_count $color_end\n")
     else
-	large_worker_node_count_string=`printf "$fail_color $worker_node_count $color_end\n"`
+	large_worker_node_count_string=$(printf "$fail_color $worker_node_count $color_end\n")
     fi
     
     if [[ $total_cpu_unrequested -ge $VCPU_LARGE_4_2 ]]; then
-	large_total_cpu_unrequested_string=`printf "$pass_color $total_cpu_unrequested $color_end\n"`
+	large_total_cpu_unrequested_string=$(printf "$pass_color $total_cpu_unrequested $color_end\n")
     else
-	large_total_cpu_unrequested_string=`printf "$fail_color $total_cpu_unrequested $color_end\n"`
+	large_total_cpu_unrequested_string=$(printf "$fail_color $total_cpu_unrequested $color_end\n")
     fi
 
     if [[ $total_memory_unrequested_GB -ge $MEMORY_LARGE_4_2 ]]; then
-	large_total_memory_unrequested_GB_string=`printf "$pass_color $total_memory_unrequested_GB $color_end\n"`
+	large_total_memory_unrequested_GB_string=$(printf "$pass_color $total_memory_unrequested_GB $color_end\n")
     elif [[ $total_memory_unrequested_GB -le 0 && "$unitNotSupported" -eq "true"  ]]; then
-	large_total_memory_unrequested_GB_string=`printf "$fail_color DNE $color_end\n"`
+	large_total_memory_unrequested_GB_string=$(printf "$fail_color DNE $color_end\n")
     else
-	large_total_memory_unrequested_GB_string=`printf "$fail_color $total_memory_unrequested_GB $color_end\n"`
+	large_total_memory_unrequested_GB_string=$(printf "$fail_color $total_memory_unrequested_GB $color_end\n")
     fi
 
     if [[ $worker_node_count -ge $NODE_COUNT_SMALL_4_2 ]]; then
-	small_worker_node_count_string=`printf "$pass_color $worker_node_count $color_end\n"`
+	small_worker_node_count_string=$(printf "$pass_color $worker_node_count $color_end\n")
     else
-	small_worker_node_count_string=`printf "$fail_color $worker_node_count $color_end\n"`
+	small_worker_node_count_string=$(printf "$fail_color $worker_node_count $color_end\n")
     fi
     
     if [[ $total_cpu_unrequested -ge $VCPU_SMALL_4_2 ]]; then
-	small_total_cpu_unrequested_string=`printf "$pass_color $total_cpu_unrequested $color_end\n"`
+	small_total_cpu_unrequested_string=$(printf "$pass_color $total_cpu_unrequested $color_end\n")
     else
-	small_total_cpu_unrequested_string=`printf "$fail_color $total_cpu_unrequested $color_end\n"`
+	small_total_cpu_unrequested_string=$(printf "$fail_color $total_cpu_unrequested $color_end\n")
     fi
     
     if [[ $total_memory_unrequested_GB -ge $MEMORY_SMALL_4_2 ]]; then
-	small_total_memory_unrequested_GB_string=`printf "$pass_color $total_memory_unrequested_GB $color_end\n"`
+	small_total_memory_unrequested_GB_string=$(printf "$pass_color $total_memory_unrequested_GB $color_end\n")
     elif [[ $total_memory_unrequested_GB -le 0 && "$unitNotSupported" -eq "true"  ]]; then
-	small_total_memory_unrequested_GB_string=`printf "$fail_color DNE $color_end\n"`
+	small_total_memory_unrequested_GB_string=$(printf "$fail_color DNE $color_end\n")
     else
-	small_total_memory_unrequested_GB_string=`printf "$fail_color $total_memory_unrequested_GB $color_end\n"`
+	small_total_memory_unrequested_GB_string=$(printf "$fail_color $total_memory_unrequested_GB $color_end\n")
     fi
 
 }
@@ -812,11 +812,11 @@ function checkSmallOrLargeProfileInstall() {
     analyze_resource_display
     
     log $INFO "==================================Resource Summary====================================================="
-    header=`printf "   %40s   |      %s      |     %s" "Nodes" "vCPU" "Memory(GB)"`
+    header=$(printf "   %40s   |      %s      |     %s" "Nodes" "vCPU" "Memory(GB)")
     log $INFO "${header}"
-    string=`printf "Small profile(available/required)  [ %s/ %s ]   [ %s/ %s ]       [ %s/ %s ]" "$small_worker_node_count_string" "$NODE_COUNT_SMALL_4_2" "$small_total_cpu_unrequested_string" "$VCPU_SMALL_4_2" "$small_total_memory_unrequested_GB_string" "$MEMORY_SMALL_4_2"`
+    string=$(printf "Small profile(available/required)  [ %s/ %s ]   [ %s/ %s ]       [ %s/ %s ]" "$small_worker_node_count_string" "$NODE_COUNT_SMALL_4_2" "$small_total_cpu_unrequested_string" "$VCPU_SMALL_4_2" "$small_total_memory_unrequested_GB_string" "$MEMORY_SMALL_4_2")
     log $INFO "${string}"
-    string=`printf "Large profile(available/required)  [ %s/ %s ]   [ %s/ %s ]       [ %s/ %s ]" "$large_worker_node_count_string" "$NODE_COUNT_LARGE_4_2" "$large_total_cpu_unrequested_string" "$VCPU_LARGE_4_2" "$large_total_memory_unrequested_GB_string" "$MEMORY_LARGE_4_2"`
+    string=$(printf "Large profile(available/required)  [ %s/ %s ]   [ %s/ %s ]       [ %s/ %s ]" "$large_worker_node_count_string" "$NODE_COUNT_LARGE_4_2" "$large_total_cpu_unrequested_string" "$VCPU_LARGE_4_2" "$large_total_memory_unrequested_GB_string" "$MEMORY_LARGE_4_2")
     log $INFO "${string}"
     
     # Script need to output a message if memory cant be calculated. This script only supports Ki, Mi, Gi, Ti, Ei, Pi, bytes, and m.
@@ -846,13 +846,13 @@ function showSummary() {
     echo
     echo
     startEndSection "Prerequisite Checker Tool Summary"
-    string=`printf "      [ %s ] Openshift Container Platform Version Check " "${OCP_VER_RES}"`
+    string=$(printf "      [ %s ] Openshift Container Platform Version Check " "${OCP_VER_RES}")
     printf "${string}\n"
-    string=`printf "      [ %s ] Entitlement Pull Secret" "${PS_RES}"`
+    string=$(printf "      [ %s ] Entitlement Pull Secret" "${PS_RES}")
     printf "${string}\n"
-    string=`printf "      [ %s ] Storage Provider\n" "${STORAGE_PROVIDER_RES}"`
+    string=$(printf "      [ %s ] Storage Provider\n" "${STORAGE_PROVIDER_RES}")
     printf "${string}\n"
-    string=`printf "      [ %s ] Small or Large Profile Install Resources" "${PROFILE_RES}"`
+    string=$(printf "      [ %s ] Small or Large Profile Install Resources" "${PROFILE_RES}")
     printf "${string}\n"
     startEndSection "Prerequisite Checker Tool Summary"
 }
