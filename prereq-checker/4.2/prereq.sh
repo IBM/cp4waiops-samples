@@ -3,18 +3,6 @@
 
 set -eo pipefail
 
-## Resource size for 4.2
-# These defaults are given in section 'IBM Cloud Pak for AIOps only Hardware requirement totals' under
-# 'Hardware requirements - IBM Cloud Pak for AIOps only' https://ibm.biz/aiops_hardware_420
-# Minimum resource values for small profile 4.2.x
-NODE_COUNT_SMALL_4_2=3
-VCPU_SMALL_4_2=62
-MEMORY_SMALL_4_2=140
-# Minimum resource values for large profile 4.2.x
-NODE_COUNT_LARGE_4_2=10
-VCPU_LARGE_4_2=162
-MEMORY_LARGE_4_2=372
-
 function display_help() {
     echo "**************************************** Usage ********************************************"
     echo
@@ -60,6 +48,18 @@ function log () {
 }
 
 function initialize() {
+
+    ## Resource size for 4.2
+    # These defaults are given in section 'IBM Cloud Pak for AIOps only Hardware requirement totals' under
+    # 'Hardware requirements - IBM Cloud Pak for AIOps only' https://ibm.biz/aiops_hardware_420
+    # Minimum resource values for small profile 4.2.x
+    NODE_COUNT_SMALL_4_2=3
+    VCPU_SMALL_4_2=62
+    MEMORY_SMALL_4_2=140
+    # Minimum resource values for large profile 4.2.x
+    NODE_COUNT_LARGE_4_2=10
+    VCPU_LARGE_4_2=162
+    MEMORY_LARGE_4_2=372
 
     command="oc"
     notop=""
