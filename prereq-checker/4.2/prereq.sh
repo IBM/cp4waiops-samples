@@ -72,6 +72,7 @@ function initialize() {
     ERROR="[ERROR]"
 
     # For Summary method
+    REQUIRED_OCP_VERSION="4.12"    
     OCP_VER_RES=""
     STORAGE_PROVIDER_RES=""
     PROFILE_RES=""
@@ -106,7 +107,7 @@ function verifyOC() {
 }
 
 # This function checks to see if user's OCP version meets our requirements by checking if 
-# substring "4.12" is in variable OCP_VER.
+# substring "${REQUIRED_OCP_VERSION}" is in variable OCP_VER.
 function checkOCPVersion {
     
     OCP_VER=$(${command} get clusterversion version -o=jsonpath='{.status.desired.version}')
@@ -117,9 +118,9 @@ function checkOCPVersion {
     
     echo
     startEndSection "Openshift Container Platform Version Check"
-    log $INFO "Checking OCP Version. Compatible Versions of OCP is v4.12.x "
+    log $INFO "Checking OCP Version. Compatible Versions of OCP is v${REQUIRED_OCP_VERSION}.x "
     
-    if [[ $OCP_VER == *"4.12"* ]]; then
+    if [[ $OCP_VER == *"${REQUIRED_OCP_VERSION}"* ]]; then
 
 	log $INFO "OCP version $OCP_VER is compaitble" 
 
@@ -127,7 +128,7 @@ function checkOCPVersion {
 	startEndSection "Openshift Container Platform Version Check"
 	return 0
     else
-	printf " $fail_color $ERROR OCP Version is incompatible. Required Version: v4.12.x $color_end\n"
+	printf " $fail_color $ERROR OCP Version is incompatible. Required Version: v${REQUIRED_OCP_VERSION}.x $color_end\n"
 	log $ERROR "Your Version: v$OCP_VER"
 	echo
 	OCP_VER_RES=$fail_msg
@@ -318,9 +319,9 @@ function checkIBMSpectrum {
 
     printf "\nChecking if IBM Storage Fusion is configured properly...\n"
 
-    # Check OCP version is 4.12
+    # Check OCP version is ${REQUIRED_OCP_VERSION}
     OCP_VER=$(${command} get clusterversion version -o=jsonpath='{.status.desired.version}')
-    if [[ "$OCP_VER" == *"4.12"* ]]; then
+    if [[ "$OCP_VER" == *"${REQUIRED_OCP_VERSION}"* ]]; then
 	# If it meets the ocp version requirement... check if ibm-spectrum-scale-sc storageclass has volume expansion enabled
 	IBM_SPEC_VE=$(checkAllowVolumeExpansion ibm-spectrum-scale-sc)
 	if [[ "$?" == "1" ]]; then
@@ -333,8 +334,8 @@ function checkIBMSpectrum {
 	printf "IBM Storage Fusion looks fine."
 	return 0
     else
-	# OCP 4.12 was not found... fail this check
-	printf "${fail_color}${ERROR}If you intend to use Storage Fusion with AIOPS 4.2, you must have 4.12 $color_end\n"
+	# OCP ${REQUIRED_OCP_VERSION} was not found... fail this check
+	printf "${fail_color}${ERROR}If you intend to use Storage Fusion with AIOPS 4.2, you must have ${REQUIRED_OCP_VERSION} $color_end\n"
 	log $INFO "See Readme for more info about this."
 	storageCheckRes+=("fail")
 	return 1
