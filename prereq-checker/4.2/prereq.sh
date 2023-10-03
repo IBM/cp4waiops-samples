@@ -850,12 +850,13 @@ function checkIfCertManagerPresent() {
 
     echo
     startEndSection "Cert Manager Check"
-    log $INFO "Checking for presencet of Cert Manager"
+    log $INFO "Checking for Cert Manager operator"
     echo
     
-    $command get deployment -A | grep "cert-manager" /dev/null 2>&1
+    $command get deployment -A | grep "cert-manager" 1> /dev/null
     result=$?
-    if [[ "${result}" -ne 0 ]]; then
+    echo "this is result: $result"
+    if [[ "${result}" == "1" ]]; then
 	log $ERROR "Cluster does not have a cert-manager present; please install the Red Hat Cert Manager"
 	CERTMANAGER_PRESENT=$fail_msg
 	return 1
