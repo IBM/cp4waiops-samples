@@ -674,3 +674,22 @@ delete_crossplane(){
     for RESOURCE in role rolebinding serviceaccount; do oc get $RESOURCE -A --no-headers -o name; done | grep crossplane | while read a b; do oc delete "$a" -n $IBM_COMMON_SERVICES_PROJECT; done
     for RESOURCE in clusterrole clusterrolebinding; do oc get $RESOURCE -A --no-headers -o name; done | grep crossplane | while read a b; do oc delete "$a"; done
 }
+
+# function to remove CRDs vaultaccess and vaultdeploy
+deleteVaultCRDs(){
+    log $INFO "Checking for remaining Vault CRDs from upgraded instances of AIOPs installations"
+    
+    # Check vaultaccess
+    oc get crd vaultaccesses.vault.aiops.ibm.com > /dev/null 2>&1
+    if [[ "$?" == "0" ]]; then
+        log $INFO "VaultAccess CRD found... Deleting it now."
+        oc delete crd vaultaccesses.vault.aiops.ibm.com --ignore-not-found
+    fi
+
+    # Check vaultdeploy
+    oc get crd vaultdeploys.vault.aiops.ibm.com > /dev/null 2>&1
+    if [[ "$?" == "0" ]]; then
+        log $INFO "VaultDeploy CRD found... Deleting it now."
+        oc delete crd vaultdeploys.vault.aiops.ibm.com --ignore-not-found
+    fi
+}

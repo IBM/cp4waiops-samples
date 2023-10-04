@@ -103,8 +103,11 @@ if [[ ! -z "$CP4WAIOPS_PROJECT"  ]]; then
   fi
   log $INFO "No remaining user-created instances, proceeding ahead..."
 
-  # Cleanup remaining connections
-  delete_connections
+   # Cleanup remaining connections
+   delete_connections
+
+   # Delete Vault CRDs -- we need to check for leftover CRDS from vault from previous versions of uninstall as this will hang up the deletion of the edge operator
+   deleteVaultCRDs
  
    # Delete the installation CR
 	log $INFO "Deleting the installation CR..."

@@ -39,9 +39,6 @@ CP4WAIOPS_DEPENDENT_CRDS=(#elasticsearch
                           #SecureTunnel
                           "applications.tunnel.management.ibm.com"
                           "tunnels.sretooling.management.ibm.com"
-                          #Vault
-                          "vaultaccesses.vault.aiops.ibm.com"
-                          "vaultdeploys.vault.aiops.ibm.com"
                           #Kong
                           "kongs.management.ibm.com"
                           "kongclusterplugins.configuration.konghq.com"
