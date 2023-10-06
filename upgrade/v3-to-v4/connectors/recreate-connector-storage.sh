@@ -101,6 +101,9 @@ function getDataFromStorage(){
         backupDataRequired=false
         proceedRecreate=false;
         return
+    else
+        echo "Connector storage access mode is $pvcAccessMode, expected ReadWriteOnce (RWO)."
+        proceedRecreate=true
     fi
 
     if [[ $backupDataRequired != "true" ]]; then
@@ -136,8 +139,8 @@ function getDataFromStorage(){
         backupDataRequired=false
     fi
 
-    if [[ $proceedRecreate != "true" ]]; then
-        msg "Connector looks OK."
+    if [[ $proceedRecreate != "true" ]] && [[ $backupDataRequired != "true" ]] ; then
+        success "Connector looks OK."
         return;
     fi
 
@@ -146,7 +149,7 @@ function getDataFromStorage(){
 
     if [[ $backupDataRequired == "true" ]]; then
 
-        targetDir=/tmp/$connconfig/$dataFilePath
+        targetDir=/tmp/$connconfig$dataFilePath
         rm -rf $targetDir
         mkdir -p $targetDir
 
@@ -238,14 +241,28 @@ function insertConnectorData(){
                 exit 1
             fi
         done
+
+        # check for directory name and move the files to new directory 
+        # with the correct name before inserting it into the PVC.
+        normalizedTargetDir=$targetDir
+        if [[ $(basename $targetDir) != $(basename $volumeMountPath) ]]; then
+            normalizedTargetDir="$(dirname $targetDir)/$(basename $volumeMountPath)"
+            rm -rf $normalizedTargetDir
+            mkdir -p $normalizedTargetDir
+            info "Moving file from $targetDir/ to $normalizedTargetDir"
+            cp -R $targetDir/ $normalizedTargetDir
+            ls -R $normalizedTargetDir
+        fi
         
-        CMD="oc cp --retries=3 $targetDir $connectorPod:$volumeMountPath/.."
-        info "Inserting data $targetDir directory into pod: $connectorPod"
+        
+        CMD="oc cp --retries=3 $normalizedTargetDir $connectorPod:$volumeMountPath/.."
+        info "Inserting data $normalizedTargetDir directory into pod: $connectorPod"
         printAndExecute "$CMD"
 
         CMD="oc exec --namespace $NS $connectorPod -- /bin/bash -c \"find $volumeMountPath -type f\""
         printAndExecute "$CMD"
 
+        rm -rf $targetDir $normalizedTargetDir
     fi
     
     info "Scaling down connector workload $connectorWorkload to restart pod."
