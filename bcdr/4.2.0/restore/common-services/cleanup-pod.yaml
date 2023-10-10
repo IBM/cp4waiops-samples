@@ -1,0 +1,30 @@
+kind: Pod
+apiVersion: v1
+metadata:
+  name: cleanup-pod
+  labels:
+    app: cleanup-pod
+spec:
+  containers:
+    - image: registry.access.redhat.com/ubi8/ubi-micro 
+      command: ["sleep"]
+      args: ["infinity"]
+      name: ubuntu
+      volumeMounts:
+        - name: mongodump
+          mountPath: "/dump"
+      lifecycle:
+            postStart:
+              exec:
+                command: ["bash", "-c", "rm -rf /dump/.velero"]
+      securityContext:
+        allowPrivilegeEscalation: false
+        runAsNonRoot: true
+        capabilities:
+          drop: ["ALL"]
+        seccompProfile:
+          type: RuntimeDefault
+  volumes:
+    - name: mongodump
+      persistentVolumeClaim:
+        claimName: my-mongodump

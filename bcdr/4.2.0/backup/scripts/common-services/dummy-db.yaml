@@ -1,0 +1,26 @@
+kind: Pod
+apiVersion: v1
+metadata:
+  name: dummy-db
+  labels:
+    app: dummy-db
+spec:
+  containers:
+    - image: registry.access.redhat.com/ubi8/ubi-micro
+      command: ["sleep"]
+      args: ["infinity"]
+      name: ubuntu
+      volumeMounts:
+        - name: mongodump
+          mountPath: "/dump"
+      securityContext:
+        allowPrivilegeEscalation: false
+        runAsNonRoot: true
+        capabilities:
+          drop: ["ALL"]
+        seccompProfile:
+          type: RuntimeDefault
+  volumes:
+    - name: mongodump
+      persistentVolumeClaim:
+        claimName: my-mongodump

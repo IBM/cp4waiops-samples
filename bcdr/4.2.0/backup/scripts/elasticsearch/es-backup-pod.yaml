@@ -1,0 +1,30 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: es-backup
+  labels:
+    restic-backup-pod: t
+  annotations:
+     backup.velero.io/backup-volumes: elasticsearch-backups
+spec:
+  containers:
+  - name: es-jump
+    image: redhat/ubi8:8.6-754
+    command: ["sleep"]
+    args: ["infinity"]
+    volumeMounts:
+            - name: elasticsearch-backups
+              mountPath: /usr/share/elasticsearch/snapshots/es-backup
+    imagePullPolicy: IfNotPresent
+    securityContext:
+        allowPrivilegeEscalation: false
+        runAsNonRoot: true
+        capabilities:
+          drop: ["ALL"]
+        seccompProfile:
+          type: RuntimeDefault
+  volumes:
+        - name: elasticsearch-backups
+          persistentVolumeClaim:
+            claimName: iaf-system-elasticsearch-es-snap-es-backup-pvc
+  restartPolicy: Always
