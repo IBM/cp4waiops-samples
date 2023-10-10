@@ -1,0 +1,8 @@
+apiVersion: securityenforcement.admission.cloud.ibm.com/v1beta1
+kind: ClusterImagePolicy
+metadata:
+  name: nginx-image-policy
+spec:
+ repositories:
+  - name: "quay.io/bitnami/nginx:latest"
+    policy:
