@@ -50,7 +50,7 @@ fi
 # optional argument handling
 if [[ "$1" == "version" ]]
 then
-    echo "0.0.22"
+    echo "0.0.23"
     exit 0
 fi
 
@@ -770,6 +770,15 @@ then
     then
         getSubscriptionStatus "vault" "$INSTALLATION_NAMESPACE" 
     fi
+    # if statement block to account for versions over 4.2 (clusterwide changes)
+    if [ "${CLUSTER_SCOPE_INSTALL}" == "true" ];
+    then
+        if [[ "${VERSION_AIOPSORCHESTRATOR}" != "3.3" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" != "3.4" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" != "3.5" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" != "3.6" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" != "3.7" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" != "4.0" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" != "4.1" ]];
+        then
+            getSubscriptionStatusGrep "ibm-automation-elastic" "$INSTALLATION_NAMESPACE" 
+            getSubscriptionStatusGrep "ibm-automation-flink" "$INSTALLATION_NAMESPACE"
+        fi
+    fi
 
     echo "______________________________________________________________"
     echo "Subscriptions from ibm-common-services namespace:" && echo ""
@@ -813,9 +822,14 @@ then
                 getSubscriptionStatusGrep "ibm-automation-core" "openshift-operators" 
                 getSubscriptionStatusGrep "ibm-automation-eventprocessing" "openshift-operators" 
             fi
-            getSubscriptionStatusGrep "ibm-automation-elastic" "openshift-operators" 
-            getSubscriptionStatusGrep "ibm-automation-flink" "openshift-operators"
-            getSubscriptionStatusGrep "ibm-common-service-operator" "openshift-operators" 
+
+            # if statement block to account for versions over 4.2 (clusterwide changes)
+            if [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.3" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.4" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.5" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.6" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.7" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "4.0" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "4.1" ]];
+            then
+                getSubscriptionStatusGrep "ibm-automation-elastic" "openshift-operators" 
+                getSubscriptionStatusGrep "ibm-automation-flink" "openshift-operators" 
+            fi
+            getSubscriptionStatusGrep "ibm-common-service-operator" "openshift-operators"
         fi
     else
         printf "${gray}[INFO] Skipping the following components (Hint: log in with CLUSTER_ADMIN credentials to view):${normal}${newline}"
