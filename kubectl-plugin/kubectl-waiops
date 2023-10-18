@@ -50,7 +50,7 @@ fi
 # optional argument handling
 if [[ "$1" == "version" ]]
 then
-    echo "0.0.22"
+    echo "0.0.23"
     exit 0
 fi
 
