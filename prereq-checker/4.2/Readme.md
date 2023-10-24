@@ -6,16 +6,20 @@ The prerequisite checker tool can be used to validate whether a Red Hat OpenShif
 
 - **OpenShift version check** : Checks whether the Red Hat OpenShift Container Platform cluster version is a fully supported Extended Update Support (EUS) version and compatible for installing IBM Cloud Pak for AIOps. OpenShift Container Platform 4.12.x is currently under full support and compatible.
 
-- **Storage check**: Checks whether a storage class that uses a supported storage provider (Portworx, Red Hat Openshift Data Foundation (ODF), Storage Fusion or IBMC-file-gold-gid) is available on the cluster. For more information, see the IBM Documentation [Storage considerations](https://ibm.biz/storage_consideration_420).
+- **Storage check**: Checks whether a storage class that uses a supported storage provider (Portworx, Red Hat Openshift Data Foundation (ODF), Storage Fusion or IBMC-file-gold-gid) is available on the cluster. For more information, see the IBM Documentation [Storage considerations](https://ibm.biz/storage_consideration_421).
 
 **NOTE: If you plan to use Storage Fusion with AIOPS, please keep in mind the following OCP version dependencies**
 | Storage Fusion Version     | OCP Versions supported |
 | -------------------------- | ---------------------- |
-| Storage Fusion v2.5        | OCP v4.10 and v4.12    |
+| Storage Fusion v2.5        | OCP v4.12              |
 
-- **Small or large profile install check**: Checks whether the cluster has enough resources (vCPU, Memory, and Nodes) for installing a small or large profile of IBM Cloud Pak for AIOps. For more information, see the IBM Documentation [Hardware requirements](https://ibm.biz/aiops_hardware_420).
+- **Small or large profile install check**: Checks whether the cluster has enough resources (vCPU, Memory, and Nodes) for installing a small or large profile of IBM Cloud Pak for AIOps. For more information, see the IBM Documentation [Hardware requirements](https://ibm.biz/aiops_hardware_421).
 
-- **Entitlement Secret check**: Checks whether a secret called ibm-entitlement-key or a global pull secret called pull-secret (global pull secret found in openshift-config namespace) have been created. For more information, see the IBM Documentation [Entitlement Keys](https://ibm.biz/entitlement_keys_420)
+- **Entitlement Secret check**: Checks whether a secret called ibm-entitlement-key or a global pull secret called pull-secret (global pull secret found in openshift-config namespace) have been created. For more information, see the IBM Documentation [Entitlement Keys](https://ibm.biz/storage_consideration_421)
+
+- **Cert Manager Operator Check**: Ensures a Cert Manager Operator is installed
+
+- **License Service Operator Check**: Ensures a license operator is installed
 
 ## Getting started
 
@@ -31,7 +35,7 @@ Clone the following GitHub repository:
 **IMPORTANT:** Before you run the script make sure that you are in the namespace where you have installed or are planning to install IBM Cloud Pak for AIOps.
 ```
 oc project <namespace_name>
-ex: oc project cp4waiops
+ex: oc project cp4aiops
 ```
 
 To run the prerequisite checker tool, run the following command:
