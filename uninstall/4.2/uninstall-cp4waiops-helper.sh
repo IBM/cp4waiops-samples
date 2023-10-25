@@ -21,31 +21,31 @@ WARNING="[WARNING]"
 ERROR="[ERROR]"
 
 log () {
-   local log_tracing_prefix=$1
-   local log_message=$2
-   local log_options=$3
+    local log_tracing_prefix=$1
+    local log_message=$2
+    local log_options=$3
     
-   if [[ ! -z $log_options ]]; then
-      echo -e $log_options "$log_tracing_prefix $log_message"
-   else
-      echo -e "$log_tracing_prefix $log_message" 
-   fi
+    if [[ ! -z $log_options ]]; then
+        echo -e $log_options "$log_tracing_prefix $log_message"
+    else
+        echo -e "$log_tracing_prefix $log_message" 
+    fi
 }
 
 display_help() {
-   echo "**************************************** Usage ********************************************"
-   echo ""
-   echo " This script is used to uninstall IBM Cloud Pak for AIOps version 4.2"
-   echo " The following prereqs are required before you run this script: "
-   echo " - oc CLI is installed and you have logged into the cluster using oc login"
-   echo " - Update uninstall-cp4waiops.props with components that you want to uninstall"
-   echo ""
-   echo " Usage:"
-   echo " ./uninstall-cp4waiops.sh -h -s"
-   echo "  -h Prints out the help message"
-   echo "  -s Skip asking for confirmations"   
-   echo ""
-   echo "*******************************************************************************************"
+    echo "**************************************** Usage ********************************************"
+    echo ""
+    echo " This script is used to uninstall IBM Cloud Pak for AIOps version 4.2"
+    echo " The following prereqs are required before you run this script: "
+    echo " - oc CLI is installed and you have logged into the cluster using oc login"
+    echo " - Update uninstall-cp4waiops.props with components that you want to uninstall"
+    echo ""
+    echo " Usage:"
+    echo " ./uninstall-cp4waiops.sh -h -s"
+    echo "  -h Prints out the help message"
+    echo "  -s Skip asking for confirmations"   
+    echo ""
+    echo "*******************************************************************************************"
 }
 
 check_namespaced_install () {
@@ -70,43 +70,43 @@ check_namespaced_install () {
 }
 
 check_oc_resource_exists () {
-  local resource=$1
-  local resource_name=$2
-  local namespace=$3
+    local resource=$1
+    local resource_name=$2
+    local namespace=$3
 
-  if oc get $resource $resource_name -n $namespace  > /dev/null 2>&1; then
-     resource_exists="true"
-  else
-     resource_exists="false"
-  fi
+    if oc get $resource $resource_name -n $namespace  > /dev/null 2>&1; then
+        resource_exists="true"
+    else
+        resource_exists="false"
+    fi
 
-  echo "$resource_exists"
+    echo "$resource_exists"
 }
 
 unsubscribe () {
-    local operator_name=$1	
+    local operator_name=$1        
     local dest_namespace=$2
     local operator_label=$3
 
     if [[ ( -z "$operator_name" ) && ( ! -z  "$operator_label" ) ]]; then
-       operator_name=$(oc get subscription.operators.coreos.com -n $dest_namespace -l $operator_label -o name)
-       if [[ ! -z "$operator_name" ]]; then
-          operator_exists="true"
-       else
-          operator_exists="false"
-       fi
+        operator_name=$(oc get subscription.operators.coreos.com -n $dest_namespace -l $operator_label -o name)
+        if [[ ! -z "$operator_name" ]]; then
+            operator_exists="true"
+        else
+            operator_exists="false"
+        fi
     elif [[ ( ! -z "$operator_name" ) ]]; then
         operator_exists=$(check_oc_resource_exists "subscription.operators.coreos.com" $operator_name $dest_namespace)
     else
-       log $ERROR "operator_name and operator_label are empty, please provide one of them and try again"
-       exit 1
+        log $ERROR "operator_name and operator_label are empty, please provide one of them and try again"
+        exit 1
     fi
     
     if [[ "$operator_exists" == "true" ]]; then
-            
-       if [[ "$operator_name" != "subscription.operators.coreos.com"*  ]]; then
-          operator_name="subscription.operators.coreos.com/"$operator_name
-       fi
+        
+        if [[ "$operator_name" != "subscription.operators.coreos.com"*  ]]; then
+            operator_name="subscription.operators.coreos.com/"$operator_name
+        fi
         
         # Get CluserServiceVersion
         CSV=$(oc get $operator_name -n $dest_namespace --ignore-not-found --output=jsonpath={.status.installedCSV})
@@ -122,18 +122,18 @@ unsubscribe () {
             log $INFO "Deleting the clusterserviceversion $CSV"
             oc delete clusterserviceversion $CSV -n $dest_namespace
 
-            log $INFO "Waiting for the deletion of all the ClusterServiceVersions $CSV for the subscription of the operator $operator_name"	
+            log $INFO "Waiting for the deletion of all the ClusterServiceVersions $CSV for the subscription of the operator $operator_name"        
             # Wait for the Copied ClusterServiceVersions to cleanup
             if [ -n "$CSV" ] ; then
                 LOOP_COUNT=0
                 while [ `oc get clusterserviceversions --all-namespaces --field-selector=metadata.name=$CSV --ignore-not-found | wc -l` -gt 0 ]
                 do
-                        sleep $SLEEP_LONG_LOOP
-                        LOOP_COUNT=`expr $LOOP_COUNT + 1`
-                        if [ $LOOP_COUNT -gt 10 ] ; then
-                                log $ERROR "There was an error in deleting the ClusterServiceVersions $CSV for the subscription of the operator $operator_name "
-                                break
-                        fi
+                    sleep $SLEEP_LONG_LOOP
+                    LOOP_COUNT=`expr $LOOP_COUNT + 1`
+                    if [ $LOOP_COUNT -gt 10 ] ; then
+                        log $ERROR "There was an error in deleting the ClusterServiceVersions $CSV for the subscription of the operator $operator_name "
+                        break
+                    fi
                 done
             fi
             log $INFO "Deletion of all the ClusterServiceVersions $CSV for the subscription of the operator $operator_name completed successfully."
@@ -150,29 +150,29 @@ unsubscribe () {
 # "eventmanagergateways.ai-manager.watson-aiops.ibm.com": None of the instance is expected to be present with install
 # "kongs.management.ibm.com" : Expected custom resource to be ignored named 'gateway' that gets created with install.
 aiops_custom_instance_exists () {
-  
-  local namespace=$1
-  
-  custom_instance_exists=false
-  if [ `oc get kongs.management.ibm.com -n $namespace --ignore-not-found --no-headers -o name | grep -v "gateway" | wc -l` -gt 0 ] ||
-     [ `oc get eventmanagergateways.ai-manager.watson-aiops.ibm.com -n $namespace --ignore-not-found --no-headers -o name | wc -l` -gt 0 ]; then
-     custom_instance_exists=true
-  fi
+    
+    local namespace=$1
+    
+    custom_instance_exists=false
+    if [ `oc get kongs.management.ibm.com -n $namespace --ignore-not-found --no-headers -o name | grep -v "gateway" | wc -l` -gt 0 ] ||
+           [ `oc get eventmanagergateways.ai-manager.watson-aiops.ibm.com -n $namespace --ignore-not-found --no-headers -o name | wc -l` -gt 0 ]; then
+        custom_instance_exists=true
+    fi
 }
 
 aiops_operands_exists () {
 
-  local namespace=$1
-  
-  operand_exists=false
-  if [ `oc get operandrequests ibm-aiops-ai-manager -n $namespace --ignore-not-found --no-headers | wc -l` -gt 0 ] ||
-                [ `oc get operandrequests ibm-aiops-aiops-foundation -n $namespace --ignore-not-found --no-headers |  wc -l` -gt 0 ] ||
-                [ `oc get operandrequests ibm-aiops-application-manager  -n $namespace --ignore-not-found --no-headers |  wc -l` -gt 0 ]  ||
-                [ `oc get operandrequests aiopsedge-base -n $namespace --ignore-not-found --no-headers | wc -l` -gt 0 ] ||
-                [ `oc get operandrequests aiopsedge-cs -n $namespace --ignore-not-found --no-headers | wc -l` -gt 0 ] ; then
-     operand_exists=true
-  fi
-  echo $operand_exists
+    local namespace=$1
+    
+    operand_exists=false
+    if [ `oc get operandrequests ibm-aiops-ai-manager -n $namespace --ignore-not-found --no-headers | wc -l` -gt 0 ] ||
+           [ `oc get operandrequests ibm-aiops-aiops-foundation -n $namespace --ignore-not-found --no-headers |  wc -l` -gt 0 ] ||
+           [ `oc get operandrequests ibm-aiops-application-manager  -n $namespace --ignore-not-found --no-headers |  wc -l` -gt 0 ]  ||
+           [ `oc get operandrequests aiopsedge-base -n $namespace --ignore-not-found --no-headers | wc -l` -gt 0 ] ||
+           [ `oc get operandrequests aiopsedge-cs -n $namespace --ignore-not-found --no-headers | wc -l` -gt 0 ] ; then
+        operand_exists=true
+    fi
+    echo $operand_exists
 
 }
 
@@ -185,18 +185,18 @@ delete_installation_instance () {
         log $INFO "Waiting for $resource instances to be deleted.  This will take a while...."
 
         oc delete installations.orchestrator.aiops.ibm.com $installation_name -n $project --ignore-not-found;
-    
+        
         LOOP_COUNT=0
         while [ `oc get installations.orchestrator.aiops.ibm.com $installation_name -n $project --ignore-not-found | wc -l` -gt 0 ]
         do
-        sleep $SLEEP_EXTRA_LONG_LOOP
-        LOOP_COUNT=`expr $LOOP_COUNT + 1`
-        if [ $LOOP_COUNT -gt 20 ] ; then
-            log $ERROR "Timed out waiting for installation instance $installation_name to be deleted"
-            exit 1
-        else
-            log $INFO "Waiting for installation instance to get deleted... Checking again in $SLEEP_LONG_LOOP seconds"
-        fi
+            sleep $SLEEP_EXTRA_LONG_LOOP
+            LOOP_COUNT=`expr $LOOP_COUNT + 1`
+            if [ $LOOP_COUNT -gt 20 ] ; then
+                log $ERROR "Timed out waiting for installation instance $installation_name to be deleted"
+                exit 1
+            else
+                log $INFO "Waiting for installation instance to get deleted... Checking again in $SLEEP_LONG_LOOP seconds"
+            fi
         done
         log $INFO "$installation_name instance got deleted successfully!"
 
@@ -214,35 +214,35 @@ delete_installation_instance () {
     LOOP_COUNT=0
     while [ $(aiops_operands_exists $project) == "true" ]
     do
-	      sleep $SLEEP_LONG_LOOP
-	      LOOP_COUNT=`expr $LOOP_COUNT + 1`
-	      if [ $LOOP_COUNT -gt 20 ] ; then
-	          log $WARNING "Timed out waiting for operandrequests to be deleted automatically"
-	
-	          log $INFO "Below operand requests are left behind in namespace $project"
-	          oc get operandrequests -n $project -o name
-	          log $INFO "Trying to delete remaining operandrequests manually, only for AIOps"
-	          oc delete operandrequests ibm-aiops-ai-manager -n $project --ignore-not-found
-	          oc delete operandrequests ibm-aiops-aiops-foundation -n $project --ignore-not-found
-	          oc delete operandrequests ibm-aiops-application-manager -n $project --ignore-not-found
-	          oc delete operandrequests aiopsedge-base -n $project --ignore-not-found
-	          oc delete operandrequests aiopsedge-cs -n $project --ignore-not-found    
-	          while [ $(aiops_operands_exists $project) == "true" ]
-	          do
-	            sleep $SLEEP_LONG_LOOP
-	            LOOP_COUNT=`expr $LOOP_COUNT + 1`
-	            if [ $LOOP_COUNT -gt 30 ] ; then
-	               log $ERROR "Timed out waiting for operandrequests to be deleted after trying manual deletion"
-	               log $ERROR "Below operand requests are left behind in namespace $project"
-	               oc get operandrequests -n $project -o name
-	               exit 1
-	            fi
-	          done
-	      else
-	          log $INFO "Found following operandrequests in the project: "
-	          log $INFO "$(oc get operandrequests -n $project --no-headers)"
-	          log $INFO "Waiting for operandrequests instances to get deleted... Checking again in $SLEEP_LONG_LOOP seconds"
-	      fi
+        sleep $SLEEP_LONG_LOOP
+        LOOP_COUNT=`expr $LOOP_COUNT + 1`
+        if [ $LOOP_COUNT -gt 20 ] ; then
+            log $WARNING "Timed out waiting for operandrequests to be deleted automatically"
+            
+            log $INFO "Below operand requests are left behind in namespace $project"
+            oc get operandrequests -n $project -o name
+            log $INFO "Trying to delete remaining operandrequests manually, only for AIOps"
+            oc delete operandrequests ibm-aiops-ai-manager -n $project --ignore-not-found
+            oc delete operandrequests ibm-aiops-aiops-foundation -n $project --ignore-not-found
+            oc delete operandrequests ibm-aiops-application-manager -n $project --ignore-not-found
+            oc delete operandrequests aiopsedge-base -n $project --ignore-not-found
+            oc delete operandrequests aiopsedge-cs -n $project --ignore-not-found    
+            while [ $(aiops_operands_exists $project) == "true" ]
+            do
+                sleep $SLEEP_LONG_LOOP
+                LOOP_COUNT=`expr $LOOP_COUNT + 1`
+                if [ $LOOP_COUNT -gt 30 ] ; then
+                    log $ERROR "Timed out waiting for operandrequests to be deleted after trying manual deletion"
+                    log $ERROR "Below operand requests are left behind in namespace $project"
+                    oc get operandrequests -n $project -o name
+                    exit 1
+                fi
+            done
+        else
+            log $INFO "Found following operandrequests in the project: "
+            log $INFO "$(oc get operandrequests -n $project --no-headers)"
+            log $INFO "Waiting for operandrequests instances to get deleted... Checking again in $SLEEP_LONG_LOOP seconds"
+        fi
     done
     log $INFO "Expected operandrequests got deleted successfully!"
     oc patch -n $CP4WAIOPS_PROJECT rolebinding/admin -p '{"metadata": {"finalizers":null}}' 2>>/dev/null
@@ -265,43 +265,43 @@ delete_zenservice_instance () {
         fi
 
         oc delete zenservice $zenservice_name -n $project --ignore-not-found;
-    
+        
         log $INFO "Waiting for $resource instances to be deleted...."
         LOOP_COUNT=0
         while [ `oc get zenservice $zenservice_name -n $project --ignore-not-found | wc -l` -gt 0 ]
         do
-        sleep $SLEEP_EXTRA_LONG_LOOP
-        LOOP_COUNT=`expr $LOOP_COUNT + 1`
-        if [ $LOOP_COUNT -gt 20 ] ; then
-            log $ERROR "Timed out waiting for zenservice instance $zenservice_name to be deleted"
-            exit 1
-        else
-            log $INFO "Waiting for zenservice instance to get deleted... Checking again in $SLEEP_LONG_LOOP seconds"
-        fi
+            sleep $SLEEP_EXTRA_LONG_LOOP
+            LOOP_COUNT=`expr $LOOP_COUNT + 1`
+            if [ $LOOP_COUNT -gt 20 ] ; then
+                log $ERROR "Timed out waiting for zenservice instance $zenservice_name to be deleted"
+                exit 1
+            else
+                log $INFO "Waiting for zenservice instance to get deleted... Checking again in $SLEEP_LONG_LOOP seconds"
+            fi
         done
         log $INFO "$zenservice_name instance got deleted successfully!"
 
         log $INFO "Checking if operandrequests are all deleted "
         LOOP_COUNT=0
         while [ `oc get operandrequests ibm-commonui-request -n ibm-common-services --ignore-not-found --no-headers |  wc -l` -gt 0 ] ||
-              [ `oc get operandrequests ibm-iam-request -n ibm-common-services --ignore-not-found --no-headers |  wc -l` -gt 0 ] ||
-              [ `oc get operandrequests ibm-mongodb-request -n ibm-common-services --ignore-not-found --no-headers |  wc -l` -gt 0 ] ||
-              [ `oc get operandrequests management-ingress -n ibm-common-services --ignore-not-found --no-headers |  wc -l` -gt 0 ] ||
-              [ `oc get operandrequests platform-api-request -n ibm-common-services --ignore-not-found --no-headers|  wc -l` -gt 0 ] ||
-              [ `oc get operandrequests ibm-iam-service -n ${project} --ignore-not-found --no-headers |  wc -l` -gt 0 ]
+                  [ `oc get operandrequests ibm-iam-request -n ibm-common-services --ignore-not-found --no-headers |  wc -l` -gt 0 ] ||
+                  [ `oc get operandrequests ibm-mongodb-request -n ibm-common-services --ignore-not-found --no-headers |  wc -l` -gt 0 ] ||
+                  [ `oc get operandrequests management-ingress -n ibm-common-services --ignore-not-found --no-headers |  wc -l` -gt 0 ] ||
+                  [ `oc get operandrequests platform-api-request -n ibm-common-services --ignore-not-found --no-headers|  wc -l` -gt 0 ] ||
+                  [ `oc get operandrequests ibm-iam-service -n ${project} --ignore-not-found --no-headers |  wc -l` -gt 0 ]
         do
-        sleep $SLEEP_LONG_LOOP
-        LOOP_COUNT=`expr $LOOP_COUNT + 1`
-        if [ $LOOP_COUNT -gt 15 ] ; then
-            log $ERROR "Timed out waiting for operandrequests to be deleted"
-            exit 1
-        elif [ "$LOOP_COUNT" == "10" ] ; then
-            oc delete operandrequest -n ibm-common-services ibm-commonui-request
-        else
-            log $INFO "Found following operandrequests in the project: "
-            log $INFO "$(oc get operandrequests -n ibm-common-services --no-headers)"
-            log $INFO "Waiting for zenservice related operandrequests instances to get deleted... Checking again in $SLEEP_LONG_LOOP seconds"
-        fi
+            sleep $SLEEP_LONG_LOOP
+            LOOP_COUNT=`expr $LOOP_COUNT + 1`
+            if [ $LOOP_COUNT -gt 15 ] ; then
+                log $ERROR "Timed out waiting for operandrequests to be deleted"
+                exit 1
+            elif [ "$LOOP_COUNT" == "10" ] ; then
+                oc delete operandrequest -n ibm-common-services ibm-commonui-request
+            else
+                log $INFO "Found following operandrequests in the project: "
+                log $INFO "$(oc get operandrequests -n ibm-common-services --no-headers)"
+                log $INFO "Waiting for zenservice related operandrequests instances to get deleted... Checking again in $SLEEP_LONG_LOOP seconds"
+            fi
         done
         log $INFO "Expected operandrequests got deleted successfully!"
     else
@@ -377,24 +377,24 @@ delete_iaf_bedrock () {
         if [[ "$subscription_check" != "" ]]; then
             unsubscribe "" $IBM_COMMON_SERVICES_PROJECT "operators.coreos.com/ibm-common-service-operator.$IBM_COMMON_SERVICES_PROJECT"
         fi
-              
+        
         # Note :  Verify there are no operandrequests & operandbindinfo at this point before proceeding.  It may take a few minutes for them to go away.
         log $INFO "Checking if operandrequests are all deleted "
         LOOP_COUNT=0
         while [ `oc get operandrequests -A --ignore-not-found --no-headers | wc -l ` -gt 0 ]
         do
-        sleep $SLEEP_LONG_LOOP
-        LOOP_COUNT=`expr $LOOP_COUNT + 1`
-        if [ $LOOP_COUNT -gt 30 ]; then
-            log $ERROR "Timed out waiting for all operandrequests to be deleted.  Cannot proceed with uninstallation til all operandrequests in ibm-common-services project are deleted."
-            exit 1
-        elif [ "$LOOP_COUNT" == "15" ]; then
-            oc delete --all operandrequests -n ibm-common-services
-            oc delete --all operandrequests -n $CP4WAIOPS_PROJECT       
-        else
-            log $INFO "Found following operandrequests in the project: $(oc get operandrequests -A --ignore-not-found --no-headers)"
-            log $INFO "Waiting for operandrequests instances to get deleted... Checking again in $SLEEP_LONG_LOOP seconds"
-        fi
+            sleep $SLEEP_LONG_LOOP
+            LOOP_COUNT=`expr $LOOP_COUNT + 1`
+            if [ $LOOP_COUNT -gt 30 ]; then
+                log $ERROR "Timed out waiting for all operandrequests to be deleted.  Cannot proceed with uninstallation til all operandrequests in ibm-common-services project are deleted."
+                exit 1
+            elif [ "$LOOP_COUNT" == "15" ]; then
+                oc delete --all operandrequests -n ibm-common-services
+                oc delete --all operandrequests -n $CP4WAIOPS_PROJECT       
+            else
+                log $INFO "Found following operandrequests in the project: $(oc get operandrequests -A --ignore-not-found --no-headers)"
+                log $INFO "Waiting for operandrequests instances to get deleted... Checking again in $SLEEP_LONG_LOOP seconds"
+            fi
         done
         log $INFO "Expected operandrequests got deleted successfully!"
 
@@ -457,112 +457,112 @@ delete_crd_group () {
     local crd_group=$1
 
     case "$crd_group" in
-    "CP4WAIOPS_CRDS") 
-        for CRD in ${CP4WAIOPS_CRDS[@]}; do
-            log $INFO "Deleting CRD $CRD.."
-            oc delete crd $CRD --ignore-not-found
-        done
-    ;;
-    "CP4WAIOPS_DEPENDENT_CRDS") 
-        for CRD in ${CP4WAIOPS_DEPENDENT_CRDS[@]}; do
-            log $INFO "Deleting CRD $CRD.."
-            oc delete crd $CRD --ignore-not-found
-        done
-    ;;
-    "IAF_CRDS") 
-        log $INFO "Deleting IAF CRDs.."
-        oc delete --ignore-not-found $(oc get crd -o name | grep "automation.ibm.com" || echo "crd no-automation-ibm")
-    ;;
-    "BEDROCK_CRDS") 
-        for CRD in ${BEDROCK_CRDS[@]}; do
-            log $INFO "Deleting CRD $CRD.."
-            oc delete crd $CRD --ignore-not-found
-        done
-    ;;
-    "ASM_CRDS")
-        for CRD in ${ASM_CRDS[@]}; do
-            log $INFO "Deleting CRD $CRD.."
-            oc delete crd $CRD --ignore-not-found
-        done
-    ;;
+        "CP4WAIOPS_CRDS") 
+            for CRD in ${CP4WAIOPS_CRDS[@]}; do
+                log $INFO "Deleting CRD $CRD.."
+                oc delete crd $CRD --ignore-not-found
+            done
+            ;;
+        "CP4WAIOPS_DEPENDENT_CRDS") 
+            for CRD in ${CP4WAIOPS_DEPENDENT_CRDS[@]}; do
+                log $INFO "Deleting CRD $CRD.."
+                oc delete crd $CRD --ignore-not-found
+            done
+            ;;
+        "IAF_CRDS") 
+            log $INFO "Deleting IAF CRDs.."
+            oc delete --ignore-not-found $(oc get crd -o name | grep "automation.ibm.com" || echo "crd no-automation-ibm")
+            ;;
+        "BEDROCK_CRDS") 
+            for CRD in ${BEDROCK_CRDS[@]}; do
+                log $INFO "Deleting CRD $CRD.."
+                oc delete crd $CRD --ignore-not-found
+            done
+            ;;
+        "ASM_CRDS")
+            for CRD in ${ASM_CRDS[@]}; do
+                log $INFO "Deleting CRD $CRD.."
+                oc delete crd $CRD --ignore-not-found
+            done
+            ;;
     esac
 }
 
 analyze_script_properties(){
 
-if [[ $DELETE_ALL == "true" ]]; then
-   DELETE_PVCS="true"
-   DELETE_CRDS="true"
-fi
+    if [[ $DELETE_ALL == "true" ]]; then
+        DELETE_PVCS="true"
+        DELETE_CRDS="true"
+    fi
 
-if [[ $DELETE_ALL != "true" ]] && [[ $DELETE_ALL != "false" ]]; then
-    log $ERROR "The DELETE_ALL flag must have a value of either \"true\" or \"false\". Please review the uninstall-cp4waiops.props file."
-    exit 1
-fi
+    if [[ $DELETE_ALL != "true" ]] && [[ $DELETE_ALL != "false" ]]; then
+        log $ERROR "The DELETE_ALL flag must have a value of either \"true\" or \"false\". Please review the uninstall-cp4waiops.props file."
+        exit 1
+    fi
 
-if [[ $ONLY_CLOUDPAK != "true" ]] && [[ $ONLY_CLOUDPAK != "false" ]]; then
-    log $ERROR "The ONLY_CLOUDPAK flag must have a value of either \"true\" or \"false\". Please review the uninstall-cp4waiops.props file."
-    exit 1
-fi
+    if [[ $ONLY_CLOUDPAK != "true" ]] && [[ $ONLY_CLOUDPAK != "false" ]]; then
+        log $ERROR "The ONLY_CLOUDPAK flag must have a value of either \"true\" or \"false\". Please review the uninstall-cp4waiops.props file."
+        exit 1
+    fi
 
-if [[ $DELETE_PVCS != "true" ]] && [[ $DELETE_PVCS != "false" ]]; then
-    log $ERROR "The DELETE_PVCS flag must have a value of either \"true\" or \"false\". Please review the uninstall-cp4waiops.props file."
-    exit 1
-fi
+    if [[ $DELETE_PVCS != "true" ]] && [[ $DELETE_PVCS != "false" ]]; then
+        log $ERROR "The DELETE_PVCS flag must have a value of either \"true\" or \"false\". Please review the uninstall-cp4waiops.props file."
+        exit 1
+    fi
 
-if [[ $DELETE_CRDS != "true" ]] && [[ $DELETE_CRDS != "false" ]]; then
-    log $ERROR "The DELETE_CRDS flag must have a value of either \"true\" or \"false\". Please review the uninstall-cp4waiops.props file."
-    exit 1
-fi
+    if [[ $DELETE_CRDS != "true" ]] && [[ $DELETE_CRDS != "false" ]]; then
+        log $ERROR "The DELETE_CRDS flag must have a value of either \"true\" or \"false\". Please review the uninstall-cp4waiops.props file."
+        exit 1
+    fi
 
 }
 
 display_script_properties(){
 
-log $INFO "##### Properties in uninstall-cp4waiops.props #####"
-log $INFO
-if [[ $DELETE_ALL == "true" ]]; then
-	log $INFO "\033[1;36m The script uninstall-cp4waiops.props has 'DELETE_ALL=true', hence the script will execute wih below values: \033[0m"
-else
-    log $INFO "The script uninstall-cp4waiops.props has the properties with below values: "
-fi
-log $INFO
-log $INFO "CP4WAIOPS_PROJECT=$CP4WAIOPS_PROJECT"
-log $INFO "INSTALLATION_NAME=$INSTALLATION_NAME"
-log $INFO "ONLY_CLOUDPAK=\033[1;36m$ONLY_CLOUDPAK\033[0m"
-log $INFO "DELETE_PVCS=\033[1;36m$DELETE_PVCS\033[0m"
-log $INFO "DELETE_CRDS=\033[1;36m$DELETE_CRDS\033[0m"
-log $INFO
-log $INFO "##### Properties in uninstall-cp4waiops.props #####"
+    log $INFO "##### Properties in uninstall-cp4waiops.props #####"
+    log $INFO
+    if [[ $DELETE_ALL == "true" ]]; then
+        log $INFO "\033[1;36m The script uninstall-cp4waiops.props has 'DELETE_ALL=true', hence the script will execute wih below values: \033[0m"
+    else
+        log $INFO "The script uninstall-cp4waiops.props has the properties with below values: "
+    fi
+    log $INFO
+    log $INFO "CP4WAIOPS_PROJECT=$CP4WAIOPS_PROJECT"
+    log $INFO "INSTALLATION_NAME=$INSTALLATION_NAME"
+    log $INFO "ONLY_CLOUDPAK=\033[1;36m$ONLY_CLOUDPAK\033[0m"
+    log $INFO "DELETE_PVCS=\033[1;36m$DELETE_PVCS\033[0m"
+    log $INFO "DELETE_CRDS=\033[1;36m$DELETE_CRDS\033[0m"
+    log $INFO
+    log $INFO "##### Properties in uninstall-cp4waiops.props #####"
 }
 
 check_additional_installation_exists(){
-  log $INFO "Checking if any additional installation resources found in the cluster."
-  installation_returned_value=$(oc get installations.orchestrator.aiops.ibm.com -A)
-  if [[ ! -z $installation_returned_value  ]] ; then
-     log $ERROR "Remaining installation cr found : "
-     oc get installations.orchestrator.aiops.ibm.com -A
-     log $INFO "Deleting remaining installation"
-     
-     # Get name and namespace of additional install
-     local INSTALLATION_NAME=$(oc get installations.orchestrator.aiops.ibm.com -A --no-headers=true | awk '{print $2}')
-     local CP4WAIOPS_PROJECT=$(oc get installations.orchestrator.aiops.ibm.com -A --no-headers=true | awk '{print $1}')
-     # Change the value of the name and namespace in the props file
-     sed -i -e "s,^CP4WAIOPS_PROJECT=\".*\",CP4WAIOPS_PROJECT=\"$CP4WAIOPS_PROJECT\",;  s,^INSTALLATION_NAME=\".*\",INSTALLATION_NAME=\"$INSTALLATION_NAME\"," ./uninstall-cp4waiops.props
-     . ./uninstall-cp4waiops.props
+    log $INFO "Checking if any additional installation resources found in the cluster."
+    installation_returned_value=$(oc get installations.orchestrator.aiops.ibm.com -A)
+    if [[ ! -z $installation_returned_value  ]] ; then
+        log $ERROR "Remaining installation cr found : "
+        oc get installations.orchestrator.aiops.ibm.com -A
+        log $INFO "Deleting remaining installation"
+        
+        # Get name and namespace of additional install
+        local INSTALLATION_NAME=$(oc get installations.orchestrator.aiops.ibm.com -A --no-headers=true | awk '{print $2}')
+        local CP4WAIOPS_PROJECT=$(oc get installations.orchestrator.aiops.ibm.com -A --no-headers=true | awk '{print $1}')
+        # Change the value of the name and namespace in the props file
+        sed -i -e "s,^CP4WAIOPS_PROJECT=\".*\",CP4WAIOPS_PROJECT=\"$CP4WAIOPS_PROJECT\",;  s,^INSTALLATION_NAME=\".*\",INSTALLATION_NAME=\"$INSTALLATION_NAME\"," ./uninstall-cp4waiops.props
+        . ./uninstall-cp4waiops.props
 
-     oc delete installation.orchestrator.aiops.ibm.com $INSTALLATION_NAME -n $CP4WAIOPS_PROJECT
-     return 1
-  else
-     log $INFO "No additional installation resources found in the cluster."
-     return 0
-  fi
+        oc delete installation.orchestrator.aiops.ibm.com $INSTALLATION_NAME -n $CP4WAIOPS_PROJECT
+        return 1
+    else
+        log $INFO "No additional installation resources found in the cluster."
+        return 0
+    fi
 }
 
 check_additional_asm_exists(){
     log $INFO "Checking if any additional ASM resources (ie from Event Manager installation) are on the cluster."
     if [ `oc get asms.asm.ibm.com -A --no-headers | while read a b; do echo $a | grep -vw $CP4WAIOPS_PROJECT; done | wc -l`  -gt 0 ] ||
-     [ `oc get asmformations.asm.ibm.com -A --no-headers | while read a b; do echo $a | grep -vw $CP4WAIOPS_PROJECT; done | wc -l` -gt 0 ] ; then
+           [ `oc get asmformations.asm.ibm.com -A --no-headers | while read a b; do echo $a | grep -vw $CP4WAIOPS_PROJECT; done | wc -l` -gt 0 ] ; then
         log $INFO "ASM resource instances were found outside the $CP4WAIOPS_PROJECT namespace"
         DELETE_ASM="false"
     else
@@ -572,17 +572,17 @@ check_additional_asm_exists(){
 }
 
 delete_connections() {
-   until GET_AIOC_MSG=$(oc -n $CP4WAIOPS_PROJECT get connectorconfigurations.connectors.aiops.ibm.com -o name 2>&1); do
+    until GET_AIOC_MSG=$(oc -n $CP4WAIOPS_PROJECT get connectorconfigurations.connectors.aiops.ibm.com -o name 2>&1); do
         if [[ "$GET_AIOC_MSG" == "error: the server doesn't have a resource type \"connectorconfigurations\"" ]]; then
             log $INFO "ConnectorConfiguration CRD is not installed, no need to clean up connections"
             return
         fi
         sleep 10
-   done
-   log $INFO "Deleting all ConnectorConfigurations"
-   oc -n $CP4WAIOPS_PROJECT delete connectorconfigurations.connectors.aiops.ibm.com --all &
-   log $INFO "waiting for ConnectorComponent termination"
-   until [[ `oc -n $CP4WAIOPS_PROJECT get connectorcomponents.connectors.aiops.ibm.com -o name | wc -l` -eq 0 ]]; do
+    done
+    log $INFO "Deleting all ConnectorConfigurations"
+    oc -n $CP4WAIOPS_PROJECT delete connectorconfigurations.connectors.aiops.ibm.com --all &
+    log $INFO "waiting for ConnectorComponent termination"
+    until [[ `oc -n $CP4WAIOPS_PROJECT get connectorcomponents.connectors.aiops.ibm.com -o name | wc -l` -eq 0 ]]; do
         oc -n $CP4WAIOPS_PROJECT get connectorcomponents.connectors.aiops.ibm.com -o name | while read r; do
             DEL_TIMESTAMP=$(oc -n $CP4WAIOPS_PROJECT get $r -o jsonpath={.metadata.deletionTimestamp} 2>>/dev/null) || continue
             DEL_TIMESTAMP=$(date --date $DEL_TIMESTAMP +%s 2>>/dev/null) || continue
@@ -594,8 +594,8 @@ delete_connections() {
             fi
         done
         sleep 10
-   done
-   log $INFO "Finished deleting ConnectorConfigurations"
+    done
+    log $INFO "Finished deleting ConnectorConfigurations"
 }
 
 delete_securetunnel(){
@@ -637,16 +637,16 @@ delete_crossplane(){
     # remove finalizers from and delete kafkaclaim, configurationrevisions, composition, objects, provider configs
     log $INFO "Deleting kafkaclaims in $CP4WAIOPS_PROJECT"
     for KAFKACLAIM in ${CROSSPLANE_KAFKACLAIMS[@]}; do
-      log $INFO "Deleting $KAFKACLAIM..."
-      oc patch -n $CP4WAIOPS_PROJECT $KAFKACLAIM --type=json --patch='[ { "op": "remove", "path": "/metadata/finalizers" } ]'
-      oc delete $KAFKACLAIM -n $CP4WAIOPS_PROJECT --ignore-not-found
+        log $INFO "Deleting $KAFKACLAIM..."
+        oc patch -n $CP4WAIOPS_PROJECT $KAFKACLAIM --type=json --patch='[ { "op": "remove", "path": "/metadata/finalizers" } ]'
+        oc delete $KAFKACLAIM -n $CP4WAIOPS_PROJECT --ignore-not-found
     done
 
     log $INFO "Deleting Object resources at the cluster scope"
     for OBJECT in ${CROSSPLANE_OBJECTS[@]}; do
-      log $INFO "Deleting $OBJECT..."
-      oc patch $OBJECT --type=json --patch='[ { "op": "remove", "path": "/metadata/finalizers" } ]'
-      oc delete $OBJECT --ignore-not-found
+        log $INFO "Deleting $OBJECT..."
+        oc patch $OBJECT --type=json --patch='[ { "op": "remove", "path": "/metadata/finalizers" } ]'
+        oc delete $OBJECT --ignore-not-found
     done
 
     log $INFO "Deleting configurations at the cluster scope"
@@ -656,8 +656,8 @@ delete_crossplane(){
     
     log $INFO "Deleting compositions at the cluster scope"
     for COMPOSITION in ${CROSSPLANE_COMPOSITIONS[@]}; do
-      log $INFO "Deleting crossplane composition $COMPOSITION.."
-      oc delete $COMPOSITION --ignore-not-found
+        log $INFO "Deleting crossplane composition $COMPOSITION.."
+        oc delete $COMPOSITION --ignore-not-found
     done
     log $INFO "Deleting ProviderConfig at the cluster scope"
     oc patch providerconfig.kubernetes.crossplane.io/kubernetes-provider --type=json --patch='[ { "op": "remove", "path": "/metadata/finalizers" } ]' && oc delete providerconfig.kubernetes.crossplane.io/kubernetes-provider --ignore-not-found
@@ -666,8 +666,8 @@ delete_crossplane(){
 
     log $INFO "Deleting compositeresourcedefinitions at the cluster scope"
     for XRD in ${CROSSPLANE_XRDS[@]}; do
-      oc patch $XRD --type=json --patch='[ { "op": "remove", "path": "/metadata/finalizers" } ]'
-      oc delete $XRD --ignore-not-found
+        oc patch $XRD --type=json --patch='[ { "op": "remove", "path": "/metadata/finalizers" } ]'
+        oc delete $XRD --ignore-not-found
     done
 
     log $INFO "Delete the Crossplane user management resources"
