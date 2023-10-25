@@ -1,0 +1,28 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: backup-cam
+  labels:
+    restic-backup-pod: t
+    component: backup-cam
+spec:
+  containers:
+  - name: backup
+    image: redhat/ubi8:8.6-754
+    command: ["sleep"]
+    args: ["infinity"]
+    volumeMounts:
+            - name: data
+              mountPath: /usr/share/backup
+    imagePullPolicy: IfNotPresent
+    securityContext:
+        allowPrivilegeEscalation: false
+        runAsNonRoot: true
+        capabilities:
+          drop: ["ALL"]
+        seccompProfile:
+          type: RuntimeDefault
+  volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: cam-mongo-pv
