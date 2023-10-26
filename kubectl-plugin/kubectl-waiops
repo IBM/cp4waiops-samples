@@ -16,52 +16,27 @@ gray=$(tput setaf 7)
 bold=$(tput bold)
 normal=$(tput sgr0) #reset color/bolding
 
-# Environment variables including installation info (gathered from existing installation instance on the cluster) and version     
-CLUSTER_ADMIN=$(oc auth can-i '*' '*' --all-namespaces)
-SECURE_TUNNEL_EXISTS=""
-SUMMARY_FAILURE=""
-USER_LEVEL=$(oc whoami) # to check if the user is running the tool at higher than a basic user role
-if [[ "$USER_LEVEL" == "basic" ]]
-then
-    echo ""
-    echo "${red}${bold}NOTE: ${normal}You do not have the appropriate permissions to run the CP4AIOps status checker tool."
-    echo "      It appears you are logged in as a basic user. Please log in again" 
-    echo "      with credentials that have more permissions.${normal}"
-    echo ""
-    exit 0
-fi    
-
-if [[ "$CLUSTER_ADMIN" == "yes" ]];
-then 
-    INSTALLATION_NAME=$(oc get installations.orchestrator.aiops.ibm.com -A --no-headers | while read a b c; do echo "$b"; done; 2>/dev/null)
-    INSTALLATION_NAMESPACE=$(oc get installations.orchestrator.aiops.ibm.com -A --no-headers | while read a b c; do echo "$a"; done; 2>/dev/null)
-    CSV_NAME=$(oc get csvs -o name --no-headers=true -n $INSTALLATION_NAMESPACE | grep ibm-aiops-orchestrator)  
-    VERSION_AIOPSORCHESTRATOR=$(oc get $CSV_NAME -n $INSTALLATION_NAMESPACE -o jsonpath='{.spec.version}' | awk '{ print substr( $0, 0, 3 ) }')
-    CLUSTER_SCOPE_INSTALL=$(if [[ $(oc get subscription.operators.coreos.com -A  | grep ibm-aiops-orchestrator | awk '{ print $1 }') == "openshift-operators" ]]; then echo "true"; else echo "false"; fi)
-else
-    # ask user if they are in the project namespace. 
-    # if they are, set INSTALLATION_NAMESPACE=current project
-    INSTALLATION_NAME=$(oc get installations.orchestrator.aiops.ibm.com --no-headers | while read a b c; do echo "$a"; done; 2>/dev/null)
-    INSTALLATION_NAMESPACE=$(oc get installation $INSTALLATION_NAME -o jsonpath='{.metadata.namespace}')
-    CSV_NAME=$(oc get csvs -o name --no-headers=true | grep ibm-aiops-orchestrator)  
-    VERSION_AIOPSORCHESTRATOR=$(oc get $CSV_NAME -o jsonpath='{.spec.version}' | awk '{ print substr( $0, 0, 3 ) }')
-fi
-
-# optional argument handling
-if [[ "$1" == "version" ]]
-then
-    echo "0.0.23"
-    exit 0
-fi
-
-# optional argument handling
-if [[ "$1" == "config" ]]
-then
-    echo "$KUBECONFIG"
-    exit 0
-fi
+PLUGIN=${0##*-}
 
 # helper functions
+function printUsage {
+  cat <<EOF
+Actions for working with IBM CloudPak for AI Ops
+
+Usage:
+  oc ${PLUGIN} COMMAND [flags]
+
+Available Commands:
+  multizone status   Print the node topology and pod zone distribution
+
+  status             Print the status of the main components in the CloudPak
+  status-summary     Print a brief summary status of the CloudPak
+  status-upgrade     Print the upgrade status of the components in the CloudPak
+  status-all         Print the most detail about the components in the CloudPak
+
+EOF
+}
+
 printStatus() {
     if [[ "$1" == "$2" ]];
     then
@@ -482,14 +457,293 @@ getOrchestratorPodStatus() {
     fi
 }
 
-# optional argument handling
+function showMultiZoneNodes {
+  c=${1:-'NAME:.metadata.name,ZONE:.metadata.labels.topology\.kubernetes\.io/zone,REGION:.metadata.labels.topology\.kubernetes\.io/region'}
+  [[ $# -gt 0 ]] && shift
+  oc get no -l node-role.kubernetes.io/worker -o=custom-columns="$c" "$@"
+}
+
+function showMultiZoneStatus {
+  ###########
+  #First check generic cluster setup so this script can be run prior to installation
+  none=$(oc get no)
+  if [[ $? -ne 0 ]]; then
+    echo "ERROR: Cannot continue with multizone status when listing nodes fails"
+    exit $LINENO;
+  fi
+
+  #Get the string oc uses to denote not labeled
+  none=$(oc get no -o custom-columns=':.metadata.labels.bogus' | tail -1)
+
+  declare -A region=()
+  declare -A zone=()
+  declare -A node=()
+  while read l; do
+    n=$(echo $l | cut -d ' ' -f 1)
+    z=$(echo $l | cut -d ' ' -f 2)
+    r=$(echo $l | cut -d ' ' -f 3)
+    node[$n]=$z
+    ((++zone[$z]))
+    ((++region[$r]))
+  done< <(showMultiZoneNodes "" --no-headers)
+
+  c=${#node[@]}
+  if [[ $c -eq 0 ]]; then
+    #Hopefully this is never true, everything we check is based on this
+    echo "ERROR: No worker nodes are labeled with node-role.kubernetes.io/worker and kubernetes.io/arch=amd64"
+    exit $LINENO
+  elif [[ $c -lt 3 ]]; then
+    echo "WARNING: Found $c worker nodes but at least 3 are required for multizone support"
+  fi
+
+  c=${region[${none}]}
+  if [[ -n "$c" ]]; then
+    echo "WARNING: $c worker nodes are not labeled with topology.kubernetes.io/region."
+    echo "         Nodes without a region label may cause pods to not be distributed properly."
+  fi
+
+  c=${zone[$none]}
+  if [[ -n "$c" ]]; then
+    echo "WARNING: $c worker nodes are not labeled with topology.kubernetes.io/zone."
+    echo "         Nodes without a zone label may cause pods to not be distributed properly."
+  fi
+
+  unset zone[$none]
+  c=${#zone[@]}
+  if [[ $c -lt 3 ]]; then
+    echo "WARNING: Found $c zones but at least 3 are required for multizone to function"
+  fi
+
+  #Print node topology summary/status
+  echo
+  echo 'Regions :' $(echo ${!region[@]} | tr ' ' '\n' | sort -u)
+  echo 'Zones   :' $(echo ${!zone[@]} | tr ' ' '\n' | sort -u)
+  echo
+  showMultiZoneNodes | head -1
+  showMultiZoneNodes | tail -n +2 | sort -b -k 3,3 -k 2,2 -k 1,1
+  echo
+
+  ###########
+  #Now that the node checks have run, check for CloudPak for AI Ops
+  declare -A ains=()     #AIOps namespaces
+  declare -A csns=()     #CommonServices namespaces
+
+  eval $(oc get -A installation.orchestrator.aiops.ibm.com --ignore-not-found -o jsonpath='{range .items[*]} ains[{.metadata.namespace}]=1{end}')
+  c=${#ains[@]}
+  if [[ $c -gt 1 ]]; then
+    echo "INFO: IBM CloudPak for AI Ops is installed in multiple namespaces: ${ains[@]}"
+  elif [[ $c -eq 0 ]]; then
+    #May not have permissions to search all namespaces try the current
+    eval $(oc get installation.orchestrator.aiops.ibm.com --ignore-not-found -o jsonpath='{range .items[*]} ains[{.metadata.namespace}]=1{end}')
+  fi
+
+  #Only search for separate Foundational Services namespace if v3
+  for n in ${!ains[@]}; do
+    v=$(oc get csv -n $n -o custom-columns=':.metadata.name,:.spec.version' \
+        | awk '/^ibm-common-service-operator/ {sub(/^3\..*/,3,$2); print $2}')
+    if [[ -z "$v" ]]; then
+      echo "WARNING: Cannot determine IBM Foundational Services version, those pods may be missed"
+    elif [[ "$v" == "3" ]]; then
+      ns=$(oc get -A commonservice.operator.ibm.com -o jsonpath='{.items[*].metadata.namespace}')
+      if [[ -z "$ns" ]]; then
+        echo "WARNING: Cannot determine IBM Foundational Services namespace, those pods may be missed"
+      fi
+      for n in $ns; do
+        if [[ -z "${ains[$n]}" ]]; then csns[$n]=1; fi
+      done
+    fi
+  done
+
+  if [[ ${#csns[@]} -gt 1 ]]; then
+    echo "WARNING: Found multiple IBM Foundational Services namespaces. Some pods shown may be from other CloudPaks"
+  fi
+
+  if [[ ${#ains[@]} -lt 1 ]]; then
+    ns=$(oc project -q)
+    if [[ -n "$ns" ]]; then
+      ains[$ns]=1
+      echo "WARNING: IBM CloudPak for AI Ops namespace not found, using the current namespace $ns"
+    else
+      #oc prints "error: no project has been set"
+      exit $LINENO
+    fi
+  fi
+
+
+  #There is no point in going forward if things are not up and ready
+  e=0
+  for ns in ${!csns[@]} ${!ains[@]}; do
+    sts=$(oc get statefulset -n $ns -o jsonpath='{.items[?(@.status.readyReplicas!=@.status.replicas)].metadata.name}')
+    if [[ $? -ne 0 ]]; then (( ++e )); fi
+    if [[ -n "$sts" ]]; then echo "ERROR: The following StatefulSets in namespace $ns are not ready: $sts"; exit $LINENO; fi
+
+    dep=$(oc get replicaset -n $ns -o jsonpath='{.items[?(@.status.readyReplicas!=@.status.replicas)].metadata.name}')
+    if [[ $? -ne 0 ]]; then (( ++e )); fi
+    if [[ -n "$dep" ]]; then echo "ERROR: The following ReplicaSets in namespace $ns are not ready: $dep"; exit $LINENO; fi
+
+    sps=$(oc get strimzipodset.core.ibmevents.ibm.com -n $ns -o jsonpath='{.items[?(@.status.readyPods!=@.status.pods)].metadata.name}')
+    if [[ $? -ne 0 ]]; then (( ++e )); fi
+    if [[ -n "$sps" ]]; then echo "ERROR: The following StrimziPodSets in namespace $ns are not ready: $sps"; exit $LINENO; fi
+
+    edb=$(oc get cluster.postgresql.k8s.enterprisedb.io -n $ns -o jsonpath='{.items[?(@.status.readyInstances!=@.status.instances)].metadata.name}')
+    if [[ $? -ne 0 ]]; then (( ++e )); fi
+    if [[ -n "$edb" ]]; then echo "ERROR: The following EDB clusters in namespace $ns are not ready: $edb"; exit $LINENO; fi
+
+    pod=$(oc get po -n $ns)   #ensure we can list pods
+    if [[ $? -ne 0 ]]; then (( ++e )); fi
+
+    #ObjectServer implemented as a singleton statefulset so already covered
+  done
+  if [[ $e -ne 0 ]]; then
+    #The most common cause should be permission errors
+    echo "ERROR: Cannot continue with multizone status when listing pod resources fails"
+    exit $LINENO;
+  fi
+
+
+  declare -A query=( [StatefulSet]='.spec.replicas>1'
+                     [ReplicaSet]='.spec.replicas>1'
+                     [StrimziPodSet.core.ibmevents.ibm.com]='.status.pods>1'
+                     [Cluster.postgresql.k8s.enterprisedb.io]='.spec.instances>1' )
+  zones="${!zone[@]}"
+  lines=""
+  for ns in ${!csns[@]} ${!ains[@]}; do
+    echo "INFO: Checking the namespace $ns"
+    for k in StatefulSet ReplicaSet StrimziPodSet.core.ibmevents.ibm.com Cluster.postgresql.k8s.enterprisedb.io; do
+      for s in $(oc get $k -n $ns -o jsonpath='{.items[?(@'"${query[$k]}"')].metadata.name}'); do
+        zone=()
+        o=""
+        for z in ${zones}; do zone[$z]=0; done
+        if [[ "$k" == "ReplicaSet" && -n $(oc get $k $s -n $ns -o jsonpath='{.metadata.ownerReferences[?(@.kind=="Deployment")].name}') ]]; then
+          dt=Deployment
+        else
+          dt=$(echo $k | sed 's/\..*//')
+        fi
+        while read l; do
+          p=$(echo $l | cut -d ' ' -f 1)
+          n=$(echo $l | cut -d ' ' -f 2)
+          z=${node[$n]}
+          o+="$ns $p $z $n $dt\n"
+          ((++zone[$z]))
+        done< <(oc get po -n $ns -o jsonpath='{range .items[?(@.metadata.ownerReferences[0].name=="'$s'")]}{@.metadata.name} {@.spec.nodeName}{"\n"}{end}')
+        #not good if only 1 zone or found a pod not in a zone or the spread diff > 1
+        if [[ ${#zone[@]} -lt 2  ||  -n "${zone[$none]}"  ||
+              $(expr $(echo ${zone[@]} | tr ' ' '\n' | sort -rn | sed -n '1s/$/ - /p;$p' | tr -d '\n')) -gt 1
+           ]]; then
+          lines+=$(echo -ne "$o" | sort -b -k 3,3 -k 2,2)"\n"
+        fi
+      done
+      if [[ $k == StatefulSet  &&  -n "${ains[$ns]}" ]]; then
+        #Handle ObjectServer special case
+        zone=()
+        o=""
+        for p in aiops-ir-core-ncoprimary-0 aiops-ir-core-ncobackup-0; do
+          n=$(oc get po -n $ns $p -o jsonpath='{.spec.nodeName}')
+          z=${node[$n]}
+          zone[$p]=$z
+          o+="$ns $p $z $n $k\n"
+        done
+        if [[ "${zone[aiops-ir-core-ncoprimary-0]}" == "${zone[aiops-ir-core-ncobackup-0]}" ]]; then
+          lines+=$(echo -ne "$o" | sort -b -k 3,3 -k 2,2)"\n"
+        fi
+      fi
+    done
+  done
+
+  echo
+  if [ -z "$lines" ]; then
+    echo "INFO: All pods are distributed appropriately for multizone."
+  else
+    echo "WARNING: Not all pods are distributed optimally."
+    echo
+    #on the off chance column is not installed at least print something
+    if [[ -x /bin/column ]]; then
+      echo -e "$lines" | column -t -o '   ' -N NAMESPACE,NAME,ZONE,NODE,KIND
+    else
+      echo -e "$lines" | awk 'BEGIN{print "NAMESPACE NAME ZONE NODE KIND"} /^$/{} {print $0}'
+    fi
+  fi
+}
+
+
+if [[ -z "$1"  ||  "$1" == "-h"  ||  "$1" == "--help"  ||  "$1" == "help" ]]
+then
+  printUsage
+  exit 0
+fi
+
+if [[ "$1" == "version" ]]
+then
+    echo "0.0.24"
+    exit 0
+fi
+
+if [[ "$1" == "config" ]]
+then
+    echo "$KUBECONFIG"
+    exit 0
+fi
+
+if [[ "$1" == "multizone" ]]; then
+  if [[ -z "$2"  ||  "$2" == "status" ]]; then
+    showMultiZoneStatus
+  else
+    echo "error: unknown command \"$2\""
+    echo "See 'oc ${PLUGIN} -h' for help and examples"
+    exit $LINENO
+  fi
+  exit 0
+fi
+
+
+
+# Environment variables including installation info (gathered from existing installation instance on the cluster) and version
+CLUSTER_ADMIN=$(oc auth can-i '*' '*' --all-namespaces)
+SECURE_TUNNEL_EXISTS=""
+SUMMARY_FAILURE=""
+USER_LEVEL=$(oc whoami) # to check if the user is running the tool at higher than a basic user role
+if [[ "$USER_LEVEL" == "basic" ]]
+then
+    echo ""
+    echo "${red}${bold}NOTE: ${normal}You do not have the appropriate permissions to run the CP4AIOps status checker tool."
+    echo "      It appears you are logged in as a basic user. Please log in again"
+    echo "      with credentials that have more permissions.${normal}"
+    echo ""
+    exit 0
+fi
+
+if [[ "$CLUSTER_ADMIN" == "yes" ]];
+then
+    INSTALLATION_NAME=$(oc get installations.orchestrator.aiops.ibm.com -A --no-headers | while read a b c; do echo "$b"; done; 2>/dev/null)
+    INSTALLATION_NAMESPACE=$(oc get installations.orchestrator.aiops.ibm.com -A --no-headers | while read a b c; do echo "$a"; done; 2>/dev/null)
+    CSV_NAME=$(oc get csvs -o name --no-headers=true -n $INSTALLATION_NAMESPACE | grep ibm-aiops-orchestrator)
+    VERSION_AIOPSORCHESTRATOR=$(oc get $CSV_NAME -n $INSTALLATION_NAMESPACE -o jsonpath='{.spec.version}' | awk '{ print substr( $0, 0, 3 ) }')
+    CLUSTER_SCOPE_INSTALL=$(if [[ $(oc get subscription.operators.coreos.com -A  | grep ibm-aiops-orchestrator | awk '{ print $1 }') == "openshift-operators" ]]; then echo "true"; else echo "false"; fi)
+else
+    # ask user if they are in the project namespace.
+    # if they are, set INSTALLATION_NAMESPACE=current project
+    INSTALLATION_NAME=$(oc get installations.orchestrator.aiops.ibm.com --no-headers | while read a b c; do echo "$a"; done; 2>/dev/null)
+    INSTALLATION_NAMESPACE=$(oc get installation $INSTALLATION_NAME -o jsonpath='{.metadata.namespace}')
+    CSV_NAME=$(oc get csvs -o name --no-headers=true | grep ibm-aiops-orchestrator)
+    VERSION_AIOPSORCHESTRATOR=$(oc get $CSV_NAME -o jsonpath='{.spec.version}' | awk '{ print substr( $0, 0, 3 ) }')
+fi
+
+
 if [[ "$1" == "status" ]]
 then
     oc project ${INSTALLATION_NAMESPACE}
 
     echo ""
     echo "${blue}${bold}Cloud Pak for AIOps v${VERSION_AIOPSORCHESTRATOR} installation status:${normal}"
-    
+
+    v=$(echo -e "${VERSION_AIOPSORCHESTRATOR}\n4.2" | sort -V | tail -1)
+    if [[ "$v" != "4.2" ]]; then
+       #keep trivial convenience command/function for versions > v4.2, but use
+       #  built-in status
+       oc describe installation ${INSTALLATION_NAME} | awk 'BEGIN{p=0} /^Events:/{p=0} {if (p) print} /^Status:$/{p=1}'
+       exit 0
+    fi
+
     echo "______________________________________________________________"
     echo "Installation instances:" && echo ""
     getInstallationStatus
@@ -1420,4 +1674,7 @@ then
     exit 0
 fi
 
-echo "kubectl-waiops" 
+
+echo "error: unknown command \"$1\""
+echo "See 'oc ${PLUGIN} -h' for help and examples"
+exit $LINENO
