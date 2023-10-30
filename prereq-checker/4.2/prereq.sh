@@ -45,8 +45,6 @@ initialize() {
     STORAGE_PROVIDER_RES=""
     PROFILE_RES=""
     PS_RES=""
-    CERTMANAGER_PRESENT=""
-    LICENSING_PRESENT=""
 
     warn_color="\x1b[33m"
     fail_color="\x1b[31m"
