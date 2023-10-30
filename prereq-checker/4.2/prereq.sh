@@ -871,10 +871,6 @@ showSummary() {
     printf "${string}\n"
     string=`printf "      [ %s ] Small or Large Profile Install Resources" "${PROFILE_RES}"`
     printf "${string}\n"
-    string=`printf "      [ %s ] Cert Manager Operator Installed" "${CERTMANAGER_PRESENT}"`
-    printf "${string}\n"
-    string=`printf "      [ %s ] Licensing Service Operator Installed" "${LICENSING_PRESENT}"`
-    printf "${string}\n"
     startEndSection "Prerequisite Checker Tool Summary"
 }
 
