@@ -858,86 +858,6 @@ function printTable() {
     echo
 }
 
-function checkIfCertManagerPresent() {
-
-    echo
-    startEndSection "Cert Manager Check"
-    log $INFO "Checking for Cert Manager operator"
-    echo
-    
-    text=$(oc get csv -A --no-headers=true -o=custom-columns='NAME:.metadata.name,NAMESPACE:.metadata.namespace,PHASE:.status.phase' | grep "cert-manager")
-    result=$?
-    if [[ "${result}" == "1" ]]; then
-        log $ERROR "Cluster does not have a cert-manager operator installed"
-        CERTMANAGER_PRESENT=$fail_msg
-        return 1
-    fi
-    
-    name=$(echo $text | awk '{print $1}')
-    namespace=$(echo $text | awk '{print $2}')
-    phase=$(echo $text | awk '{print $3}')
-    if [[ "${phase}" == "Succeeded" ]]; then
-        CERTMANAGER_PRESENT=$pass_msg
-        log $INFO "Successfully functioning cert-manager found."
-    elif [[ "${phase}" == "Pending" ]]; then
-        CERTMANAGER_PRESENT=$pass_msg
-        log $INFO "Pending cert-manager found."
-        printTable $name $namespace
-        startEndSection "Cert Manager Check"
-        return 1
-    else
-        CERTMANAGER_PRESENT=$fail_msg
-        log $ERROR "Unsuccessfully installed cert-manager found."
-        printTable $name $namespace
-        startEndSection "Cert Manager Check"
-        return 1
-    fi
-
-    printTable $name $namespace
-    startEndSection "Cert Manager Check"
-    return 0
-}
-
-function checkIfLicensingPresent() {
-
-    echo
-    startEndSection "Licensing Service Operator Check"
-    log $INFO "Checking for Licensing Service operator"
-    echo
-    
-    text=$(oc get csv -A --no-headers=true -o=custom-columns='NAME:.metadata.name,NAMESPACE:.metadata.namespace,PHASE:.status.phase' | grep "licensing-operator")
-    result=$?
-    if [[ "${result}" == "1" ]]; then
-        log $ERROR "Cluster does not have the licensing service operator installed"
-        LICENSING_PRESENT=$fail_msg
-        return 1
-    fi
-    
-    name=$(echo $text | awk '{print $1}')
-    namespace=$(echo $text | awk '{print $2}')
-    phase=$(echo $text | awk '{print $3}')
-    if [[ "${phase}" == "Succeeded" ]]; then
-        LICENSING_PRESENT=$pass_msg
-        log $INFO "Successfully functioning licensing service operator found."
-    elif [[ "${phase}" == "Pending" ]]; then
-        LICENSING_PRESENT=$pass_msg
-        log $INFO "Pending licensing service operator found."
-        printTable $name $namespace
-        startEndSection "Licensing Service Operator Check"
-        return 1
-    else
-        LICENSING_PRESENT=$fail_msg
-        log $ERROR "Unsuccessfully installed licensing service operator found."
-        printTable $name $namespace
-        startEndSection "Licensing Service Operator Check"
-        return 1
-    fi
-
-    printTable $name $namespace
-    startEndSection "Licensing Service Operator Check"
-    return 0
-}
-
 showSummary() {
 
     echo
@@ -971,8 +891,6 @@ function main {
     checkEntitlementSecret || fail_found=1
     checkStorage || fail_found=1
     checkSmallOrLargeProfileInstall || fail_found=1
-    checkIfCertManagerPresent || fail_found=1
-    checkIfLicensingPresent || fail_found=1
 
     showSummary
 

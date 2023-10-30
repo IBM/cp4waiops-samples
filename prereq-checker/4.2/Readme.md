@@ -17,10 +17,6 @@ The prerequisite checker tool can be used to validate whether a Red Hat OpenShif
 
 - **Entitlement Secret check**: Checks whether a secret called ibm-entitlement-key or a global pull secret called pull-secret (global pull secret found in openshift-config namespace) have been created. For more information, see the IBM Documentation [Entitlement Keys](https://ibm.biz/storage_consideration_421)
 
-- **Cert Manager Operator Check**: Ensures a Cert Manager Operator is installed
-
-- **License Service Operator Check**: Ensures a license operator is installed
-
 ## Getting started
 
 Clone the following GitHub repository:
