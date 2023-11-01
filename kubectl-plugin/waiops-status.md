@@ -10,6 +10,8 @@ https://kubernetes.io/docs/tasks/extend-kubectl/kubectl-plugins/
 
 ## Highlights
 Run `oc waiops multizone status` to view how well the installation is prepared for a zone outage.
+  * **NOTE**: This function requires bash to be at least version **4**  (MacOS ships with a very old version)
+  * **NOTE**: If you have installed/upgraded bash to a path other than `/bin/bash` change the first line of the script to that fully qualified path.
 
 Run `oc waiops status` to print the statuses of some of your instance's main components. If you see components with issues (or are generally facing issues on your cluster), run `oc waiops status-all` for a more detailed printout with more components.
 
@@ -411,8 +413,8 @@ ______________________________________________________________
 - You must have an installation of Cloud Pak for AIOps v3.3, v3.4, v3.5, v3.6, v3.7, v4.1, or v4.2 on your cluster. 
 
 **Note**: while this tool does not require you to be logged in as a cluster admin, however
- * `oc waiops status-all`'s output will be limited if you are not. If possible, it is recommended to be logged in as a cluster admin to receive a more complete view of your install status.
  * `oc waiops multizone status` output may be limited and inaccurate without the required permissions
+ * `oc waiops status-all`'s output will be limited if you are not. If possible, it is recommended to be logged in as a cluster admin to receive a more complete view of your install status.
 
 ### Dependencies
 - `oc` cli

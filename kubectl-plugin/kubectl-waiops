@@ -685,6 +685,10 @@ then
 fi
 
 if [[ "$1" == "multizone" ]]; then
+  if [[ 0$(${BASH} -c 'echo ${BASH_VERSINFO[0]}') -lt 04 ]]; then
+    echo "ERROR: The ${PLUGIN} plugin requires bash version 4 or higher, but ${BASH} is ${BASH_VERSION}"
+    exit $LINENO
+  fi
   if [[ -z "$2"  ||  "$2" == "status" ]]; then
     showMultiZoneStatus
   else
