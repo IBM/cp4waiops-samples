@@ -1,6 +1,6 @@
 <!-- © Copyright IBM Corp. 2020, 2023-->
 
-#### ***NOTE**: from CP4AIOps v4.1.0 onwards, the use of this status-checking tool is now considered **optional**. Please primarily refer to the installation status messages provided directly in the `ibm-aiops-orchestrator` CR of your cluster's installation.*
+#### ***NOTE**: from CP4AIOps v4.1.0 onwards, the use of the status, status-all, status-upgrade functions are now considered **deprecated**. Please primarily refer to the installation status messages provided directly in the installation.orchestrator.aiops.ibm.com CR instance of your cluster's installation.*
 
 # kubectl-waiops
 
@@ -9,6 +9,10 @@ A kubectl plugin for CP4AIOps
 https://kubernetes.io/docs/tasks/extend-kubectl/kubectl-plugins/
 
 ## Highlights
+Run `oc waiops multizone status` to view how well the installation is prepared for a zone outage.
+  * **NOTE**: This function requires bash to be at least version **4**  (MacOS ships with a very old version)
+  * **NOTE**: If you have installed/upgraded bash to a path other than `/bin/bash` change the first line of the script to that fully qualified path.
+
 Run `oc waiops status` to print the statuses of some of your instance's main components. If you see components with issues (or are generally facing issues on your cluster), run `oc waiops status-all` for a more detailed printout with more components.
 
 If you are upgrading your instance to the latest version, run `oc waiops status-upgrade`, which returns a list of components that have (and have not) completed upgrading. 
@@ -18,7 +22,7 @@ Below are example outputs of these commands.
 ### Installation status checker output (`oc waiops status`)
 ```
 $ oc waiops status
-Cloud Pak for Watson AIOps AI Manager v4.2 installation status:
+Cloud Pak for AIOps AI Manager v4.2 installation status:
 ______________________________________________________________
 Installation instances:
 
@@ -84,7 +88,7 @@ Hint: for a more detailed printout of component statuses, run `oc waiops status-
 ### Detailed installation status checker output (`oc waiops status-all`)
 ```
 $ oc waiops status-all
-Cloud Pak for Watson AIOps AI Manager v4.2 installation status:
+Cloud Pak for AIOps AI Manager v4.2 installation status:
 ______________________________________________________________
 Installation instances:
 
@@ -167,13 +171,13 @@ NAME                               DISPLAY                             VERSION  
 asm-operator.v4.2.0-202309121245   IBM Netcool Agile Service Manager   4.2.0-202309121245              Succeeded
 
 NAME                                  DISPLAY                                            VERSION              REPLACES   PHASE
-ibm-aiops-ir-ai.v4.2.0-202309121245   IBM Watson AIOps Issue Resolution AI & Analytics   4.2.0-202309121245              Succeeded
+ibm-aiops-ir-ai.v4.2.0-202309121245   IBM AIOps Issue Resolution AI & Analytics   4.2.0-202309121245              Succeeded
 
 NAME                                    DISPLAY                                  VERSION              REPLACES   PHASE
-ibm-aiops-ir-core.v4.2.0-202309121245   IBM Watson AIOps Issue Resolution Core   4.2.0-202309121245              Succeeded
+ibm-aiops-ir-core.v4.2.0-202309121245   IBM AIOps Issue Resolution Core   4.2.0-202309121245              Succeeded
 
 NAME                                         DISPLAY                                    VERSION              REPLACES   PHASE
-ibm-aiops-ir-lifecycle.v4.2.0-202309121245   IBM Cloud Pak for Watson AIOps Lifecycle   4.2.0-202309121245              Succeeded
+ibm-aiops-ir-lifecycle.v4.2.0-202309121245   IBM Cloud Pak for AIOps Lifecycle   4.2.0-202309121245              Succeeded
 
 NAME                                         DISPLAY                   VERSION              REPLACES   PHASE
 ibm-aiops-orchestrator.v4.2.0-202309121245   IBM Cloud Pak for AIOps   4.2.0-202309121245              Succeeded
@@ -368,7 +372,7 @@ katamari                                           ibm-aiops-orchestrator-contro
 ### Upgrade status checker (`oc waiops status-upgrade`):
 ```
 $ oc waiops status-upgrade
-Cloud Pak for Watson AIOps AI Manager v4.2 upgrade status:
+Cloud Pak for AIOps AI Manager v4.2 upgrade status:
 
 ______________________________________________________________
 
@@ -408,7 +412,9 @@ ______________________________________________________________
 ### Requirements
 - You must have an installation of Cloud Pak for AIOps v3.3, v3.4, v3.5, v3.6, v3.7, v4.1, or v4.2 on your cluster. 
 
-**Note**: while this tool does not require you to be logged in as a cluster admin, `oc waiops status-all`'s output will be limited if you are not. If possible, it is recommended to be logged in as a cluster admin to receive a more complete view of your install status.
+**Note**: while this tool does not require you to be logged in as a cluster admin, however
+ * `oc waiops multizone status` output may be limited and inaccurate without the required permissions
+ * `oc waiops status-all`'s output will be limited if you are not. If possible, it is recommended to be logged in as a cluster admin to receive a more complete view of your install status.
 
 ### Dependencies
 - `oc` cli
@@ -426,6 +432,7 @@ git clone https://github.com/IBM/cp4waiops-samples.git
 chmod +x cp4waiops-samples/kubectl-plugin/kubectl-waiops
 cp cp4waiops-samples/kubectl-plugin/kubectl-waiops /usr/local/bin/kubectl-waiops
 
+oc waiops multizone status
 oc waiops status
 oc waiops status-all
 oc waiops status-upgrade
