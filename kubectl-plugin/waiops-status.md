@@ -432,7 +432,7 @@ git clone https://github.com/IBM/cp4waiops-samples.git
 chmod +x cp4waiops-samples/kubectl-plugin/kubectl-waiops
 cp cp4waiops-samples/kubectl-plugin/kubectl-waiops /usr/local/bin/kubectl-waiops
 
-oc waiops multizone-status
+oc waiops multizone status
 oc waiops status
 oc waiops status-all
 oc waiops status-upgrade
