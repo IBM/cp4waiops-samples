@@ -1,0 +1,329 @@
+apiVersion: spp-data-protection.isf.ibm.com/v1alpha1
+kind: Recipe
+metadata:
+  name: aiops-backup-restore-recipe
+  namespace: ibm-spectrum-fusion-ns
+spec:
+  appType: aiops-ns
+  groups:
+    - name: aiops-volumes
+      type: volume
+      includedNamespaces:
+        - aiops
+      labelSelector: 'component!=user-home-pvc,app!=ibm-zabbix-conn'
+    - name: ibm-common-services-volumes
+      type: volume
+      includedNamespaces:
+        - ibm-common-services
+    - name: aiops-operatorgroup
+      type: resource
+      includedNamespaces:
+        - aiops
+      includedResourceTypes:
+        - operatorgroups
+    - name: aiops-subscription
+      type: resource
+      includedNamespaces:
+        - aiops
+      includedResourceTypes:
+        - subscriptions
+      labelSelector: operators.coreos.com/ibm-aiops-orchestrator.aiops=
+    - name: aiops-configmap
+      type: resource
+      includedNamespaces:
+        - aiops
+      includedResourceTypes:
+        - configmaps
+      labelSelector: cm=aiops-custom-size-profile
+    - name: redis-resources
+      type: resource
+      includedNamespaces:
+        - aiops
+      includedResourceTypes:
+        - serviceaccounts
+        - roles
+        - rolebindings
+      labelSelector: manual=example-redis
+    - name: aiops-installation
+      type: resource
+      includedNamespaces:
+        - aiops
+      includedResourceTypes:
+        - installations
+    - name: icp-mongodb-admin-secret
+      type: resource
+      includedNamespaces:
+        - ibm-common-services
+      includedResourceTypes:
+        - secrets
+      labelSelector: app=icp-mongodb
+    - name: icp-mongodb-metrics-secret
+      type: resource
+      includedNamespaces:
+        - ibm-common-services
+      includedResourceTypes:
+        - secrets
+      labelSelector: app.kubernetes.io/instance=icp-mongodb
+    - name: aiops-topology-cassandra-auth-secret
+      type: resource
+      includedNamespaces:
+        - aiops
+      includedResourceTypes:
+        - secrets
+      labelSelector: app.kubernetes.io/name=aiops-topology-cassandra-auth-secret
+    - name: omni-secret
+      type: resource
+      includedNamespaces:
+        - aiops
+      includedResourceTypes:
+        - secrets
+      labelSelector: app.kubernetes.io/component=omni-secret
+    - name: model-secret
+      type: resource
+      includedNamespaces:
+        - aiops
+      includedResourceTypes:
+        - secrets
+      labelSelector: app.kubernetes.io/component=model-secret
+  hooks:
+  - name: ibm-aiops-orchestrator-pod-exec
+    type: exec
+    namespace: aiops
+    labelSelector: name=ibm-aiops-orchestrator 
+    timeout: 120
+    onError: fail
+    ops:
+    - name: sleep-a-minute 
+      command: >
+        ["/bin/bash", "-c", "sleep 60"]
+      container: manager
+      timeout: 120
+  - name: edb-postgresql-pod-exec
+    type: exec
+    namespace: aiops
+    labelSelector: postgresql=ibm-cp-watson-aiops-edb-postgres,role=primary
+    timeout: 120
+    onError: fail
+    ops:
+    - name: checkpoint
+      command: "psql -c CHECKPOINT -U postgres"
+      container: postgres
+      timeout: 60
+  - name: ibm-cloud-databases-redis-operator-check
+    type: check
+    namespace: aiops
+    selectResource: deployment
+    labelSelector: operators.coreos.com/ibm-cloud-databases-redis-operator.aiops=
+    timeout: 2592000
+    onError: fail
+    chks:
+    - name: replicasReady
+      timeout: 2592000
+      onError: fail
+      condition: "{$.spec.replicas} == {$.status.readyReplicas}"
+  - name: c-example-redis-m-check
+    type: check
+    namespace: aiops
+    selectResource: statefulset
+    labelSelector: formation_id=example-redis,formation_type=redis,role=m
+    timeout: 2592000
+    onError: fail
+    chks:
+    - name: replicasReady
+      timeout: 2592000
+      onError: fail
+      condition: "{$.spec.replicas} == {$.status.readyReplicas}"
+  - name: c-example-redis-s-check
+    type: check
+    namespace: aiops
+    selectResource: statefulset
+    labelSelector: formation_id=example-redis,formation_type=redis,role=s
+    timeout: 2592000
+    onError: fail
+    chks:
+    - name: replicasReady
+      timeout: 2592000
+      onError: fail
+      condition: "{$.spec.replicas} == {$.status.readyReplicas}"
+  - name: ibm-aiops-orchestrator-controller-manager-check
+    type: check
+    namespace: aiops
+    selectResource: deployment
+    labelSelector: operators.coreos.com/ibm-aiops-orchestrator.aiops=
+    timeout: 2592000
+    onError: fail
+    chks:
+    - name: replicasReady
+      timeout: 2592000
+      onError: fail
+      condition: "{$.spec.replicas} == {$.status.readyReplicas}"
+  - name: ibm-common-service-operator-check
+    type: check
+    namespace: aiops
+    selectResource: deployment
+    labelSelector: operators.coreos.com/ibm-common-service-operator.aiops=
+    timeout: 2592000
+    onError: fail
+    chks:
+    - name: replicasReady
+      timeout: 2592000
+      onError: fail
+      condition: "{$.spec.replicas} == {$.status.readyReplicas}"
+  - name: aiops-topology-cassandra-check
+    type: check
+    namespace: aiops
+    selectResource: statefulset
+    labelSelector: app=cassandra
+    timeout: 2592000
+    onError: fail
+    chks:
+    - name: replicasReady
+      timeout: 2592000
+      onError: fail
+      condition: "{$.spec.replicas} == {$.status.readyReplicas}"
+  - name: couchdbcluster-check
+    namespace: aiops
+    type: check
+    selectResource: statefulset
+    nameSelector: c-example-couchdbcluster-m
+    timeout: 2592000
+    onError: fail
+    chks:
+    - name: replicasReady
+      timeout: 2592000
+      onError: fail
+      condition: "{$.spec.replicas} == {$.status.readyReplicas}"
+  - name: redissentinels-pod-exec
+    type: exec
+    namespace: aiops
+    labelSelector: cluster_role=leader,formation_id=example-redis
+    timeout: 300
+    onError: fail
+    ops:
+    - name: "copy-password"
+      command: >
+        ["/usr/bin/bash", "-c", "curl -H \"Authorization: Bearer $(cat /var/run/secrets/kubernetes.io/serviceaccount/token)\" -k https://kubernetes.default.svc/api/v1/namespaces/aiops/secrets/c-example-redis-m | python -c \"import sys, json; data = json.load(sys.stdin); print(data['data']['compose_password'])\" >/data/compose_password"]
+      container: mgmt
+    - name: "bgsave"
+      command: >
+        ["/usr/bin/bash", "-c", "export REDISCLI_AUTH=$(cat /data/compose_password | base64 -d); redis-cli bgsave; while [ $(redis-cli INFO persistence | grep rdb_bgsave_in_progress | tr -d '\r' | rev | cut -c 1) -ne 0 ]; do echo \"Sleeping for a millisecond\"; sleep 0.001; done; rm -f /data/compose_password"]
+      container: db
+  - name: ibm-mongodb-operator-check
+    type: check
+    namespace: ibm-common-services
+    selectResource: deployment
+    labelSelector: operators.coreos.com/ibm-mongodb-operator-app.ibm-common-services=
+    timeout: 2592000
+    onError: fail
+    chks:
+    - name: replicasReady
+      timeout: 2592000
+      onError: fail
+      condition: "{$.spec.replicas} == {$.status.readyReplicas}"
+  - name: icp-mongodb-check
+    type: check
+    namespace: ibm-common-services
+    selectResource: statefulset
+    labelSelector: app.kubernetes.io/managed-by=mongodbs.operator.ibm.com,app=icp-mongodb
+    timeout: 2592000
+    onError: fail
+    chks:
+    - name: replicasReady
+      timeout: 2592000
+      onError: fail
+      condition: "{$.spec.replicas} == {$.status.readyReplicas}"
+  - name: mongodbs-pod-exec
+    type: exec
+    namespace: ibm-common-services
+    nameSelector: icp-mongodb-.*
+    timeout: 120
+    onError: fail
+    ops:
+    - name: fsyncLock
+      command: >
+        ["/bin/bash", "-c", "[[ $(mongo --ssl --sslCAFile=/data/configdb/tls.crt --sslPEMKeyFile=/work-dir/mongo.pem --username `printenv ADMIN_USER` --password `printenv ADMIN_PASSWORD` --eval \"rs.isMaster().ismaster\" --quiet) == \"true\" ]] && mongo --ssl --sslCAFile=/data/configdb/tls.crt --sslPEMKeyFile=/work-dir/mongo.pem --username `printenv ADMIN_USER` --password `printenv ADMIN_PASSWORD` --eval \"db.fsyncLock()\" || echo \"Not Master\""]
+      container: icp-mongodb
+      timeout: 60
+    - name: fsyncUnlock
+      command: >
+        ["/bin/bash", "-c", "[[ $(mongo --ssl --sslCAFile=/data/configdb/tls.crt --sslPEMKeyFile=/work-dir/mongo.pem --username `printenv ADMIN_USER` --password `printenv ADMIN_PASSWORD` --eval \"rs.isMaster().ismaster\" --quiet) == \"true\" ]] && mongo --ssl --sslCAFile=/data/configdb/tls.crt --sslPEMKeyFile=/work-dir/mongo.pem --username `printenv ADMIN_USER` --password `printenv ADMIN_PASSWORD` --eval \"db.fsyncUnlock()\" || echo \"Not Master\""]
+      container: icp-mongodb
+      timeout: 60
+  - name: cassandra-pod-exec
+    type: exec
+    namespace: aiops
+    labelSelector: app=cassandra
+    timeout: 120
+    onError: fail
+    ops:
+    - name: nodetool-flush
+      command: >
+        ["/bin/bash", "-c", "nodetool flush"]
+      container: aiops-topology-cassandra
+      timeout: 60
+    - name: nodetool-verify
+      command: >
+        ["/bin/bash", "-c", "nodetool verify"]
+      container: aiops-topology-cassandra
+      timeout: 60
+  - name: ibm-aiops-orchestrator-controller-manager-pod-exec
+    type: exec
+    namespace: aiops
+    labelSelector: control-plane=controller-manager,name=ibm-aiops-orchestrator
+    timeout: 2592000
+    onError: fail
+    ops:
+    - name: installationsRunning
+      command: >
+        ["/bin/bash", "-c", "while ! curl -X GET --cacert /var/run/secrets/kubernetes.io/serviceaccount/ca.crt -H \"Authorization: Bearer `cat /var/run/secrets/kubernetes.io/serviceaccount/token`\"  -k https://kubernetes.default.svc/apis/orchestrator.aiops.ibm.com/v1alpha1/namespaces/aiops/installations/ibm-cp-watson-aiops | tail -6 | head -1 | grep Running; do echo \"Installations resource not yet running, retrying in 5 seconds...\"; sleep 5; done"]
+      container: manager
+      singlePodOnly: true
+      timeout: 2592000
+  workflows:
+  - name: backup
+    sequence:
+    - group: aiops-operatorgroup
+    - group: aiops-subscription
+    - group: aiops-configmap
+    - group: redis-resources
+    - group: icp-mongodb-admin-secret
+    - group: icp-mongodb-metrics-secret
+    - group: aiops-topology-cassandra-auth-secret
+    - group: omni-secret
+    - group: model-secret
+    - group: aiops-installation
+    - hook: redissentinels-pod-exec/copy-password
+    - hook: redissentinels-pod-exec/bgsave
+    - hook: edb-postgresql-pod-exec/checkpoint
+    - hook: cassandra-pod-exec/nodetool-flush
+    - group: aiops-volumes
+    - hook: mongodbs-pod-exec/fsyncLock
+    - group: ibm-common-services-volumes
+    - hook: mongodbs-pod-exec/fsyncUnlock
+    - hook: cassandra-pod-exec/nodetool-verify
+  - name: restore
+    sequence:
+    - group: aiops-volumes
+    - group: ibm-common-services-volumes
+    - group: aiops-operatorgroup
+    - group: aiops-subscription
+    - hook: ibm-aiops-orchestrator-controller-manager-check/replicasReady
+    - group: icp-mongodb-admin-secret
+    - group: icp-mongodb-metrics-secret
+    - group: aiops-topology-cassandra-auth-secret
+    - group: omni-secret
+    - group: model-secret
+    - group: aiops-configmap
+    - group: redis-resources
+    - hook: ibm-aiops-orchestrator-pod-exec/sleep-a-minute
+    - group: aiops-installation
+    - hook: ibm-common-service-operator-check/replicasReady
+    - hook: ibm-cloud-databases-redis-operator-check/replicasReady
+    - hook: c-example-redis-m-check/replicasReady
+    - hook: c-example-redis-s-check/replicasReady
+    - hook: couchdbcluster-check/replicasReady
+    - hook: ibm-mongodb-operator-check/replicasReady
+    - hook: icp-mongodb-check/replicasReady
+    - hook: aiops-topology-cassandra-check/replicasReady
+    - hook: ibm-aiops-orchestrator-controller-manager-pod-exec/installationsRunning
+    - hook: cassandra-pod-exec/nodetool-verify
