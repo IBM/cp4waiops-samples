@@ -91,7 +91,7 @@ ______________________________________________________________
 LifecycleService instances:
 
 KIND               NAMESPACE   NAME    VERSION   STATUS   MESSAGE
-LifecycleService   katamari    aiops   4.3.0     <none>   All Services Ready
+LifecycleService   katamari    aiops   4.3.0     Ready    All Services Ready
 
 ______________________________________________________________
 BaseUI instances:
