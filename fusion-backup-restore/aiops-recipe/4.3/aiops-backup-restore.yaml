@@ -90,14 +90,14 @@ spec:
     type: exec
     namespace: aiops
     labelSelector: name=ibm-aiops-orchestrator 
-    timeout: 120
+    timeout: 900
     onError: fail
     ops:
     - name: sleep-a-minute 
       command: >
-        ["/bin/bash", "-c", "sleep 60"]
+        ["/bin/bash", "-c", "sleep 300"]
       container: manager
-      timeout: 120
+      timeout: 900
   - name: edb-postgresql-pod-exec
     type: exec
     namespace: aiops
