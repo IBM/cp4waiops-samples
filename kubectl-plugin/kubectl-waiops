@@ -624,7 +624,7 @@ function showMultiZoneStatus {
         zone=()
         o=""
         for z in ${zones}; do zone[$z]=0; done
-        if [[ "$k" == "ReplicaSet" && -n $(oc get $k $s -n $ns -o jsonpath='{.metadata.ownerReferences[?(@.kind=="Deployment")].name}') ]]; then
+        if [[ $k == ReplicaSet  &&  -n $(oc get $k $s -n $ns -o jsonpath='{.metadata.ownerReferences[?(@.kind=="Deployment")].name}') ]]; then
           dt=Deployment
         else
           dt=$(echo $k | sed 's/\..*//')
@@ -643,7 +643,10 @@ function showMultiZoneStatus {
           lines+=$(echo -ne "$o" | sort -b -k 3,3 -k 2,2)"\n"
         fi
       done
-      if [[ $k == StatefulSet  &&  -n "${ains[$ns]}" ]]; then
+      if [[ $k == StatefulSet  &&  -n "${ains[$ns]}" \
+            && -n "$(oc get po --ignore-not-found aiops-ir-core-ncoprimary-0)" \
+            && -n "$(oc get po --ignore-not-found aiops-ir-core-ncobackup-0)" \
+         ]]; then
         #Handle ObjectServer special case
         zone=()
         o=""
