@@ -380,7 +380,7 @@ data:
       "csNamespace": "{{ .Values.csNamespace }}",
       "veleroNamespace": "{{ .Values.veleroNamespace }}",
       "backupNameSuffix": "{{ .Values.backupNameSuffix }}",
-      "aiopsVersion": "4.2.0"
+      "aiopsVersion": "4.2.1"
     }
 kind: ConfigMap
 metadata:
