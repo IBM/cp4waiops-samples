@@ -1,5 +1,5 @@
 #
-# © Copyright IBM Corp. 2020, 2023
+# Copyright 2020- IBM Inc. All rights reserved
 # SPDX-License-Identifier: Apache2.0
 #
 # Supplementary file to uninstall-cp4waiops.sh script for uninstalling 
@@ -147,8 +147,6 @@ CP4WAIOPS_CRDS=("aimanagermainprods.ai-manager.watson-aiops.ibm.com"
                 "applicationmanagers.aiops.ibm.com"
                 "applicationuis.consoleui.aiops.ibm.com"
                 "baseuis.consoleui.aiops.ibm.com"
-                "cemformations.cem.ibm.com"
-                "cemserviceinstances.cem.ibm.com"
                 "connectoruis.consoleui.aiops.ibm.com"
                 "eventmanagergateways.ai-manager.watson-aiops.ibm.com"
                 "installations.orchestrator.aiops.ibm.com"
@@ -236,7 +234,7 @@ ZEN_PVCS_LABELS=("app.kubernetes.io/component=zen-metastoredb"
 
 IAF_PVCS_LABELS=("app.kubernetes.io/instance=iaf-system")
 #### IBM Automation Foundation ####
-IAF_MISC=("client.oidc.security.ibm.com/zenclient-$IAF_NAMESPACE"
+IAF_MISC=("client.oidc.security.ibm.com/zenclient-$IAF_PROJECT"
           "operatorgroup.operators.coreos.com/operand-deployment-lifecycle-manager-operatorgroup"
           "automationuiconfig.core.automation.ibm.com/iaf-system")
 
