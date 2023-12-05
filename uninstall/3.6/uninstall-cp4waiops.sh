@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# © Copyright IBM Corp. 2020, 2023
+# Copyright 2020- IBM Inc. All rights reserved
 # SPDX-License-Identifier: Apache2.0
 #
 # This script can be used to uninstall the IBM Cloud Pak for Watson AIOps AI Manager v3.6 product and
@@ -129,16 +129,6 @@ if [[ ! -z "$CP4WAIOPS_PROJECT"  ]]; then
        log $INFO "Deleting resource  $RESOURCE_MISC.."
        oc delete $RESOURCE_MISC -n $CP4WAIOPS_PROJECT --ignore-not-found
    done
-
-   # Check if asm instances exist outside the ai mgr ns, and decide whether to delete those CRDs
-   # There is an overlap with Event Mgr CRDs
-   check_additional_asm_exists
-   if [[ $DELETE_ASM == "true" ]]; then
-      log $INFO "Deleting ASM CRDs..."
-      delete_crd_group ASM_CRDS
-   else
-      log $INFO "Skipping ASM CRD deletion."
-   fi
    
    delete_securetunnel
    

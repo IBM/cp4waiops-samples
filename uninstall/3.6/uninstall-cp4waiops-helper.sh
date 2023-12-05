@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# © Copyright IBM Corp. 2020, 2023
+# Copyright 2020- IBM Inc. All rights reserved
 # SPDX-License-Identifier: Apache2.0
 #
 . ./uninstall-cp4waiops.props
@@ -508,21 +508,19 @@ if [[ $DELETE_ALL != "true" ]] && [[ $DELETE_ALL != "false" ]]; then
     log $ERROR "The DELETE_ALL flag must have a value of either \"true\" or \"false\". Please review the uninstall-cp4waiops.props file."
     exit 1
 fi
-
 if [[ $ONLY_CLOUDPAK != "true" ]] && [[ $ONLY_CLOUDPAK != "false" ]]; then
     log $ERROR "The ONLY_CLOUDPAK flag must have a value of either \"true\" or \"false\". Please review the uninstall-cp4waiops.props file."
     exit 1
 fi
-
 if [[ $DELETE_PVCS != "true" ]] && [[ $DELETE_PVCS != "false" ]]; then
     log $ERROR "The DELETE_PVCS flag must have a value of either \"true\" or \"false\". Please review the uninstall-cp4waiops.props file."
     exit 1
 fi
-
 if [[ $DELETE_CRDS != "true" ]] && [[ $DELETE_CRDS != "false" ]]; then
     log $ERROR "The DELETE_CRDS flag must have a value of either \"true\" or \"false\". Please review the uninstall-cp4waiops.props file."
     exit 1
 fi
+
 
 }
 
@@ -557,18 +555,6 @@ check_additional_installation_exists(){
   else
      log $INFO "No additional installation resources found in the cluster."
   fi
-}
-
-check_additional_asm_exists(){
-    log $INFO "Checking if any additional ASM resources (ie from Event Manager installation) are on the cluster."
-    if [ `oc get asms.asm.ibm.com -A --no-headers | while read a b; do echo $a | grep -vw $CP4WAIOPS_PROJECT; done | wc -l`  -gt 0 ] ||
-     [ `oc get asmformations.asm.ibm.com -A --no-headers | while read a b; do echo $a | grep -vw $CP4WAIOPS_PROJECT; done | wc -l` -gt 0 ] ; then
-        log $INFO "ASM resource instances were found outside the $CP4WAIOPS_PROJECT namespace"
-        DELETE_ASM="false"
-    else
-        log $INFO "No ASM resource instances were found outside the $CP4WAIOPS_PROJECT namespace, so the ASM CRDs can be deleted."
-        DELETE_ASM="true"
-    fi
 }
 
 delete_connections() {
