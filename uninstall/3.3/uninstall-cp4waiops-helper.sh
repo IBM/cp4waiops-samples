@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# © Copyright IBM Corp. 2020, 2023
+# Copyright 2020- IBM Inc. All rights reserved
 # SPDX-License-Identifier: Apache2.0
 #
 . ./uninstall-cp4waiops.props
@@ -178,9 +178,10 @@ unsubscribe () {
 }
 
 # If any custom instances created by users for below CRD's
+# "applicationmanageragents.aiops.ibm.com": None of the instance is expected to be present with install
+# "applicationmanagers.aiops.ibm.com": None of the instance is expected to be present with install
 # "eventmanagergateways.ai-manager.watson-aiops.ibm.com": None of the instance is expected to be present with install
 # "kongs.management.ibm.com" : Expected custom resource to be ignored named 'gateway' that gets created with install.
-# Will automatically delete insightsuis.consoleui.aiops.ibm.com CR
 aiops_custom_instance_exists () {
   
   local namespace=$1
@@ -446,7 +447,6 @@ delete_iaf_bedrock () {
         oc delete deployment ibm-common-service-webhook -n ibm-common-services --ignore-not-found
         oc delete deployment meta-api-deploy -n ibm-common-services --ignore-not-found
         oc delete deployment secretshare -n ibm-common-services --ignore-not-found
-        oc get role.rbac.authorization.k8s.io --no-headers -o name | grep nss-runtime-managed-role-from-ibm-common-services | while read a b; do oc delete "$a"; done
 
         oc delete service cert-manager-webhook -n ibm-common-services --ignore-not-found
         oc delete service ibm-common-service-webhook -n ibm-common-services --ignore-not-found
@@ -540,18 +540,6 @@ check_additional_installation_exists(){
   else
      log $INFO "No additional installation resources found in the cluster."
   fi
-}
-
-check_additional_asm_exists(){
-    log $INFO "Checking if any additional ASM resources (ie from Event Manager installation) are on the cluster."
-    if [ `oc get asms.asm.ibm.com -A --no-headers | while read a b; do echo $a | grep -vw $CP4WAIOPS_PROJECT; done | wc -l`  -gt 0 ] ||
-     [ `oc get asmformations.asm.ibm.com -A --no-headers | while read a b; do echo $a | grep -vw $CP4WAIOPS_PROJECT; done | wc -l` -gt 0 ] ; then
-        log $INFO "ASM resource instances were found outside the $CP4WAIOPS_PROJECT namespace"
-        DELETE_ASM="false"
-    else
-        log $INFO "No ASM resource instances were found outside the $CP4WAIOPS_PROJECT namespace, so the ASM CRDs can be deleted."
-        DELETE_ASM="true"
-    fi
 }
 
 delete_connections() {
