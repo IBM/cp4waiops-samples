@@ -610,18 +610,34 @@ get_worker_node_list() {
     fi
     
     for node in ${all_node_list} ; do
-        # If node has label indicating it's amd64, then do the following
-        amd64Check=`${command} get node $node -o jsonpath='{.metadata.labels.kubernetes\.io/arch}'`
-        if [[ "${amd64Check}" == "amd64" ]]; then
-            ${command} get node $node -o jsonpath='{.metadata.labels}' | fgrep node-role.kubernetes.io/master > /dev/null 2>&1
-            if [[ "$?" == "0" ]]; then
-                master_node_count=$((${master_node_count}+1))
+        # Check for OCP version
+        OCP_VER=$(oc get clusterversion version -o=jsonpath='{.status.desired.version}')
+        if [[ "$OCP_VER" == *"4.14"* ]]; then
+            # IF the ocp version is 4.14, we need to check for the annotation that indicates if it can run amd64
+
+            amd64Check=`${command} get node $node -o jsonpath='{.metadata.labels.kubernetes\.io/arch}'`
+            if [[ "${amd64Check}" == "amd64" ]]; then
+                ${command} get node $node -o jsonpath='{.metadata.labels}' | fgrep node-role.kubernetes.io/master > /dev/null 2>&1
+                if [[ "$?" == "0" ]]; then
+                    master_node_count=$((${master_node_count}+1))
+                else
+                    worker_node_count=$((${worker_node_count}+1))
+                fi
+                total_nodes=$((${total_nodes}+1))
             else
+                log $INFO "Ignoring node ${node} because it is not amd64"
+            fi
+        else
+            # Otherwise, calculate how we tend to do it
+
+            describe=`${command} describe node ${node} 2> /dev/null`
+            NoSchedule=`echo ${describe} | grep NoSchedule`
+            if [ -z "${NoSchedule}" ] ; then
                 worker_node_count=$((${worker_node_count}+1))
+            else
+                master_node_count=$((${master_node_count}+1))
             fi
             total_nodes=$((${total_nodes}+1))
-        else
-            log $INFO "Ignoring node ${node} because it is not amd64"
         fi
     done
 }
