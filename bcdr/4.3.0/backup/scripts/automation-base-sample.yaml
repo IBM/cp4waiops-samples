@@ -1,0 +1,72 @@
+apiVersion: base.automation.ibm.com/v1beta1
+kind: AutomationBase
+metadata:
+  annotations:
+    aiops.ibm.com/installedBy: cp4waiops
+    - apiVersion: base.automation.ibm.com/v1beta1
+  name: automationbase-sample
+  namespace: aiops
+spec:
+  elasticsearch:
+    additionalAllowedAPIs: >-
+      GET:[cat_alias_action, cat_count_action, cat_health_action,
+      cat_indices_action, cat_shards_action, cat_tasks_action,
+      cluster_allocation_explain_action, cluster_get_settings_action,
+      cluster_health_action, cluster_state_action, count_action,
+      document_get_action, document_get_source_action, explain_action,
+      flush_action, get_aliases_action, get_field_mapping_action,
+      get_indices_action, get_mapping_action, get_settings_action,
+      get_task_action, indices_stats_action, list_tasks_action,
+      nodes_info_action, nodes_stats_action, refresh_action, search_action,
+      search_scroll_action, xpack_info_action, get_repositories_action,
+      get_snapshots_action, cat_snapshot_action],PUT:[create_snapshot_action,
+      bulk_action, cluster_update_settings_action, create_index_action,
+      document_create_action, document_index_action, index_put_alias_action,
+      put_index_template_action, put_mapping_action,
+      update_settings_action],POST:[open_index_action, close_index_action,
+      create_snapshot_action, bulk_action, cancel_tasks_action, count_action,
+      delete_by_query_action, document_create_action_auto_id,
+      document_create_action, document_index_action, document_update_action,
+      explain_action, flush_action, index_put_alias_action,
+      indices_aliases_action, put_mapping_action, refresh_action,
+      reindex_action, rollover_index_action, search_action,
+      search_scroll_action, update_by_query_action],HEAD:[document_get_action,
+      document_get_source_action, get_aliases_action, get_index_template_action,
+      get_indices_action, get_mapping_action,
+      main_action],DELETE:[clear_scroll_action, delete_index_action,
+      document_delete_action, index_delete_aliases_action,
+      delete_snapshot_action]
+    license:
+      accept: true
+    nodegroupspecs:
+      - config:
+          - key: node.master
+            value: 'true'
+          - key: node.data
+            value: 'true'
+          - key: path.repo
+            value: /usr/share/elasticsearch/snapshots/es-backup
+        name: aiops
+        replicas: 1
+        storage:
+          class: ocs-storagecluster-ceph-rbd
+          type: persistent-claim
+        template:
+          ...
+    snapshotStores:
+      - name: es-backup
+        storage:
+          type: persistent-claim
+          volumeClaimTemplate:
+            spec:
+              accessModes:
+                - ReadWriteMany
+              resources:
+                requests:
+                  storage: 50Gi
+              storageClassName: rook-cephfs
+              volumeMode: Filesystem
+    tls: {}
+    version: v2.0
+  kafka:
+    ...
