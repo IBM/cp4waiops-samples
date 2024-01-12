@@ -436,8 +436,16 @@ getODLMPodStatus() {
     if [[ "$CLUSTER_ADMIN" == "yes" ]];
     then
         INSTANCE=$(oc get pod -A | grep operand-deployment-lifecycle-manager)
-        POD_NAME=$(oc get pods -o name --no-headers=true -n ibm-common-services | grep operand-deployment | awk '{ print substr( $0, 5 ) }')         
-        STATUS=$(oc get pod $POD_NAME -n ibm-common-services -o jsonpath='{.status.phase}')
+        if [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.3" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.4" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.5" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.6" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.7" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "4.1" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "4.2" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "4.3" ]];
+        then
+            POD_NAME=$(oc get pods -o name --no-headers=true -n ibm-common-services | grep operand-deployment | awk '{ print substr( $0, 5 ) }')         
+            STATUS=$(oc get pod $POD_NAME -n ibm-common-services -o jsonpath='{.status.phase}')
+
+        else
+            POD_NAME=$(oc get pods -o name --no-headers=true -n $INSTALLATION_NAMESPACE | grep operand-deployment | awk '{ print substr( $0, 5 ) }')         
+            STATUS=$(oc get pod $POD_NAME -n $INSTALLATION_NAMESPACE -o jsonpath='{.status.phase}')
+
+        fi
         if [[ $STATUS == "Running" ]]; then
             printf '%s\n' "$green$INSTANCE$normal"
         else
@@ -954,57 +962,99 @@ then
 
     getCSVStatus "$INSTALLATION_NAMESPACE" "ibm-watson-aiops-ui-operator"
 
-    echo "______________________________________________________________"
-    echo "CSVs from ibm-common-services namespace:" && echo ""
-
-    if [[ "$CLUSTER_ADMIN" == "yes" ]];
+    if [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.3" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.4" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.5" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.6" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.7" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "4.1" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "4.2" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "4.3" ]];
     then
-        if [ "${VERSION_AIOPSORCHESTRATOR}" != "3.3" ];
-        then 
-            getCSVStatus "ibm-common-services" "cloud-native-postgresql"
+        echo "______________________________________________________________"
+        echo "CSVs from ibm-common-services namespace:" && echo ""
+
+        if [[ "$CLUSTER_ADMIN" == "yes" ]];
+        then
+            if [ "${VERSION_AIOPSORCHESTRATOR}" != "3.3" ];
+            then 
+                getCSVStatus "ibm-common-services" "cloud-native-postgresql"
+            fi
+            getCSVStatus "ibm-common-services" "ibm-cert-manager-operator"
+            getCSVStatus "ibm-common-services" "ibm-common-service-operator"
+            getCSVStatus "ibm-common-services" "ibm-commonui-operator"
+            if [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.3" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.4" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.5" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.6" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.7" ]];
+            then 
+                getCSVStatus "ibm-common-services" "ibm-crossplane-operator"
+                getCSVStatus "ibm-common-services" "ibm-crossplane-provider-kubernetes-operator"
+            fi
+            getCSVStatus "ibm-common-services" "ibm-events-operator"
+            getCSVStatus "ibm-common-services" "ibm-iam-operator"
+            getCSVStatus "ibm-common-services" "ibm-ingress-nginx-operator"
+            getCSVStatus "ibm-common-services" "ibm-licensing-operator"
+            getCSVStatus "ibm-common-services" "ibm-management-ingress-operator"
+            getCSVStatus "ibm-common-services" "ibm-mongodb-operator"
+            getCSVStatus "ibm-common-services" "ibm-namespace-scope-operator"
+            getCSVStatus "ibm-common-services" "ibm-platform-api-operator"
+            getCSVStatus "ibm-common-services" "ibm-zen-operator"
+            getCSVStatus "ibm-common-services" "operand-deployment-lifecycle-manager"
+        else
+            printf "${gray}[INFO] Skipping the following components (Hint: log in with CLUSTER_ADMIN credentials to view):${normal}${newline}"
+            if [ "${VERSION_AIOPSORCHESTRATOR}" != "3.3" ];
+            then 
+                clusterAdminSkipMessage "cloud-native-postgresql"
+            fi
+            clusterAdminSkipMessage "ibm-cert-manager-operator"
+            clusterAdminSkipMessage "ibm-common-service-operator"
+            clusterAdminSkipMessage "ibm-commonui-operator"
+            if [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.3" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.4" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.5" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.6" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.7" ]];
+            then 
+                clusterAdminSkipMessage "ibm-crossplane-operator"
+                clusterAdminSkipMessage "ibm-crossplane-provider-kubernetes-operator"
+            fi
+            clusterAdminSkipMessage "ibm-events-operator"
+            clusterAdminSkipMessage "ibm-iam-operator"
+            clusterAdminSkipMessage "ibm-ingress-nginx-operator"
+            clusterAdminSkipMessage "ibm-licensing-operator"
+            clusterAdminSkipMessage "ibm-management-ingress-operator"
+            clusterAdminSkipMessage "ibm-mongodb-operator"
+            clusterAdminSkipMessage "ibm-namespace-scope-operator"
+            clusterAdminSkipMessage "ibm-platform-api-operator"
+            clusterAdminSkipMessage "ibm-zen-operator"
+            clusterAdminSkipMessage "operand-deployment-lifecycle-manager"
         fi
-        getCSVStatus "ibm-common-services" "ibm-cert-manager-operator"
-        getCSVStatus "ibm-common-services" "ibm-common-service-operator"
-        getCSVStatus "ibm-common-services" "ibm-commonui-operator"
-        if [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.3" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.4" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.5" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.6" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.7" ]];
-        then 
-            getCSVStatus "ibm-common-services" "ibm-crossplane-operator"
-            getCSVStatus "ibm-common-services" "ibm-crossplane-provider-kubernetes-operator"
-        fi
-        getCSVStatus "ibm-common-services" "ibm-events-operator"
-        getCSVStatus "ibm-common-services" "ibm-iam-operator"
-        getCSVStatus "ibm-common-services" "ibm-ingress-nginx-operator"
-        getCSVStatus "ibm-common-services" "ibm-licensing-operator"
-        getCSVStatus "ibm-common-services" "ibm-management-ingress-operator"
-        getCSVStatus "ibm-common-services" "ibm-mongodb-operator"
-        getCSVStatus "ibm-common-services" "ibm-namespace-scope-operator"
-        getCSVStatus "ibm-common-services" "ibm-platform-api-operator"
-        getCSVStatus "ibm-common-services" "ibm-zen-operator"
-        getCSVStatus "ibm-common-services" "operand-deployment-lifecycle-manager"
     else
-        printf "${gray}[INFO] Skipping the following components (Hint: log in with CLUSTER_ADMIN credentials to view):${normal}${newline}"
-        if [ "${VERSION_AIOPSORCHESTRATOR}" != "3.3" ];
-        then 
-            clusterAdminSkipMessage "cloud-native-postgresql"
+        if [[ "$CLUSTER_ADMIN" == "yes" ]];
+        then
+            if [ "${VERSION_AIOPSORCHESTRATOR}" != "3.3" ];
+            then 
+                getCSVStatus "$INSTALLATION_NAMESPACE" "cloud-native-postgresql"
+            fi
+            getCSVStatus "$INSTALLATION_NAMESPACE" "ibm-cert-manager-operator"
+            getCSVStatus "$INSTALLATION_NAMESPACE" "ibm-commonui-operator"
+            if [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.3" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.4" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.5" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.6" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.7" ]];
+            then 
+                getCSVStatus "$INSTALLATION_NAMESPACE" "ibm-crossplane-operator"
+                getCSVStatus "$INSTALLATION_NAMESPACE" "ibm-crossplane-provider-kubernetes-operator"
+            fi
+            getCSVStatus "$INSTALLATION_NAMESPACE" "ibm-events-operator"
+            getCSVStatus "$INSTALLATION_NAMESPACE" "ibm-iam-operator"
+            getCSVStatus "$INSTALLATION_NAMESPACE" "ibm-mongodb-operator"
+            getCSVStatus "$INSTALLATION_NAMESPACE" "ibm-zen-operator"
+            getCSVStatus "$INSTALLATION_NAMESPACE" "operand-deployment-lifecycle-manager"
+        else
+            printf "${gray}[INFO] Skipping the following components (Hint: log in with CLUSTER_ADMIN credentials to view):${normal}${newline}"
+            if [ "${VERSION_AIOPSORCHESTRATOR}" != "3.3" ];
+            then 
+                clusterAdminSkipMessage "cloud-native-postgresql"
+            fi
+            clusterAdminSkipMessage "ibm-cert-manager-operator"
+            clusterAdminSkipMessage "ibm-common-service-operator"
+            clusterAdminSkipMessage "ibm-commonui-operator"
+            if [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.3" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.4" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.5" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.6" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.7" ]];
+            then 
+                clusterAdminSkipMessage "ibm-crossplane-operator"
+                clusterAdminSkipMessage "ibm-crossplane-provider-kubernetes-operator"
+            fi
+            clusterAdminSkipMessage "ibm-events-operator"
+            clusterAdminSkipMessage "ibm-iam-operator"
+            clusterAdminSkipMessage "ibm-mongodb-operator"
+            clusterAdminSkipMessage "ibm-zen-operator"
+            clusterAdminSkipMessage "operand-deployment-lifecycle-manager"
         fi
-        clusterAdminSkipMessage "ibm-cert-manager-operator"
-        clusterAdminSkipMessage "ibm-common-service-operator"
-        clusterAdminSkipMessage "ibm-commonui-operator"
-        if [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.3" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.4" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.5" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.6" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.7" ]];
-        then 
-            clusterAdminSkipMessage "ibm-crossplane-operator"
-            clusterAdminSkipMessage "ibm-crossplane-provider-kubernetes-operator"
-        fi
-        clusterAdminSkipMessage "ibm-events-operator"
-        clusterAdminSkipMessage "ibm-iam-operator"
-        clusterAdminSkipMessage "ibm-ingress-nginx-operator"
-        clusterAdminSkipMessage "ibm-licensing-operator"
-        clusterAdminSkipMessage "ibm-management-ingress-operator"
-        clusterAdminSkipMessage "ibm-mongodb-operator"
-        clusterAdminSkipMessage "ibm-namespace-scope-operator"
-        clusterAdminSkipMessage "ibm-platform-api-operator"
-        clusterAdminSkipMessage "ibm-zen-operator"
-        clusterAdminSkipMessage "operand-deployment-lifecycle-manager"
     fi
 
     echo "______________________________________________________________"
@@ -1061,99 +1111,158 @@ then
         fi
     fi
 
-    echo "______________________________________________________________"
-    echo "Subscriptions from ibm-common-services namespace:" && echo ""
-    
-    if [[ "$CLUSTER_ADMIN" == "yes" ]];
+    if [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.3" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.4" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.5" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.6" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.7" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "4.1" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "4.2" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "4.3" ]];
     then
-        if [ "${VERSION_AIOPSORCHESTRATOR}" != "3.3" ];
-        then 
-            getSubscriptionStatus "cloud-native-postgresql" "ibm-common-services" 
-        fi
-        getSubscriptionStatus "ibm-cert-manager-operator" "ibm-common-services" 
-        if [ "${CLUSTER_SCOPE_INSTALL}" == "false" ];
-        then  
-            getSubscriptionStatusGrep "ibm-common-service-operator" "ibm-common-services" 
-        fi
-        getSubscriptionStatus "ibm-commonui-operator" "ibm-common-services" 
-        if [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.3" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.4" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.5" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.6" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.7" ]];
+        # Version 4.3 checks and below to account for Bedrock changes
+        echo "______________________________________________________________"
+        echo "Subscriptions from ibm-common-services namespace:" && echo ""
+        
+        if [[ "$CLUSTER_ADMIN" == "yes" ]];
         then
-            getSubscriptionStatus "ibm-crossplane-operator-app" "ibm-common-services" 
-            getSubscriptionStatus "ibm-crossplane-provider-kubernetes-operator-app" "ibm-common-services" 
-        fi
-        getSubscriptionStatus "ibm-events-operator" "ibm-common-services" 
-        getSubscriptionStatus "ibm-iam-operator" "ibm-common-services" 
-        getSubscriptionStatus "ibm-ingress-nginx-operator" "ibm-common-services" 
-        getSubscriptionStatus "ibm-licensing-operator" "ibm-common-services" 
-        getSubscriptionStatus "ibm-management-ingress-operator" "ibm-common-services" 
-        getSubscriptionStatus "ibm-mongodb-operator" "ibm-common-services" 
-        getSubscriptionStatus "ibm-namespace-scope-operator" "ibm-common-services" 
-        getSubscriptionStatus "ibm-platform-api-operator" "ibm-common-services" 
-        getSubscriptionStatus "ibm-zen-operator" "ibm-common-services" 
-        getSubscriptionStatus "operand-deployment-lifecycle-manager-app" "ibm-common-services" 
-
-        if [ "${CLUSTER_SCOPE_INSTALL}" == "true" ];
-        then 
-            echo "______________________________________________________________"
-            echo "Subscriptions from openshift-operators namespace:" && echo ""
-            getSubscriptionStatus "ibm-aiops-orchestrator" "openshift-operators" 
+            if [ "${VERSION_AIOPSORCHESTRATOR}" != "3.3" ];
+            then 
+                getSubscriptionStatus "cloud-native-postgresql" "ibm-common-services" 
+            fi
+            getSubscriptionStatus "ibm-cert-manager-operator" "ibm-common-services" 
+            if [ "${CLUSTER_SCOPE_INSTALL}" == "false" ];
+            then  
+                getSubscriptionStatusGrep "ibm-common-service-operator" "ibm-common-services" 
+            fi
+            getSubscriptionStatus "ibm-commonui-operator" "ibm-common-services" 
             if [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.3" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.4" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.5" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.6" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.7" ]];
             then
-                getSubscriptionStatusSelector "operators.coreos.com/ibm-automation.openshift-operators" "openshift-operators" 
-                getSubscriptionStatusGrep "ibm-automation-core" "openshift-operators" 
-                getSubscriptionStatusGrep "ibm-automation-eventprocessing" "openshift-operators" 
+                getSubscriptionStatus "ibm-crossplane-operator-app" "ibm-common-services" 
+                getSubscriptionStatus "ibm-crossplane-provider-kubernetes-operator-app" "ibm-common-services" 
             fi
+            getSubscriptionStatus "ibm-events-operator" "ibm-common-services" 
+            getSubscriptionStatus "ibm-iam-operator" "ibm-common-services" 
+            getSubscriptionStatus "ibm-ingress-nginx-operator" "ibm-common-services" 
+            getSubscriptionStatus "ibm-licensing-operator" "ibm-common-services" 
+            getSubscriptionStatus "ibm-management-ingress-operator" "ibm-common-services" 
+            getSubscriptionStatus "ibm-mongodb-operator" "ibm-common-services" 
+            getSubscriptionStatus "ibm-namespace-scope-operator" "ibm-common-services" 
+            getSubscriptionStatus "ibm-platform-api-operator" "ibm-common-services" 
+            getSubscriptionStatus "ibm-zen-operator" "ibm-common-services" 
+            getSubscriptionStatus "operand-deployment-lifecycle-manager-app" "ibm-common-services" 
 
-            # if statement block to account for versions over 4.2 (clusterwide changes)
-            if [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.3" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.4" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.5" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.6" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.7" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "4.0" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "4.1" ]];
-            then
-                getSubscriptionStatusGrep "ibm-automation-elastic" "openshift-operators" 
-                getSubscriptionStatusGrep "ibm-automation-flink" "openshift-operators" 
+            if [ "${CLUSTER_SCOPE_INSTALL}" == "true" ];
+            then 
+                echo "______________________________________________________________"
+                echo "Subscriptions from openshift-operators namespace:" && echo ""
+                getSubscriptionStatus "ibm-aiops-orchestrator" "openshift-operators" 
+                if [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.3" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.4" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.5" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.6" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.7" ]];
+                then
+                    getSubscriptionStatusSelector "operators.coreos.com/ibm-automation.openshift-operators" "openshift-operators" 
+                    getSubscriptionStatusGrep "ibm-automation-core" "openshift-operators" 
+                    getSubscriptionStatusGrep "ibm-automation-eventprocessing" "openshift-operators" 
+                fi
+
+                # if statement block to account for versions over 4.2 (clusterwide changes)
+                if [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.3" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.4" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.5" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.6" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.7" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "4.0" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "4.1" ]];
+                then
+                    getSubscriptionStatusGrep "ibm-automation-elastic" "openshift-operators" 
+                    getSubscriptionStatusGrep "ibm-automation-flink" "openshift-operators" 
+                fi
+                getSubscriptionStatusGrep "ibm-common-service-operator" "openshift-operators"
             fi
-            getSubscriptionStatusGrep "ibm-common-service-operator" "openshift-operators"
+        else
+            printf "${gray}[INFO] Skipping the following components (Hint: log in with CLUSTER_ADMIN credentials to view):${normal}${newline}"
+            if [ "${VERSION_AIOPSORCHESTRATOR}" != "3.3" ];
+            then 
+                clusterAdminSkipMessage "cloud-native-postgresql"
+            fi
+            clusterAdminSkipMessage "ibm-cert-manager-operator"
+            if [ "${CLUSTER_SCOPE_INSTALL}" == "false" ];
+            then  
+                clusterAdminSkipMessage "ibm-common-service-operator"
+            fi
+            clusterAdminSkipMessage "ibm-commonui-operator" 
+            if [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.3" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.4" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.5" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.6" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.7" ]];
+            then
+                clusterAdminSkipMessage "ibm-crossplane-operator-app"
+                clusterAdminSkipMessage "ibm-crossplane-provider-kubernetes-operator-app"
+            fi
+            clusterAdminSkipMessage "ibm-events-operator"
+            clusterAdminSkipMessage "ibm-iam-operator"
+            clusterAdminSkipMessage "ibm-ingress-nginx-operator"
+            clusterAdminSkipMessage "ibm-licensing-operator"
+            clusterAdminSkipMessage "ibm-management-ingress-operator" 
+            clusterAdminSkipMessage "ibm-mongodb-operator"
+            clusterAdminSkipMessage "ibm-namespace-scope-operator" 
+            clusterAdminSkipMessage "ibm-platform-api-operator" 
+            clusterAdminSkipMessage "ibm-zen-operator"
+            clusterAdminSkipMessage "operand-deployment-lifecycle-manager-app" 
         fi
     else
-        printf "${gray}[INFO] Skipping the following components (Hint: log in with CLUSTER_ADMIN credentials to view):${normal}${newline}"
-        if [ "${VERSION_AIOPSORCHESTRATOR}" != "3.3" ];
-        then 
-            clusterAdminSkipMessage "cloud-native-postgresql"
-        fi
-        clusterAdminSkipMessage "ibm-cert-manager-operator"
-        if [ "${CLUSTER_SCOPE_INSTALL}" == "false" ];
-        then  
-            clusterAdminSkipMessage "ibm-common-service-operator"
-        fi
-        clusterAdminSkipMessage "ibm-commonui-operator" 
-        if [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.3" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.4" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.5" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.6" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.7" ]];
+        # Version 4.4 checks and above to account for Bedrock changes
+        if [[ "$CLUSTER_ADMIN" == "yes" ]];
         then
-            clusterAdminSkipMessage "ibm-crossplane-operator-app"
-            clusterAdminSkipMessage "ibm-crossplane-provider-kubernetes-operator-app"
-        fi
-        clusterAdminSkipMessage "ibm-events-operator"
-        clusterAdminSkipMessage "ibm-iam-operator"
-        clusterAdminSkipMessage "ibm-ingress-nginx-operator"
-        clusterAdminSkipMessage "ibm-licensing-operator"
-        clusterAdminSkipMessage "ibm-management-ingress-operator" 
-        clusterAdminSkipMessage "ibm-mongodb-operator"
-        clusterAdminSkipMessage "ibm-namespace-scope-operator" 
-        clusterAdminSkipMessage "ibm-platform-api-operator" 
-        clusterAdminSkipMessage "ibm-zen-operator"
-        clusterAdminSkipMessage "operand-deployment-lifecycle-manager-app" 
-
-        if [ "${CLUSTER_SCOPE_INSTALL}" == "true" ];
-        then 
-            echo "______________________________________________________________"
-            echo "Subscriptions from openshift-operators namespace:" && echo ""
+            if [ "${VERSION_AIOPSORCHESTRATOR}" != "3.3" ];
+            then 
+                getSubscriptionStatus "cloud-native-postgresql" "$INSTALLATION_NAMESPACE" 
+            fi
+            if [ "${CLUSTER_SCOPE_INSTALL}" == "false" ];
+            then  
+                getSubscriptionStatusGrep "aiops-ibm-common-services" "$INSTALLATION_NAMESPACE" 
+            fi
+            getSubscriptionStatus "ibm-idp-config-ui-operator" "$INSTALLATION_NAMESPACE"
             if [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.3" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.4" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.5" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.6" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.7" ]];
             then
-                clusterAdminSkipMessage "ibm-automation-core"
-                clusterAdminSkipMessage "ibm-automation-eventprocessing"
-                clusterAdminSkipMessage "operators.coreos.com/ibm-automation.openshift-operators" 
+                getSubscriptionStatus "ibm-crossplane-operator-app" "$INSTALLATION_NAMESPACE"
+                getSubscriptionStatus "ibm-crossplane-provider-kubernetes-operator-app" "$INSTALLATION_NAMESPACE"
             fi
-            clusterAdminSkipMessage "ibm-aiops-orchestrator"
-            clusterAdminSkipMessage "ibm-automation-elastic" 
-            clusterAdminSkipMessage "ibm-automation-flink"
-            clusterAdminSkipMessage "ibm-common-service-operator"
+            getSubscriptionStatus "ibm-events-operator" "$INSTALLATION_NAMESPACE"
+            getSubscriptionStatus "ibm-im-operator" "$INSTALLATION_NAMESPACE"
+            getSubscriptionStatus "ibm-im-mongodb-operator" "$INSTALLATION_NAMESPACE"
+            getSubscriptionStatus "ibm-platformui-operator" "$INSTALLATION_NAMESPACE"
+            getSubscriptionStatus "operand-deployment-lifecycle-manager-app" "$INSTALLATION_NAMESPACE"
+
+            if [ "${CLUSTER_SCOPE_INSTALL}" == "true" ];
+            then 
+                echo "______________________________________________________________"
+                echo "Subscriptions from openshift-operators namespace:" && echo ""
+                getSubscriptionStatus "ibm-aiops-orchestrator" "openshift-operators" 
+                if [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.3" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.4" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.5" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.6" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.7" ]];
+                then
+                    getSubscriptionStatusSelector "operators.coreos.com/ibm-automation.openshift-operators" "openshift-operators" 
+                    getSubscriptionStatusGrep "ibm-automation-core" "openshift-operators" 
+                    getSubscriptionStatusGrep "ibm-automation-eventprocessing" "openshift-operators" 
+                fi
+
+                # if statement block to account for versions over 4.2 (clusterwide changes)
+                if [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.3" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.4" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.5" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.6" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.7" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "4.0" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "4.1" ]];
+                then
+                    getSubscriptionStatusGrep "ibm-automation-elastic" "openshift-operators" 
+                    getSubscriptionStatusGrep "ibm-automation-flink" "openshift-operators" 
+                fi
+                getSubscriptionStatusGrep "aiops-ibm-common-services" "openshift-operators"
+            else
+                echo "______________________________________________________________"
+                echo "Subscriptions from openshift-operators namespace:" && echo ""
+                getSubscriptionStatus "ibm-cert-mgr" "openshift-operators"
+            fi
+        else
+            printf "${gray}[INFO] Skipping the following components (Hint: log in with CLUSTER_ADMIN credentials to view):${normal}${newline}"
+            if [ "${VERSION_AIOPSORCHESTRATOR}" != "3.3" ];
+            then 
+                clusterAdminSkipMessage "cloud-native-postgresql"
+            fi
+            clusterAdminSkipMessage "ibm-cert-manager-operator"
+            if [ "${CLUSTER_SCOPE_INSTALL}" == "false" ];
+            then  
+                clusterAdminSkipMessage "aiops-ibm-common-services"
+            fi
+            clusterAdminSkipMessage "ibm-idp-config-ui-operator" 
+            if [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.3" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.4" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.5" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.6" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.7" ]];
+            then
+                clusterAdminSkipMessage "ibm-crossplane-operator-app"
+                clusterAdminSkipMessage "ibm-crossplane-provider-kubernetes-operator-app"
+            fi
+            clusterAdminSkipMessage "ibm-events-operator"
+            clusterAdminSkipMessage "ibm-im-operator"
+            clusterAdminSkipMessage "ibm-im-mongodb-operator"
+            clusterAdminSkipMessage "ibm-platformui-operator"
+            clusterAdminSkipMessage "operand-deployment-lifecycle-manager-app" 
         fi
     fi
 
@@ -1201,11 +1310,18 @@ then
 
     if [[ "$CLUSTER_ADMIN" == "yes" ]];
     then
-        getOperandRequestStatus "ibm-commonui-request" "ibm-common-services" 
-        getOperandRequestStatus "ibm-iam-request" "ibm-common-services" 
-        getOperandRequestStatus "ibm-mongodb-request" "ibm-common-services" 
-        getOperandRequestStatus "management-ingress" "ibm-common-services" 
-        getOperandRequestStatus "platform-api-request" "ibm-common-services" 
+        if [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.3" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.4" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.5" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.6" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.7" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "4.1" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "4.2" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "4.3" ]];
+        then
+            # Version 4.3 checks and above to account for Bedrock changes
+            getOperandRequestStatus "ibm-commonui-request" "ibm-common-services" 
+            getOperandRequestStatus "ibm-iam-request" "ibm-common-services" 
+            getOperandRequestStatus "ibm-mongodb-request" "ibm-common-services" 
+            getOperandRequestStatus "management-ingress" "ibm-common-services" 
+            getOperandRequestStatus "platform-api-request" "ibm-common-services" 
+        else
+            # Version 4.4 checks and above to account for Bedrock changes
+            getOperandRequestStatus "ibm-iam-request" "$INSTALLATION_NAMESPACE" 
+        fi
     else
         printf "${gray}[INFO] Skipping the following components (Hint: log in with CLUSTER_ADMIN credentials to view):${normal}${newline}"
         if [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.3" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.4" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.5" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.6" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.7" ]];
@@ -1214,11 +1330,18 @@ then
             clusterAdminSkipMessage "iaf-eventprocessing-operator"
             clusterAdminSkipMessage "iaf-operator"
         fi
-        clusterAdminSkipMessage "ibm-commonui-request"
-        clusterAdminSkipMessage "ibm-iam-request"
-        clusterAdminSkipMessage "ibm-mongodb-request"
-        clusterAdminSkipMessage "management-ingress"
-        clusterAdminSkipMessage "platform-api-request"
+        if [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.3" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.4" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.5" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.6" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.7" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "4.1" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "4.2" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "4.3" ]];
+        then
+            # Version 4.3 checks and above to account for Bedrock changes
+            clusterAdminSkipMessage "ibm-commonui-request"
+            clusterAdminSkipMessage "ibm-iam-request"
+            clusterAdminSkipMessage "ibm-mongodb-request"
+            clusterAdminSkipMessage "management-ingress"
+            clusterAdminSkipMessage "platform-api-request"
+        else
+            # Version 4.4 checks and above to account for Bedrock changes
+            clusterAdminSkipMessage "ibm-iam-request"
+        fi
     fi
 
     echo "______________________________________________________________"
