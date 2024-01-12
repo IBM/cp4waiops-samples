@@ -22,7 +22,7 @@ Below are example outputs of these commands.
 ### Installation status checker output (`oc waiops status`)
 ```
 $ oc waiops status
-Cloud Pak for AIOps v4.3 installation status:
+Cloud Pak for AIOps v4.4 installation status:
   Componentstatus:
     Aimanager:                       Ready
     Aiopsanalyticsorchestrator:      Ready
@@ -31,13 +31,13 @@ Cloud Pak for AIOps v4.3 installation status:
     Asm:                             Ready
     Baseui:                          Ready
     Cluster:                         Ready
+    Commonservice:                   Ready
     Elasticsearch:                   Ready
     Flinkcluster:                    Ready
     Issueresolutioncore:             Ready
     Kafka:                           Ready
     Kong:                            Ready
     Lifecycleservice:                Ready
-    Redissentinel:                   Ready
     Tunnel:                          Ready
     Zenservice:                      Ready
   Custom Profile Configmap:          aiops-custom-size-profile
@@ -390,7 +390,7 @@ ______________________________________________________________
 ## How to use
 
 ### Requirements
-- You must have an installation of Cloud Pak for AIOps v3.3, v3.4, v3.5, v3.6, v3.7, v4.1, v4.2, or v4.3 on your cluster. 
+- You must have an installation of Cloud Pak for AIOps v3.3, v3.4, v3.5, v3.6, v3.7, v4.1, v4.2, v4.3, or v4.4 on your cluster. 
 
 **Note**: while this tool does not require you to be logged in as a cluster admin, however
  * `oc waiops multizone status` output may be limited and inaccurate without the required permissions
