@@ -695,7 +695,7 @@ fi
 
 if [[ "$1" == "version" ]]
 then
-    echo "0.0.26"
+    echo "0.0.27"
     exit 0
 fi
 
@@ -765,7 +765,7 @@ then
     if [[ "$v" != "4.2" ]]; then
        #keep trivial convenience command/function for versions > v4.2, but use
        #  built-in status
-       oc describe installation ${INSTALLATION_NAME} | awk 'BEGIN{p=0} /^Events:/{p=0} {if (p) print} /^Status:$/{p=1}'
+       oc describe installations.orchestrator.aiops.ibm.com ${INSTALLATION_NAME} | awk 'BEGIN{p=0} /^Events:/{p=0} {if (p) print} /^Status:$/{p=1}'
        exit 0
     fi
 
