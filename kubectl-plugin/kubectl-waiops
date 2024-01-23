@@ -1233,10 +1233,7 @@ then
                 fi
                 getSubscriptionStatusGrep "aiops-ibm-common-services" "openshift-operators"
             # else
-            # TODO: update this to check for cert manager certificate expiry
-            #     echo "______________________________________________________________"
-            #     echo "Subscriptions from openshift-operators namespace:" && echo ""
-            #     getSubscriptionStatus "ibm-cert-mgr" "openshift-operators"
+            #     TODO: update this to check for cert manager certificate expiry
             fi
         else
             printf "${gray}[INFO] Skipping the following components (Hint: log in with CLUSTER_ADMIN credentials to view):${normal}${newline}"
