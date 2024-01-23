@@ -695,7 +695,7 @@ fi
 
 if [[ "$1" == "version" ]]
 then
-    echo "0.0.26"
+    echo "0.0.27"
     exit 0
 fi
 
@@ -765,7 +765,7 @@ then
     if [[ "$v" != "4.2" ]]; then
        #keep trivial convenience command/function for versions > v4.2, but use
        #  built-in status
-       oc describe installation ${INSTALLATION_NAME} | awk 'BEGIN{p=0} /^Events:/{p=0} {if (p) print} /^Status:$/{p=1}'
+       oc describe installations.orchestrator.aiops.ibm.com ${INSTALLATION_NAME} | awk 'BEGIN{p=0} /^Events:/{p=0} {if (p) print} /^Status:$/{p=1}'
        exit 0
     fi
 
@@ -1201,10 +1201,6 @@ then
             then 
                 getSubscriptionStatus "cloud-native-postgresql" "$INSTALLATION_NAMESPACE" 
             fi
-            if [ "${CLUSTER_SCOPE_INSTALL}" == "false" ];
-            then  
-                getSubscriptionStatusGrep "aiops-ibm-common-services" "$INSTALLATION_NAMESPACE" 
-            fi
             getSubscriptionStatus "ibm-idp-config-ui-operator" "$INSTALLATION_NAMESPACE"
             if [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.3" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.4" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.5" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.6" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.7" ]];
             then
@@ -1236,10 +1232,8 @@ then
                     getSubscriptionStatusGrep "ibm-automation-flink" "openshift-operators" 
                 fi
                 getSubscriptionStatusGrep "aiops-ibm-common-services" "openshift-operators"
-            else
-                echo "______________________________________________________________"
-                echo "Subscriptions from openshift-operators namespace:" && echo ""
-                getSubscriptionStatus "ibm-cert-mgr" "openshift-operators"
+            # else
+            #     TODO: update this to check for cert manager certificate expiry
             fi
         else
             printf "${gray}[INFO] Skipping the following components (Hint: log in with CLUSTER_ADMIN credentials to view):${normal}${newline}"
