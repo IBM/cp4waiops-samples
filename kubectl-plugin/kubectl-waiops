@@ -454,6 +454,19 @@ getODLMPodStatus() {
     fi
 }
 
+getAllCertStatus() {
+    AIOPS_CERTS=()                                                                                                                                                                                                             
+    while IFS= read -r line; do
+        AIOPS_CERTS+=( "$line" )
+    done < <( oc get certificate -n $INSTALLATION_NAMESPACE -o=custom-columns='NAME:.metadata.name' --no-headers=true )
+    echo "Certificate Name               Renewal Time"
+    for c in "${AIOPS_CERTS[@]}"; do
+        certStatus=$(oc get cert $c --no-headers=true | awk '{print $2}')
+        renewalTime=$(oc get cert $c -o jsonpath='{.status.renewalTime}')
+        printStatus "$certStatus" "True" "$c    $renewalTime"
+    done
+}
+
 getOrchestratorPodStatus() {
     INSTANCE=$(oc get pod -A | grep ibm-aiops-orchestrator-controller-manager)
     if [[ "$CLUSTER_ADMIN" == "yes" ]];
@@ -1347,6 +1360,10 @@ then
         printf "${gray}[INFO] Skipping the following component (Hint: log in with CLUSTER_ADMIN credentials to view):${normal}${newline}"
         clusterAdminSkipMessage "operand-deployment-lifecycle-manager"
     fi
+
+    echo "______________________________________________________________"
+    echo "AIOps certificate status:" && echo ""
+    getAllCertStatus
 
     echo "______________________________________________________________"
     echo "Orchestrator pod current status:" && echo ""   
