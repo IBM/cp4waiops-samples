@@ -459,7 +459,6 @@ getAllCertStatus() {
     while IFS= read -r line; do
         AIOPS_CERTS+=( "$line" )
     done < <( oc get certificate -n $INSTALLATION_NAMESPACE -o=custom-columns='NAME:.metadata.name' --no-headers=true )
-    echo "Certificate Name               Renewal Time"
     for c in "${AIOPS_CERTS[@]}"; do
         CERT_STATUS=$(oc get cert $c --no-headers=true | awk '{print $2}')
         CERT_RENEWAL=$(oc get cert $c -o custom-columns="NAME:metadata.name,RENEWAL:status.renewalTime,READY:status.conditions[?(@.type==\"Ready\")].status,MESSAGE:status.conditions[?(@.type==\"Ready\")].message")
