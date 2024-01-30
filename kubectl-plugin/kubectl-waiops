@@ -1232,8 +1232,6 @@ then
                     getSubscriptionStatusGrep "ibm-automation-flink" "openshift-operators" 
                 fi
                 getSubscriptionStatusGrep "aiops-ibm-common-services" "openshift-operators"
-            # else
-            #     TODO: update this to check for cert manager certificate expiry
             fi
         else
             printf "${gray}[INFO] Skipping the following components (Hint: log in with CLUSTER_ADMIN credentials to view):${normal}${newline}"
