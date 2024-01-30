@@ -461,9 +461,9 @@ getAllCertStatus() {
     done < <( oc get certificate -n $INSTALLATION_NAMESPACE -o=custom-columns='NAME:.metadata.name' --no-headers=true )
     echo "Certificate Name               Renewal Time"
     for c in "${AIOPS_CERTS[@]}"; do
-        certStatus=$(oc get cert $c --no-headers=true | awk '{print $2}')
-        renewalTime=$(oc get cert $c -o jsonpath='{.status.renewalTime}')
-        printStatus "$certStatus" "True" "$c    $renewalTime"
+        CERT_STATUS=$(oc get cert $c --no-headers=true | awk '{print $2}')
+        CERT_RENEWAL=$(oc get cert $c -o custom-columns="NAME:metadata.name,RENEWAL:status.renewalTime,READY:status.conditions[?(@.type==\"Ready\")].status,MESSAGE:status.conditions[?(@.type==\"Ready\")].message")
+        printStatus "$CERT_STATUS" "True" "$CERT_RENEWAL"
     done
 }
 
@@ -1350,6 +1350,10 @@ then
     fi
 
     echo "______________________________________________________________"
+    echo "AIOps certificate status:" && echo ""
+    getAllCertStatus
+
+    echo "______________________________________________________________"
     echo "ODLM pod current status:" && echo ""
     if [[ "$CLUSTER_ADMIN" == "yes" ]];
     then
@@ -1358,10 +1362,6 @@ then
         printf "${gray}[INFO] Skipping the following component (Hint: log in with CLUSTER_ADMIN credentials to view):${normal}${newline}"
         clusterAdminSkipMessage "operand-deployment-lifecycle-manager"
     fi
-
-    echo "______________________________________________________________"
-    echo "AIOps certificate status:" && echo ""
-    getAllCertStatus
 
     echo "______________________________________________________________"
     echo "Orchestrator pod current status:" && echo ""   
