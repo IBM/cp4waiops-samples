@@ -454,6 +454,18 @@ getODLMPodStatus() {
     fi
 }
 
+getAllCertStatus() {
+    AIOPS_CERTS=()                                                                                                                                                                                                             
+    while IFS= read -r line; do
+        AIOPS_CERTS+=( "$line" )
+    done < <( oc get certificate -n $INSTALLATION_NAMESPACE -o=custom-columns='NAME:.metadata.name' --no-headers=true )
+    for c in "${AIOPS_CERTS[@]}"; do
+        CERT_STATUS=$(oc get cert $c --no-headers=true | awk '{print $2}')
+        CERT_RENEWAL=$(oc get cert $c -o custom-columns="NAME:metadata.name,RENEWAL:status.renewalTime,READY:status.conditions[?(@.type==\"Ready\")].status,MESSAGE:status.conditions[?(@.type==\"Ready\")].message")
+        printStatus "$CERT_STATUS" "True" "$CERT_RENEWAL"
+    done
+}
+
 getOrchestratorPodStatus() {
     INSTANCE=$(oc get pod -A | grep ibm-aiops-orchestrator-controller-manager)
     if [[ "$CLUSTER_ADMIN" == "yes" ]];
@@ -1232,8 +1244,6 @@ then
                     getSubscriptionStatusGrep "ibm-automation-flink" "openshift-operators" 
                 fi
                 getSubscriptionStatusGrep "aiops-ibm-common-services" "openshift-operators"
-            # else
-            #     TODO: update this to check for cert manager certificate expiry
             fi
         else
             printf "${gray}[INFO] Skipping the following components (Hint: log in with CLUSTER_ADMIN credentials to view):${normal}${newline}"
@@ -1337,6 +1347,10 @@ then
             clusterAdminSkipMessage "ibm-iam-request"
         fi
     fi
+
+    echo "______________________________________________________________"
+    echo "AIOps certificate status:" && echo ""
+    getAllCertStatus
 
     echo "______________________________________________________________"
     echo "ODLM pod current status:" && echo ""
