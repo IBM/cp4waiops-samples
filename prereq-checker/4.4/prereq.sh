@@ -601,6 +601,7 @@ function checkStorage {
 }
 
 get_worker_node_list() {
+    oc_version=$(oc get clusterversion version -o=jsonpath='{.status.desired.version}')
 
     if [ -z "${all_node_list}" ] ; then
         all_node_list=`${command} get nodes | grep -v NAME | awk '{ print $1 }' | sort -V | tr "\n" ' ' | tr -s ' '`
@@ -610,19 +611,31 @@ get_worker_node_list() {
         top=`${command} ${adm} top nodes`
     fi
     
+
     for node in ${all_node_list} ; do
         # If node has label indicating it's amd64, then do the following
-        amd64Check=`${command} get node $node -o jsonpath='{.metadata.labels.kubernetes\.io/arch}'`
-        if [[ "${amd64Check}" == "amd64" ]]; then
-            ${command} get node $node -o jsonpath='{.metadata.labels}' | fgrep node-role.kubernetes.io/master > /dev/null 2>&1
-            if [[ "$?" == "0" ]]; then
-                master_node_count=$((${master_node_count}+1))
+        if [[ "$oc_version" == *"4.14"* ]]; then
+            amd64Check=`${command} get node $node -o jsonpath='{.metadata.labels.kubernetes\.io/arch}'`
+            if [[ "${amd64Check}" == "amd64" ]]; then
+                ${command} get node $node -o jsonpath='{.metadata.labels}' | fgrep node-role.kubernetes.io/master > /dev/null 2>&1
+                if [[ "$?" == "0" ]]; then
+                    master_node_count=$((${master_node_count}+1))
+                else
+                    worker_node_count=$((${worker_node_count}+1))
+                fi
+                total_nodes=$((${total_nodes}+1))
             else
+                log $INFO "Ignoring node ${node} because it is not amd64"
+            fi
+        else
+            describe=`${command} describe node ${node} 2> /dev/null`
+            NoSchedule=`echo ${describe} | grep NoSchedule`
+            if [ -z "${NoSchedule}" ] ; then
                 worker_node_count=$((${worker_node_count}+1))
+            else
+                master_node_count=$((${master_node_count}+1))
             fi
             total_nodes=$((${total_nodes}+1))
-        else
-            log $INFO "Ignoring node ${node} because it is not amd64"
         fi
     done
 }
