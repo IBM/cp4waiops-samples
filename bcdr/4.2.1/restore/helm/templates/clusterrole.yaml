@@ -146,10 +146,19 @@ rules:
 - apiGroups:
   - "ai-manager.watson-aiops.ibm.com"
   resources:
+  - aimanagermainprods
+  verbs:
+  - list
+  - get
+  - patch
+- apiGroups:
+  - "ai-manager.watson-aiops.ibm.com"
+  resources:
   - aimanagers
   verbs:
   - list
   - get
+  - patch
 - apiGroups:
   - "connectors.aiops.ibm.com"
   resources:
