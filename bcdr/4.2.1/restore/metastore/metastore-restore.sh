@@ -154,9 +154,13 @@ echo "[INFO] $(date) Restoring SERVICE_INSTANCE_ID"
 oc get deploy -n $namespace aimanager-aio-controller -o yaml > $WORKDIR/restore/metastore/aimanager-aio-controller-deploy-before-change.yaml
 service_instance_id=$(oc get cm metastore-bcdr-config -n $namespace -o jsonpath='{.data.serviceInstanceId}')
 echo "[INFO] $(date) SERVICE_INSTANCE_ID value is $service_instance_id"
+echo "[INFO] $(date) Updating SERVICE_INSTANCE_ID value in CR aimanagermainprod and deployment aimanager-aio-controller"
+oc -n $namespace patch aimanagermainprod aimanager --type='json' -p="[{"op": "replace", "path": "/spec/instance_id", "value": \"$service_instance_id\"}]"
+oc -n $namespace patch aimanagermainprod aimanager --type='json' -p="[{"op": "replace", "path": "/spec/helmValues/global/zenServiceInstanceId", "value": \"$service_instance_id\"}]"
 oc set env deployment aimanager-aio-controller SERVICE_INSTANCE_ID=$service_instance_id -n $namespace 
+ 
 
-echo "[INFO] $(date) Waiting for some time after updating SERVICE_INSTANCE_ID in deployment aimanager-aio-controller"
+echo "[INFO] $(date) Waiting for some time after updating SERVICE_INSTANCE_ID in CR aimanagermainprod"
 wait "30"
 oc delete po -n $namespace -l app.kubernetes.io/component=controller
 checkPodReadyness $namespace "app.kubernetes.io/component=controller" "60"
