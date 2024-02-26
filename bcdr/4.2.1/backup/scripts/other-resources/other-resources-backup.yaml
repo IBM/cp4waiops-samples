@@ -8,7 +8,7 @@ metadata:
 spec:
   containers:
   - name: backup
-    image: redhat/ubi8:8.6-754
+    image: redhat/ubi9:latest
     command: ["sleep"]
     args: ["infinity"]
     volumeMounts:

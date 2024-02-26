@@ -6,7 +6,7 @@ metadata:
     app: cleanup-pod
 spec:
   containers:
-    - image: registry.access.redhat.com/ubi8/ubi-micro 
+    - image: redhat/ubi9:latest
       command: ["sleep"]
       args: ["infinity"]
       name: ubuntu
