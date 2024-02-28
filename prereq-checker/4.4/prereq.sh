@@ -5,7 +5,7 @@ set -eo pipefail
 
 ## Resource size for 4.4
 # These defaults are given in section 'IBM Cloud Pak for AIOps only Hardware requirement totals' under
-# 'Hardware requirements - IBM Cloud Pak for AIOps only' https://ibm.biz/aiops_hardware_440
+# 'Hardware requirements - IBM Cloud Pak for AIOps only' https://ibm.biz/aiops_hardware_441
 # Minimum resource values for small profile 4.4.x
 NODE_COUNT_SMALL_4_4=3
 VCPU_SMALL_4_4=62
@@ -111,7 +111,7 @@ log $INFO "Starting IBM Cloud Pak for AIOps prerequisite checker v4.4..."
 echo
 
 # This function checks to see if user's OCP version meets our requirements by checking if 
-# substring "4.11", "4.12", "4.13", or "4.14" is in variable OCP_VER.
+# substring "4.12", "4.13", or "4.14" is in variable OCP_VER.
 function checkOCPVersion {
     
     OCP_VER=$(oc get clusterversion version -o=jsonpath='{.status.desired.version}')
@@ -122,21 +122,11 @@ function checkOCPVersion {
     
     echo
     startEndSection "Openshift Container Platform Version Check"
-    log $INFO "Checking OCP Version. Compatible Versions of OCP is v4.11 (non-FIPS enabled cluster), v4.12, v4.13, and v4.14 (homogenous clusters only)."
+    log $INFO "Checking OCP Version. Compatible Versions of OCP is v4.12, v4.13, and v4.14 (homogenous clusters only)."
     
     if [[ $OCP_VER == *"4.12"* ||  $OCP_VER == *"4.13"* ]]; then
         printf "$pass_color$INFO OCP version $OCP_VER is compatible.$color_end\n"
 
-        OCP_VER_RES=$pass_msg
-        startEndSection "Openshift Container Platform Version Check"
-        return 0
-    elif [[ $OCP_VER == *"4.11"* &&  ! -z "$(oc get mc -o jsonpath='{.items[?(.spec.fips==true)].metadata.name}')" ]]; then
-        printf "$fail_color$ERROR OCP version $OCP_VER is compatible for only non-FIPS enabled clusters.$color_end\n"
-        OCP_VER_RES=$fail_msg
-        startEndSection "Openshift Container Platform Version Check"
-        return 1
-    elif [[ $OCP_VER == *"4.11"* &&  -z "$(oc get mc -o jsonpath='{.items[?(.spec.fips==true)].metadata.name}')" ]]; then
-        printf "$fail_color$ERROR OCP version $OCP_VER is compatible for only non-FIPS enabled clusters.$color_end\n"
         OCP_VER_RES=$pass_msg
         startEndSection "Openshift Container Platform Version Check"
         return 0
@@ -146,7 +136,7 @@ function checkOCPVersion {
         startEndSection "Openshift Container Platform Version Check"
         return 0
     else
-        printf "$fail_color$ERROR OCP Version is incompatible. Required Versions: v4.11 (non-FIPS enabled cluster), v4.12, v4.13, and v4.14 (homogenous clusters only). $color_end\n"
+        printf "$fail_color$ERROR OCP Version is incompatible. Required Versions: v4.12, v4.13, and v4.14 (homogenous clusters only). $color_end\n"
         log $ERROR "Your Version: v$OCP_VER"
         echo
         OCP_VER_RES=$fail_msg
@@ -342,7 +332,7 @@ function checkIBMSpectrum {
         # If it meets the ocp version requirement... check if ibm-spectrum-scale-sc storageclass has volume expansion enabled
         IBM_SPEC_VE=$(checkAllowVolumeExpansion ibm-spectrum-scale-sc)
         if [[ "$?" == "1" ]]; then
-            printf "${fail_color}${ERROR} StorageClass ibm-spectrum-scale-sc does not have allowedVolumeExpansion enabled. This is required for all large profile installs and strongly recommended for small profile installs. See \"Storage Class Requirements\" section in https://ibm.biz/storage_consideration_440 for details.$color_end\n"
+            printf "${fail_color}${ERROR} StorageClass ibm-spectrum-scale-sc does not have allowedVolumeExpansion enabled. This is required for all large profile installs and strongly recommended for small profile installs. See \"Storage Class Requirements\" section in https://ibm.biz/storage_consideration_441 for details.$color_end\n"
             storageCheckRes+=("fail")
             return 1
         fi
@@ -394,7 +384,7 @@ function checkODF {
     for s in "${ODF_STORAGECLASSES[@]}"; do
         VE_CHECK=$(checkAllowVolumeExpansion $s)
         if [[ "$?" == "1" ]]; then
-            printf " $fail_color $ERROR StorageClass $s does not have allowedVolumeExpansion enabled. This is required for all large profile installs and strongly recommended for small profile installs. See \"Storage Class Requirements\" section in https://ibm.biz/storage_consideration_440 for details.$color_end\n"
+            printf " $fail_color $ERROR StorageClass $s does not have allowedVolumeExpansion enabled. This is required for all large profile installs and strongly recommended for small profile installs. See \"Storage Class Requirements\" section in https://ibm.biz/storage_consideration_441 for details.$color_end\n"
             ODF_VE_FLAG="true"
         fi
     done
@@ -422,7 +412,7 @@ function checkPortworx {
     else
         PORTWORX_WARNING="true"
         echo
-        log $WARNING "StorageClass \"portworx-fs\" does not exist. See \"Portworx Storage\" section in https://ibm.biz/storage_consideration_440 for details."
+        log $WARNING "StorageClass \"portworx-fs\" does not exist. See \"Portworx Storage\" section in https://ibm.biz/storage_consideration_441 for details."
     fi
 
     printf "Checking for storageclass \"portworx-aiops\"...\n"
@@ -432,13 +422,13 @@ function checkPortworx {
     else
         PORTWORX_WARNING="true"
         echo
-        log $WARNING "StorageClass \"portworx-aiops\" does not exist. See \"Portworx Storage\" section in https://ibm.biz/storage_consideration_440 for details."
+        log $WARNING "StorageClass \"portworx-aiops\" does not exist. See \"Portworx Storage\" section in https://ibm.biz/storage_consideration_441 for details."
     fi
     
     portworx_fs=$(checkAllowVolumeExpansion portworx-aiops)
     if [[ "$?" == "1" ]]; then
         echo
-        printf " $fail_color $ERROR StorageClass portworx-aiops does not have allowedVolumeExpansion enabled. This is required for all large profile installs and strongly recommended for small profile installs. See \"Storage Class Requirements\" section in https://ibm.biz/storage_consideration_440 for details.$color_end\n"
+        printf " $fail_color $ERROR StorageClass portworx-aiops does not have allowedVolumeExpansion enabled. This is required for all large profile installs and strongly recommended for small profile installs. See \"Storage Class Requirements\" section in https://ibm.biz/storage_consideration_441 for details.$color_end\n"
         storageCheckRes+=("fail")
         return 1
     fi
@@ -446,7 +436,7 @@ function checkPortworx {
     portworx_block=$(checkAllowVolumeExpansion portworx-fs)
     if [[ "$?" == "1" ]]; then
         echo
-        printf " $fail_color $ERROR StorageClass portworx-fs does not have allowedVolumeExpansion enabled. This is required for all large profile installs and strongly recommended for small profile installs. See \"Storage Class Requirements\" section in https://ibm.biz/storage_consideration_440 for details.$color_end\n"
+        printf " $fail_color $ERROR StorageClass portworx-fs does not have allowedVolumeExpansion enabled. This is required for all large profile installs and strongly recommended for small profile installs. See \"Storage Class Requirements\" section in https://ibm.biz/storage_consideration_441 for details.$color_end\n"
         storageCheckRes+=("fail")
         return 1
     fi
@@ -467,21 +457,21 @@ function checkIBMCFileGoldGidStorage {
     block=$(oc get storageclass ibmc-block-gold --ignore-not-found=true)
 
     if [[ "$file" == "" || "$block" == "" ]]; then
-        printf "$fail_color $ERROR Both ibmc-block-gold and ibmc-file-gold-gid need to exist to use IBM Cloud Storage. See \"Storage\" section in https://ibm.biz/storage_consideration_440 for details. $color_end\n"
+        printf "$fail_color $ERROR Both ibmc-block-gold and ibmc-file-gold-gid need to exist to use IBM Cloud Storage. See \"Storage\" section in https://ibm.biz/storage_consideration_441 for details. $color_end\n"
         storageCheckRes+=("fail")
         return 1 
     fi
 
     VE_BLOCK=$(checkAllowVolumeExpansion ibmc-block-gold)
     if [[ "$?" == "1" ]]; then
-        printf " $fail_color $ERROR StorageClass ibmc-block-gold does not have allowedVolumeExpansion enabled. This is required for all large profile installs and strongly recommended for small profile installs. See \"Storage Class Requirements\" section in https://ibm.biz/storage_consideration_440 for details.$color_end\n"
+        printf " $fail_color $ERROR StorageClass ibmc-block-gold does not have allowedVolumeExpansion enabled. This is required for all large profile installs and strongly recommended for small profile installs. See \"Storage Class Requirements\" section in https://ibm.biz/storage_consideration_441 for details.$color_end\n"
         storageCheckRes+=("fail")
         return 1
     fi
 
     VE_FILE=$(checkAllowVolumeExpansion ibmc-file-gold-gid)
     if [[ "$?" == "1" ]]; then
-        printf " $fail_color $ERROR StorageClass ibmc-file-gold-gid does not have allowedVolumeExpansion enabled. This is required for all large profile installs and strongly recommended for small profile installs. See \"Storage Class Requirements\" section in https://ibm.biz/storage_consideration_440 for details.$color_end\n"
+        printf " $fail_color $ERROR StorageClass ibmc-file-gold-gid does not have allowedVolumeExpansion enabled. This is required for all large profile installs and strongly recommended for small profile installs. See \"Storage Class Requirements\" section in https://ibm.biz/storage_consideration_441 for details.$color_end\n"
         storageCheckRes+=("fail")
         return 1
     fi
@@ -552,7 +542,7 @@ function checkStorage {
     if [ ${#storageFound[@]} -eq 0 ]; then
         STORAGE_PROVIDER_RES=$fail_msg
         printf "$fail_color$ERROR At least one of the four Storage Providers are required$color_end\n"
-        printf "$fail_color$ERROR The supported Storage Providers are Portworx, Openshift Data Foundation, IBM Cloud Storage for ROKS, or IBM Spectrum Fusion/IBM Spectrum Scale Container Native. See https://ibm.biz/storage_consideration_440 for details.$color_end\n"
+        printf "$fail_color$ERROR The supported Storage Providers are Portworx, Openshift Data Foundation, IBM Cloud Storage for ROKS, or IBM Spectrum Fusion/IBM Spectrum Scale Container Native. See https://ibm.biz/storage_consideration_441 for details.$color_end\n"
         STORAGE_PROVIDER_RES=$fail_msg
         startEndSection "Storage Provider"
         return 1
