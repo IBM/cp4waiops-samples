@@ -4,19 +4,24 @@ The prerequisite checker tool can be used to validate whether a Red Hat OpenShif
 
 **Pre-Install Checker::**
 
-- **OpenShift version check** : Checks whether the Red Hat OpenShift Container Platform cluster version is supported for IBM Cloud Pak for AIOps. The following OCP versions are compatible with 4.4.0:
-  - v4.11 (non-FIPS enabled cluster only)
+- **OpenShift version check** : Checks whether the Red Hat OpenShift Container Platform cluster version is supported for IBM Cloud Pak for AIOps. The following OCP versions are compatible with 4.4.1:
   - v4.12
   - v4.13
   - v4.14 (homogenous cluster only)
 
-- **Storage check**: Checks whether a storage class that uses a supported storage provider (Portworx, Red Hat Openshift Data Foundation (ODF), Storage Fusion or IBMC-file-gold-gid) is available on the cluster. For more information, see the IBM Documentation [Storage considerations](https://ibm.biz/storage_consideration_440).
+- **Storage check**: Checks whether a storage class that uses a supported storage provider (Portworx, Red Hat Openshift Data Foundation (ODF), Storage Fusion or IBMC-file-gold-gid) is available on the cluster. For more information, see the IBM Documentation [Storage considerations](https://ibm.biz/storage_consideration_441).
 
-- **Small or large profile install check**: Checks whether the cluster has enough resources (vCPU, Memory, and Nodes) for installing a small or large profile of IBM Cloud Pak for AIOps. For more information, see the IBM Documentation [Hardware requirements](https://ibm.biz/aiops_hardware_440).
+**NOTE: If you plan to use Storage Fusion with AIOPS, please keep in mind the following OCP version dependencies**
+| Storage Fusion Version     | OCP Versions supported |
+| -------------------------- | ---------------------- |
+| Storage Fusion v2.5        | OCP v4.12              |
+| Storage Fusion v2.6        | OCP v4.12              |
+
+- **Small or large profile install check**: Checks whether the cluster has enough resources (vCPU, Memory, and Nodes) for installing a small or large profile of IBM Cloud Pak for AIOps. For more information, see the IBM Documentation [Hardware requirements](https://ibm.biz/aiops_hardware_441).
 
 Note: Only nodes that have AMD64 will only be calculated.
 
-- **Entitlement Secret check**: Checks whether a secret called ibm-entitlement-key or a global pull secret called pull-secret (global pull secret found in openshift-config namespace) have been created. For more information, see the IBM Documentation [Entitlement Keys](https://ibm.biz/storage_consideration_440)
+- **Entitlement Secret check**: Checks whether a secret called ibm-entitlement-key or a global pull secret called pull-secret (global pull secret found in openshift-config namespace) have been created. For more information, see the IBM Documentation [Entitlement Keys](https://ibm.biz/storage_consideration_441)
 
 - **Cert Manager Operator Check**: Ensures a Cert Manager Operator is installed
 
