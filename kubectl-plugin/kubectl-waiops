@@ -487,6 +487,25 @@ getOrchestratorPodStatus() {
     fi
 }
 
+function emulateColumn {
+  #old versions of awk are in the wild use early/basic function only (single dim array, for loop, etc)
+  awk '{ n=split(o[NR]=$0, a);
+         for (c=1; c<=n; ++c) {
+           l=length(a[c]);
+           if (l>m[c]) m[c]=l;
+         }
+       } END {
+         for (r=1; r<=NR; ++r){
+           n=split(o[r], a)
+           for (c=1; c<=n; ++c){
+             if (c>1) printf("   ");
+             printf("%-" m[c] "s", a[c])
+           }
+           printf("\n")
+         }
+       }'
+}
+
 function showMultiZoneNodes {
   c=${1:-'NAME:.metadata.name,ZONE:.metadata.labels.topology\.kubernetes\.io/zone,REGION:.metadata.labels.topology\.kubernetes\.io/region'}
   [[ $# -gt 0 ]] && shift
@@ -692,12 +711,7 @@ function showMultiZoneStatus {
   else
     echo "WARNING: Not all pods are distributed optimally."
     echo
-    #on the off chance column is not installed at least print something
-    if [[ -x /bin/column ]]; then
-      echo -e "$lines" | column -t -o '   ' -N NAMESPACE,NAME,ZONE,NODE,KIND
-    else
-      echo -e "$lines" | awk 'BEGIN{print "NAMESPACE NAME ZONE NODE KIND"} /^$/{} {print $0}'
-    fi
+    echo -e "NAMESPACE NAME ZONE NODE KIND\n$lines" | emulateColumn
   fi
 }
 
