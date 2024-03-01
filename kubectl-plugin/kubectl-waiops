@@ -637,9 +637,10 @@ function showMultiZoneStatus {
                      [Cluster.postgresql.k8s.enterprisedb.io]='.spec.instances>1' )
   zones="${!zone[@]}"
   lines=""
+  dot=""
   for ns in ${!csns[@]} ${!ains[@]}; do
-    echo "INFO: Checking the namespace $ns"
-    for k in StatefulSet ReplicaSet StrimziPodSet.core.ibmevents.ibm.com Cluster.postgresql.k8s.enterprisedb.io; do
+    echo -n "INFO: Checking the namespace $ns..."
+    for k in StatefulSet StrimziPodSet.core.ibmevents.ibm.com Cluster.postgresql.k8s.enterprisedb.io ReplicaSet; do
       for s in $(oc get $k -n $ns -o jsonpath='{.items[?(@'"${query[$k]}"')].metadata.name}'); do
         zone=()
         o=""
@@ -662,6 +663,7 @@ function showMultiZoneStatus {
            ]]; then
           lines+=$(echo -ne "$o" | sort -b -k 3,3 -k 2,2)"\n"
         fi
+        if [[ -z "$dot" ]]; then dot=.; else echo -n $dot; dot=""; fi   #show progress
       done
       if [[ $k == StatefulSet  &&  -n "${ains[$ns]}" \
             && -n "$(oc get po --ignore-not-found aiops-ir-core-ncoprimary-0)" \
@@ -681,6 +683,7 @@ function showMultiZoneStatus {
         fi
       fi
     done
+    echo done.
   done
 
   echo
