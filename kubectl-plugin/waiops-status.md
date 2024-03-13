@@ -352,7 +352,7 @@ katamari                                           ibm-aiops-orchestrator-contro
 ### Upgrade status checker (`oc waiops status-upgrade`):
 ```
 [root@api.pours.cp.fyre.ibm.com cp4waiops-samples]# oc waiops status-upgrade
-Already on project "katamari" on server "https://api.bvt-svl-13082019.cp.fyre.ibm.com:6443".
+Already on project "katamari" on server "https://api.my.cool.domain.ibm.com:6443".
 
 Cloud Pak for AIOps v4.5 upgrade status:
 
