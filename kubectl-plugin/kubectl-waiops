@@ -1777,7 +1777,7 @@ then
     elif [ "${VERSION_AIOPSORCHESTRATOR}" == "3.3" ]; 
     then
         component-versions-33
-    elif [ "${VERSION_AIOPSORCHESTRATOR}" == "0.1" ]
+    elif [ "${VERSION_AIOPSORCHESTRATOR}" == "0.1" ];
     then
         # for developer builds (v0.1), we will check against release-4.5 versions
         component-versions-45
