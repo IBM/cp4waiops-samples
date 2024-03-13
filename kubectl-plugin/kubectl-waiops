@@ -1260,7 +1260,10 @@ then
                     getSubscriptionStatusGrep "ibm-automation-elastic" "openshift-operators" 
                     getSubscriptionStatusGrep "ibm-automation-flink" "openshift-operators" 
                 fi
-                getSubscriptionStatusGrep "aiops-ibm-common-services" "openshift-operators"
+
+                if [[ "${VERSION_AIOPSORCHESTRATOR}" != "4.4" || "${VERSION_AIOPSORCHESTRATOR}" != "0.1" ]]; then
+                    getSubscriptionStatusGrep "aiops-ibm-common-services" "openshift-operators"
+                fi
             fi
         else
             printf "${gray}[INFO] Skipping the following components (Hint: log in with CLUSTER_ADMIN credentials to view):${normal}${newline}"
