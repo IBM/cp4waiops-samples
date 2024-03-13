@@ -351,8 +351,10 @@ katamari                                           ibm-aiops-orchestrator-contro
 
 ### Upgrade status checker (`oc waiops status-upgrade`):
 ```
-$ oc waiops status-upgrade
-Cloud Pak for AIOps AI Manager v4.3 upgrade status:
+[root@api.pours.cp.fyre.ibm.com cp4waiops-samples]# oc waiops status-upgrade
+Already on project "katamari" on server "https://api.bvt-svl-13082019.cp.fyre.ibm.com:6443".
+
+Cloud Pak for AIOps v4.5 upgrade status:
 
 ______________________________________________________________
 
@@ -362,29 +364,31 @@ The following component(s) have finished upgrading:
 KIND        NAMESPACE   NAME        STATUS       MESSAGE
 AIOpsEdge   katamari    aiopsedge   Configured   all critical components are reporting healthy
 
+KIND               NAMESPACE   NAME    VERSION   STATUS   MESSAGE
+LifecycleService   katamari    aiops   4.5.0     Ready    All Services Ready
+
 KIND      NAMESPACE   NAME               VERSION   STATUS   MESSAGE
-AIOpsUI   katamari    aiopsui-instance   4.3.0     True     Ready
+AIOpsUI   katamari    aiopsui-instance   4.5.0     True     Ready
 
 KIND   NAMESPACE   NAME      STATUS   MESSAGE
 Kong   katamari    gateway   True     <none>
 
 KIND        NAMESPACE   NAME        VERSION   STATUS      MESSAGE
-AIManager   katamari    aimanager   4.3.0     Completed   AI Manager is ready
+AIManager   katamari    aimanager   4.5.0     Completed   AI Manager is ready
 
 KIND                  NAMESPACE   NAME    VERSION   STATUS   MESSAGE
-IssueResolutionCore   katamari    aiops   4.3.0     Ready    All Services Ready
+IssueResolutionCore   katamari    aiops   4.5.0     Ready    All Services Ready
 
 KIND                         NAMESPACE   NAME    VERSION   STATUS   MESSAGE
-AIOpsAnalyticsOrchestrator   katamari    aiops   4.3.0     Ready    All Services Ready
+AIOpsAnalyticsOrchestrator   katamari    aiops   4.5.0     Ready    All Services Ready
+
+KIND     NAMESPACE   NAME         STATUS
+Tunnel   katamari    sre-tunnel   True
 
 KIND   NAMESPACE   NAME             VERSION   STATUS
-ASM    katamari    aiops-topology   2.19.0    OK
-
-KIND               NAMESPACE   NAME    VERSION   STATUS   MESSAGE
-LifecycleService   katamari    aiops   4.3.0     Ready    All Services Ready
+ASM    katamari    aiops-topology   2.22.0    OK
 
 ______________________________________________________________
-
 ```
 
 ## How to use
