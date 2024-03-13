@@ -1261,7 +1261,7 @@ then
                     getSubscriptionStatusGrep "ibm-automation-flink" "openshift-operators" 
                 fi
 
-                if [[ "${VERSION_AIOPSORCHESTRATOR}" != "4.4" || "${VERSION_AIOPSORCHESTRATOR}" != "0.1" ]]; then
+                if [[ "${VERSION_AIOPSORCHESTRATOR}" != "4.4" || "${VERSION_AIOPSORCHESTRATOR}" != "0.1" || "${VERSION_AIOPSORCHESTRATOR}" != "4.5" ]]; then
                     getSubscriptionStatusGrep "aiops-ibm-common-services" "openshift-operators"
                 fi
             fi
