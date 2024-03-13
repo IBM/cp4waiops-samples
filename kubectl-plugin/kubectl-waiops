@@ -1785,7 +1785,7 @@ then
         echo "${red}${bold}NOTE: ${normal}Your Cloud Pak for AIOps install appears to be an internal dev version (v${VERSION_AIOPSORCHESTRATOR})."
         echo "      The status-upgrade command checks the status of upgrades to v3.3, v3.4, v3.5, v3.6, v3.7, v4.1, v4.2, v4.3, v4.4, and v4.5 only." 
         echo "      Therefore, the upgrade checks below will be against v4.4 component versions."
-        echo "      This may influence your results below if your dev build is not based on release-4.4.${normal}"
+        echo "      This may influence your results below if your dev build is not based on release-4.5.${normal}"
     else
         echo ""
         echo "${red}${bold}ERROR: ${normal}Your Cloud Pak for AIOps install appears to be v${VERSION_AIOPSORCHESTRATOR}."
