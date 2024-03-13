@@ -1241,6 +1241,7 @@ then
             getSubscriptionStatus "ibm-im-mongodb-operator" "$INSTALLATION_NAMESPACE"
             getSubscriptionStatus "ibm-platformui-operator" "$INSTALLATION_NAMESPACE"
             getSubscriptionStatus "operand-deployment-lifecycle-manager-app" "$INSTALLATION_NAMESPACE"
+            getSubscriptionStatusGrep "aiops-ibm-common-services" "$INSTALLATION_NAMESPACE"
 
             if [ "${CLUSTER_SCOPE_INSTALL}" == "true" ];
             then 
@@ -1259,10 +1260,6 @@ then
                 then
                     getSubscriptionStatusGrep "ibm-automation-elastic" "openshift-operators" 
                     getSubscriptionStatusGrep "ibm-automation-flink" "openshift-operators" 
-                fi
-
-                if [[ "${VERSION_AIOPSORCHESTRATOR}" != "4.4" || "${VERSION_AIOPSORCHESTRATOR}" != "0.1" || "${VERSION_AIOPSORCHESTRATOR}" != "4.5" ]]; then
-                    getSubscriptionStatusGrep "aiops-ibm-common-services" "openshift-operators"
                 fi
             fi
         else
