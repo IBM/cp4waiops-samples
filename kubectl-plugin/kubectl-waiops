@@ -1750,7 +1750,7 @@ then
     if [ "${VERSION_AIOPSORCHESTRATOR}" == "4.5" ];
     then
         component-versions-45
-    if [ "${VERSION_AIOPSORCHESTRATOR}" == "4.4" ];
+    elif [ "${VERSION_AIOPSORCHESTRATOR}" == "4.4" ];
     then
         component-versions-44
     elif [ "${VERSION_AIOPSORCHESTRATOR}" == "4.3" ];
