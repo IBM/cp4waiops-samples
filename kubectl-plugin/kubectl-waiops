@@ -724,7 +724,7 @@ fi
 
 if [[ "$1" == "version" ]]
 then
-    echo "0.0.27"
+    echo "0.0.28"
     exit 0
 fi
 
