@@ -1241,6 +1241,7 @@ then
             getSubscriptionStatus "ibm-im-mongodb-operator" "$INSTALLATION_NAMESPACE"
             getSubscriptionStatus "ibm-platformui-operator" "$INSTALLATION_NAMESPACE"
             getSubscriptionStatus "operand-deployment-lifecycle-manager-app" "$INSTALLATION_NAMESPACE"
+            getSubscriptionStatusGrep "aiops-ibm-common-services" "$INSTALLATION_NAMESPACE"
 
             if [ "${CLUSTER_SCOPE_INSTALL}" == "true" ];
             then 
@@ -1260,7 +1261,6 @@ then
                     getSubscriptionStatusGrep "ibm-automation-elastic" "openshift-operators" 
                     getSubscriptionStatusGrep "ibm-automation-flink" "openshift-operators" 
                 fi
-                getSubscriptionStatusGrep "aiops-ibm-common-services" "openshift-operators"
             fi
         else
             printf "${gray}[INFO] Skipping the following components (Hint: log in with CLUSTER_ADMIN credentials to view):${normal}${newline}"
