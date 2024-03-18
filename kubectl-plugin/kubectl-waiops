@@ -27,7 +27,8 @@ Usage:
   oc ${PLUGIN} COMMAND [flags]
 
 Available Commands:
-  multizone status   Print the node topology and pod zone distribution
+  multizone pods     Print the node topology and pods with zone distribution
+  multizone status   Print the node topology and report status
 
   status             Print the status of the main components in the CloudPak
   status-summary     Print a brief summary status of the CloudPak
@@ -512,12 +513,13 @@ function showMultiZoneNodes {
   oc get no -l node-role.kubernetes.io/worker -o=custom-columns="$c" "$@"
 }
 
+
 function showMultiZoneStatus {
   ###########
   #First check generic cluster setup so this script can be run prior to installation
   none=$(oc get no)
   if [[ $? -ne 0 ]]; then
-    echo "ERROR: Cannot continue with multizone status when listing nodes fails"
+    echo "ERROR: Cannot continue with any multizone function when listing nodes fails"
     exit $LINENO;
   fi
 
@@ -716,6 +718,42 @@ function showMultiZoneStatus {
 }
 
 
+function showMultiZonePods {
+  ###########
+  #First check generic cluster setup so this script can be run prior to installation
+  none=$(oc get no)
+  if [[ $? -ne 0 ]]; then
+    echo "ERROR: Cannot continue with any multizone function when listing nodes fails"
+    exit $LINENO;
+  fi
+
+  #Get the string oc uses to denote not labeled
+  none=$(oc get no -o custom-columns=':.metadata.labels.bogus' | tail -1)
+
+  declare -A node=()
+  while read l; do
+    n=$(echo $l | cut -d ' ' -f 1)
+    z=$(echo $l | cut -d ' ' -f 2)
+    node[$n]=$z
+  done< <(showMultiZoneNodes "" --no-headers)
+
+  hdr=""
+  while read l; do
+    if [[ -z "$hdr" ]]; then
+      hdr=1; echo "$l"
+    else
+      n=$(echo $l | cut -d ' ' -f 2)
+      z=${node[$n]}
+      if [[ -z "$z" ]]; then z=$none; fi
+      echo "$l" | awk '{print $1, "'$z'", $3}'
+    fi
+  done< <(oc get po -o custom-columns='NAME:.metadata.name,ZONE:.spec.nodeName,NODE:.spec.nodeName') \
+  | emulateColumn
+
+}
+
+
+
 if [[ -z "$1"  ||  "$1" == "-h"  ||  "$1" == "--help"  ||  "$1" == "help" ]]
 then
   printUsage
@@ -741,6 +779,8 @@ if [[ "$1" == "multizone" ]]; then
   fi
   if [[ -z "$2"  ||  "$2" == "status" ]]; then
     showMultiZoneStatus
+  elif [[ "$2" == "pods" ]]; then
+    showMultiZonePods
   else
     echo "error: unknown command \"$2\""
     echo "See 'oc ${PLUGIN} -h' for help and examples"

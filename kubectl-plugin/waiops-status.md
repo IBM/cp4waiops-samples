@@ -10,7 +10,8 @@ https://kubernetes.io/docs/tasks/extend-kubectl/kubectl-plugins/
 
 ## Highlights
 Run `oc waiops multizone status` to view how well the installation is prepared for a zone outage.
-  * **NOTE**: This function requires bash to be at least version **4**  (MacOS ships with a very old version)
+Run `oc waiops multizone pods` to view which zone each pod is in.
+  * **NOTE**: These functions require bash to be at least version **4**  (MacOS ships with a very old version)
   * **NOTE**: If you have installed/upgraded bash to a path other than `/bin/bash` change the first line of the script to that fully qualified path.
 
 Run `oc waiops status` to print the statuses of some of your instance's main components. If you see components with issues (or are generally facing issues on your cluster), run `oc waiops status-all` for a more detailed printout with more components.
