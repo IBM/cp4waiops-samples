@@ -1,0 +1,39 @@
+ca_catalog_name: ibm-operator-catalog
+ca_catalog_displayname: "ibm operator catalog"
+ca_catalog_publisher: ibm
+ca_catalog_namespace: openshift-marketplace
+ca_catalog_image: icr.io/cpopen/ibm-operator-catalog:latest
+approval_type: automatic 
+
+# operator deployment
+operator_namespace: aiops
+ca_package: ibm-ca-operator
+ca_channel: "v25.4"
+
+# instance deployment
+ca_name: aiops
+ca_namespace: aiops
+file_storageclass: "rook-cephfs"
+block_storageclass: "rook-ceph-block"
+ca_version: "25.4.0"
+licenseaccept: false
+
+# provision
+reprovision_cognos: true
+provision_timeout: 60
+plan_size: "fixedminimum"
+content_store: 'DB2' # only 'DB2' (must be capitalized!) right now, want to use postgresql
+content_store_db_url: "c-db2u-db01-db2u"
+content_store_db_name: "BLUDB"
+content_store_db_port: "50000"
+content_store_db_user: "db2inst1"
+
+# UI Extension
+display_name: "Cognos Analytics"
+parent_folder_name: "Visualize"
+parent_folder: "aiops_visualizations_folder"
+folder_icon: "nav/icons/carbon10/Scan32"
+permission_ca_name: "aiops-ca-permissions"
+view_dashboard_permission: "aiops_view_ca_dashboards"
+manage_dashboard_permission: "aiops_manage_ca_dashboards"
+nav_menu_permissions: "aiops_view_ca_dashboards,aiops_manage_ca_dashboards"

@@ -1,0 +1,15 @@
+aiops_channel: "v4.4"
+aiops_package: ibm-aiops-orchestrator
+aiops_instance: ibm-cp-aiops
+aiops_namespace: "cp4aiops"
+aiops_size: "small" # small|large
+aiops_catalog_image: icr.io/cpopen/ibm-operator-catalog:latest
+aiops_catalog_name: aiops-catalog
+aiops_catalog_namespace: openshift-marketplace
+approval_type: automatic
+imagepullsecret: "ibm-entitlement-key" # empty string uses global pull secret
+licenseaccept: false # must be set to true by customer; customer default should be changed to false; boolean not string
+operator_namespace: cp4aiops
+installaiops: no # create catalogsource, subscription, and installation resources for AIOps
+waitforinstall: yes # wait for the aiops installation resource to have status.phase == Running
+wait_for_install_retry: 4

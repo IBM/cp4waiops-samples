@@ -1,0 +1,67 @@
+# Get the AIOps Installation resource
+# Used to determine the name/type of the pull secret used
+- name: get AIOps Installation info
+  kubernetes.core.k8s_info:
+    api_version: orchestrator.aiops.ibm.com/v1alpha1
+    name: "{{ aiops_instance }}"
+    namespace: "{{ aiops_namespace }}"
+    kind: Installation
+  register: aiopsinstance_info
+  until: 
+  - aiopsinstance_info.resources is defined
+  - aiopsinstance_info.resources | length > 0
+  - aiopsinstance_info.resources[0].status is defined
+  - aiopsinstance_info.resources[0].spec is defined
+  retries: 8 # 8 loops at 15 second intervals is 2 minutes 
+  delay: 15 # 15 seconds
+  when: (ibm_entitlement_key is undefined) or (ibm_entitlement_key | length == 0)
+
+# Get the pull secret using the name and namespace
+# determined by the AIOps installation status
+- name: get pull secret info
+  kubernetes.core.k8s_info:
+    api_version: v1
+    # If status.imagePullSecret is not Global, use spec.imagePullSecret; else use global pull secret name
+    name: "{{ aiopsinstance_info.resources[0].spec.imagePullSecret if aiopsinstance_info.resources[0].status.imagePullSecret != 'Global' else global_pull_secret_name }}"
+    # If status.imagePullSecret is not Global, use AIOps instance namespace; else use global pull secret namespace
+    namespace: "{{ aiops_namespace if aiopsinstance_info.resources[0].status.imagePullSecret != 'Global' else global_pull_secret_namespace }}"
+    kind: Secret
+  register: pullsecret_info
+  until: 
+  - pullsecret_info.resources is defined
+  - pullsecret_info.resources | length > 0
+  - pullsecret_info.resources[0].data is defined
+  retries: 8 # 8 loops at 15 second intervals is 2 minutes 
+  delay: 15 # 15 seconds
+  when: (ibm_entitlement_key is undefined) or (ibm_entitlement_key | length == 0)
+
+# Check if registry entitlement exists
+- name: Check for IBM registry entitlement
+  ansible.builtin.set_fact:
+    # Extract data[.dockerconfigjson], decode from base64, extract password for cp.icr.io
+    ibm_access: "{{ (pullsecret_info.resources[0].data['.dockerconfigjson'] | b64decode | 
+      from_json | community.general.json_query(entitlement_key_query)) != None }}"
+  vars:
+    entitlement_key_query: "auths.\"{{ db2_registry }}\".auth"
+  when: (ibm_entitlement_key is undefined) or (ibm_entitlement_key | length == 0)
+
+# Parse the pull secret data to extract the decoded password
+- name: Set the entitlement key
+  ansible.builtin.set_fact:
+    # Extract data[.dockerconfigjson], decode from base64, extract password for cp.icr.io
+    ibm_entitlement_key: "{{ (pullsecret_info.resources[0].data['.dockerconfigjson'] | b64decode | 
+      from_json | community.general.json_query(entitlement_key_query) | b64decode | split(':'))[1] }}"
+  vars:
+    entitlement_key_query: "auths.\"{{ db2_registry }}\".auth"
+  when: (ibm_access is defined and ibm_access) and ((ibm_entitlement_key is undefined) or (ibm_entitlement_key | length == 0))
+
+# If entitlement key extraction failed, this is likely an offline deployment
+- name: Entitlement key not found
+  ansible.builtin.debug:
+    msg:
+    - "Entitlement key for cp.icr.io not found, assuming a global pull secret is in use for private registry"
+  when: (ibm_entitlement_key is undefined) or (ibm_entitlement_key | length == 0)
+- name: Entitlement key not found
+  ansible.builtin.set_fact:
+    ibm_entitlement_key: "Global"
+  when: (ibm_entitlement_key is undefined) or (ibm_entitlement_key | length == 0)
