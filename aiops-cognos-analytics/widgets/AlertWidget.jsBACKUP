@@ -1,0 +1,181 @@
+/* ******************************************************** {COPYRIGHT-TOP} ****
+ * IBM Confidential
+ * 5725-Q09, 5737-M96
+ * © Copyright IBM Corp. 2023
+ ********************************************************* {COPYRIGHT-END} ****/
+define([
+], function() {
+	'use strict';
+
+	class Renderer {
+    constructor(options) {
+      this.content = options.content;
+
+      this.canvas = options.features["Dashboard.Canvas"];
+      this.canvas.on("change:content:selections", (payload) => {
+        const contentID = payload.info.events[0].info.contentId;
+        const dataPointSelection = this.canvas
+          .getContent(contentID)
+          .getFeature("DataPointSelections");
+        let inputColumnMapping;
+        this.content.getPropertyList().forEach((item) => {
+          if (item.id === "inputColumnMapping") {
+            inputColumnMapping = item.getPropertyValue();
+          }
+        });
+
+        const getColumnMapping = (value) => {
+          try {
+            return JSON.parse(value);
+          } catch (ex) {
+            return value;
+          }
+        };
+        inputColumnMapping = getColumnMapping(inputColumnMapping);
+        const iframeAlertsWidget = document.getElementById("alertsWidget");
+        iframeAlertsWidget.contentWindow.postMessage(
+          {
+            source: "dashboard",
+            params: {
+              widgetdata: dataPointSelection.getSelections(),
+              transformations: { columnmapping: inputColumnMapping },
+            },
+          },
+          "*"
+        );
+      });
+
+      this.content.on("change:property", (data) => {
+        const iframeAlertsWidget = document.getElementById("alertsWidget");
+
+        if (data?.info?.events[0].name === "change:property:dropdownFilter") {
+          const filterName = data?.info?.events[0].info.value;
+          iframeAlertsWidget.contentWindow.postMessage(
+            { source: "dashboard", params: { filtername: filterName } },
+            "*"
+          );
+        }
+
+        if (data?.info?.events[0].name === "change:property:dropdownView") {
+          const viewName = data?.info?.events[0].info.value;
+          iframeAlertsWidget.contentWindow.postMessage(
+            { source: "dashboard", params: { viewname: viewName } },
+            "*"
+          );
+        }
+
+        if (data?.info?.events[0].name === "change:property:toggleToolbar") {
+          const showToolbar = data?.info?.events[0].info.value;
+          iframeAlertsWidget.contentWindow.postMessage(
+            { source: "dashboard", params: { showtoolbar: showToolbar } },
+            "*"
+          );
+        }
+
+        if (data?.info?.events[0].name === "change:property:toggleDetails") {
+          const showDetails = data?.info?.events[0].info.value;
+          iframeAlertsWidget.contentWindow.postMessage(
+            { source: "dashboard", params: { showdetails: showDetails } },
+            "*"
+          );
+        }
+
+        if (
+          data?.info?.events[0].name === "change:property:inputColumnMapping"
+        ) {
+          let columnMapping = data?.info?.events[0].info.value;
+
+          const getColumnMapping = (value) => {
+            try {
+              return JSON.parse(value);
+            } catch (ex) {
+              return value;
+            }
+          };
+
+          columnMapping = getColumnMapping(columnMapping);
+          iframeAlertsWidget.contentWindow.postMessage(
+            {
+              source: "dashboard",
+              params: { transformations: { columnmapping: { columnMapping } } },
+            },
+            "*"
+          );
+        }
+      });
+    }
+
+    getAPI() {
+      return {
+        render: (domNode) => this.render(domNode),
+      };
+    }
+
+    destroy() {}
+
+    renderControl() {
+
+      let filterName = "All+Alerts";
+      let viewName = "Default+View";
+      let showToolbar = true;
+      let showDetails = false;
+
+      // showToolbar = this.content.getPropertyValue('toggleToolbar');
+      // showDetails = this.content.getPropertyValue('toggleDetails');
+      // filterName = this.content.getPropertyValue("dropdownFilter");
+      // viewName = this.content.getPropertyValue("dropdownView");
+
+      this.content.getPropertyList().forEach((item) => {
+        if (item.id === "dropdownView") {
+          viewName = item.getPropertyValue();
+          viewName = viewName.replace(/ /g, "+");
+          console.log("====View name:", viewName);
+        } else if (item.id === "dropdownFilter") {
+          filterName = item.getPropertyValue();
+          filterName = filterName.replace(/ /g, "+");
+          console.log("====Filter name:", filterName);
+        } else if (item.id === "toggleToolbar") {
+          //Not working item.getPropertyValue() returns undefined
+          // showToolbar = item.getPropertyValue();
+          // showToolbar = this.content.getPropertyValue('toggleToolbar');
+          // console.log("====showToolbar", showToolbar);
+        } else if (item.id === "toggleDetails") {
+          //Not working item.getPropertyValue() returns undefined
+          // showDetails = item.getPropertyValue();
+          // console.log("====showDetails", showDetails);
+        }
+
+        // else if(item.id === "toggleToolbar") {
+        //     // Always returns default valued defined in spec.json
+        //     showToolbar = item.editor.uiControl.value;
+        // }
+        // else if(item.id === "toggleDetails") {
+        //     // Always returns default valued defined in spec.json
+        //     showDetails = item.editor.uiControl.value;
+        // }
+      });
+
+      this.parentNode.innerHTML =
+        // "<iframe id='alertsWidget' src='https://" + window.location.host + "/aiops/cfd95b7e-3bc7-4006-a4a8-a73a79c71255/widgets/alerts?showtoolbar=true&showdetails=false' title='AIOPS Alerts widget' width='100%' height='100%'></iframe>";
+        // "<iframe id='alertsWidget' src='https://localhost:9443/aiops/cfd95b7e-3bc7-4006-a4a8-a73a79c71255/widgets/alerts?showtoolbar=" + showToolbar + "&showdetails=" + showDetails + "&filtername=" + filterName + "?viewname=" + viewName + "' title='AIOPS Alerts widget' width='100%' height='100%'></iframe>";
+        // "<iframe id='alertsWidget' src='https://localhost:9443/aiops/default/widgets/alerts?showtoolbar=" +
+        "<iframe id='alertsWidget' src='https://" + window.location.host + "/aiops/default/widgets/alerts?showtoolbar=" +
+        showToolbar +
+        "&showdetails=" +
+        showDetails +
+        "&filtername=" +
+        filterName +
+        "?viewname=" +
+        viewName +
+        "' title='AIOPS Alerts widget' width='100%' height='100%'></iframe>";
+    }
+
+    render(options) {
+      this.parentNode = options.parent;
+      this.renderControl();
+      return Promise.resolve();
+    }
+  }
+
+	return Renderer;
+});
