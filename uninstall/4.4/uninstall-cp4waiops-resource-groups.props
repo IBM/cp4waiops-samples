@@ -92,10 +92,8 @@ CP4AIOPS_CONFIGMAPS_INTERNAL=("configmap/ff20eae3.connectors.aiops.ibm.com"
 
 CP4AIOPS_KAFKATOPICS_LABELS=("ibmevents.ibm.com/cluster=iaf-system")
 
-CP4AIOPS_SERVICEACCOUNTS=(# Event Processor
-                          "serviceaccount/cp4waiops-eventprocessor-eve-29ee-ep"
-                          
-                          "serviceaccount/postgresql-operator-manager")
+CP4AIOPS_INTERNAL_SERVICEACCOUNTS=("serviceaccount/cp4waiops-eventprocessor-eve-29ee-ep")
+CP4AIOPS_SHARED_SERVICEACCOUNTS=("serviceaccount/postgresql-operator-manager")
 
 CP4AIOPS_MISC=("rolebinding.authorization.openshift.io/example-redis"
                 "role.authorization.openshift.io/example-redis"

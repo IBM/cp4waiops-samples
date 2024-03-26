@@ -218,11 +218,20 @@ if [[ ! -z "$CP4WAIOPS_PROJECT"  ]]; then
       oc delete secret -l $SECRETLABEL -n $CP4WAIOPS_PROJECT --ignore-not-found
    done   
 
+   # Always delete AIOps internal ServiceAccounts
    log $INFO "Deleting the serviceaccounts in $CP4WAIOPS_PROJECT"
-   for SERVICEACCOUNT in ${CP4AIOPS_SERVICEACCOUNTS[@]}; do
+   for SERVICEACCOUNT in ${CP4AIOPS_INTERNAL_SERVICEACCOUNTS[@]}; do
       log $INFO "Deleting serviceaccounts $SERVICEACCOUNT.."
       oc delete $SERVICEACCOUNT -n $CP4WAIOPS_PROJECT --ignore-not-found
-   done      
+   done
+
+   # Only delete shared ServiceAccounts if IA is not installed with AIOps
+   if ! iaEnabled; then
+      for SERVICEACCOUNT in ${CP4AIOPS_SHARED_SERVICEACCOUNTS[@]}; do
+         log $INFO "Deleting serviceaccounts $SERVICEACCOUNT.."
+         oc delete $SERVICEACCOUNT -n $CP4WAIOPS_PROJECT --ignore-not-found
+      done
+   fi   
 
    # Remove Redis annotation from the namespace.  Leaving the annotation
    # would prevent a Redis re-install in the namespace.  Note that the

@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# © Copyright IBM Corp. 2020, 2024
+# © Copyright IBM Corp. 2020, 2023
 # SPDX-License-Identifier: Apache2.0
 #
 . ./uninstall-cp4waiops.props
@@ -363,12 +363,24 @@ deleteIAM_Workaround () {
     oc delete role leader-election-role -n $CP4WAIOPS_PROJECT
 }
 
+# Check if Infrastructure Automation is installed by looking for the CSV
+iaEnabled() {
+    iaEnabled=$(oc get csv -n $CP4WAIOPS_PROJECT | grep ibm-infrastructure-automation-operator)
+    if [[ "$iaEnabled" == ""  ]]; then
+        # Infrastructure Automation is not installed
+        return 1 # Non-zero exit code (false)
+    else
+        # Infrastructure Automation is installed
+        return 0 # Zero exit code (success, true)
+    fi
+}
+
 delete_bedrock () {
     echo
     log $INFO "Starting uninstall of IBM Cloud Pak Foundational Services components"
 
-    iaEnabled=$(oc get csv -n $CP4WAIOPS_PROJECT | grep ibm-infrastructure-automation-operator)
-    if [[ "$iaEnabled" == ""  ]]; then
+    # Only delete IBM Common Services resources if IA is not installed with AIOps
+    if ! iaEnabled; then
         # Since ZenService is automatically deleted via odlm and some resources linger due to their controller being
         # prematurely uplifted, we need to patch the finalizers for zenextension and zenclient.
         log $INFO "Delete ZenService related resources"
