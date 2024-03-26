@@ -16,12 +16,10 @@ The playbook execution will create subscriptions to operators and define custom 
 # - Python / pip 3.11+
 # - Ansible 2.15+ - https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html
 # - logged in with oc/kubectl to an active/accessible Openshift Cluster; it will use the local kubeconfig to perform the actions
-# - Authentication for cp.icr.io and  global pull secret or ibm-entitlement-key; global pull secret is preferred due to CP4D services in use
+# - Authentication for cp.icr.io in global pull secret
 # - Download the ibm.mas_devops collection - for use to install DB2
 ansible-galaxy collection install ibm.mas_devops
 
-# Review the footprint allocation for Cognos Analytics
-# - https://github.ibm.com/katamari/dev-issue-tracking/issues/59517#issuecomment-71989107
 # Configure the variables in vars.yml - Storage, Namespace
 # Review the product license; it is accepted by running the playbook
 # - https://ibm.biz/cp4aiops-450-license
