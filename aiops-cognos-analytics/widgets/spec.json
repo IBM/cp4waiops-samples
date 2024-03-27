@@ -1,0 +1,99 @@
+{
+  "name": "aiopsAlertWidget",
+  "extensions": [
+    {
+      "perspective": "dashboard",
+      "features": [
+        {
+          "id": "com.ibm.dashboard.aiops.alert.widget",
+          "collectionItems": [
+            {
+              "containerId": "com.ibm.bi.dashboard.contentTypes",
+              "id": "widget.alertWidget.renderer",
+              "type": "alertWidget",
+              "icon": "loading.svg",
+              "expose": true,
+              "name": "AIOps Alert list",
+              "propertyLayoutList": [
+                {
+                  "type": "Section",
+                  "id": "aiops_settings",
+                  "label": "AIOPs",
+                  "position": 0
+                }
+              ],
+              "propertyList": [
+                {
+                  "id": "toggleToolbar",
+                  "editor": {
+                    "sectionId": "general.aiops_settings",
+                    "uiControl": {
+                      "label": "Show toolbar",
+                      "type": "ToggleButton",
+                      "ariaLabel": "Show toolbar",
+                      "value": true
+                    }
+                  }
+                },
+                {
+                  "id": "toggleDetails",
+                  "editor": {
+                    "sectionId": "general.aiops_settings",
+                    "uiControl": {
+                      "label": "Show details",
+                      "type": "ToggleButton",
+                      "ariaLabel": "Show details"
+                    }
+                  }
+                },
+                {
+                  "id": "inputColumnMapping",
+                  "editor": {
+                    "sectionId": "general.aiops_settings",
+                    "uiControl": {
+                    "type": "InputLabel",
+                    "label": "Column mapping"
+                    }
+                  }
+                }
+              ],
+              "renderer": {
+                "class": "v1/ext/aiopsAlertWidget/AlertWidget",
+                "dependencies": ["Dashboard.Canvas"]
+              },
+              "capabilities": {
+                "selection": true
+              }
+            },
+            {
+              "containerId": "com.ibm.bi.dashboard.content-features",
+              "name": "DynamicWidgetProperty",
+              "id": "dashboard.DynamicWidgetProperty",
+              "class": "v1/ext/aiopsAlertWidget/CustomProperty",
+              "dependencies":["Properties"],
+              "types": ["alertWidget"]
+            }
+          ],
+		  "cssStyles": ["v1/ext/aiopsAlertWidget/index.css"]
+        }
+      ]
+    },
+    {
+      "perspective": "aiopsAlertWidget",
+      "features": [
+        {
+          "id": "com.ibm.aiopsAlertWidget",
+          "content": {
+            "type": "v1/ext/aiopsAlertWidget/AlertWidget",
+            "options": {
+              "info": {
+                "title": "AIOps Alert list"
+              }
+            }
+          },
+          "cssStyles": ["v1/ext/aiopsAlertWidget/index.css"]
+        }
+      ]
+    }
+  ]
+}
