@@ -1,0 +1,3 @@
+collections:
+  - kubernetes.core.k8s
+  - ibm.mas_devops

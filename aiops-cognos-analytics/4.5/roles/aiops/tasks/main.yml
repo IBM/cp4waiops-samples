@@ -1,0 +1,150 @@
+- name: Check if licenseaccept is set to true
+  fail:
+    msg: Please review license and run playbook again setting licenseaccept to true
+  when: licenseaccept != true
+
+- name: be sure AIOps CatalogSource is installed
+  when: installaiops is defined and installaiops
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: v1alpha1
+      group: operators.coreos.com
+      kind: CatalogSource
+      metadata:
+        name: "{{ aiops_catalog_name }}"
+        namespace: "{{ aiops_catalog_namespace }}"
+      spec:
+        sourceType: grpc
+        image: "{{ aiops_catalog_image }}"
+        secrets: 
+        - ibm-entitlement-key
+
+- name: be sure AIOps CatalogSource is READY
+  when: installaiops is defined and installaiops
+  kubernetes.core.k8s_info:
+    api_version: operators.coreos.com/v1alpha1
+    name: "{{ aiops_catalog_name }}"
+    namespace: "{{ aiops_catalog_namespace }}"
+    kind: CatalogSource
+  register: catalogsource_info
+  until: 
+  - catalogsource_info.resources is defined
+  - catalogsource_info.resources | length > 0
+  - catalogsource_info.resources[0].status is defined
+  - catalogsource_info.resources[0].status.connectionState is defined
+  - catalogsource_info.resources[0].status.connectionState.lastObservedState == "READY"
+  retries: 8 # 8 loops at 15 second intervals is 2 minutes 
+  delay: 15 # 15 seconds
+
+- name: be sure AIOps is subscribed
+  when: installaiops is defined and installaiops
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: v1alpha1
+      group: operators.coreos.com
+      kind: Subscription
+      metadata:
+        name: "{{ aiops_package }}"
+        namespace: "{{ operator_namespace }}"
+      spec:
+        name: "{{ aiops_package }}"
+        channel: "{{ aiops_channel }}"
+        installPlanApproval: "{{approval_type}}"
+        source: "{{ aiops_catalog_name }}"
+        sourceNamespace: "{{ aiops_catalog_namespace }}"
+        config:
+          env:
+          - name: BEDROCKV4
+            value: "true"
+
+- name: be sure AIOps Subscription is AtLatestKnown
+  when: installaiops is defined and installaiops
+  kubernetes.core.k8s_info:
+    api_version: operators.coreos.com/v1alpha1
+    name: "{{ aiops_package }}"
+    namespace: "{{ operator_namespace }}"
+    kind: Subscription
+  register: aiopssub_info
+  until: 
+  - aiopssub_info.resources is defined
+  - aiopssub_info.resources | length > 0
+  - aiopssub_info.resources[0].status is defined
+  - aiopssub_info.resources[0].status.state is defined
+  - aiopssub_info.resources[0].status.state == "AtLatestKnown"
+  retries: 20 # 20 loops at 15 second intervals is 5 minutes 
+  delay: 15 # 15 seconds
+
+- name: be sure Block Storage Class (RWO) exists
+  when: installaiops is defined and installaiops
+  kubernetes.core.k8s_info:
+    api_version: storage.k8s.io/v1
+    name: "{{ block_storageclass }}"
+    kind: StorageClass
+  register: block_storageclass_info
+  until:
+  - block_storageclass_info.resources is defined
+  - block_storageclass_info.resources | length == 1
+
+- name: be sure File Storage Class (RWX) exists
+  when: installaiops is defined and installaiops
+  kubernetes.core.k8s_info:
+    api_version: storage.k8s.io/v1
+    name: "{{ file_storageclass }}"
+    kind: StorageClass
+  register: file_storageclass_info
+  until:
+  - file_storageclass_info.resources is defined
+  - file_storageclass_info.resources | length == 1
+
+- name: be sure AIOps Installation is created
+  when: installaiops is defined and installaiops
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: v1alpha1
+      group: orchestrator.aiops.ibm.com
+      kind: Installation
+      metadata:
+        name: "{{ aiops_instance }}"
+        namespace: "{{ aiops_namespace }}"
+      spec:
+        imagePullSecret: "{{ imagepullsecret }}" 
+        license:
+          accept: "{{ licenseaccept }}"
+        pakModules: 
+        - config:
+          - enabled: false
+            name: ibm-watson-aiops-ui-operator
+          - enabled: false
+            name: redis
+          - enabled: false
+            name: ibm-management-kong
+          enabled: true # Enable Bedrock, but disable other AIOps components for testing
+          name: aiopsFoundation 
+        - enabled: false # Disable AIOps components for testing
+          name: applicationManager
+        - enabled: false # Disable AIOps components for testing
+          name: aiManager
+        - enabled: false # Disable AIOps components for testing
+          name: connection
+        size: "{{ aiops_size }}"
+        storageClass: "{{ file_storageclass }}"
+        storageClassLargeBlock: "{{ block_storageclass }}"
+
+- name: be sure AIOps Installation is Running 
+  kubernetes.core.k8s_info:
+    api_version: orchestrator.aiops.ibm.com/v1alpha1
+    name: "{{ aiops_instance }}"
+    namespace: "{{ aiops_namespace }}"
+    kind: Installation
+  register: aiopsinstance_info
+  when: waitforinstall is defined and waitforinstall
+  until:
+  - aiopsinstance_info.resources is defined
+  - aiopsinstance_info.resources | length == 1
+  - aiopsinstance_info.resources[0].status is defined
+  - aiopsinstance_info.resources[0].status.phase == "Running"
+  retries: "{{ wait_for_install_retry }}" # 4 retries at 15s delay is 1 minute
+  delay: 15 # 15 second delay

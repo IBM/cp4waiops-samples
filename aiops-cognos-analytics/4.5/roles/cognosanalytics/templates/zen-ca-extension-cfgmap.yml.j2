@@ -1,0 +1,82 @@
+{% if cainstancelist_info is defined and cainstancelist_info.resources[0].spec.cp4d_web_url != "" %}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  labels:
+    icpdata_addon: "true"
+    icpdata_addon_version: "4.5"
+  name: aiops-ca-cognos-extension
+  namespace: {{ ca_namespace }}
+data:
+  extensions: |-
+    [{
+      "details": {
+        "actions": [{
+          "description": "{{ '{{' }}.global_waiops_perm_view_ca_dashboards_action_0{{ '}}' }}",
+          "tooltip": ""
+        }],
+        "category": "{{ '{{' }}.global_waiops_perm_view_report_dashboards_category{{ '}}' }}",
+        "description": [
+          "{{ '{{' }}.global_waiops_perm_view_ca_dashboards_description{{ '}}' }}"
+        ],
+        "key": "{{ view_dashboard_permission }}"
+      },
+      "display_name": "View dashboards",
+      "extension_name": "aiops_view_ca_dashboards_perm",
+      "extension_point_id": "zen_permissions"
+    }, {
+      "details": {
+        "actions": [{
+          "description": "{{ '{{' }}.global_waiops_perm_manage_ca_dashboards_action_0{{ '}}' }}",
+          "tooltip": ""
+        }, {
+          "description": "{{ '{{' }}.global_waiops_perm_manage_ca_dashboards_action_1{{ '}}' }}",
+          "tooltip": ""
+        }],
+        "category": "{{ '{{' }}.global_waiops_perm_view_report_dashboards_category{{ '}}' }}",
+        "description": [
+          "{{ '{{' }}.global_waiops_perm_manage_ca_dashboards_description{{ '}}' }}"
+        ],
+        "key": "{{ manage_dashboard_permission }}"
+      },
+      "display_name": "{{ '{{' }}.global_waiops_perm_manage_ca_dashboards_display_name{{ '}}' }}",
+      "extension_name": "aiops_manage_ca_dashboards_perm",
+      "extension_point_id": "zen_permissions"
+    }, {
+        "details": {
+          "icon": "{{ folder_icon }}"
+        },
+        "display_name": "{{ '{{' }}.global_katamari_nav_visualize{{ '}}' }}",
+        "extension_name": "{{ parent_folder }}",
+        "extension_point_id": "left_menu_folder",
+        "match_permissions": "{{ nav_menu_permissions }}",
+        "order_hint": 190
+      }, {
+        "details": {
+          "window_open_target":"_blank",
+          "target":"_blank",
+          "href": "{{ cainstancelist_info.resources[0].spec.cp4d_web_url }}",
+          "parent_folder": "{{ parent_folder }}"
+        },
+        "display_name": "{{ '{{' }}.global_waiops_nav_menuitem_cognos{{ '}}' }}",
+        "extension_name": "aiops-nav-menuitem-cognos",
+        "extension_point_id": "left_menu_item",
+        "match_permissions": "{{ nav_menu_permissions }}",
+        "order_hint": 1
+      }, {
+        "details": {
+          "label": "{{ '{{' }}.global_waiops_nav_menuitem_cognos{{ '}}' }}",
+          "nav_link": "{{ cainstancelist_info.resources[0].spec.cp4d_web_url }}"
+        },
+        "display_name": "{{ '{{' }}.global_waiops_nav_menuitem_cognos{{ '}}' }}",
+        "extension_name": "homepage_quick_navigation_cognos",
+        "extension_point_id": "homepage_quick_navigation",
+        "match_permissions": "{{ nav_menu_permissions }}",
+        "meta": {
+          "reference": {
+            "nav_item": "aiops-nav-menuitem-cognos"
+          }
+        },
+        "order_hint": 1
+      }]
+{% endif %}
