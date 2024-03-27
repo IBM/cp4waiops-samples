@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# © Copyright IBM Corp. 2020, 2023
+# © Copyright IBM Corp. 2020, 2024
 # SPDX-License-Identifier: Apache2.0
 #
 . ./uninstall-cp4waiops.props
@@ -33,7 +33,7 @@ log () {
 display_help() {
    echo "**************************************** Usage ********************************************"
    echo ""
-   echo " This script is used to uninstall IBM Cloud Pak for AIOps version 4.4"
+   echo " This script is used to uninstall IBM Cloud Pak for AIOps version 4.5"
    echo " The following prereqs are required before you run this script: "
    echo " - oc CLI is installed and you have logged into the cluster using oc login"
    echo " - Update uninstall-cp4waiops.props with components that you want to uninstall"

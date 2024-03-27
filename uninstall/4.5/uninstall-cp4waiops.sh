@@ -3,7 +3,7 @@
 # © Copyright IBM Corp. 2020, 2024
 # SPDX-License-Identifier: Apache2.0
 #
-# This script can be used to uninstall the IBM Cloud Pak for AIOps v4.4 product and
+# This script can be used to uninstall the IBM Cloud Pak for AIOps v4.5 product and
 # cleanup resources created by the product.  Please configure what you want to uninstall
 # in the uninstall-cp4waiops.props file first before running this script.
 
@@ -36,9 +36,9 @@ analyze_script_properties
 
 # Confirm we really want to uninstall 
 if [[ $SKIP_CONFIRM != "true" ]]; then
-  log $INFO "\033[0;33mUninstall v2.0 for AIOPs v4.4\033[0m"
+  log $INFO "\033[0;33mUninstall v2.0 for AIOPs v4.5\033[0m"
   log $INFO
-  log $INFO "This script will uninstall IBM Cloud Pak for AIOps version 4.4. Please ensure you have deleted any CRs you created before running this script."
+  log $INFO "This script will uninstall IBM Cloud Pak for AIOps version 4.5. Please ensure you have deleted any CRs you created before running this script."
   log $INFO ""
   log $INFO "##### IMPORTANT ######"
   log $INFO ""
@@ -56,7 +56,7 @@ if [[ $SKIP_CONFIRM != "true" ]]; then
   fi
   log " "
 else
-  log $INFO "\033[0;33mUninstall v2.0 for AIOPs v4.4\033[0m"
+  log $INFO "\033[0;33mUninstall v2.0 for AIOPs v4.5\033[0m"
   log $INFO
   log $INFO "This script will uninstall IBM Cloud Pak for AIOps."
   display_script_properties
@@ -231,7 +231,7 @@ if [[ ! -z "$CP4WAIOPS_PROJECT"  ]]; then
          log $INFO "Deleting serviceaccounts $SERVICEACCOUNT.."
          oc delete $SERVICEACCOUNT -n $CP4WAIOPS_PROJECT --ignore-not-found
       done
-   fi   
+   fi     
 
    # Remove Redis annotation from the namespace.  Leaving the annotation
    # would prevent a Redis re-install in the namespace.  Note that the

@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: Apache2.0
 #
 # Supplementary file to uninstall-cp4waiops.sh script for uninstalling 
-# IBM Cloud Pak for AIOps version 4.4
+# IBM Cloud Pak for AIOps version 4.5
 
 # Below are the PVC's that would be deleted if DELETE_PVCS in uninstall-cp4waiops-props.props is set to true
 # 1. app.kubernetes.io/instance=aimanager : This PVC is for minio StatefulSet. Change risk model and all the training logs are in the minio pvc.
@@ -71,9 +71,13 @@ CP4AIOPS_INTERNAL_PVC=("app=cassandra"
 CP4AIOPS_INTERNAL_SECRETS_LABELS=("release=aiops-topology")
 
 # Delete these internal secrets always
-CP4AIOPS_INTERNAL_SECRETS=("secret/aiops-ir-lifecycle-eventprocessor-ep-client-cert-kp"
+# CertMgr secrets are not deleted by default and not configurable via instance or namespace
+# https://cert-manager.io/docs/usage/certificate/#cleaning-up-secrets-when-certificates-are-deleted
+CP4AIOPS_INTERNAL_SECRETS=("secret/aiops-ir-lifecycle-eventprocessor-ep-zk-client-cert-kp"
+                           "secret/aiops-ir-lifecycle-eventprocessor-ep-client-cert-kp"
                            "secret/aiops-ir-lifecycle-eventprocessor-ep-internal-cert-kp"
                            "secret/aiops-ir-lifecycle-eventprocessor-ep-ss-cacert-kp"
+                           "secret/cp4waiops-eventprocessor-eve-29ee-ep-zk-client-cert-kp"
                            "secret/cp4waiops-eventprocessor-eve-29ee-ep-client-cert-kp"
                            "secret/cp4waiops-eventprocessor-eve-29ee-ep-ss-cacert-kp"
                            "secret/cp4waiops-eventprocessor-eve-29ee-ep-internal-cert-kp"
