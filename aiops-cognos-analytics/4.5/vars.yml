@@ -20,8 +20,8 @@ db2_cpu_requests: "2000m"
 db2_cpu_limits: "4000m"
 db2_memory_requests: "2Gi"
 db2_memory_limits: "4Gi"
-db2_affinity_key: "" # To schedule DB2 to specific nodes; DB2 cannot schedule reliably to nodes with >32Gi of memory
-db2_affinity_value: "" # To schedule DB2 to specific nodes; DB2 cannot schedule reliably to nodes with >32Gi of memory
+db2_affinity_key: "" # To schedule DB2 to specific nodes
+db2_affinity_value: "" # To schedule DB2 to specific nodes
 db2_registry: "cp.icr.io"
 # Cognos Analytics
 ca_name: "cp4aiops"
