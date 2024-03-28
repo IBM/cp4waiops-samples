@@ -54,10 +54,6 @@
         installPlanApproval: "{{approval_type}}"
         source: "{{ aiops_catalog_name }}"
         sourceNamespace: "{{ aiops_catalog_namespace }}"
-        config:
-          env:
-          - name: BEDROCKV4
-            value: "true"
 
 - name: be sure AIOps Subscription is AtLatestKnown
   when: installaiops is defined and installaiops
@@ -114,20 +110,13 @@
         license:
           accept: "{{ licenseaccept }}"
         pakModules: 
-        - config:
-          - enabled: false
-            name: ibm-watson-aiops-ui-operator
-          - enabled: false
-            name: redis
-          - enabled: false
-            name: ibm-management-kong
-          enabled: true # Enable Bedrock, but disable other AIOps components for testing
+        - enabled: true
           name: aiopsFoundation 
-        - enabled: false # Disable AIOps components for testing
+        - enabled: true
           name: applicationManager
-        - enabled: false # Disable AIOps components for testing
+        - enabled: true
           name: aiManager
-        - enabled: false # Disable AIOps components for testing
+        - enabled: false
           name: connection
         size: "{{ aiops_size }}"
         storageClass: "{{ file_storageclass }}"
