@@ -21,8 +21,8 @@ licenseaccept: false
 # provision
 reprovision_cognos: true
 provision_timeout: 60
-plan_size: "fixedminimum"
-content_store: 'DB2' # only 'DB2' (must be capitalized!) right now, want to use postgresql
+plan_size: "xsmall"
+content_store: 'DB2' # only 'DB2' (must be capitalized!)
 content_store_db_url: "c-db2u-db01-db2u"
 content_store_db_name: "BLUDB"
 content_store_db_port: "50000"
