@@ -10,7 +10,7 @@ aiops_instance: ibm-cp-aiops
 waitforinstall: yes # wait for the aiops installation resource to have status.phase == Running
 # DB2
 db2_instance_name: db2u-db01
-db2_version: "s11.5.9.0"
+db2_version: "s11.5.9.0-cn1"
 db2_data_storage_class: "ocs-storagecluster-ceph-rbd" # Block
 db2_logs_storage_class: "ocs-storagecluster-ceph-rbd" # Block
 db2_temp_storage_class: "ocs-storagecluster-ceph-rbd" # Block
