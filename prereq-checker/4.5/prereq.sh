@@ -11,7 +11,7 @@ NODE_COUNT_SMALL_4_4=3
 VCPU_SMALL_4_4=62
 MEMORY_SMALL_4_4=140
 # Minimum resource values for large profile 4.5.x
-NODE_COUNT_LARGE_4_4=10
+NODE_COUNT_LARGE_4_4=6
 VCPU_LARGE_4_4=162
 MEMORY_LARGE_4_4=372
 
@@ -918,13 +918,11 @@ checkSmallOrLargeProfileInstall() {
     fi
 
     log $INFO "==================================Resource Summary====================================================="
-
-    if [[ $worker_node_count -le 5 ]]; then
-        largeProfileNodeCheck="false"
-    elif [[ $worker_node_count -ge $NODE_COUNT_LARGE_4_4 ]]; then
+   
+    if [[ $worker_node_count -ge $NODE_COUNT_LARGE_4_4 ]]; then
         largeProfileNodeCheck="true"
     else
-        largeProfileNodeCheck="warn"
+        largeProfileNodeCheck="false"
     fi
     
     if [[ ("$largeProfileNodeCheck" == "true" ) && ($total_cpu_unrequested -ge $VCPU_LARGE_4_4) && ($total_memory_unrequested_GB -ge $MEMORY_LARGE_4_4)  ]] ; then
@@ -938,15 +936,6 @@ checkSmallOrLargeProfileInstall() {
         PROFILE_RES=$fail_msg
         startEndSection "Small or Large Profile Install Resources"
         return 1
-    fi
-
-    # Need to add comparison for CPU Large and Mem Large to resolve a bug wherein the prereq script passes an env with 6-9 workers but out of scope cpu and memory
-    if [[ "$largeProfileNodeCheck" == "warn" && "$CPU_LARGE" != "fail" && "$MEM_LARGE" != "fail" ]]; then
-        echo
-        printf "$warn_color$WARNING 6-9 worker nodes are adequate for a production deployment, but for resilience IBM recommends at least 10 worker nodes to enable the deployment to better withstand a worker node being unavailable. $color_end\n"
-        PROFILE_RES=$warning_msg
-        startEndSection "Small or Large Profile Install Resources"
-        return 0
     fi
 
     PROFILE_RES=$pass_msg
@@ -1127,6 +1116,8 @@ function Multizone() {
         if [[ "$cpu" -le  "$CPU_per_zone_large" ]]; then
             printf "$warn_color$WARNING $zone has $cpu CPU but at least $CPU_per_zone_large is required.$color_end\n"
             MZ_FLAG="true"
+        else
+            log $INFO "${zone} meets CPU requirements."
         fi
     done
 
@@ -1140,6 +1131,8 @@ function Multizone() {
         if [[ "$m" -le  "$Mem_per_zone_large" ]]; then
             printf "$warn_color$WARNING $zone has ${m}G of Memory but at least ${Mem_per_zone_large}G is required.$color_end\n"
             MZ_FLAG="true"
+        else
+            log $INFO "${zone} meets Memory requirements."
         fi
     done
     
@@ -1174,7 +1167,7 @@ showSummary() {
     printf "${string}\n"
 
     if [[ "$SHOW_MULTIZONE" == "true" ]]; then
-        string=`printf "      [ %s ] Zone CPU Requirements" "${MZ_RES}"`
+        string=`printf "      [ %s ] Zone CPU and Memory Requirements" "${MZ_RES}"`
         printf "${string}\n"
     fi
 
