@@ -5,16 +5,15 @@ set -eo pipefail
 
 ## Resource size for 4.5
 # These defaults are given in section 'IBM Cloud Pak for AIOps only Hardware requirement totals' under
-# 'Hardware requirements - IBM Cloud Pak for AIOps only' https://ibm.biz/aiops_hardware_450
+# 'Hardware requirements - IBM Cloud Pak for AIOps only' https://ibm.biz/aiops_hardware_451
 # Minimum resource values for small profile 4.5.x
-NODE_COUNT_SMALL_4_4=3
-VCPU_SMALL_4_4=62
-MEMORY_SMALL_4_4=140
+NODE_COUNT_SMALL_4_5=3
+VCPU_SMALL_4_5=62
+MEMORY_SMALL_4_5=140
 # Minimum resource values for large profile 4.5.x
-NODE_COUNT_LARGE_4_4=6
-VCPU_LARGE_4_4=162
-MEMORY_LARGE_4_4=372
-
+NODE_COUNT_LARGE_4_5=6
+VCPU_LARGE_4_5=162
+MEMORY_LARGE_4_5=372
 
 log () {
     local log_tracing_prefix=$1
@@ -85,7 +84,7 @@ display_help() {
 }
 
 # Add options as needed
-while getopts 'hsuom' opt; do
+while getopts 'hsom:n:' opt; do
     case "$opt" in
         h)
             display_help
@@ -97,6 +96,10 @@ while getopts 'hsuom' opt; do
         m)
             SHOW_MULTIZONE="true"
             ;;
+        n)
+            NAMESPACE="$OPTARG"
+            NS_OPTION="true"
+            ;;
     esac
 done
 shift "$(($OPTIND -1))"
@@ -104,12 +107,6 @@ shift "$(($OPTIND -1))"
 # Verify oc is installed & we are logged into the cluster
 if ! [ -x "$(command -v oc)" ]; then
     log $ERROR "oc CLI is not installed.  Please install the oc CLI and try running the script again."
-    exit 1
-fi
-
-oc project
-if [ $? -gt 0 ]; then
-    log $ERROR "oc login required.  Please login to the cluster and try running the script again."
     exit 1
 fi
 
@@ -123,6 +120,39 @@ fi
 echo
 log $INFO "Starting IBM Cloud Pak for AIOps prerequisite checker v4.5..."
 echo
+
+check_namespace() {
+
+    local restricted_ns=("default" "kube-system" "kube-public" "openshift-node" "openshift-infra")
+
+    # Check if the Namespace option has been enabled, if so -- use the param the user passed in
+    if [[ "$NS_OPTION" == "true" ]]; then
+        for ns in "${restricted_ns[@]}"; do
+            if [[ "$NAMESPACE" == $ns ]]; then
+                printf "$fail_color$ERROR You may not use the $ns namespace for your deployment.\n$color_end"
+                exit 1
+            fi
+        done
+    fi
+
+    local p=$(oc project "$NAMESPACE" -q)
+    # If output of "oc project" command includes the substring "Using project default", then exit script and notify user...
+    # If there is trouble connecting, ensure the user is logged in
+    if [[ $? -ne 0 || -z "$p" ]]; then
+        printf "$fail_color$ERROR Cannot determine the current namespace.\n$color_end"
+        exit 1
+    fi
+
+    for ns in "${restricted_ns[@]}"; do
+        if [[ "$p" == "$ns" ]]; then
+            printf "$fail_color$ERROR You may not use the $ns namespace for your deployment.\n$color_end"
+            exit 1
+        fi
+    done
+
+    # If the option wasn't enabled and the current namespace context is not default, then we can assume it's safe to run the script
+    return 0
+}
 
 # This function checks to see if user's OCP version meets our requirements by checking if 
 # substring "4.12", "4.13", "4.14", or "4.15" is in variable OCP_VER.
@@ -224,7 +254,7 @@ createTestJob () {
           - name: ibm-entitlement-key
           containers:
           - name: testimage
-            image: cp.icr.io/cp/cp4waiops/ai-platform-api-server@sha256:84c1693b1c391c3e576063fb7ac1be0ec3ad7012890e6b8d15135712a5a41b14
+            image: cp.icr.io/cp/cp4waiops/ai-platform-api-server@sha256:0f2635e17379299f69f8d3a04518c347af80e0d834f6db27a5f0a930df15348c
             imagePullPolicy: Always
             command: [ "echo", "SUCCESS" ]
           restartPolicy: OnFailure
@@ -257,7 +287,7 @@ EOF
                         - amd64
           containers:
           - name: testimage
-            image: cp.icr.io/cp/cp4waiops/ai-platform-api-server@sha256:84c1693b1c391c3e576063fb7ac1be0ec3ad7012890e6b8d15135712a5a41b14
+            image: cp.icr.io/cp/cp4waiops/ai-platform-api-server@sha256:0f2635e17379299f69f8d3a04518c347af80e0d834f6db27a5f0a930df15348c
             imagePullPolicy: Always
             command: [ "echo", "SUCCESS" ]
           restartPolicy: OnFailure
@@ -346,7 +376,7 @@ function checkIBMSpectrum {
         # If it meets the ocp version requirement... check if ibm-spectrum-scale-sc storageclass has volume expansion enabled
         IBM_SPEC_VE=$(checkAllowVolumeExpansion ibm-spectrum-scale-sc)
         if [[ "$?" == "1" ]]; then
-            printf "${fail_color}${ERROR} StorageClass ibm-spectrum-scale-sc does not have allowedVolumeExpansion enabled. This is required for all large profile installs and strongly recommended for small profile installs. See \"Storage Class Requirements\" section in https://ibm.biz/storage_consideration_450 for details.$color_end\n"
+            printf "${fail_color}${ERROR} StorageClass ibm-spectrum-scale-sc does not have allowedVolumeExpansion enabled. This is required for all large profile installs and strongly recommended for small profile installs. See \"Storage Class Requirements\" section in https://ibm.biz/storage_consideration_451 for details.$color_end\n"
             storageCheckRes+=("fail")
             return 1
         fi
@@ -398,7 +428,7 @@ function checkODF {
     for s in "${ODF_STORAGECLASSES[@]}"; do
         VE_CHECK=$(checkAllowVolumeExpansion $s)
         if [[ "$?" == "1" ]]; then
-            printf " $fail_color $ERROR StorageClass $s does not have allowedVolumeExpansion enabled. This is required for all large profile installs and strongly recommended for small profile installs. See \"Storage Class Requirements\" section in https://ibm.biz/storage_consideration_450 for details.$color_end\n"
+            printf " $fail_color $ERROR StorageClass $s does not have allowedVolumeExpansion enabled. This is required for all large profile installs and strongly recommended for small profile installs. See \"Storage Class Requirements\" section in https://ibm.biz/storage_consideration_451 for details.$color_end\n"
             ODF_VE_FLAG="true"
         fi
     done
@@ -422,7 +452,7 @@ function checkNonCSIPortworx {
     if [[ "$?" == "0" ]]; then
         log $INFO "StorageClass \"portworx-fs\" exists."
     else
-        printf " $fail_color $ERROR No valid Portworx StorageClass found. See \"Storage Class Requirements\" section in https://ibm.biz/storage_consideration_450 for details.$color_end\n"
+        printf " $fail_color $ERROR No valid Portworx StorageClass found. See \"Storage Class Requirements\" section in https://ibm.biz/storage_consideration_451 for details.$color_end\n"
         return 1
     fi
 
@@ -431,21 +461,21 @@ function checkNonCSIPortworx {
     if [[ "$?" == "0" ]]; then
         log $INFO "StorageClass \"portworx-aiops\" exists."
     else
-        printf "$fail_color$ERROR No valid Portworx StorageClass found. See \"Storage Class Requirements\" section in https://ibm.biz/storage_consideration_450 for details.$color_end\n"
+        printf "$fail_color$ERROR No valid Portworx StorageClass found. See \"Storage Class Requirements\" section in https://ibm.biz/storage_consideration_451 for details.$color_end\n"
         return 1
     fi
     
     checkAllowVolumeExpansion portworx-aiops
     if [[ "$?" == "1" ]]; then
         echo
-        printf "$fail_color$ERROR StorageClass portworx-aiops does not have allowedVolumeExpansion enabled. This is required for all large profile installs and strongly recommended for small profile installs. See the \"Storage Class Requirements\" section in https://ibm.biz/storage_consideration_450 for details.$color_end\n"
+        printf "$fail_color$ERROR StorageClass portworx-aiops does not have allowedVolumeExpansion enabled. This is required for all large profile installs and strongly recommended for small profile installs. See the \"Storage Class Requirements\" section in https://ibm.biz/storage_consideration_451 for details.$color_end\n"
         return 1
     fi
 
     checkAllowVolumeExpansion portworx-fs
     if [[ "$?" == "1" ]]; then
         echo
-        printf "$fail_color$ERROR StorageClass portworx-fs does not have allowedVolumeExpansion enabled. This is required for all large profile installs and strongly recommended for small profile installs. See the \"Storage Class Requirements\" section in https://ibm.biz/storage_consideration_450 for details.$color_end\n"
+        printf "$fail_color$ERROR StorageClass portworx-fs does not have allowedVolumeExpansion enabled. This is required for all large profile installs and strongly recommended for small profile installs. See the \"Storage Class Requirements\" section in https://ibm.biz/storage_consideration_451 for details.$color_end\n"
         return 1
     fi
 
@@ -465,7 +495,7 @@ function checkPortworx {
         checkAllowVolumeExpansion px-csi-aiops
         if [[ "$?" == "1" ]]; then
             echo
-            printf "$fail_color$ERROR StorageClass px-csi-aiops does not have allowedVolumeExpansion enabled. This is required for all large profile installs and strongly recommended for small profile installs. See the \"Storage Class Requirements\" section in https://ibm.biz/storage_consideration_450 for details.$color_end\n"
+            printf "$fail_color$ERROR StorageClass px-csi-aiops does not have allowedVolumeExpansion enabled. This is required for all large profile installs and strongly recommended for small profile installs. See the \"Storage Class Requirements\" section in https://ibm.biz/storage_consideration_451 for details.$color_end\n"
             storageCheckRes+=("fail")
             return 1
         fi
@@ -479,7 +509,7 @@ function checkPortworx {
             checkAllowVolumeExpansion px-csi-aiops-mz
             if [[ "$?" == "1" ]]; then
                 echo
-                printf "$fail_color$ERROR StorageClass px-csi-aiops-mz does not have allowedVolumeExpansion enabled. This is required for all large profile installs and strongly recommended for small profile installs. See the \"Storage Class Requirements\" section in https://ibm.biz/storage_consideration_450 for details.$color_end\n"
+                printf "$fail_color$ERROR StorageClass px-csi-aiops-mz does not have allowedVolumeExpansion enabled. This is required for all large profile installs and strongly recommended for small profile installs. See the \"Storage Class Requirements\" section in https://ibm.biz/storage_consideration_451 for details.$color_end\n"
                 storageCheckRes+=("fail")
                 return 1
             fi
@@ -510,21 +540,21 @@ function checkIBMCFileGoldGidStorage {
     block=$(oc get storageclass ibmc-block-gold --ignore-not-found=true)
 
     if [[ "$file" == "" || "$block" == "" ]]; then
-        printf "$fail_color $ERROR Both ibmc-block-gold and ibmc-file-gold-gid need to exist to use IBM Cloud Storage. See \"Storage\" section in https://ibm.biz/storage_consideration_450 for details. $color_end\n"
+        printf "$fail_color $ERROR Both ibmc-block-gold and ibmc-file-gold-gid need to exist to use IBM Cloud Storage. See \"Storage\" section in https://ibm.biz/storage_consideration_451 for details. $color_end\n"
         storageCheckRes+=("fail")
         return 1 
     fi
 
     VE_BLOCK=$(checkAllowVolumeExpansion ibmc-block-gold)
     if [[ "$?" == "1" ]]; then
-        printf " $fail_color $ERROR StorageClass ibmc-block-gold does not have allowedVolumeExpansion enabled. This is required for all large profile installs and strongly recommended for small profile installs. See \"Storage Class Requirements\" section in https://ibm.biz/storage_consideration_450 for details.$color_end\n"
+        printf " $fail_color $ERROR StorageClass ibmc-block-gold does not have allowedVolumeExpansion enabled. This is required for all large profile installs and strongly recommended for small profile installs. See \"Storage Class Requirements\" section in https://ibm.biz/storage_consideration_451 for details.$color_end\n"
         storageCheckRes+=("fail")
         return 1
     fi
 
     VE_FILE=$(checkAllowVolumeExpansion ibmc-file-gold-gid)
     if [[ "$?" == "1" ]]; then
-        printf " $fail_color $ERROR StorageClass ibmc-file-gold-gid does not have allowedVolumeExpansion enabled. This is required for all large profile installs and strongly recommended for small profile installs. See \"Storage Class Requirements\" section in https://ibm.biz/storage_consideration_450 for details.$color_end\n"
+        printf " $fail_color $ERROR StorageClass ibmc-file-gold-gid does not have allowedVolumeExpansion enabled. This is required for all large profile installs and strongly recommended for small profile installs. See \"Storage Class Requirements\" section in https://ibm.biz/storage_consideration_451 for details.$color_end\n"
         storageCheckRes+=("fail")
         return 1
     fi
@@ -595,7 +625,7 @@ function checkStorage {
     if [ ${#storageFound[@]} -eq 0 ]; then
         STORAGE_PROVIDER_RES=$fail_msg
         printf "$fail_color$ERROR At least one of the four Storage Providers are required$color_end\n"
-        printf "$fail_color$ERROR The supported Storage Providers are Portworx, Openshift Data Foundation, IBM Cloud Storage for ROKS, or IBM Spectrum Fusion/IBM Spectrum Scale Container Native. See https://ibm.biz/storage_consideration_450 for details.$color_end\n"
+        printf "$fail_color$ERROR The supported Storage Providers are Portworx, Openshift Data Foundation, IBM Cloud Storage for ROKS, or IBM Spectrum Fusion/IBM Spectrum Scale Container Native. See https://ibm.biz/storage_consideration_451 for details.$color_end\n"
         STORAGE_PROVIDER_RES=$fail_msg
         startEndSection "Storage Provider"
         return 1
@@ -847,20 +877,20 @@ analyze_resource_display() {
     # If 10 or more, then set to pass
     if [[ $worker_node_count -le 5 ]]; then
         large_worker_node_count_string=`printf "$fail_color $worker_node_count $color_end\n"`
-    elif [[ $worker_node_count -ge $NODE_COUNT_LARGE_4_4 ]]; then
+    elif [[ $worker_node_count -ge $NODE_COUNT_LARGE_4_5 ]]; then
         large_worker_node_count_string=`printf "$pass_color $worker_node_count $color_end\n"`
     else
         large_worker_node_count_string=`printf "$warn_color $worker_node_count $color_end\n"`
     fi
     
-    if [[ $total_cpu_unrequested -ge $VCPU_LARGE_4_4 ]]; then
+    if [[ $total_cpu_unrequested -ge $VCPU_LARGE_4_5 ]]; then
         large_total_cpu_unrequested_string=`printf "$pass_color $total_cpu_unrequested $color_end\n"`
     else
         large_total_cpu_unrequested_string=`printf "$fail_color $total_cpu_unrequested $color_end\n"`
         CPU_LARGE="fail"
     fi
 
-    if [[ $total_memory_unrequested_GB -ge $MEMORY_LARGE_4_4 ]]; then
+    if [[ $total_memory_unrequested_GB -ge $MEMORY_LARGE_4_5 ]]; then
         large_total_memory_unrequested_GB_string=`printf "$pass_color $total_memory_unrequested_GB $color_end\n"`
     elif [[ $total_memory_unrequested_GB -le 0 && "$unitNotSupported" -eq "true"  ]]; then
         large_total_memory_unrequested_GB_string=`printf "$fail_color DNE $color_end\n"`
@@ -870,19 +900,19 @@ analyze_resource_display() {
         MEM_LARGE="fail"
     fi
 
-    if [[ $worker_node_count -ge $NODE_COUNT_SMALL_4_4 ]]; then
+    if [[ $worker_node_count -ge $NODE_COUNT_SMALL_4_5 ]]; then
         small_worker_node_count_string=`printf "$pass_color $worker_node_count $color_end\n"`
     else
         small_worker_node_count_string=`printf "$fail_color $worker_node_count $color_end\n"`
     fi
     
-    if [[ $total_cpu_unrequested -ge $VCPU_SMALL_4_4 ]]; then
+    if [[ $total_cpu_unrequested -ge $VCPU_SMALL_4_5 ]]; then
         small_total_cpu_unrequested_string=`printf "$pass_color $total_cpu_unrequested $color_end\n"`
     else
         small_total_cpu_unrequested_string=`printf "$fail_color $total_cpu_unrequested $color_end\n"`
     fi
     
-    if [[ $total_memory_unrequested_GB -ge $MEMORY_SMALL_4_4 ]]; then
+    if [[ $total_memory_unrequested_GB -ge $MEMORY_SMALL_4_5 ]]; then
         small_total_memory_unrequested_GB_string=`printf "$pass_color $total_memory_unrequested_GB $color_end\n"`
     elif [[ $total_memory_unrequested_GB -le 0 && "$unitNotSupported" -eq "true"  ]]; then
         small_total_memory_unrequested_GB_string=`printf "$fail_color DNE $color_end\n"`
@@ -907,9 +937,9 @@ checkSmallOrLargeProfileInstall() {
     log $INFO "==================================Resource Summary====================================================="
     header=`printf "   %40s   |      %s      |     %s" "Nodes" "vCPU" "Memory(GB)"`
     log $INFO "${header}"
-    string=`printf "Small profile(available/required)  [ %s/ %s ]   [ %s/ %s ]       [ %s/ %s ]" "$small_worker_node_count_string" "$NODE_COUNT_SMALL_4_4" "$small_total_cpu_unrequested_string" "$VCPU_SMALL_4_4" "$small_total_memory_unrequested_GB_string" "$MEMORY_SMALL_4_4"`
+    string=`printf "Small profile(available/required)  [ %s/ %s ]   [ %s/ %s ]       [ %s/ %s ]" "$small_worker_node_count_string" "$NODE_COUNT_SMALL_4_5" "$small_total_cpu_unrequested_string" "$VCPU_SMALL_4_5" "$small_total_memory_unrequested_GB_string" "$MEMORY_SMALL_4_5"`
     log $INFO "${string}"
-    string=`printf "Large profile(available/required)  [ %s/ %s ]   [ %s/ %s ]       [ %s/ %s ]" "$large_worker_node_count_string" "$NODE_COUNT_LARGE_4_4" "$large_total_cpu_unrequested_string" "$VCPU_LARGE_4_4" "$large_total_memory_unrequested_GB_string" "$MEMORY_LARGE_4_4"`
+    string=`printf "Large profile(available/required)  [ %s/ %s ]   [ %s/ %s ]       [ %s/ %s ]" "$large_worker_node_count_string" "$NODE_COUNT_LARGE_4_5" "$large_total_cpu_unrequested_string" "$VCPU_LARGE_4_5" "$large_total_memory_unrequested_GB_string" "$MEMORY_LARGE_4_5"`
     log $INFO "${string}"
     
     # Script need to output a message if memory cant be calculated. This script only supports Ki, Mi, Gi, Ti, Ei, Pi, bytes, and m.
@@ -919,15 +949,15 @@ checkSmallOrLargeProfileInstall() {
 
     log $INFO "==================================Resource Summary====================================================="
    
-    if [[ $worker_node_count -ge $NODE_COUNT_LARGE_4_4 ]]; then
+    if [[ $worker_node_count -ge $NODE_COUNT_LARGE_4_5 ]]; then
         largeProfileNodeCheck="true"
     else
         largeProfileNodeCheck="false"
     fi
     
-    if [[ ("$largeProfileNodeCheck" == "true" ) && ($total_cpu_unrequested -ge $VCPU_LARGE_4_4) && ($total_memory_unrequested_GB -ge $MEMORY_LARGE_4_4)  ]] ; then
+    if [[ ("$largeProfileNodeCheck" == "true" ) && ($total_cpu_unrequested -ge $VCPU_LARGE_4_5) && ($total_memory_unrequested_GB -ge $MEMORY_LARGE_4_5)  ]] ; then
         log $INFO "Cluster currently has resources available to create a large profile of Cloud Pak for AIOps"
-    elif [[ $worker_node_count -ge $NODE_COUNT_SMALL_4_4 && ($total_cpu_unrequested -ge $VCPU_SMALL_4_4) && ($total_memory_unrequested_GB -ge $MEMORY_SMALL_4_4) ]] ; then
+    elif [[ $worker_node_count -ge $NODE_COUNT_SMALL_4_5 && ($total_cpu_unrequested -ge $VCPU_SMALL_4_5) && ($total_memory_unrequested_GB -ge $MEMORY_SMALL_4_5) ]] ; then
         log $INFO "Cluster currently has resources available to create a small profile of Cloud Pak for AIOps"
         ONLY_SMALL="true"
     else
@@ -1107,7 +1137,7 @@ function Multizone() {
         zones_Mem+=($zm)
     done
 
-    CPU_per_zone_large=$(( (($VCPU_LARGE_4_4 / $uniqueZones) + ($VCPU_LARGE_4_4 / (($uniqueZones - 1) * $uniqueZones))) + 1))
+    CPU_per_zone_large=$(( (($VCPU_LARGE_4_5 / $uniqueZones) + ($VCPU_LARGE_4_5 / (($uniqueZones - 1) * $uniqueZones))) + 1))
     for i in "${zones_CPU[@]}"; do
         zone="${i%%:*}"
         cpu="${i#*:}"
@@ -1123,7 +1153,7 @@ function Multizone() {
 
     echo
 
-    Mem_per_zone_large=$(( (($MEMORY_LARGE_4_4 / $uniqueZones) + ($MEMORY_LARGE_4_4 / (($uniqueZones - 1) * $uniqueZones))) + 1))
+    Mem_per_zone_large=$(( (($MEMORY_LARGE_4_5 / $uniqueZones) + ($MEMORY_LARGE_4_5 / (($uniqueZones - 1) * $uniqueZones))) + 1))
     for i in "${zones_Mem[@]}"; do
         zone="${i%%:*}"
         m="${i#*:}"
@@ -1183,6 +1213,7 @@ function main {
     initialize
 
     fail_found=0
+    check_namespace || fail_found=1
     checkOCPVersion || fail_found=1
 
     checkEntitlementSecret || fail_found=1
