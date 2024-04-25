@@ -83,25 +83,6 @@ display_help() {
    echo "*******************************************************************************************"
 }
 
-# Upgrade: Check if the user is doing an upgrade
-checkUpgrade () {
-  echo
-    log $INFO "Starting IBM Cloud Pak for Watson AIOps AI Manager upgrade checker..."
-  echo
-  ORCHESTRATOR_UPGRADE="true"
-
-  OPS_NAMESPACE="openshift-operators"
-  INSTALL_NAMESPACE=`oc project -q`
-
-  ORCHESTRATOR_CHECK1=`oc get subscription.operator --ignore-not-found -n $INSTALL_NAMESPACE -o=jsonpath="{range .items[*]}{.spec.name}{'\n'}{end}" | grep ibm-aiops-orchestrator`
-
-  ORCHESTRATOR_CHECK2=`oc get subscription.operator --ignore-not-found -n $OPS_NAMESPACE -o=jsonpath="{range .items[*]}{.spec.name}{'\n'}{end}" | grep ibm-aiops-orchestrator`
-
-  if [[ $ORCHESTRATOR_CHECK1 || $ORCHESTRATOR_CHECK2 ]] ; then
-    checkIAFSubs
-  fi
-}
-
 # Upgrade: Check IAF subscription
 checkIAFSubs () {
 NUM_SUBS=`oc get subscription.operator --ignore-not-found -n $OPS_NAMESPACE -o=jsonpath="{range .items[*]}{.spec.name}{'\n'}{end}" | grep ibm-automation | wc -l || true`
@@ -154,11 +135,8 @@ while getopts 'hsuo' opt; do
       display_help
       exit 0
       ;;
-    u)
-      checkUpgrade
-      ;;
     s)
-      SKIP_CONFIRM="true" && checkUpgrade
+      SKIP_CONFIRM="true"
       ;;
     o)
       SKIP_STORAGE_CHECK="true"
