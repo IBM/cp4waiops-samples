@@ -1,6 +1,6 @@
 # IBM Cloud Pak for AIOps prerequisite checker tool
 
-The prerequisite checker tool can be used to validate whether a Red Hat OpenShift Container Platform cluster has the required resources and prerequisites available to enable a successful installation of IBM Cloud Pak for AIOps AIOps. This tool completes the following checks and generates an installation readiness report:
+The prerequisite checker tool can be used to validate whether a Red Hat OpenShift Container Platform cluster has the required resources and prerequisites available to enable a successful installation of IBM Cloud Pak for AIOps. This tool completes the following checks and generates an installation readiness report:
 
 **Pre-Install Checker::**
 
