@@ -1437,7 +1437,7 @@ fi
 if [[ "$1" == "status-upgrade" ]]
 then
     # This command checks the status of CP4AIOps upgrades
-    # to v3.3, v3.4, v3.5, v3.6, v3.7, v4.1, v4.2, v4.3, and v4.4.
+    # to v3.3, v3.4, v3.5, v3.6, v3.7, v4.1, v4.2, v4.3, v4.4, v4.5, and v4.6.
 
     FAILING_UPGRADE=""
     SUCCESSFULLY_UPGRADED=""
@@ -1557,6 +1557,14 @@ then
         MAJORVERSION_ASM="2.22"
     }
 
+    component-versions-46() {
+        MAJORVERSION_AIOPSUI="4.6"
+        MAJORVERSION_AIMANAGER="4.6"
+        MAJORVERSION_IRCORE="4.6"
+        MAJORVERSION_LIFECYCLESERVICE="4.6"
+        MAJORVERSION_AIOPSANALYTICSORCHESTRATOR="4.6"
+        MAJORVERSION_ASM="2.23"
+    }
 
     aiopsEdgeBaseUpgradeStatus() {    
         UPGRADED=$(oc get aiopsedge aiopsedge -o jsonpath='{.status.conditions[?(@.type=="UpgradeReady")].status}')
