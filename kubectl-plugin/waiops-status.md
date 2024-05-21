@@ -395,7 +395,7 @@ ______________________________________________________________
 ## How to use
 
 ### Requirements
-- You must have an installation of Cloud Pak for AIOps v3.3, v3.4, v3.5, v3.6, v3.7, v4.1, v4.2, v4.3, v4.4, or, v4.5 on your cluster. 
+- You must have an installation of Cloud Pak for AIOps v3.x or v4.x on your cluster. 
 
 **Note**: while this tool does not require you to be logged in as a cluster admin, however
  * `oc waiops multizone status` output may be limited and inaccurate without the required permissions
