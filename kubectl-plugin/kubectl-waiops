@@ -1833,7 +1833,7 @@ then
         component-versions-33
     elif [ "${VERSION_AIOPSORCHESTRATOR}" == "0.1" ];
     then
-        # for developer builds (v0.1), we will check against release-4.5 versions
+        # for developer builds (v0.1), we will check against release-4.6 versions
         component-versions-46
         echo ""
         echo "${red}${bold}NOTE: ${normal}Your Cloud Pak for AIOps install appears to be an internal dev version (v${VERSION_AIOPSORCHESTRATOR})."
