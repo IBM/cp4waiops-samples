@@ -951,9 +951,12 @@ then
     getAIOpsEdgeStatus
     getAIOpsUIStatus
 
-    echo "______________________________________________________________"
-    echo "Kong instances:" && echo ""
-    getKongStatus
+    if [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.3" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.4" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.5" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.6" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.7" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "4.1" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "4.2" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "4.3" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "4.4" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "4.5" ]];
+    then
+        echo "______________________________________________________________"
+        echo "Kong instances:" && echo ""
+        getKongStatus
+    fi
 
     if [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.3" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.4" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.5" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.6" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.7" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "4.1" ]];
     then
@@ -1852,7 +1855,12 @@ then
     aiopsEdgeBaseUpgradeStatus
     lifecycleUpgradeStatus
     aiopsUIUpgradeStatus
-    kongUpgradeStatus
+    
+    if [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.3" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.4" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.5" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.6" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.7" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "4.1" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "4.2" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "4.3" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "4.4" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "4.5" ]];
+    then
+        kongUpgradeStatus
+    fi
+
     aiManagerUpgradeStatus
     irCoreUpgradeStatus
     aiopsAnalyticsUpgradeStatus
