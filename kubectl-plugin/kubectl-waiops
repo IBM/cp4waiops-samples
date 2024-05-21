@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# © Copyright IBM Corp. 2020, 2023
+# © Copyright IBM Corp. 2020, 2024
 
 # The CP4AIOps status checker tool prints out several components to indicate the status of your install.
 # In a successful install, the components below should all have a successful STATUS/PROGRESS/PHASE indicator.
