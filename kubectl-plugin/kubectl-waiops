@@ -1017,7 +1017,6 @@ then
     fi
     
     getCSVStatus "$INSTALLATION_NAMESPACE" "ibm-common-service-operator"
-    getCSVStatus "$INSTALLATION_NAMESPACE" "ibm-management-kong"
     if [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.3" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.4" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.5" ]];
     then
         getCSVStatus "$INSTALLATION_NAMESPACE" "ibm-postgreservice-operator"
@@ -1104,7 +1103,6 @@ then
             fi
             getCSVStatus "$INSTALLATION_NAMESPACE" "ibm-events-operator"
             getCSVStatus "$INSTALLATION_NAMESPACE" "ibm-iam-operator"
-            getCSVStatus "$INSTALLATION_NAMESPACE" "ibm-mongodb-operator"
             getCSVStatus "$INSTALLATION_NAMESPACE" "ibm-zen-operator"
             getCSVStatus "$INSTALLATION_NAMESPACE" "operand-deployment-lifecycle-manager"
         else
@@ -1150,7 +1148,11 @@ then
         getSubscriptionStatusGrep "ibm-automation-elastic" "$INSTALLATION_NAMESPACE" 
         getSubscriptionStatusGrep "ibm-automation-flink" "$INSTALLATION_NAMESPACE" 
     fi
-    getSubscriptionStatus "ibm-management-kong" "$INSTALLATION_NAMESPACE" 
+
+    if [[ "$VERSION_AIOPSORCHESTRATOR" != "4.6" ]]; then
+        getSubscriptionStatus "ibm-management-kong" "$INSTALLATION_NAMESPACE" 
+    fi
+
     if [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.3" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.4" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.5" ]];
     then
         getSubscriptionStatus "ibm-postgreservice-operator" "$INSTALLATION_NAMESPACE" 
@@ -1281,7 +1283,11 @@ then
             fi
             getSubscriptionStatus "ibm-events-operator" "$INSTALLATION_NAMESPACE"
             getSubscriptionStatus "ibm-im-operator" "$INSTALLATION_NAMESPACE"
-            getSubscriptionStatus "ibm-im-mongodb-operator" "$INSTALLATION_NAMESPACE"
+
+            if [[ "$VERSION_AIOPSORCHESTRATOR" != "4.6" ]]; then
+                getSubscriptionStatus "ibm-im-mongodb-operator" "$INSTALLATION_NAMESPACE"
+            fi
+            
             getSubscriptionStatus "ibm-platformui-operator" "$INSTALLATION_NAMESPACE"
             getSubscriptionStatus "operand-deployment-lifecycle-manager-app" "$INSTALLATION_NAMESPACE"
             getSubscriptionStatusGrep "aiops-ibm-common-services" "$INSTALLATION_NAMESPACE"
