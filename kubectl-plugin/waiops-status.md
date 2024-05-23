@@ -22,8 +22,10 @@ Below are example outputs of these commands.
 
 ### Installation status checker output (`oc waiops status`)
 ```
-$ oc waiops status
-Cloud Pak for AIOps v4.4 installation status:
+liamsalazar@Liams-MBP kubectl-plugin % oc waiops status
+Already on project "katamari" on server "https://api.my.cool.domain.com:6443".
+
+Cloud Pak for AIOps v4.6 installation status:
   Componentstatus:
     Aimanager:                       Ready
     Aiopsanalyticsorchestrator:      Ready
@@ -37,8 +39,8 @@ Cloud Pak for AIOps v4.4 installation status:
     Flinkcluster:                    Ready
     Issueresolutioncore:             Ready
     Kafka:                           Ready
-    Kong:                            Ready
     Lifecycleservice:                Ready
+    Lifecycletrigger:                Ready
     Tunnel:                          Ready
     Zenservice:                      Ready
   Custom Profile Configmap:          aiops-custom-size-profile
