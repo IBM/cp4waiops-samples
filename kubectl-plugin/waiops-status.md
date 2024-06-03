@@ -22,7 +22,7 @@ Below are example outputs of these commands.
 
 ### Installation status checker output (`oc waiops status`)
 ```
-liamsalazar@Liams-MBP kubectl-plugin % oc waiops status
+$ oc waiops status
 Already on project "katamari" on server "https://api.my.cool.domain.com:6443".
 
 Cloud Pak for AIOps v4.6 installation status:
@@ -58,7 +58,7 @@ Cloud Pak for AIOps v4.6 installation status:
 
 ### Detailed installation status checker output (`oc waiops status-all`)
 ```
-liamsalazar@Liams-MBP kubectl-plugin % oc waiops status-all                                
+$ oc waiops status-all                                
 Already on project "katamari" on server "https://api.my.cool.domain.com:6443".
 
 Cloud Pak for AIOps v4.6 installation status:
@@ -415,7 +415,7 @@ katamari                                           ibm-aiops-orchestrator-contro
 
 ### Upgrade status checker (`oc waiops status-upgrade`):
 ```
-liamsalazar@Liams-MBP cp4waiops-samples % oc waiops status-upgrade
+$ oc waiops status-upgrade
 Now using project "katamari" on server "https://my.cool.domain.com:6443".
 
 Cloud Pak for AIOps v4.6 upgrade status:
