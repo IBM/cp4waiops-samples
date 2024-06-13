@@ -4,7 +4,7 @@ Cognos `visualizations` and `extensions` require **version 11.2 +**
 
 ## Files
 
-**alert data example:** [TelcoDash.zip](telcoDash/TelcoDash.zip)
+**alert data example:** [TelcoDash.zip](telcoDash/TelcoDash.zip) <br />
 _optional static csv_ [AlertsData.csv](telcoDash/AlertsData.csv)
 
 ## Installation 
