@@ -3,11 +3,12 @@ Example packages containing `data modules` and `dashboard` examples  <br />
 Cognos `visualizations` and `extensions` require **version 11.2 +** 
 
 ## Files
-_Examples with data require a password to import_
+_Examples with data require a password to import thus all data need to be relinked_
 
-**alert data example:** [TelcoDash.zip](https://github.ibm.com/hdm/aiops-custom-widget-cognos-integration/files/1343805/TelcoDash.zip)
+**alert data example:** [TelcoDash.zip](telcoDash/TelcoDash.zip)
 
 ## Installation 
+[view demo](videoSteps/ImportDemo.mov)
 
 1. Find the location of Cognos packages, these can be found in either
 
@@ -19,19 +20,20 @@ _If you are having trouble locating the pod that contains /data/deployment/ sear
 
 2. Place the desired example zip file into the above location
 
-3. Open the [admin console](https://media.github.ibm.com/user/430455/files/a347c775-3da1-4626-8cef-16898eca96f0) in the Cognos UI
+3. Open the admin console in the Cognos UI
 
-4. Go to [configuration then content administration then select the new import button](https://media.github.ibm.com/user/430455/files/5f90126c-8edd-4c61-a8a4-b9abc4197c0a)
+4. Go to configuration then content administration then select the new import button
 
-5. Select the [package name](https://media.github.ibm.com/user/430455/files/fd762b21-5606-4ee3-9d64-bdf778526235)
+5. Select the package name
 
-6. Select next and select the [checkbox next to the folder](https://media.github.ibm.com/user/430455/files/435f34b7-9112-41a1-8013-82115af34cd2)
+6. Select next and select the checkbox next to the folder
 
 7. Select next and finish
 
 8. Deployment will show up in **Team content**
 
-9. [Re-link](https://media.github.ibm.com/user/430455/files/8b689e77-cd96-4210-81d2-caf4d8ef1100) the dashboard to the data source provided in the same folder.
+9. Re-link the dashboard to the data source provided in the same folder.
+    - To view static dashboards, upload the corresponding csv. [Demo](videoSteps/StaticCSVUpload.mov)
 
 10. Reload the page if visualizations will not load
 ---
