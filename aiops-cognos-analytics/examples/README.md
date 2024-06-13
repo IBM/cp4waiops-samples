@@ -3,12 +3,11 @@ Example packages containing `data modules` and `dashboard` examples  <br />
 Cognos `visualizations` and `extensions` require **version 11.2 +** 
 
 ## Files
-_Examples with data require a password to import thus all data need to be relinked_
 
 **alert data example:** [TelcoDash.zip](telcoDash/TelcoDash.zip)
 
 ## Installation 
-[view demo](videoSteps/ImportDemo.mov)
+[Video demo steps](videoSteps/ImportDemo.mov)
 
 1. Find the location of Cognos packages, these can be found in either
 
