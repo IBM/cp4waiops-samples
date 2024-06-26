@@ -40,6 +40,9 @@ db2 -td@ -vf db2_reporter_aiops_alerts.sql
 ```
 db2 -td@ -vf db2_reporter_aiops_incidents.sql
 ```
+```
+db2 -td@ -vf db2_reporter_aiops_noise_reduction.sql
+```
 
 If you prefer to use the UI (as with IBM DB2 on Cloud), paste the contents of each script into the SQL command window to run. Make sure to configure the command terminator to use @.
 
@@ -76,6 +79,7 @@ The following are provided as defaults for alerts:
   "acknowledged": $number(alert.acknowledged),
   "owner": alert.owner,
   "team": alert.team,
+  "eventCount": alert.eventCount,
   "lastStateChangeTime": $replace($replace($replace(alert.lastStateChangeTime, 'T', '-'), ':', '.'), 'Z', '000')
 }
 ```
@@ -132,9 +136,11 @@ Now you're all set to create reports in Cognos Analytics. See AIOps product docu
 ```
 db2 -td@ -vf db2_reporter_aiops_alerts_remove.sql
 ```
-and
 ```
 db2 -td@ -vf db2_reporter_aiops_incidents_remove.sql
+```
+```
+db2 -td@ -vf db2_reporter_aiops_noise_reduction_remove.sql
 ```
 
 ## Reference
@@ -161,6 +167,8 @@ INCIDENTS_AUDIT_TEAM - Audit of incident team changes
 INCIDENTS_AUDIT_PRIORITY - Audit of incident priority changes
 
 INCIDENTS_AUDIT_STATE - Audit of incident status changes
+
+AIOPS_NOISE_REDUCTION_TIMELINE_TABLE - Noise reduction over time
 
 ### Views
 ALERTS_STATUS_VW - View similar to alerts list in the UI
@@ -208,3 +216,14 @@ INCIDENTS_AUDIT_UPDATE_OWNER - Updates previous incident owner state
 INCIDENTS_AUDIT_UPDATE_TEAM - Updates previous incident team state
 
 INCIDENTS_AUDIT_UPDATE_STATE - Updates previous incident status
+
+AIOPS_ALERT_COUNT_UPDATER_ON_UPDATE - Updates tallys when an alert is updated
+
+ALERT_AIOPS_COUNT_UPDATER_ON_INSERT - Updates tallys when an alert is created
+
+AIOPS_INCIDENT_COUNT_UPDATER_ON_UPDATE - Updates tallys when an incident is updated
+
+AIOPS_INCIDENT_COUNT_UPDATER_ON_INSERT - Updates tallys when an incident is created
+
+### Stored procedures
+INSERT_ALERT_COUNTS_UPDATE - Inserts a tally of event instances, alerts and incidents at the current point in time
