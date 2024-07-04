@@ -1,5 +1,5 @@
 {
-  "name": "aiopsAlertWidget",
+  "name": "AIOpsCustomWidgets",
   "extensions": [
     {
       "perspective": "dashboard",
@@ -11,7 +11,7 @@
               "containerId": "com.ibm.bi.dashboard.contentTypes",
               "id": "widget.alertWidget.renderer",
               "type": "alertWidget",
-              "icon": "loading.svg",
+              "iconUrl": "v1/ext/AIOpsCustomWidgets/assets/table.svg",
               "expose": true,
               "name": "AIOps Alert list",
               "propertyLayoutList": [
@@ -51,14 +51,14 @@
                   "editor": {
                     "sectionId": "general.aiops_settings",
                     "uiControl": {
-                    "type": "InputLabel",
-                    "label": "Column mapping"
+                      "type": "InputLabel",
+                      "label": "Column mapping"
                     }
                   }
                 }
               ],
               "renderer": {
-                "class": "v1/ext/aiopsAlertWidget/AlertWidget",
+                "class": "v1/ext/AIOpsCustomWidgets/alert-list/AlertWidget",
                 "dependencies": ["Dashboard.Canvas"]
               },
               "capabilities": {
@@ -68,30 +68,351 @@
             {
               "containerId": "com.ibm.bi.dashboard.content-features",
               "name": "DynamicWidgetProperty",
-              "id": "dashboard.DynamicWidgetProperty",
-              "class": "v1/ext/aiopsAlertWidget/CustomProperty",
+              "id": "dashboard.alertListWidget.DynamicWidgetProperty",
+              "class": "v1/ext/AIOpsCustomWidgets/alert-list/AlertListCustomProperty",
               "dependencies":["Properties"],
               "types": ["alertWidget"]
             }
           ],
-		  "cssStyles": ["v1/ext/aiopsAlertWidget/index.css"]
+          "cssStyles": ["v1/ext/AIOpsCustomWidgets/index.css"]
         }
       ]
     },
     {
-      "perspective": "aiopsAlertWidget",
+      "perspective": "dashboard",
       "features": [
         {
-          "id": "com.ibm.aiopsAlertWidget",
+          "id": "com.ibm.dashboard.aiops.incident.widget",
+          "collectionItems": [
+            {
+              "containerId": "com.ibm.bi.dashboard.contentTypes",
+              "id": "widget.incidentListWidget.renderer",
+              "type": "incidentListWidget",
+              "iconUrl": "v1/ext/AIOpsCustomWidgets/assets/table.svg",
+              "expose": true,
+              "name": "AIOps Incident list",
+              "propertyLayoutList": [
+                {
+                  "type": "Section",
+                  "id": "aiops_settings",
+                  "label": "AIOPs",
+                  "position": 0
+                }
+              ],
+              "propertyList": [
+                {
+                  "id": "toggleToolbar",
+                  "editor": {
+                    "sectionId": "general.aiops_settings",
+                    "uiControl": {
+                      "label": "Show toolbar",
+                      "type": "ToggleButton",
+                      "ariaLabel": "Show toolbar",
+                      "value": true
+                    }
+                  }
+                },
+                {
+                  "id": "toggleDetails",
+                  "editor": {
+                    "sectionId": "general.aiops_settings",
+                    "uiControl": {
+                      "label": "Show details",
+                      "type": "ToggleButton",
+                      "ariaLabel": "Show details"
+                    }
+                  }
+                },
+                {
+                  "id": "inputColumnMapping",
+                  "editor": {
+                    "sectionId": "general.aiops_settings",
+                    "uiControl": {
+                      "type": "InputLabel",
+                      "label": "Column mapping"
+                    }
+                  }
+                }
+              ],
+              "renderer": {
+                "class": "v1/ext/AIOpsCustomWidgets/incident-list/IncidentListWidget",
+                "dependencies": ["Dashboard.Canvas"]
+              },
+              "capabilities": {
+                "selection": true
+              }
+            },
+            {
+              "containerId": "com.ibm.bi.dashboard.content-features",
+              "name": "DynamicWidgetProperty",
+              "id": "dashboard.incidentListWidget.DynamicWidgetProperty",
+              "class": "v1/ext/AIOpsCustomWidgets/incident-list/IncidentListCustomProperty",
+              "dependencies":["Properties"],
+              "types": ["incidentListWidget"]
+            }
+          ],
+          "cssStyles": ["v1/ext/AIOpsCustomWidgets/index.css"]
+        }
+      ]
+    },
+    {
+      "perspective": "dashboard",
+      "features": [
+        {
+          "id": "com.ibm.dashboard.aiops.topo.widget",
+          "collectionItems": [
+            {
+              "containerId": "com.ibm.bi.dashboard.contentTypes",
+              "id": "widget.topoWidget.renderer",
+              "type": "topologyViewerWidget",
+              "iconUrl": "v1/ext/AIOpsCustomWidgets/assets/network.svg",
+              "expose": true,
+              "name": "AIOps Topology Viewer",
+              "propertyLayoutList": [
+                {
+                  "type": "Section",
+                  "id": "aiops_settings",
+                  "label": "AIOPs",
+                  "position": 0
+                }
+              ],
+              "propertyList": [
+                {
+                  "id": "toggleToolbar",
+                  "editor": {
+                    "sectionId": "general.aiops_settings",
+                    "uiControl": {
+                      "label": "Show toolbar",
+                      "type": "ToggleButton",
+                      "ariaLabel": "Show toolbar",
+                      "value": true
+                    }
+                  }
+                },
+                {
+                  "id": "toggleSearch",
+                  "editor": {
+                    "sectionId": "general.aiops_settings",
+                    "uiControl": {
+                      "label": "Show search",
+                      "type": "ToggleButton",
+                      "ariaLabel": "Show search",
+                      "value": true
+                    }
+                  }
+                },
+                {
+                  "id": "hops",
+                  "editor": {
+                    "sectionId": "general.aiops_settings",
+                    "uiControl": {
+                    "type": "InputLabel",
+                    "label": "Hops"
+                    }
+                  }
+                },
+                {
+                  "id": "maxResourceIds",
+                  "editor": {
+                    "sectionId": "general.aiops_settings",
+                    "uiControl": {
+                    "type": "InputLabel",
+                    "label": "Max unique resource IDs",
+                    "value": 10
+                    }
+                  }
+                },
+                {
+                  "id": "resourceId",
+                  "editor": {
+                    "sectionId": "general.aiops_settings",
+                    "uiControl": {
+                    "type": "InputLabel",
+                    "label": "Resource ID"
+                    }
+                  }
+                },
+                {
+                  "id": "statusId",
+                  "editor": {
+                    "sectionId": "general.aiops_settings",
+                    "uiControl": {
+                    "type": "InputLabel",
+                    "label": "Status ID"
+                    }
+                  }
+                }
+              ],
+              "renderer": {
+                "class": "v1/ext/AIOpsCustomWidgets/topology-viewer/TopologyViewerWidget",
+                "dependencies": ["Dashboard.Canvas"]
+              },
+              "capabilities": {
+                "selection": true
+              }
+            }
+          ],
+          "cssStyles": ["v1/ext/AIOpsCustomWidgets/index.css"]
+        }
+      ]
+    },
+    {
+      "perspective": "dashboard",
+      "features": [
+        {
+          "id": "com.ibm.dashboard.aiops.button.widget",
+          "collectionItems": [
+            {
+              "containerId": "com.ibm.bi.dashboard.contentTypes",
+              "id": "widget.buttonWidget.renderer",
+              "type": "buttonWidget",
+              "iconUrl": "v1/ext/AIOpsCustomWidgets/assets/button.svg",
+              "expose": true,
+              "name": "AIOps Button",
+              "propertyLayoutList": [
+                {
+                  "type": "Section",
+                  "id": "aiops_settings",
+                  "label": "AIOPs",
+                  "position": 0
+                }
+              ],
+              "propertyList": [
+                {
+                  "id": "dropdownShape",
+                  "defaultValue": "rectangular",
+                  "editor": {
+                    "sectionId": "general.aiops_settings",
+                    "uiControl": {
+                      "type": "DropDown",
+                      "name": "dropdown shape",
+                      "label": "Shape",
+                      "ariaLabel": "Shape",
+                      "options": [
+                        { "label": "Rectangular", "value": "rectangular" },
+                        { "label": "Round", "value": "round" }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "id": "dropdownButtonLabel",
+                  "defaultValue": "filterName",
+                  "editor": {
+                    "sectionId": "general.aiops_settings",
+                    "uiControl": {
+                      "type": "DropDown",
+                      "name": "dropdown label",
+                      "label": "Button label",
+                      "ariaLabel": "Button label",
+                      "options": [
+                        { "label": "Filter name", "value": "filterName" },
+                        { "label": "Alert count", "value": "alertCount" },
+                        { "label": "Both", "value": "both" }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "id": "dropdownTarget",
+                  "defaultValue": "update",
+                  "editor": {
+                    "sectionId": "general.aiops_settings",
+                    "uiControl": {
+                      "type": "DropDown",
+                      "name": "dropdown target",
+                      "label": "Target",
+                      "ariaLabel": "Target",
+                      "options": [
+                        { "label": "Update alert list", "value": "update" },
+                        { "label": "Launch in new window", "value": "launch" }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "id": "inputRefreshInterval",
+                  "editor": {
+                    "sectionId": "general.aiops_settings",
+                    "uiControl": {
+                    "type": "InputLabel",
+                    "label": "Refresh interval (Seconds)",
+                    "value": 30
+                    }
+                  }
+                }
+              ],
+              "renderer": {
+                "class": "v1/ext/AIOpsCustomWidgets/button/ButtonWidget",
+                "dependencies": ["Dashboard.Canvas"]
+              },
+              "capabilities": {
+                "selection": true
+              }
+            },
+            {
+              "containerId": "com.ibm.bi.dashboard.content-features",
+              "name": "DynamicWidgetProperty",
+              "id": "dashboard.buttonWidget.DynamicWidgetProperty",
+              "class": "v1/ext/AIOpsCustomWidgets/button/ButtonDynamicProperty",
+              "dependencies":["Properties"],
+              "types": ["buttonWidget"]
+            }
+          ],
+          "cssStyles": ["v1/ext/AIOpsCustomWidgets/index.css"]
+        }
+      ]
+    },
+    {
+      "perspective": "AIOpsCustomWidgets",
+      "features": [
+        {
+          "id": "com.ibm.aiopsAlertListWidget",
           "content": {
-            "type": "v1/ext/aiopsAlertWidget/AlertWidget",
+            "type": "v1/ext/AIOpsCustomWidgets/alert-list/AlertWidget",
             "options": {
               "info": {
                 "title": "AIOps Alert list"
               }
             }
           },
-          "cssStyles": ["v1/ext/aiopsAlertWidget/index.css"]
+          "cssStyles": ["v1/ext/AIOpsCustomWidgets/index.css"]
+        },
+        {
+          "id": "com.ibm.aiopsButtonWidget",
+          "content": {
+            "type": "v1/ext/AIOpsCustomWidgets/button/ButtonWidget",
+            "options": {
+              "info": {
+                "title": "AIOps Button"
+              }
+            }
+          },
+          "cssStyles": ["v1/ext/AIOpsCustomWidgets/index.css"]
+        },
+        {
+          "id": "com.ibm.aiopsIncidentListWidget",
+          "content": {
+            "type": "v1/ext/AIOpsCustomWidgets/incident-list/IncidentListWidget",
+            "options": {
+              "info": {
+                "title": "AIOps Incident list"
+              }
+            }
+          },
+          "cssStyles": ["v1/ext/AIOpsCustomWidgets/index.css"]
+        },
+        {
+          "id": "com.ibm.aiopsTopologyViewerWidget",
+          "content": {
+            "type": "v1/ext/AIOpsCustomWidgets/topology-viewer/TopologyViewerWidget",
+            "options": {
+              "info": {
+                "title": "AIOps Topology Viewer"
+              }
+            }
+          },
+          "cssStyles": ["v1/ext/AIOpsCustomWidgets/index.css"]
         }
       ]
     }

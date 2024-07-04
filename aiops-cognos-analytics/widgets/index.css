@@ -75,6 +75,18 @@
    animation: spin 2s linear infinite;
  }
  
+.aiops-button {
+  border: 1px solid #0f62fe;
+  color: #0f62fe;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+}
+
+.aiops-button.round {
+   border-radius: 50%;
+}
+
  /* Safari */
  @-webkit-keyframes spin {
    0% { -webkit-transform: rotate(0deg); }
