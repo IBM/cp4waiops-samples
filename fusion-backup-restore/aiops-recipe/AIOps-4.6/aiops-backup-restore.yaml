@@ -121,6 +121,7 @@ spec:
         - connectorconfiguration.connectors.aiops.ibm.com
         - bundlemanifests.connectors.aiops.ibm.com
         - connectorschemas.connectors.aiops.ibm.com
+      essential: false
     - name: aimanager-edb-postgresdb-secret
       type: resource
       includedResourceTypes:
