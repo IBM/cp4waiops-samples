@@ -762,7 +762,7 @@ fi
 
 if [[ "$1" == "version" ]]
 then
-    echo "0.0.29"
+    echo "0.0.30"
     exit 0
 fi
 
@@ -1575,6 +1575,15 @@ then
         MAJORVERSION_ASM="2.24"
     }
 
+    component-versions-47() {
+        MAJORVERSION_AIOPSUI="4.7"
+        MAJORVERSION_AIMANAGER="4.7"
+        MAJORVERSION_IRCORE="4.7"
+        MAJORVERSION_LIFECYCLESERVICE="4.7"
+        MAJORVERSION_AIOPSANALYTICSORCHESTRATOR="4.7"
+        MAJORVERSION_ASM="2.25"
+    }
+
     aiopsEdgeBaseUpgradeStatus() {    
         UPGRADED=$(oc get aiopsedge aiopsedge -o jsonpath='{.status.conditions[?(@.type=="UpgradeReady")].status}')
         CONFIGURED=$(oc get aiopsedge aiopsedge -o jsonpath='{.status.phase}')
@@ -1804,7 +1813,10 @@ then
     }
 
     # Check current instance version and component status checks for that version of CP4AIOps
-    if [ "${VERSION_AIOPSORCHESTRATOR}" == "4.6" ];
+    if [ "${VERSION_AIOPSORCHESTRATOR}" == "4.7"];
+    then
+        component-versions-47
+    elif [ "${VERSION_AIOPSORCHESTRATOR}" == "4.6" ];
     then
         component-versions-46
     elif [ "${VERSION_AIOPSORCHESTRATOR}" == "4.5" ];
@@ -1839,17 +1851,17 @@ then
         component-versions-33
     elif [ "${VERSION_AIOPSORCHESTRATOR}" == "0.1" ];
     then
-        # for developer builds (v0.1), we will check against release-4.6 versions
-        component-versions-46
+        # for developer builds (v0.1), we will check against release-4.7 versions
+        component-versions-47
         echo ""
         echo "${red}${bold}NOTE: ${normal}Your Cloud Pak for AIOps install appears to be an internal dev version (v${VERSION_AIOPSORCHESTRATOR})."
-        echo "      The status-upgrade command checks the status of upgrades to v3.3, v3.4, v3.5, v3.6, v3.7, v4.1, v4.2, v4.3, v4.4, v4.5, and v4.6 only." 
-        echo "      Therefore, the upgrade checks below will be against v4.6 component versions."
-        echo "      This may influence your results below if your dev build is not based on release-4.6.${normal}"
+        echo "      The status-upgrade command checks the status of upgrades to v3.3 - v3.7 and v4.1 - v4.7 only." 
+        echo "      Therefore, the upgrade checks below will be against v4.7 component versions."
+        echo "      This may influence your results below if your dev build is not based on release-4.7.${normal}"
     else
         echo ""
         echo "${red}${bold}ERROR: ${normal}Your Cloud Pak for AIOps install appears to be v${VERSION_AIOPSORCHESTRATOR}."
-        echo "       The status-upgrade command checks the status of upgrades to v3.3, v3.4, v3.5, v3.6, v3.7, v4.1, v4.2, v4.3, v4.4, v4.5, and v4.6 only." 
+        echo "       The status-upgrade command checks the status of upgrades to v3.3 - v3.7 and v4.1 - v4.7 only." 
         echo "       The version you are using is not supported for use with the status-upgrade command. Exiting."
         echo ""
         exit 0
