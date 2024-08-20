@@ -1149,7 +1149,7 @@ then
         getSubscriptionStatusGrep "ibm-automation-flink" "$INSTALLATION_NAMESPACE" 
     fi
 
-    if [[ "$VERSION_AIOPSORCHESTRATOR" != "4.6" ]]; then
+    if [[ "$VERSION_AIOPSORCHESTRATOR" != "4.6" || "$VERSION_AIOPSORCHESTRATOR" != "4.7"  ]]; then
         getSubscriptionStatus "ibm-management-kong" "$INSTALLATION_NAMESPACE" 
     fi
 
@@ -1284,7 +1284,7 @@ then
             getSubscriptionStatus "ibm-events-operator" "$INSTALLATION_NAMESPACE"
             getSubscriptionStatus "ibm-im-operator" "$INSTALLATION_NAMESPACE"
 
-            if [[ "$VERSION_AIOPSORCHESTRATOR" != "4.6" ]]; then
+            if [[ "$VERSION_AIOPSORCHESTRATOR" != "4.6" || "$VERSION_AIOPSORCHESTRATOR" != "4.7" ]]; then
                 getSubscriptionStatus "ibm-im-mongodb-operator" "$INSTALLATION_NAMESPACE"
             fi
             
