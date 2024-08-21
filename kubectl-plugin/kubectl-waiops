@@ -1813,7 +1813,7 @@ then
     }
 
     # Check current instance version and component status checks for that version of CP4AIOps
-    if [ "${VERSION_AIOPSORCHESTRATOR}" == "4.7"];
+    if [ "${VERSION_AIOPSORCHESTRATOR}" == "4.7" ];
     then
         component-versions-47
     elif [ "${VERSION_AIOPSORCHESTRATOR}" == "4.6" ];
