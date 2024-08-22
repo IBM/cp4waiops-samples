@@ -85,12 +85,12 @@ getSubscriptionStatusSelector () {
 
 getFlinkDeploymentStatus () {
     INSTANCE=$(oc get flinkdeployment aiops-ir-lifecycle-flink)
-    STATUS_FLINKDEP=$(oc get flinkdeployment aiops-ir-lifecycle-flink -o=jsonpath='{.status.reconciliationStatus.state}')
+    STATUS_FLINKDEP=$(oc get flinkdeployment aiops-ir-lifecycle-flink -o=jsonpath='{.status.lifecycleState}')
     if [[ "$1" == "status-summary" ]];
     then
-        printStatus "$STATUS" "DEPLOYED" "$INSTANCE" "status-summary"
+        printStatus "$STATUS_FLINKDEP" "STABLE" "$INSTANCE" "status-summary"
     else
-        printStatus "$STATUS" "DEPLOYED" "$INSTANCE"
+        printStatus "$STATUS_FLINKDEP" "STABLE" "$INSTANCE"
     fi
 }
 
@@ -991,6 +991,9 @@ then
     fi
 
     if [[ "${VERSION_AIOPSORCHESTRATOR}" == "4.7" ]]; then
+        echo "______________________________________________________________"
+        echo "FlinkDeployment:" && echo "" 
+
         getFlinkDeploymentStatus
     fi
 
