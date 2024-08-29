@@ -23,7 +23,7 @@ Below are example outputs of these commands.
 ### Installation status checker output (`oc waiops status`)
 ```
 $ oc waiops status
-Already on project "katamari" on server "https://my.cool.domain.com:6443".
+Already on project "cp4aiops" on server "https://my.cool.domain.com:6443".
 
 Cloud Pak for AIOps v4.7 installation status:
   Componentstatus:
@@ -71,60 +71,60 @@ ______________________________________________________________
 ZenService instances:
 
 KIND         NAME                 NAMESPACE   VERSION   STATUS      PROGRESS   MESSAGE
-ZenService   iaf-zen-cpdservice   katamari    5.1.7     Completed   100%       The Current Operation Is Completed
+ZenService   iaf-zen-cpdservice   cp4aiops    5.1.7     Completed   100%       The Current Operation Is Completed
 
 ______________________________________________________________
 Kafka and Elasticsearch instances:
 
 KIND    NAMESPACE   NAME         STATUS
-Kafka   katamari    iaf-system   True
+Kafka   cp4aiops    iaf-system   True
 
 KIND            NAMESPACE   NAME         STATUS
-Elasticsearch   katamari    iaf-system   True
+Elasticsearch   cp4aiops    iaf-system   True
 
 ______________________________________________________________
 IRCore and AIOpsAnalyticsOrchestrator instances:
 
 KIND                  NAMESPACE   NAME    VERSION   STATUS   MESSAGE
-IssueResolutionCore   katamari    aiops   4.7.0     Ready    All Services Ready
+IssueResolutionCore   cp4aiops    aiops   4.7.0     Ready    All Services Ready
 
 KIND                         NAMESPACE   NAME    VERSION   STATUS   MESSAGE
-AIOpsAnalyticsOrchestrator   katamari    aiops   4.7.0     Ready    All Services Ready
+AIOpsAnalyticsOrchestrator   cp4aiops    aiops   4.7.0     Ready    All Services Ready
 
 ______________________________________________________________
 LifecycleService instances:
 
 KIND               NAMESPACE   NAME    VERSION   STATUS   MESSAGE
-LifecycleService   katamari    aiops   4.7.0     Ready    All Services Ready
+LifecycleService   cp4aiops    aiops   4.7.0     Ready    All Services Ready
 
 ______________________________________________________________
 BaseUI instances:
 
 KIND     NAMESPACE   NAME              VERSION   STATUS   MESSAGE
-BaseUI   katamari    baseui-instance   4.7.0     True     Ready
+BaseUI   cp4aiops    baseui-instance   4.7.0     True     Ready
 
 ______________________________________________________________
 AIManager, ASM, AIOpsEdge, and AIOpsUI instances:
 
 KIND        NAMESPACE   NAME        VERSION   STATUS      MESSAGE
-AIManager   katamari    aimanager   4.7.0     Completed   AI Manager is ready
+AIManager   cp4aiops    aimanager   4.7.0     Completed   AI Manager is ready
 
 KIND   NAMESPACE   NAME             VERSION   STATUS
-ASM    katamari    aiops-topology   2.25.0    OK
+ASM    cp4aiops    aiops-topology   2.25.0    OK
 
 KIND        NAMESPACE   NAME        STATUS       MESSAGE
-AIOpsEdge   katamari    aiopsedge   Configured   all critical components are reporting healthy
+AIOpsEdge   cp4aiops    aiopsedge   Configured   all critical components are reporting healthy
 
 KIND      NAMESPACE   NAME               VERSION   STATUS   MESSAGE
-AIOpsUI   katamari    aiopsui-instance   4.7.0     True     Ready
+AIOpsUI   cp4aiops    aiopsui-instance   4.7.0     True     Ready
 
 ______________________________________________________________
 Postgres instances:
 
 KIND      NAMESPACE   NAME                              STATUS
-Cluster   katamari    aiops-installation-edb-postgres   Cluster in healthy state
-Cluster   katamari    common-service-db                 Cluster in healthy state
-Cluster   katamari    zen-metastore-edb                 Cluster in healthy state
+Cluster   cp4aiops    aiops-installation-edb-postgres   Cluster in healthy state
+Cluster   cp4aiops    common-service-db                 Cluster in healthy state
+Cluster   cp4aiops    zen-metastore-edb                 Cluster in healthy state
 
 ______________________________________________________________
 FlinkDeployment:
@@ -136,10 +136,10 @@ ______________________________________________________________
 Secure Tunnel instances:
 
 KIND     NAMESPACE   NAME         STATUS
-Tunnel   katamari    sre-tunnel   True
+Tunnel   cp4aiops    sre-tunnel   True
 
 ______________________________________________________________
-CSVs from katamari namespace:
+CSVs from cp4aiops namespace:
 
 NAME                                     DISPLAY                VERSION              REPLACES   PHASE
 aimanager-operator.v4.7.0-202408221445   IBM AIOps AI Manager   4.7.0-202408221445              Succeeded
@@ -202,7 +202,7 @@ NAME                                          DISPLAY                           
 operand-deployment-lifecycle-manager.v4.3.4   Operand Deployment Lifecycle Manager   4.3.4                Succeeded
 
 ______________________________________________________________
-Subscriptions from katamari namespace:
+Subscriptions from cp4aiops namespace:
 
 NAME                 PACKAGE              SOURCE                  CHANNEL
 aimanager-operator   aimanager-operator   ibm-cp-waiops-catalog   v4.7
@@ -265,19 +265,19 @@ ______________________________________________________________
 OperandRequest instances:
 
 NAMESPACE   NAME                   PHASE     CREATED AT
-katamari    ibm-aiops-ai-manager   Running   2024-08-22T15:40:39Z
+cp4aiops    ibm-aiops-ai-manager   Running   2024-08-22T15:40:39Z
 
 NAMESPACE   NAME                         PHASE     CREATED AT
-katamari    ibm-aiops-aiops-foundation   Running   2024-08-22T15:40:39Z
+cp4aiops    ibm-aiops-aiops-foundation   Running   2024-08-22T15:40:39Z
 
 NAMESPACE   NAME                   PHASE     CREATED AT
-katamari    ibm-aiops-connection   Running   2024-08-22T15:40:39Z
+cp4aiops    ibm-aiops-connection   Running   2024-08-22T15:40:39Z
 
 NAMESPACE   NAME              PHASE     CREATED AT
-katamari    ibm-iam-service   Running   2024-08-22T15:41:41Z
+cp4aiops    ibm-iam-service   Running   2024-08-22T15:41:41Z
 
 NAMESPACE   NAME              PHASE     CREATED AT
-katamari    ibm-iam-request   Running   2024-08-22T15:38:28Z
+cp4aiops    ibm-iam-request   Running   2024-08-22T15:38:28Z
 
 ______________________________________________________________
 AIOps certificate status:
@@ -537,11 +537,11 @@ zen-minio-certificate   2025-08-22T15:45:38Z   True    Certificate is up to date
 ______________________________________________________________
 ODLM pod current status:
 
-katamari                                           operand-deployment-lifecycle-manager-746db74589-hx9ts                     1/1     Running     0             63m
+cp4aiops                                           operand-deployment-lifecycle-manager-746db74589-hx9ts                     1/1     Running     0             63m
 ______________________________________________________________
 Orchestrator pod current status:
 
-katamari                                           ibm-aiops-orchestrator-controller-manager-74fc94656b-5kz5w                1/1     Running     0             69m
+cp4aiops                                           ibm-aiops-orchestrator-controller-manager-74fc94656b-5kz5w                1/1     Running     0             69m
 
 ```
 

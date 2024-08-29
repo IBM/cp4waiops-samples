@@ -1030,9 +1030,10 @@ then
     if [[ "${VERSION_AIOPSORCHESTRATOR}" != "4.7" ]];
     then
         getCSVStatus "$INSTALLATION_NAMESPACE" "ibm-automation-flink"
+    else
+        getCSVStatus "$INSTALLATION_NAMESPACE" "ibm-opencontent-flink"
     fi
 
-    getCSVStatus "$INSTALLATION_NAMESPACE" "ibm-opencontent-flink"
 
     if [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.3" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.4" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.5" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.6" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.7" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "4.1" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "4.2" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "4.3" ]];
     then 
@@ -1175,8 +1176,9 @@ then
         if [[ "${VERSION_AIOPSORCHESTRATOR}" != "4.7" ]];
         then
             getSubscriptionStatusGrep "ibm-automation-flink" "$INSTALLATION_NAMESPACE"
+        else
+            getSubscriptionStatusGrep "ibm-opencontent-flink" "$INSTALLATION_NAMESPACE"
         fi
-        getSubscriptionStatusGrep "ibm-opencontent-flink" "$INSTALLATION_NAMESPACE"
     fi
 
     if [[ "$VERSION_AIOPSORCHESTRATOR" != "4.6" && "$VERSION_AIOPSORCHESTRATOR" != "4.7"  ]]; then
@@ -1208,12 +1210,15 @@ then
     # if statement block to account for versions over 4.2 (clusterwide changes)
     if [ "${CLUSTER_SCOPE_INSTALL}" == "true" ];
     then
-        getSubscriptionStatusGrep "ibm-automation-elastic" "$INSTALLATION_NAMESPACE" 
-        if [[ "${VERSION_AIOPSORCHESTRATOR}" != "4.7" ]];
+        if [[ "${VERSION_AIOPSORCHESTRATOR}" != "3.3" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" != "3.4" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" != "3.5" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" != "3.6" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" != "3.7" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" != "4.0" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" != "4.1" ]];
         then
-            getSubscriptionStatusGrep "ibm-automation-flink" "$INSTALLATION_NAMESPACE"
-        else
-            getSubscriptionStatusGrep "ibm-opencontent-flink" "$INSTALLATION_NAMESPACE"
+            getSubscriptionStatusGrep "ibm-automation-elastic" "$INSTALLATION_NAMESPACE" 
+            if [[ "${VERSION_AIOPSORCHESTRATOR}" != "4.7" ]];
+            then
+                getSubscriptionStatusGrep "ibm-automation-flink" "$INSTALLATION_NAMESPACE"
+            else
+                getSubscriptionStatusGrep "ibm-opencontent-flink" "$INSTALLATION_NAMESPACE"
+            fi
         fi
     fi
 
@@ -1614,7 +1619,6 @@ then
         MAJORVERSION_LIFECYCLESERVICE="4.7"
         MAJORVERSION_AIOPSANALYTICSORCHESTRATOR="4.7"
         MAJORVERSION_ASM="2.25"
-        MAJORVERSION_FLINKDEPLOYMENT="1.19.0-aiops"
     }
 
     aiopsEdgeBaseUpgradeStatus() {    
@@ -1817,19 +1821,6 @@ then
         fi
     }
 
-    FlinkDeploymentUpgradeStatus() {
-        FLINK_DEPLOYMENT_COMPLETED=$(oc get flinkdeployment aiops-ir-lifecycle-flink -o jsonpath='{.status.reconciliationStatus.state}')
-        CURRENT_MAJOR_VERSION=$(oc get flinkdeployment aiops-ir-lifecycle-flink -o jsonpath='{.status.clusterInfo.flink-version}')
-        DETAILS=$(oc get flinkdeployment aiops-ir-lifecycle-flink -o custom-columns='KIND:.kind',NAMESPACE:.metadata.namespace,VERSION:.status.clusterInfo.flink-version,STATUS:.status.reconciliationStatus.state)
-        if [ "${FLINK_DEPLOYMENT_COMPLETED}"  == "DEPLOYED"] && [ "${CURRENT_MAJOR_VERSION}" == "${MAJORVERSION_FLINKDEPLOYMENT}" ]
-        then
-            SUCCESSFULLY_UPGRADED+="${newline}${DETAILS}"
-        else
-            FAILING_UPGRADE+="${newline}${DETAILS}\n* EXPECTED MAJOR VERSION: ${MAJORVERSION_FLINKDEPLOYMENT}"
-            return 1;
-        fi
-    }
-
     secureTunnelUpgradeStatus() {    
         checkIfSecureTunnelExists
         if [[ "${SECURE_TUNNEL_EXISTS}" == "true" ]];
@@ -1939,8 +1930,6 @@ then
     if [[ "${VERSION_AIOPSORCHESTRATOR}" != "4.7" ]];
     then
         FlinkEventProcessorUpgradeStatus
-    else
-        FlinkDeploymentUpgradeStatus
     fi
 
 
