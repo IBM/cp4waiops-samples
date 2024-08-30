@@ -90,13 +90,14 @@ getFlinkDeploymentStatus () {
     name=$(echo $installation_instance | awk '{print $2}')
 
     # Programatically get FD deployment for LAD if the module is enabled
-    LAD_ENABLED=oc get installation.orchestrator.aiops.ibm.com $name -n $namespace -o=jsonpath='{.spec.pakModules[?(@.name=="logAnomalyDetection")].enabled}'
+    LAD_ENABLED=$(oc get installation.orchestrator.aiops.ibm.com $name -n $namespace -o=jsonpath='{.spec.pakModules[?(@.name=="logAnomalyDetection")].enabled}')
     if [[ "$LAD_ENABLED" == "true" ]]; then
         LAD_INSTANCE=$(oc get flinkdeployment aiops-lad-flink)
+        STATUS_FLINKDEP=$(oc get flinkdeployment aiops-lad-flink -o=jsonpath='{.status.lifecycleState}')
 
         if [[ "$1" == "status-summary" ]];
         then
-            printStatus "$STATUS_FLINKDEP" "STABLE" "$LAD_INSTANCE" "status-summary"
+            printStatus "$STATUS_FLINKDEP" "Running" "$LAD_INSTANCE" "status-summary"
         else
             printStatus "$STATUS_FLINKDEP" "STABLE" "$LAD_INSTANCE"
         fi
