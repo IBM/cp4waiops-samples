@@ -84,13 +84,31 @@ getSubscriptionStatusSelector () {
 }
 
 getFlinkDeploymentStatus () {
-    INSTANCE=$(oc get flinkdeployment aiops-ir-lifecycle-flink)
+    # Get Installation CR name
+    installation_instance=$(oc get installation.orchestrator.aiops.ibm.com -A -o custom-columns="NAMESPACE:.metadata.namespace,NAME:.metadata.name" --no-headers)
+    namespace=$(echo $installation_instance | awk '{print $1}')
+    name=$(echo $installation_instance | awk '{print $2}')
+
+    # Programatically get FD deployment for LAD if the module is enabled
+    LAD_ENABLED=oc get installation.orchestrator.aiops.ibm.com $name -n $namespace -o=jsonpath='{.spec.pakModules[?(@.name=="logAnomalyDetection")].enabled}'
+    if [[ "$LAD_ENABLED" == "true" ]]; then
+        LAD_INSTANCE=$(oc get flinkdeployment aiops-lad-flink)
+
+        if [[ "$1" == "status-summary" ]];
+        then
+            printStatus "$STATUS_FLINKDEP" "STABLE" "$LAD_INSTANCE" "status-summary"
+        else
+            printStatus "$STATUS_FLINKDEP" "STABLE" "$LAD_INSTANCE"
+        fi
+    fi
+
+    IR_LC_INSTANCE=$(oc get flinkdeployment aiops-ir-lifecycle-flink)
     STATUS_FLINKDEP=$(oc get flinkdeployment aiops-ir-lifecycle-flink -o=jsonpath='{.status.lifecycleState}')
     if [[ "$1" == "status-summary" ]];
     then
-        printStatus "$STATUS_FLINKDEP" "STABLE" "$INSTANCE" "status-summary"
+        printStatus "$STATUS_FLINKDEP" "STABLE" "$IR_LC_INSTANCE" "status-summary"
     else
-        printStatus "$STATUS_FLINKDEP" "STABLE" "$INSTANCE"
+        printStatus "$STATUS_FLINKDEP" "STABLE" "$IR_LC_INSTANCE"
     fi
 }
 
