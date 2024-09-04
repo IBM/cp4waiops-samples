@@ -52,9 +52,9 @@ If you prefer to use the UI (as with IBM DB2 on Cloud), paste the contents of ea
 
 Now that the schemas have been installed, you can take steps to integrate with AIOps. The following are the basic steps to get data into DB2 to be used in Cognos. Refer to AIOps and Cognos documentation for complete details.
 
-1. Configure an integration - The schemas can be used for Cloud Pak for AIOps Netcool Impact integration with DB2. 
+1. Configure an integration - The schemas can be used for Cloud Pak for AIOps Netcool Impact or IBM Db2 integrations. 
 
-2. Configure a policy - For alert and incidents data to flow into the DB2 database, configure the "Invoke IBM Tivoli Netcool/Impact" policy. You'll need separate policies for alerts and incidents. Use the details of the integration you configured in the previous step, and customize the column mappings. The id and tenantid are required.
+2. Configure a policy - For alert and incidents data to flow into the DB2 database, configure the "Invoke IBM Tivoli Netcool/Impact" or "Populate a dashboard or report" policy. You'll need separate policies for alerts and incidents. Use the details of the integration you configured in the previous step, and customize the column mappings. The id and tenantid are required.
 
 The following are provided as defaults for alerts:
 ```
@@ -68,8 +68,8 @@ The following are provided as defaults for alerts:
   "eventType": alert.type.classification,
   "sender": alert.sender.name,
   "resource": alert.resource.name,
-  "firstOccurrenceTime": $replace($replace($replace(alert.firstOccurrenceTime, 'T', '-'), ':', '.'), 'Z', '000'),
-  "lastOccurrenceTime": $replace($replace($replace(alert.lastOccurrenceTime, 'T', '-'), ':', '.'), 'Z', '000'),
+  "firstOccurrenceTime": alert.firstOccurrenceTime,
+  "lastOccurrenceTime": alert.lastOccurrenceTime,
   "runbooks": $count(alert.insights[type="aiops.ibm.com/insight-type/runbook"]),
   "topology": $count(alert.insights[type="aiops.ibm.com/insight-type/topology/resource"]),
   "seasonal": $count(alert.insights[type="aiops.ibm.com/insight-type/seasonal-occurrence"].details[isSeasonal=true]),
@@ -80,7 +80,7 @@ The following are provided as defaults for alerts:
   "owner": alert.owner,
   "team": alert.team,
   "eventCount": alert.eventCount,
-  "lastStateChangeTime": $replace($replace($replace(alert.lastStateChangeTime, 'T', '-'), ':', '.'), 'Z', '000')
+  "lastStateChangeTime": alert.lastStateChangeTime
 }
 ```
 
@@ -96,13 +96,13 @@ These are the default mappings for incidents:
 {
   "tenantid": "cfd95b7e-3bc7-4006-a4a8-a73a79c71255",
   "id": incident.id,
-  "createdTime": $replace($replace($replace(incident.createdTime, 'T', '-'), ':', '.'), 'Z', '000'),
+  "createdTime": incident.createdTime,
   "createdBy": incident.createdBy,
   "title": incident.title,
   "description": incident.description,
   "priority": incident.priority,
   "state": incident.state,
-  "lastChangedTime": $replace($replace($replace(incident.lastChangedTime, 'T', '-'), ':', '.'), 'Z', '000'),
+  "lastChangedTime": incident.lastChangedTime,
   "owner": incident.owner,
   "team": incident.team,
   "alerts": $count(incident.contextualAlertIds) + $count(incident.alertIds),
@@ -113,6 +113,11 @@ These are the default mappings for incidents:
   "resourceId": incident.insights[type="aiops.ibm.com/insight-type/topology/resource"].details.id,
   "policyId": incident.insights[type="aiops.ibm.com/insight-type/proposed-by"].details.policyId
 }
+```
+
+For the "Invoke IBM Tivoli Netcool/Impact" policy type, you'll need to convert the timestamp fields using Jsonata like this,
+```
+$replace($replace($replace(<timestamp property>}, 'T', '-'), ':', '.'), 'Z', '000')
 ```
 
 Once the policy has been saved, new alerts and incidents and state changes to existing ones (if update trigger type is configured) will be forwarded to the database.
