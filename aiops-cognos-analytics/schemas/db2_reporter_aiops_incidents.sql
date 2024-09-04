@@ -51,7 +51,7 @@ CREATE TABLE INCIDENTS_REPORTER_STATUS (
     chatOpsIntegrations INTEGER,
     resourceId          VARCHAR(255),
     policyId            VARCHAR(64),
-    PRIMARY KEY (tenantid, id) )@
+    PRIMARY KEY (id) )@
 --DATA CAPTURE NONE@
 
 --\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
@@ -77,14 +77,13 @@ CREATE TABLE INCIDENTS_AUDIT_OWNER (
         owner           VARCHAR(255) NOT NULL,
         tenantid        VARCHAR(64) NOT NULL,
         id              VARCHAR(255) NOT NULL,
-        CONSTRAINT eventref FOREIGN KEY (tenantid, id) REFERENCES INCIDENTS_REPORTER_STATUS(tenantid, id) ON DELETE CASCADE )@
+        CONSTRAINT eventref FOREIGN KEY (id) REFERENCES INCIDENTS_REPORTER_STATUS(id) ON DELETE CASCADE )@
 --DATA CAPTURE NONE @
 
 -- Create the Index for INCIDENTS_AUDIT_OWNER
 
 CREATE INDEX INCIDENTS_AUDIT_OWNER_IDX
        ON INCIDENTS_AUDIT_OWNER (
-               tenantid,
                id )
        PCTFREE 10 @
 
@@ -99,14 +98,13 @@ CREATE TABLE INCIDENTS_AUDIT_TEAM (
         team            VARCHAR(255) NOT NULL,
         tenantid        VARCHAR(64) NOT NULL,
         id              VARCHAR(255) NOT NULL,
-        CONSTRAINT eventref FOREIGN KEY (tenantid, id) REFERENCES INCIDENTS_REPORTER_STATUS(tenantid, id) ON DELETE CASCADE )@
+        CONSTRAINT eventref FOREIGN KEY (id) REFERENCES INCIDENTS_REPORTER_STATUS(id) ON DELETE CASCADE )@
 --DATA CAPTURE NONE @
 
 -- Create the Index for INCIDENTS_AUDIT_TEAM
 
 CREATE INDEX INCIDENTS_AUDIT_TEAM_IDX
        ON INCIDENTS_AUDIT_TEAM (
-               tenantid,
                id )
        PCTFREE 10 @
 
@@ -123,7 +121,7 @@ CREATE TABLE INCIDENTS_AUDIT_PRIORITY (
         complete        INTEGER,
         tenantid        VARCHAR(64) NOT NULL,
         id              VARCHAR(255) NOT NULL,
-        CONSTRAINT eventref FOREIGN KEY (tenantid, id) REFERENCES INCIDENTS_REPORTER_STATUS(tenantid, id) ON DELETE CASCADE )@
+        CONSTRAINT eventref FOREIGN KEY (id) REFERENCES INCIDENTS_REPORTER_STATUS(id) ON DELETE CASCADE )@
 --DATA CAPTURE NONE @
 
 
@@ -150,7 +148,7 @@ CREATE TABLE INCIDENTS_AUDIT_STATE (
         complete        INTEGER,
         tenantid        VARCHAR(64) NOT NULL,
         id              VARCHAR(255) NOT NULL,
-        CONSTRAINT eventref FOREIGN KEY (tenantid, id) REFERENCES INCIDENTS_REPORTER_STATUS(tenantid, id) ON DELETE CASCADE )@
+        CONSTRAINT eventref FOREIGN KEY (id) REFERENCES INCIDENTS_REPORTER_STATUS(id) ON DELETE CASCADE )@
 --DATA CAPTURE NONE @
 
 -- Create the Index for INCIDENTS_AUDIT_STATE
