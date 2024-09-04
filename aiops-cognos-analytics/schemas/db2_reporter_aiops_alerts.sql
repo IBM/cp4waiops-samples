@@ -65,7 +65,7 @@ CREATE TABLE ALERTS_REPORTER_STATUS (
     lastStateChangeTime TIMESTAMP,
     langId              VARCHAR(32),
     expirySeconds       INTEGER,
-    PRIMARY KEY (tenantid, id) )@
+    PRIMARY KEY (id) )@
 --DATA CAPTURE NONE@
 
 --\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
@@ -91,14 +91,13 @@ CREATE TABLE ALERTS_AUDIT_OWNER (
         owner               VARCHAR(255) NOT NULL,
         tenantid            VARCHAR(64) NOT NULL,
         id                  VARCHAR(255) NOT NULL,
-        CONSTRAINT eventref FOREIGN KEY (tenantid, id) REFERENCES ALERTS_REPORTER_STATUS(tenantid, id) ON DELETE CASCADE )@
+        CONSTRAINT eventref FOREIGN KEY (id) REFERENCES ALERTS_REPORTER_STATUS(id) ON DELETE CASCADE )@
 --DATA CAPTURE NONE @
 
 -- Create the Index for ALERTS_AUDIT_OWNER
 
 CREATE INDEX ALERTS_AUDIT_OWNER_IDX
        ON ALERTS_AUDIT_OWNER (
-               tenantid,
                id )
        PCTFREE 10 @
 
@@ -113,14 +112,13 @@ CREATE TABLE ALERTS_AUDIT_TEAM (
         team                VARCHAR(255) NOT NULL,
         tenantid            VARCHAR(64) NOT NULL,
         id                  VARCHAR(255) NOT NULL,
-        CONSTRAINT eventref FOREIGN KEY (tenantid, id) REFERENCES ALERTS_REPORTER_STATUS(tenantid, id) ON DELETE CASCADE )@
+        CONSTRAINT eventref FOREIGN KEY (id) REFERENCES ALERTS_REPORTER_STATUS(id) ON DELETE CASCADE )@
 --DATA CAPTURE NONE @
 
 -- Create the Index for ALERTS_AUDIT_TEAM
 
 CREATE INDEX ALERTS_AUDIT_TEAM_IDX
        ON ALERTS_AUDIT_TEAM (
-               tenantid,
                id )
        PCTFREE 10 @
 
@@ -137,7 +135,7 @@ CREATE TABLE ALERTS_AUDIT_SEVERITY (
         state               INTEGER,
         tenantid            VARCHAR(64) NOT NULL,
         id                  VARCHAR(255) NOT NULL,
-        CONSTRAINT eventref FOREIGN KEY (tenantid, id) REFERENCES ALERTS_REPORTER_STATUS(tenantid, id) ON DELETE CASCADE )@
+        CONSTRAINT eventref FOREIGN KEY (id) REFERENCES ALERTS_REPORTER_STATUS(id) ON DELETE CASCADE )@
 --DATA CAPTURE NONE @
 
 
@@ -164,7 +162,7 @@ CREATE TABLE ALERTS_AUDIT_ACK (
         state               INTEGER,
         tenantid            VARCHAR(64) NOT NULL,
         id                  VARCHAR(255) NOT NULL,
-        CONSTRAINT eventref FOREIGN KEY (tenantid, id) REFERENCES ALERTS_REPORTER_STATUS(tenantid, id) ON DELETE CASCADE )@
+        CONSTRAINT eventref FOREIGN KEY (id) REFERENCES ALERTS_REPORTER_STATUS(id) ON DELETE CASCADE )@
 --DATA CAPTURE NONE @
 
 -- Create the Index for ALERTS_AUDIT_ACK
