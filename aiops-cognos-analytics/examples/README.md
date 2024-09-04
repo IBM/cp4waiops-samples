@@ -3,9 +3,18 @@ Example packages containing `data modules` and `dashboard` examples  <br />
 Cognos `visualizations` and `extensions` require **version 11.2 +** 
 
 ## Files
+_Examples with data require a password to import_
 
-**alert data example:** [TelcoDash.zip](telcoDash/TelcoDash.zip) <br />
-_optional static csv_ [AlertsData.csv](telcoDash/AlertsData.csv)
+**alert data example:** [TelcoDash.zip](telcoDash/TelcoDash.zip)
+
+optional static csv [AlertsData.csv](telcoDash/AlertsData.csv)
+
+
+**incident data example:** [PMDash.zip](pmDash/PMDash.zip)
+
+optional static csv [IncidentDataStatic.csv](pmDash/IncidentDataStatic.csv) [EventCountStatic.csv](pmDash/EventCountStatic.csv)
+
+
 
 ## Installation 
 [Video demo steps](videoSteps/ImportDemo.mov)

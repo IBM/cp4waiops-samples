@@ -1,0 +1,46 @@
+{
+  "root": true,
+  "extends": [
+    "plugin:jsx-a11y/recommended",
+    "plugin:import/recommended"
+  ],
+  "settings": {
+    "import/resolver": {
+      "node": {
+        "extensions": [
+          ".js",
+          ".jsx"
+        ]
+      }
+    }
+  },
+  "parser": "@babel/eslint-parser",
+  "parserOptions": {
+    "ecmaVersion": 2018,
+    "sourceType": "module",
+    "allowImportExportEverywhere": true,
+    "ecmaFeatures": {
+      "experimentalObjectRestSpread": true,
+      "jsx": true,
+      "modules": true
+    }
+  },
+  "plugins": [
+    "import",
+    "jsx-a11y",
+    "notice"
+  ],
+  "env": {
+    "jest": true
+  },
+  "rules": {
+    "notice/notice": [
+      "error",
+      {
+        "mustMatch": "\\*+ \\{COPYRIGHT-TOP\\} \\*+",
+        "template": "/* ******************************************************** {COPYRIGHT-TOP} ****\n * Copyright IBM Corp. <%= YEAR %>\n * \n * This source code is licensed under the Apache-2.0 license found in the\n * LICENSE file in the root directory of this source tree.\n ********************************************************* {COPYRIGHT-END} ****/\n"
+      }
+    ],
+    "indent": ["error", 2, { "SwitchCase": 1 }]
+  }
+}
