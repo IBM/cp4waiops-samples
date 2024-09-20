@@ -65,7 +65,8 @@ CREATE TABLE ALERTS_REPORTER_STATUS (
     lastStateChangeTime TIMESTAMP,
     langId              VARCHAR(32),
     expirySeconds       INTEGER,
-    PRIMARY KEY (id) )@
+    uuid                VARCHAR(255) NOT NULL GENERATED ALWAYS AS (CONCAT(CONCAT(tenantid,'_'),id)),
+    PRIMARY KEY (uuid) )@
 --DATA CAPTURE NONE@
 
 --\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
@@ -91,14 +92,15 @@ CREATE TABLE ALERTS_AUDIT_OWNER (
         owner               VARCHAR(255) NOT NULL,
         tenantid            VARCHAR(64) NOT NULL,
         id                  VARCHAR(255) NOT NULL,
-        CONSTRAINT eventref FOREIGN KEY (id) REFERENCES ALERTS_REPORTER_STATUS(id) ON DELETE CASCADE )@
+        uuid                VARCHAR(255) NOT NULL,
+        CONSTRAINT eventref FOREIGN KEY (uuid) REFERENCES ALERTS_REPORTER_STATUS(uuid) ON DELETE CASCADE )@
 --DATA CAPTURE NONE @
 
 -- Create the Index for ALERTS_AUDIT_OWNER
 
 CREATE INDEX ALERTS_AUDIT_OWNER_IDX
        ON ALERTS_AUDIT_OWNER (
-               id )
+               uuid )
        PCTFREE 10 @
 
 --+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -112,13 +114,15 @@ CREATE TABLE ALERTS_AUDIT_TEAM (
         team                VARCHAR(255) NOT NULL,
         tenantid            VARCHAR(64) NOT NULL,
         id                  VARCHAR(255) NOT NULL,
-        CONSTRAINT eventref FOREIGN KEY (id) REFERENCES ALERTS_REPORTER_STATUS(id) ON DELETE CASCADE )@
+        uuid                VARCHAR(255) NOT NULL,
+        CONSTRAINT eventref FOREIGN KEY (uuid) REFERENCES ALERTS_REPORTER_STATUS(uuid) ON DELETE CASCADE )@
 --DATA CAPTURE NONE @
 
 -- Create the Index for ALERTS_AUDIT_TEAM
 
 CREATE INDEX ALERTS_AUDIT_TEAM_IDX
        ON ALERTS_AUDIT_TEAM (
+               tenantid,
                id )
        PCTFREE 10 @
 
@@ -135,7 +139,8 @@ CREATE TABLE ALERTS_AUDIT_SEVERITY (
         state               INTEGER,
         tenantid            VARCHAR(64) NOT NULL,
         id                  VARCHAR(255) NOT NULL,
-        CONSTRAINT eventref FOREIGN KEY (id) REFERENCES ALERTS_REPORTER_STATUS(id) ON DELETE CASCADE )@
+        uuid                VARCHAR(255) NOT NULL,
+        CONSTRAINT eventref FOREIGN KEY (uuid) REFERENCES ALERTS_REPORTER_STATUS(uuid) ON DELETE CASCADE )@
 --DATA CAPTURE NONE @
 
 
@@ -143,7 +148,7 @@ CREATE TABLE ALERTS_AUDIT_SEVERITY (
 
 CREATE INDEX ALERTS_AUDIT_SEVERITY_IDX
        ON ALERTS_AUDIT_SEVERITY (
-               id,
+               uuid,
                state )
        PCTFREE 10 @
 
@@ -162,14 +167,15 @@ CREATE TABLE ALERTS_AUDIT_ACK (
         state               INTEGER,
         tenantid            VARCHAR(64) NOT NULL,
         id                  VARCHAR(255) NOT NULL,
-        CONSTRAINT eventref FOREIGN KEY (id) REFERENCES ALERTS_REPORTER_STATUS(id) ON DELETE CASCADE )@
+        uuid                VARCHAR(255) NOT NULL,
+        CONSTRAINT eventref FOREIGN KEY (uuid) REFERENCES ALERTS_REPORTER_STATUS(uuid) ON DELETE CASCADE )@
 --DATA CAPTURE NONE @
 
 -- Create the Index for ALERTS_AUDIT_ACK
 
 CREATE INDEX ALERTS_AUDIT_ACK_IDX
        ON ALERTS_AUDIT_ACK (
-               id,
+               uuid,
                state )
        PCTFREE 10 @
 
@@ -246,8 +252,7 @@ BEGIN ATOMIC
                 enddate = N.lastStateChangeTime,
                 state = 1
         WHERE
-                tenantid = N.tenantid AND
-                id = N.id AND
+                uuid = N.uuid AND
                 state = 0 ;
         INSERT INTO ALERTS_AUDIT_ACK VALUES (
                 N.acknowledged, 
@@ -256,14 +261,14 @@ BEGIN ATOMIC
                 N.owner, 
                 0, 
                 N.tenantid, 
-                N.id ) ;
+                N.id,
+                N.uuid ) ;
         -- start severity procedure
         UPDATE ALERTS_AUDIT_SEVERITY SET
                 enddate = N.lastStateChangeTime,
                 state = 1
         WHERE
-                tenantid = N.tenantid AND
-                id = N.id AND
+                uuid = N.uuid AND
                 state = 0 ;
         INSERT INTO ALERTS_AUDIT_SEVERITY VALUES ( 
                 N.lastStateChangeTime, 
@@ -271,7 +276,8 @@ BEGIN ATOMIC
                 N.severity,
                 0,
                 N.tenantid, 
-                N.id ) ;
+                N.id,
+                N.uuid ) ;
 END @
 
 CREATE TRIGGER ALERTS_AUDIT_UPDATE_SEVERITY
@@ -286,8 +292,7 @@ BEGIN ATOMIC
                         enddate = N.lastStateChangeTime,
                         state = 1
                 WHERE
-                        tenantid = N.tenantid AND
-                        id = N.id AND
+                        uuid = N.uuid AND
                         state = 0 ;
               
                 INSERT INTO ALERTS_AUDIT_SEVERITY VALUES ( 
@@ -296,7 +301,8 @@ BEGIN ATOMIC
                         N.severity,
                         0,
                         N.tenantid,
-                        N.id ) ;
+                        N.id,
+                        N.uuid ) ;
 END @
 
 CREATE TRIGGER ALERTS_AUDIT_UPDATE_OWNER
@@ -312,7 +318,8 @@ BEGIN ATOMIC
                         O.owner,
                         N.owner,
                         N.tenantid,
-                        N.id );
+                        N.id,
+                        N.uuid );
 END @
 
 CREATE TRIGGER ALERTS_AUDIT_UPDATE_TEAM
@@ -328,7 +335,8 @@ BEGIN ATOMIC
                         O.team,
                         N.team,
                         N.tenantid,
-                        N.id );
+                        N.id,
+                        N.uuid );
 END @
 
 CREATE TRIGGER ALERTS_AUDIT_UPDATE_ACK
@@ -343,8 +351,7 @@ BEGIN ATOMIC
                         enddate = N.lastStateChangeTime,
                         state = 1
                 WHERE
-                        tenantid = N.tenantid AND
-                        id = N.id AND
+                        uuid = N.uuid AND
                         state = 0;
         
                 INSERT INTO ALERTS_AUDIT_ACK VALUES (
@@ -354,7 +361,8 @@ BEGIN ATOMIC
                         N.owner, 
                         0, 
                         N.tenantid, 
-                        N.id );
+                        N.id,
+                        N.uuid );
 END @
 
 

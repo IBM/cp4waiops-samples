@@ -302,7 +302,7 @@ function createNamespace() {
       ;;
     esac
 
-    result=$(curl -k -X PUT $url/api/v1/configuration/namespaces/$id \
+    result=$(curl -k -X PUT $url/api/v1/configuration/namespaces/$cognosNamespace \
       -H "IBM-BA-Authorization: $sessionKey" \
       -H "Content-Type: application/json" \
       -d @- << EOF 2>/dev/null
