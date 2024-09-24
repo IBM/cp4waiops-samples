@@ -51,7 +51,8 @@ CREATE TABLE INCIDENTS_REPORTER_STATUS (
     chatOpsIntegrations INTEGER,
     resourceId          VARCHAR(255),
     policyId            VARCHAR(64),
-    PRIMARY KEY (id) )@
+    uuid                VARCHAR(255) NOT NULL GENERATED ALWAYS AS (CONCAT(CONCAT(tenantid,'_'),id)),
+    PRIMARY KEY (uuid) )@
 --DATA CAPTURE NONE@
 
 --\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
@@ -77,14 +78,15 @@ CREATE TABLE INCIDENTS_AUDIT_OWNER (
         owner           VARCHAR(255) NOT NULL,
         tenantid        VARCHAR(64) NOT NULL,
         id              VARCHAR(255) NOT NULL,
-        CONSTRAINT eventref FOREIGN KEY (id) REFERENCES INCIDENTS_REPORTER_STATUS(id) ON DELETE CASCADE )@
+        uuid            VARCHAR(255) NOT NULL,
+        CONSTRAINT eventref FOREIGN KEY (uuid) REFERENCES INCIDENTS_REPORTER_STATUS(uuid) ON DELETE CASCADE )@
 --DATA CAPTURE NONE @
 
 -- Create the Index for INCIDENTS_AUDIT_OWNER
 
 CREATE INDEX INCIDENTS_AUDIT_OWNER_IDX
        ON INCIDENTS_AUDIT_OWNER (
-               id )
+               uuid )
        PCTFREE 10 @
 
 --+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -98,13 +100,15 @@ CREATE TABLE INCIDENTS_AUDIT_TEAM (
         team            VARCHAR(255) NOT NULL,
         tenantid        VARCHAR(64) NOT NULL,
         id              VARCHAR(255) NOT NULL,
-        CONSTRAINT eventref FOREIGN KEY (id) REFERENCES INCIDENTS_REPORTER_STATUS(id) ON DELETE CASCADE )@
+        uuid            VARCHAR(255) NOT NULL,
+        CONSTRAINT eventref FOREIGN KEY (uuid) REFERENCES INCIDENTS_REPORTER_STATUS(uuid) ON DELETE CASCADE )@
 --DATA CAPTURE NONE @
 
 -- Create the Index for INCIDENTS_AUDIT_TEAM
 
 CREATE INDEX INCIDENTS_AUDIT_TEAM_IDX
        ON INCIDENTS_AUDIT_TEAM (
+               tenantid,
                id )
        PCTFREE 10 @
 
@@ -121,7 +125,8 @@ CREATE TABLE INCIDENTS_AUDIT_PRIORITY (
         complete        INTEGER,
         tenantid        VARCHAR(64) NOT NULL,
         id              VARCHAR(255) NOT NULL,
-        CONSTRAINT eventref FOREIGN KEY (id) REFERENCES INCIDENTS_REPORTER_STATUS(id) ON DELETE CASCADE )@
+        uuid            VARCHAR(255) NOT NULL,
+        CONSTRAINT eventref FOREIGN KEY (uuid) REFERENCES INCIDENTS_REPORTER_STATUS(uuid) ON DELETE CASCADE )@
 --DATA CAPTURE NONE @
 
 
@@ -129,7 +134,7 @@ CREATE TABLE INCIDENTS_AUDIT_PRIORITY (
 
 CREATE INDEX INCIDENTS_AUDIT_PRIORITY_IDX
        ON INCIDENTS_AUDIT_PRIORITY (
-               id,
+               uuid,
                complete )
        PCTFREE 10 @
 
@@ -148,14 +153,15 @@ CREATE TABLE INCIDENTS_AUDIT_STATE (
         complete        INTEGER,
         tenantid        VARCHAR(64) NOT NULL,
         id              VARCHAR(255) NOT NULL,
-        CONSTRAINT eventref FOREIGN KEY (id) REFERENCES INCIDENTS_REPORTER_STATUS(id) ON DELETE CASCADE )@
+        uuid            VARCHAR(255) NOT NULL,
+        CONSTRAINT eventref FOREIGN KEY (uuid) REFERENCES INCIDENTS_REPORTER_STATUS(uuid) ON DELETE CASCADE )@
 --DATA CAPTURE NONE @
 
 -- Create the Index for INCIDENTS_AUDIT_STATE
 
 CREATE INDEX INCIDENTS_AUDIT_STATE_IDX
        ON INCIDENTS_AUDIT_STATE (
-               id,
+               uuid,
                complete )
        PCTFREE 10 @
 
@@ -209,8 +215,7 @@ BEGIN ATOMIC
                 enddate = N.lastChangedTime,
                 complete = 1
         WHERE
-                tenantid = N.tenantid AND
-                id = N.id AND
+                uuid = N.uuid AND
                 complete = 0 ;
         INSERT INTO INCIDENTS_AUDIT_STATE VALUES (
                 N.state, 
@@ -219,14 +224,14 @@ BEGIN ATOMIC
                 N.owner, 
                 0, 
                 N.tenantid, 
-                N.id ) ;
+                N.id,
+                N.uuid ) ;
         -- start priority procedure
         UPDATE INCIDENTS_AUDIT_PRIORITY SET
                 enddate = N.lastChangedTime,
                 complete = 1
         WHERE
-                tenantid = N.tenantid AND
-                id = N.id AND
+                uuid = N.uuid AND
                 complete = 0 ;
         INSERT INTO INCIDENTS_AUDIT_PRIORITY VALUES ( 
                 N.lastChangedTime, 
@@ -234,7 +239,8 @@ BEGIN ATOMIC
                 N.priority,
                 0,
                 N.tenantid, 
-                N.id ) ;
+                N.id,
+                N.uuid ) ;
 END @
 
 CREATE TRIGGER INCIDENTS_AUDIT_UPDATE_PRIORITY
@@ -249,8 +255,7 @@ BEGIN ATOMIC
                         enddate = N.lastChangedTime,
                         complete = 1
                 WHERE
-                        tenantid = N.tenantid AND
-                        id = N.id AND
+                        uuid = N.uuid AND
                         complete = 0 ;
               
                 INSERT INTO INCIDENTS_AUDIT_PRIORITY VALUES ( 
@@ -259,7 +264,8 @@ BEGIN ATOMIC
                         N.priority,
                         0,
                         N.tenantid,
-                        N.id ) ;
+                        N.id,
+                        N.uuid ) ;
 END @
 
 CREATE TRIGGER INCIDENTS_AUDIT_UPDATE_OWNER
@@ -275,7 +281,8 @@ BEGIN ATOMIC
                         O.owner,
                         N.owner,
                         N.tenantid,
-                        N.id );
+                        N.id,
+                        N.uuid );
 END @
 
 CREATE TRIGGER INCIDENTS_AUDIT_UPDATE_TEAM
@@ -291,7 +298,8 @@ BEGIN ATOMIC
                         O.team,
                         N.team,
                         N.tenantid,
-                        N.id );
+                        N.id,
+                        N.uuid );
 END @
 
 CREATE TRIGGER INCIDENTS_AUDIT_UPDATE_STATE
@@ -306,8 +314,7 @@ BEGIN ATOMIC
                         enddate = N.lastChangedTime,
                         complete = 1
                 WHERE
-                        tenantid = N.tenantid AND
-                        id = N.id AND
+                        uuid = N.uuid AND
                         complete = 0;
         
                 INSERT INTO INCIDENTS_AUDIT_STATE VALUES (
@@ -317,7 +324,8 @@ BEGIN ATOMIC
                         N.owner, 
                         0, 
                         N.tenantid, 
-                        N.id );
+                        N.id,
+                        N.uuid );
 END @
 
 

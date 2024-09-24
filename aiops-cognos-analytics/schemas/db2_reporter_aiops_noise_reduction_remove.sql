@@ -31,7 +31,7 @@ DROP TRIGGER AIOPS_INCIDENT_COUNT_UPDATER_ON_INSERT @
 ------------------------------------------------------------------------------
 -- Drop procedures related to noise reduction.
 ------------------------------------------------------------------------------
-DROP PROCEDURE INSERT_ALERT_COUNTS_UPDATE @
+DROP PROCEDURE INSERT_ALERT_COUNTS_UPDATE(BIGINT, BIGINT, BIGINT) @
 
 ------------------------------------------------------------------------------
 -- Drop tables related to noise reduction.

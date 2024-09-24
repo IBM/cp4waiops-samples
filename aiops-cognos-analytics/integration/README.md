@@ -4,7 +4,12 @@ Configure OIDC authentication and single sign-on (SSO) between IBM Cloud Pak for
 
 ## Prereqs
 - Install jq where you plan to run this script (if needed).
-- Have your Cognos server and API key handy (see [Notes](#notes-section) for API key requirements).
+- Obtain a Cognos API key from an administrator.
+  - The Cognos administrator can get the key from any existing namespace under "Profile and Settings - My API keys".
+  - The Cognos administrator will first need to "Renew" credentials if "My credentials - Manage" is disabled.
+  ![credentials](./images/credentials.png)
+  - The Cognos user should have administration capabilities "Manage Namespaces" and "Users, Groups, and Roles".
+  
 - From the command-line, authenticate with the Cloud Pak for AIOps cluster as an admin user.
 - Add the Cloud Pak for AIOps cluster CA to Cognos as documented [here](https://www.ibm.com/docs/en/cognos-analytics/12.0.0?topic=servers-copying-ca-certificate-cognos). If you're using 
 the default [OpenShift ingress CA](https://docs.openshift.com/container-platform/4.16/security/certificate_types_descriptions/ingress-certificates.html), find it by running
@@ -37,12 +42,6 @@ kubectl get -n openshift-ingress-operator secrets router-ca -o jsonpath={.data."
 
 - If the Cloud Pak for AIOps cluster uses self-signed certificates, you need add a browser security exception prior to using these widgets in Cognos. See browser documentation for details.
 
-- The Cognos user associated with the API key must have the following capabilities:
-  - Administration -> Manage Namespaces
-  - Administration -> Users, Groups, and Roles
-
 - Cognos users cannot modify a namespace they are currently using.
-
-- If you intend to use a Cloud Pak for AIOps user to manage SSO, you will have to renew their credentials and create an API key in Cognos "Profile and settings".
 
 - For SSO to be effective, anonymous access must be [disabled](https://ibm.biz/BdKKYW) after successfully running this script.

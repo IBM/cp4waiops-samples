@@ -42,19 +42,8 @@ CREATE TABLE AIOPS_NOISE_REDUCTION_TIMELINE_TABLE(
   UPDATETIME TIMESTAMP
 )@
 
-CREATE OR REPLACE PROCEDURE INSERT_ALERT_COUNTS_UPDATE()
+CREATE OR REPLACE PROCEDURE INSERT_ALERT_COUNTS_UPDATE(in incidentCount BIGINT, in alertCount BIGINT, in eventCount BIGINT)
 BEGIN ATOMIC
-  declare incidentCount BIGINT;
-  declare alertCount BIGINT;
-  declare eventCount BIGINT;
-
-  -- Get current incident count
-  set incidentCount=(select count(*) from INCIDENTS_REPORTER_STATUS);
-  -- Get current alert count
-  set alertCount=(select count(*) from ALERTS_REPORTER_STATUS where ININCIDENT <> 0);
-  -- Get current event count
-  set eventCount=(select sum(EVENTCOUNT) from ALERTS_REPORTER_STATUS where ININCIDENT <> 0);
-
   INSERT INTO AIOPS_NOISE_REDUCTION_TIMELINE_TABLE(
     EVENTCOUNT,
     ALERTCOUNT,
@@ -72,28 +61,52 @@ CREATE OR REPLACE TRIGGER AIOPS_ALERT_COUNT_UPDATER_ON_UPDATE
   AFTER UPDATE ON ALERTS_REPORTER_STATUS
   FOR EACH ROW
 BEGIN ATOMIC
-  CALL INSERT_ALERT_COUNTS_UPDATE();
+  declare incidentCount BIGINT;
+  declare alertCount BIGINT;
+  declare eventCount BIGINT;
+  set incidentCount=(select count(*) from INCIDENTS_REPORTER_STATUS);
+  set alertCount=(select count(*) from ALERTS_REPORTER_STATUS where ININCIDENT <> 0);
+  set eventCount=(select sum(EVENTCOUNT) from ALERTS_REPORTER_STATUS where ININCIDENT <> 0);
+  CALL INSERT_ALERT_COUNTS_UPDATE(incidentCount, alertCount, eventCount);
 END@
 
 CREATE OR REPLACE TRIGGER ALERT_AIOPS_COUNT_UPDATER_ON_INSERT
   AFTER INSERT ON ALERTS_REPORTER_STATUS
   FOR EACH ROW
 BEGIN ATOMIC
-  CALL INSERT_ALERT_COUNTS_UPDATE();
+  declare incidentCount BIGINT;
+  declare alertCount BIGINT;
+  declare eventCount BIGINT;
+  set incidentCount=(select count(*) from INCIDENTS_REPORTER_STATUS);
+  set alertCount=(select count(*) from ALERTS_REPORTER_STATUS where ININCIDENT <> 0);
+  set eventCount=(select sum(EVENTCOUNT) from ALERTS_REPORTER_STATUS where ININCIDENT <> 0);
+  CALL INSERT_ALERT_COUNTS_UPDATE(incidentCount, alertCount, eventCount);
 END@
 
 CREATE OR REPLACE TRIGGER AIOPS_INCIDENT_COUNT_UPDATER_ON_UPDATE
   AFTER UPDATE ON INCIDENTS_REPORTER_STATUS
   FOR EACH ROW
 BEGIN ATOMIC
-  CALL INSERT_ALERT_COUNTS_UPDATE();
+  declare incidentCount BIGINT;
+  declare alertCount BIGINT;
+  declare eventCount BIGINT;
+  set incidentCount=(select count(*) from INCIDENTS_REPORTER_STATUS);
+  set alertCount=(select count(*) from ALERTS_REPORTER_STATUS where ININCIDENT <> 0);
+  set eventCount=(select sum(EVENTCOUNT) from ALERTS_REPORTER_STATUS where ININCIDENT <> 0);
+  CALL INSERT_ALERT_COUNTS_UPDATE(incidentCount, alertCount, eventCount);
 END@
 
 CREATE OR REPLACE TRIGGER AIOPS_INCIDENT_COUNT_UPDATER_ON_INSERT
   AFTER INSERT ON INCIDENTS_REPORTER_STATUS
   FOR EACH ROW
 BEGIN ATOMIC
-  CALL INSERT_ALERT_COUNTS_UPDATE();
+  declare incidentCount BIGINT;
+  declare alertCount BIGINT;
+  declare eventCount BIGINT;
+  set incidentCount=(select count(*) from INCIDENTS_REPORTER_STATUS);
+  set alertCount=(select count(*) from ALERTS_REPORTER_STATUS where ININCIDENT <> 0);
+  set eventCount=(select sum(EVENTCOUNT) from ALERTS_REPORTER_STATUS where ININCIDENT <> 0);
+  CALL INSERT_ALERT_COUNTS_UPDATE(incidentCount, alertCount, eventCount);
 END@
 
 COMMIT WORK @
