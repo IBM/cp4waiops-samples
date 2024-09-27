@@ -1,6 +1,6 @@
 {
   "branches": [
-    "sem-test"
+    "main"
   ],
   "verifyConditions": [
     "@semantic-release/changelog",

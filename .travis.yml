@@ -5,11 +5,6 @@ dist: jammy
 node_js:
 - 20
 
-branches:
-  only:
-    - main
-    - sem-test
-
 cache:
   npm: false
 
@@ -29,4 +24,4 @@ deploy:
   script: npx semantic-release
   on:
     node: 20
-    branch: sem-test
+    branch: main
