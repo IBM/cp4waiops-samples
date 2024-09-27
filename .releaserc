@@ -1,0 +1,28 @@
+{
+  "branches": [
+    "sem-test"
+  ],
+  "verifyConditions": [
+    "@semantic-release/changelog",
+    "@semantic-release/git"
+  ],
+  "prepare": [
+    "@semantic-release/changelog",
+    "@semantic-release/git"
+  ],
+  "publish": [
+    [
+      "@semantic-release/git",
+      {
+          "assets": [
+            "CHANGELOG.md",
+            "dist/**/*.{zip}"
+          ],
+          "message": "chore: Release ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}"
+      }
+    ],
+    {
+      "path": "@semantic-release/github"
+    }
+  ]
+}

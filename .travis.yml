@@ -1,23 +1,27 @@
-language: ruby
+language: node_js
+
+dist: jammy
+
+node_js:
+- 18
+
+cache:
+  npm: false
 
 before_install:
-  - echo "#"
-  - echo "#"
-  - echo "TravisCI is unbelively powerful, but you need to do your research first."
-  - echo "#"
-  - echo "#"
+- cd aiops-cognos-analytics
+- npm i -g npm@8
+- npm --version
 
 script:
-  - echo "#"
-  - echo "#"
-  - echo "Please take a look https://docs.travis-ci.com/user/tutorial/ for you options."
-  - echo "#"
-  - echo "#"
+- npm run build
+- npm run lint
+- npm run test
 
-
-after_success:
-  - echo "#"
-  - echo "#"
-  - echo "Don't forget to enable it in the GitHub repository also.."
-  - echo "#"
-  - echo "#"
+deploy:
+- provider: script
+  skip_cleanup: true
+  script: npx semantic-release
+  on:
+    node: 18
+    branch: sem-test
