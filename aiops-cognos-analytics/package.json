@@ -39,6 +39,7 @@
     "showdown": "^1.9.1",
     "zip-lib": "^1.0.4"
   },
+  "private": true,
   "engines": {
     "node": "^18"
   }
