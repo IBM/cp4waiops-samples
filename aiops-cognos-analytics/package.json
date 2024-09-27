@@ -1,11 +1,11 @@
 {
   "name": "aiops-custom-widget-cognos-integration",
-  "version": "1.1.0",
+  "version": "4.7.0",
   "description": "Custom AIOps widgets for Cognos",
   "main": "index.js",
   "scripts": {
     "clean:dist": "rimraf dist",
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "echo \"Error: no test specified\"",
     "lint": "node node_modules/.bin/eslint widgets/**/*.js --fix",
     "lint:diff": "npm-run-all -c -p lint:js:diff",
     "lint:js:diff": "eslint $(git diff --name-only --diff-filter=dr HEAD | grep -E '.js$|.jsx$') --max-warnings=0",
@@ -24,6 +24,8 @@
     "@babel/plugin-proposal-class-properties": "^7.8.3",
     "@babel/plugin-transform-modules-amd": "^7.24.1",
     "@babel/preset-env": "^7.8.7",
+    "@semantic-release/changelog": "6.0.3",
+    "@semantic-release/git": "10.0.1",
     "babel-eslint": "^10.1.0",
     "babel-minify": "^0.5.1",
     "copy-and-watch": "^0.1.4",
