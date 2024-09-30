@@ -1,4 +1,4 @@
-# Deploy Cognos Analytics with Cloud Pak For AIOps
+# Embedded Cognos Analytics
 
 - Execute the steps in the Ansible playbook section below to deploy Db2 & CA
 

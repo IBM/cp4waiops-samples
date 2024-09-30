@@ -1,4 +1,4 @@
-# Reporting schemas
+# Schemas
 
 Schemas for reporting in Cloud Pak for AIOps using Cognos Analytics with DB2
 
