@@ -1,17 +1,20 @@
-# Dashboard AIOps custom widget
+# Custom Dashboards in Cognos Analytics
 
-This implements AIOps custom widgets for Cognos.
+Create custom dashboards in Cognos Analytics using Cloud Pak for AIOps data.
 
 ## Content
 
-## How to setup
+### [Embedded Cognos Analytics](4.5/README.md)
+Install Cognos Analytics and DB2 into a Cloud Pak for AIOps cluster using Ansible.
 
-Clone the repo and then Run:
+### [Standalone Cognos Analytics](integration/README.md)
+Integrate an existing Cognos Analytics server with a Cloud Pak for AIOps cluster.
 
-```npm ci```
+### [Schemas](schemas/README.md)
+Install default schemas for storing Cloud Pak for AIOps data in DB2.
 
-## How to build
+### [Widgets](widgets/README.md)
+Install Cloud Pak for AIOps custom widgets for use in Cognos Analytics dashboards.
 
-Run ```npm run build```
-
-This will generate a zip file under ```dist``` folder which can be uploaded to cognos extensions
+### [Examples](examples/README.md)
+Use examples to help you get started quickly.

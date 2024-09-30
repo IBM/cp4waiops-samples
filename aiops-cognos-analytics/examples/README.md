@@ -1,4 +1,4 @@
-# Importing deployment packages
+# Examples
 This folder contains `data modules` and `dashboard` examples.  <br />
 
 This requires IBM Cognos Analytics **version 11.2 or higher**.
