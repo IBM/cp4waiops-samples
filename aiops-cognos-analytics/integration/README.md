@@ -7,7 +7,7 @@ Configure OIDC authentication and single sign-on (SSO) between IBM Cloud Pak for
 - Obtain a Cognos API key from an administrator.
   - The Cognos administrator can get the key from any existing namespace under "Profile and Settings - My API keys".
   - The Cognos administrator will first need to "Renew" credentials if "My credentials - Manage" is disabled.
-  ![credentials](./images/credentials.png)
+  ![credentials](../images/credentials.png)
   - The Cognos user should have administration capabilities "Manage Namespaces" and "Users, Groups, and Roles".
   
 - From the command-line, authenticate with the Cloud Pak for AIOps cluster as an admin user.
@@ -24,7 +24,7 @@ kubectl get -n openshift-ingress-operator secrets router-ca -o jsonpath={.data."
 ./setupCognos.sh -u cognos_url [-k cognos_api_key] [-n cognos_namespace] [-g cognos_gateway] [-c aiops_client] [-r]
 ```
 
-`-u cognos_url` (required) Cognos server in the form of `hostname:port`
+`-u cognos_url` (required) Cognos server in the form of `http(s)://hostname:port`
 
 `-k cognos_api_key` (optional) API key of the Cognos user under which the setup will run. If no API key is specified, anonymous user will be used.
 
