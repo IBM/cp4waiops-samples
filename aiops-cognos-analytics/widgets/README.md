@@ -1,4 +1,4 @@
-# installWidgets.sh
+# Widgets
 
 Build and install Cloud Pak for AIOps widgets for Cognos.
 

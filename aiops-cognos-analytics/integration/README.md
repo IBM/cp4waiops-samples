@@ -1,4 +1,4 @@
-# setupCognos.sh
+# Standalone Cognos Analytics
 
 Configure OIDC authentication and single sign-on (SSO) between IBM Cloud Pak for AIOps and Cognos Analytics.
 
