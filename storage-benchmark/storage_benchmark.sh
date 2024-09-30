@@ -7,7 +7,7 @@ if [ -z "${STORAGE_CLASS}" ]; then
 fi
 
 if [ -z "${IMAGE}" ]; then
-    IMAGE="docker-na-public.artifactory.swg-devops.com/hyc-katamari-cicd-team-docker-local/ibmcom/storage-benchmark:v0.1.0"
+    IMAGE="icr.io/cpopen/cp4waiops/storage-benchmark@sha256:2803d2f79651f5ccd1c8a0467a429076281120599f9ef03ef4c15924c31db51c"
 fi
 
 if [ -z "${SIZE}" ]; then
