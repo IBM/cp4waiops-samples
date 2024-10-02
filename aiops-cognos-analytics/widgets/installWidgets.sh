@@ -76,7 +76,7 @@ function prereqCheck() {
 
     kubectl auth can-i "*" "*" <<< test > /dev/null 2>&1
     if [ $? -gt 0 ]; then
-      echo "Authenticate with the Cloud Pak for AIOps cluster using kubectl as an admin user."
+      echo "Authenticate with the Cloud Pak for AIOps cluster using kubectl or oc as an admin user."
       echo
       exit 1
     fi
