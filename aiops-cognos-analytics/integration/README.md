@@ -10,7 +10,7 @@ Configure OIDC authentication and single sign-on (SSO) between IBM Cloud Pak for
   ![credentials](../images/credentials.png)
   - The Cognos user should have administration capabilities "Manage Namespaces" and "Users, Groups, and Roles".
   
-- From the command-line, authenticate with the Cloud Pak for AIOps cluster as an admin user.
+- From the command-line, authenticate with the Cloud Pak for AIOps cluster as an admin user with `kubectl` or `oc`.
 - Add the Cloud Pak for AIOps cluster CA to Cognos as documented [here](https://www.ibm.com/docs/en/cognos-analytics/12.0.0?topic=servers-copying-ca-certificate-cognos). If you're using 
 the default [OpenShift ingress CA](https://docs.openshift.com/container-platform/4.16/security/certificate_types_descriptions/ingress-certificates.html), find it by running
 
