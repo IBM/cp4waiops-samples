@@ -1,0 +1,17 @@
+apiVersion: v1
+data:
+  restore-data.json: |-
+    {
+      "backupName": "{{ .Values.backupName }}"
+    }
+  aiops-config.json: |-
+    {
+      "aiopsNamespace": "{{ .Values.aiopsNamespace }}",
+      "csNamespace": "{{ .Values.csNamespace }}",
+      "oadpNamespace": "{{ .Values.oadpNamespace }}",
+      "aiopsVersion": "4.7.0"
+    }
+kind: ConfigMap
+metadata:
+  name: restore-config
+  namespace: {{ .Values.oadpNamespace }}
