@@ -1343,7 +1343,9 @@ then
                 getSubscriptionStatus "cloud-native-postgresql" "$INSTALLATION_NAMESPACE" 
             fi
 
-            if [[ "${VERSION_AIOPSORCHESTRATOR}" != "4.7" ]]; then
+            if [[ "${VERSION_AIOPSORCHESTRATOR}" == "4.7" ]]; then
+                getSubscriptionStatus "ibm-commonui-operator-app" "$INSTALLATION_NAMESPACE"
+            else
                 getSubscriptionStatus "ibm-idp-config-ui-operator" "$INSTALLATION_NAMESPACE"
             fi
             
