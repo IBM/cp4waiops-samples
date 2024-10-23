@@ -347,7 +347,7 @@ spec:
       timeout: 60
     - name: nodetool-verify
       command: >
-        ["/bin/bash", "-c", "nodetool verify"]
+        ["/bin/bash", "-c", "nodetool verify -f"]
       container: aiops-topology-cassandra
       timeout: 60
   - name: ibm-cp-aiops-redis-server-pod-exec
