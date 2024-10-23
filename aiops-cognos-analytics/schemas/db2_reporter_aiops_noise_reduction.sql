@@ -14,7 +14,7 @@
 -- To run this script, you must do the following:
 --   (1) Put this script in directory of your choice.
 
---   (2) At the DB2 command prompt, run this script.
+--   (2) At the command prompt, run this script.
 
 --       EXAMPLE:    db2 -td@ -vf c:\temp\db2_reporter_aiops_noise_reduction.sql
 --------------------------------------------------------------------------------
@@ -23,90 +23,45 @@
 -- THIS SECTION OF THE SCRIPT CREATES ALL THE TABLES DIRECTLY
 -- ACCESSED BY THE REPORTER
 
--- TABLES:
---        AIOPS_NOISE_REDUCTION_TIMELINE_TABLE
+-- VIEWS:
+--        INCIDENT_DASHBOARD
 --//////////////////////////////////////////////////////////////////////
 
 
 --+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
--- The AIOPS_NOISE_REDUCTION_TIMELINE_TABLE contains noise reduction over time.
--- Only includes alerts which are part of an incident.
+-- The INCIDENT_DASHBOARD provides a an example view of incident health.
+-- This includes noise reduction and summarization metrics.
+-- Since the alert and incident tables are not joined, this is a union
+-- of summarization metrics needed for the example dashboard.
 --+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+--#SET TERMINATOR @
 
-
-CREATE TABLE AIOPS_NOISE_REDUCTION_TIMELINE_TABLE(
-  UUIDCOL INT not null GENERATED ALWAYS AS IDENTITY(START WITH 0, INCREMENT BY 1), 
-  EVENTCOUNT BIGINT, 
-  ALERTCOUNT BIGINT,
-  INCIDENTCOUNT BIGINT,
-  UPDATETIME TIMESTAMP
-)@
-
-CREATE OR REPLACE PROCEDURE INSERT_ALERT_COUNTS_UPDATE(in incidentCount BIGINT, in alertCount BIGINT, in eventCount BIGINT)
-BEGIN ATOMIC
-  INSERT INTO AIOPS_NOISE_REDUCTION_TIMELINE_TABLE(
-    EVENTCOUNT,
-    ALERTCOUNT,
-    INCIDENTCOUNT,
-    UPDATETIME
-  ) VALUES(
-    eventCount,
-    alertCount,
-    incidentCount,
-    CURRENT TIMESTAMP(3)
-  );
-END@
-
-CREATE OR REPLACE TRIGGER AIOPS_ALERT_COUNT_UPDATER_ON_UPDATE
-  AFTER UPDATE ON ALERTS_REPORTER_STATUS
-  FOR EACH ROW
-BEGIN ATOMIC
-  declare incidentCount BIGINT;
-  declare alertCount BIGINT;
-  declare eventCount BIGINT;
-  set incidentCount=(select count(*) from INCIDENTS_REPORTER_STATUS);
-  set alertCount=(select count(*) from ALERTS_REPORTER_STATUS where ININCIDENT <> 0);
-  set eventCount=(select sum(EVENTCOUNT) from ALERTS_REPORTER_STATUS where ININCIDENT <> 0);
-  CALL INSERT_ALERT_COUNTS_UPDATE(incidentCount, alertCount, eventCount);
-END@
-
-CREATE OR REPLACE TRIGGER ALERT_AIOPS_COUNT_UPDATER_ON_INSERT
-  AFTER INSERT ON ALERTS_REPORTER_STATUS
-  FOR EACH ROW
-BEGIN ATOMIC
-  declare incidentCount BIGINT;
-  declare alertCount BIGINT;
-  declare eventCount BIGINT;
-  set incidentCount=(select count(*) from INCIDENTS_REPORTER_STATUS);
-  set alertCount=(select count(*) from ALERTS_REPORTER_STATUS where ININCIDENT <> 0);
-  set eventCount=(select sum(EVENTCOUNT) from ALERTS_REPORTER_STATUS where ININCIDENT <> 0);
-  CALL INSERT_ALERT_COUNTS_UPDATE(incidentCount, alertCount, eventCount);
-END@
-
-CREATE OR REPLACE TRIGGER AIOPS_INCIDENT_COUNT_UPDATER_ON_UPDATE
-  AFTER UPDATE ON INCIDENTS_REPORTER_STATUS
-  FOR EACH ROW
-BEGIN ATOMIC
-  declare incidentCount BIGINT;
-  declare alertCount BIGINT;
-  declare eventCount BIGINT;
-  set incidentCount=(select count(*) from INCIDENTS_REPORTER_STATUS);
-  set alertCount=(select count(*) from ALERTS_REPORTER_STATUS where ININCIDENT <> 0);
-  set eventCount=(select sum(EVENTCOUNT) from ALERTS_REPORTER_STATUS where ININCIDENT <> 0);
-  CALL INSERT_ALERT_COUNTS_UPDATE(incidentCount, alertCount, eventCount);
-END@
-
-CREATE OR REPLACE TRIGGER AIOPS_INCIDENT_COUNT_UPDATER_ON_INSERT
-  AFTER INSERT ON INCIDENTS_REPORTER_STATUS
-  FOR EACH ROW
-BEGIN ATOMIC
-  declare incidentCount BIGINT;
-  declare alertCount BIGINT;
-  declare eventCount BIGINT;
-  set incidentCount=(select count(*) from INCIDENTS_REPORTER_STATUS);
-  set alertCount=(select count(*) from ALERTS_REPORTER_STATUS where ININCIDENT <> 0);
-  set eventCount=(select sum(EVENTCOUNT) from ALERTS_REPORTER_STATUS where ININCIDENT <> 0);
-  CALL INSERT_ALERT_COUNTS_UPDATE(incidentCount, alertCount, eventCount);
-END@
+CREATE VIEW INCIDENT_DASHBOARD (
+        eventCount, 
+        alertCount, 
+        incidentCount,
+        unassignedCount,
+        inProgressCount,
+        ticketedCount,
+        criticalPct) 
+AS SELECT
+        SUM(EVENTCOUNT),
+        COUNT(*),
+        CAST(NULL AS BIGINT),
+        CAST(NULL AS BIGINT),
+        CAST(NULL AS BIGINT),
+        CAST(NULL AS BIGINT),
+        CAST(NULL AS DECIMAL)
+FROM ALERTS_REPORTER_STATUS
+		WHERE ININCIDENT <> 0
+UNION SELECT
+        CAST(NULL AS BIGINT),
+        CAST(NULL AS BIGINT),
+        SUM(case when STATE <> 'closed' then 1 else 0 end),
+        SUM(case when STATE = 'unassigned' then 1 else 0 end),
+        SUM(case when STATE = 'inProgress' then 1 else 0 end),
+        SUM(case when TICKETS > 0 and STATE <> 'closed' then 1 else 0 end),
+        CAST(CAST(SUM(case when PRIORITY = 1 then 1 else 0 end) AS FLOAT) / SUM(case when STATE <> 'closed' then 1 else 0 end) * 100 AS DECIMAL(5,2))
+FROM INCIDENTS_REPORTER_STATUS @
 
 COMMIT WORK @

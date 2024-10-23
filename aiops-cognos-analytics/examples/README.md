@@ -1,20 +1,14 @@
 # Examples
-This folder contains `data modules` and `dashboard` examples.  <br />
+This folder contains dashboard examples.  <br />
 
 This requires IBM Cognos Analytics **version 11.2 or higher**.
 
 ## Files
 
-[TelcoDash.zip](telcoDash/TelcoDash.zip) - Alert data example
-
-[AlertsData.csv](telcoDash/AlertsData.csv) - Static alert data (optional)
-
-[PMdash.zip](pmDash/PMdash.zip) - Incident data example
-
-[IncidentDataStatic.csv](pmDash/IncidentDataStatic.csv),  [EventCountStatic.csv](pmDash/EventCountStatic.csv) - Static incident data (optional) 
+[Cloud_Pak_for_AIOps_examples.zip](Cloud_Pak_for_AIOps_examples.zip) - Example dashboards
 
 ## Installation 
-[Download video demo](videoSteps/ImportDemo.mov)
+[Installation video demo](videoSteps/ImportDemo.mov)
 
 #### 1. Find the location for Cognos extensions
 
@@ -51,46 +45,44 @@ _For standalone Cognos, this file will be on the Cognos server typically under `
 _For Cognos running within an OpenShift cluster_
 
 ``` bash
-kubectl cp ./<example>.zip <pod_name>:/data/deployment/<example>.zip
+kubectl cp ./Cloud_Pak_for_AIOps_examples.zip <pod_name>:/data/deployment/Cloud_Pak_for_AIOps_examples.zip
 ```
 
 _For a standalone Cognos server_
 ```bash
- cp ./<example>.zip /opt/ibm/cognos/analytics/deployment/<example>.zip
+ cp ./Cloud_Pak_for_AIOps_examples.zip /opt/ibm/cognos/analytics/deployment/Cloud_Pak_for_AIOps_examples.zip
 ```
 
-#### 3. Open the admin console in the Cognos UI
+#### 3. Open the `Manage > Administration` console menu option from the IBM Cognos Analytics home page.
 
-#### 4. Go to configuration then content administration then select the new import button
+#### 4. Go to `Configuration > Content Administration` and click the `New Import` button in the top-right.
 
-#### 5. Select the package name
+#### 5. Select the package name `Cloud Pak for AIOps examples`.
 
-#### 6. Select next and select the checkbox next to the folder
+#### 6. You will be prompted for a passcode. Enter `examples` and Click Next, and select the checkbox next to the `Cloud Pak for AIOps examples` folder.
 
-#### 7. Select next and finish
+#### 7. Click Next then Finish.
 
-#### 8. Deployment will show up in **Team content**
+#### 8. The examples will then show up under `Content > Team content` from the IBM Cognos Analytics home page.
+- If you don't immediately see the examples, you may need to wait a minute and reload the `Team content` page.
 
-#### 9. For static dashboards which use csv data
-- The examples will initially show errors due to missing data.
-- Upload the corresponding csv. [(download demo)](videoSteps/StaticCSVUpload.mov)
-- Re-link the example data source(s) to the uploaded .csv(s) with the same name.
+#### 9. Example dashboards use mock data by default. To use your own live data, re-link the data source to use the "DB2" data modules.
+- You must first [setup dashboard integration](https://ibm.biz/BdaveZ) before using live data.
+- See this [video](videoSteps/RelinkDemo.mov) for details on using the live data source.
 
-#### 10. Reload the page if visualizations will not load
+#### 10. The incident dashboard example requires a custom funnel extension. [Download](https://accelerator.ca.analytics.ibm.com/bi/?perspective=authoring&pathRef=.public_folders%2FIBM%2BAccelerator%2BCatalog%2FContent%2FVIZ00024&id=iD8FDBEAFC25E4D1BA440A9FFA9FD5401&objRef=iD8FDBEAFC25E4D1BA440A9FFA9FD5401&action=run&format=HTML&cmPropStr=%7B%22id%22%3A%22iD8FDBEAFC25E4D1BA440A9FFA9FD5401%22%2C%22type%22%3A%22reportView%22%2C%22defaultName%22%3A%22VIZ00024%22%2C%22permissions%22%3A%5B%22execute%22%2C%22read%22%2C%22traverse%22%5D%7D) then install this from the `Manage > Customization > Custom Visuals` menu option on the Cognos Analytics home page.
 
 ## Troubleshooting 
 
-1. Color of severity is off - Check if the custom color extension has been installed and used.
+1. Color of severity is off - Install the [custom color extension](https://accelerator.ca.analytics.ibm.com/bi/?perspective=authoring&pathRef=.public_folders%2FIBM%2BAccelerator%2BCatalog%2FContent%2FEXT00064&id=i208E818772C44592A1CFDDC59C6E48A1&objRef=i208E818772C44592A1CFDDC59C6E48A1&action=run&format=HTML&cmPropStr=%7B%22id%22%3A%22i208E818772C44592A1CFDDC59C6E48A1%22%2C%22type%22%3A%22reportView%22%2C%22defaultName%22%3A%22EXT00064%22%2C%22permissions%22%3A%5B%22execute%22%2C%22read%22%2C%22traverse%22%5D%7D) which provides a richer color palette.
 
-2. Funnel graph is blank - Check if the funnel extension has been installed.
+2. Funnel graph is blank - Install the [custom funnel extension](https://accelerator.ca.analytics.ibm.com/bi/?perspective=authoring&pathRef=.public_folders%2FIBM%2BAccelerator%2BCatalog%2FContent%2FVIZ00024&id=iD8FDBEAFC25E4D1BA440A9FFA9FD5401&objRef=iD8FDBEAFC25E4D1BA440A9FFA9FD5401&action=run&format=HTML&cmPropStr=%7B%22id%22%3A%22iD8FDBEAFC25E4D1BA440A9FFA9FD5401%22%2C%22type%22%3A%22reportView%22%2C%22defaultName%22%3A%22VIZ00024%22%2C%22permissions%22%3A%5B%22execute%22%2C%22read%22%2C%22traverse%22%5D%7D).
 
-3. Missing data (errored visualizations) - Check if the data sources have been properly linked.
+3. Missing data in the DB2 module - Re-link the provided DB2 data source in the `Data` sub-folder to your own DB2 server connection.
+
+4. Warning "One or more data caches could not be loaded." - This message can occur after re-linking data sources. It's harmless, simply letting you know the data from the new source is not found in the local cache. You may dismiss the notification.
 
 ---
-## Extensions 
-[Custom color extension](https://accelerator.ca.analytics.ibm.com/bi/?perspective=authoring&pathRef=.public_folders%2FIBM%2BAccelerator%2BCatalog%2FContent%2FEXT00064&id=i208E818772C44592A1CFDDC59C6E48A1&objRef=i208E818772C44592A1CFDDC59C6E48A1&action=run&format=HTML&cmPropStr=%7B%22id%22%3A%22i208E818772C44592A1CFDDC59C6E48A1%22%2C%22type%22%3A%22reportView%22%2C%22defaultName%22%3A%22EXT00064%22%2C%22permissions%22%3A%5B%22execute%22%2C%22read%22%2C%22traverse%22%5D%7D) - Provides a richer color palette
-
-[Custom funnel extension](https://accelerator.ca.analytics.ibm.com/bi/?perspective=authoring&pathRef=.public_folders%2FIBM%2BAccelerator%2BCatalog%2FContent%2FVIZ00024&id=iD8FDBEAFC25E4D1BA440A9FFA9FD5401&objRef=iD8FDBEAFC25E4D1BA440A9FFA9FD5401&action=run&format=HTML&cmPropStr=%7B%22id%22%3A%22iD8FDBEAFC25E4D1BA440A9FFA9FD5401%22%2C%22type%22%3A%22reportView%22%2C%22defaultName%22%3A%22VIZ00024%22%2C%22permissions%22%3A%5B%22execute%22%2C%22read%22%2C%22traverse%22%5D%7D) - Required for the incident dashboard example
 
 ## Additional details 
 

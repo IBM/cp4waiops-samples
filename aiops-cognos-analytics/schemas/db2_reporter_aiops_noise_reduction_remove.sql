@@ -12,30 +12,16 @@
 -- To run this script, you must do the following:
 --   (1) Put this script in directory of your choice.
 
---   (2) At the DB2 command window prompt, run this script.
+--   (2) At the command window prompt, run this script.
 
---       EXAMPLE:    db2 -td@ -vf c:\temp\db2_reporter_aiops_noise_reduction_remove.sql
---------------------------------------------------------------------------------
-
-------------------------------------------------------------------------------
--- Drop triggers related to noise reduction.
-------------------------------------------------------------------------------
-DROP TRIGGER AIOPS_ALERT_COUNT_UPDATER_ON_UPDATE @
-
-DROP TRIGGER ALERT_AIOPS_COUNT_UPDATER_ON_INSERT @
-
-DROP TRIGGER AIOPS_INCIDENT_COUNT_UPDATER_ON_UPDATE @
-
-DROP TRIGGER AIOPS_INCIDENT_COUNT_UPDATER_ON_INSERT @
+--       EXAMPLE:    db2 -vf c:\temp\db2_reporter_aiops_noise_reduction_remove.sql
+----------------------------------- ---------------------------------------------
 
 ------------------------------------------------------------------------------
--- Drop procedures related to noise reduction.
+-- Drop views related to noise reduction.
 ------------------------------------------------------------------------------
-DROP PROCEDURE INSERT_ALERT_COUNTS_UPDATE(BIGINT, BIGINT, BIGINT) @
+--#SET TERMINATOR @
 
-------------------------------------------------------------------------------
--- Drop tables related to noise reduction.
-------------------------------------------------------------------------------
-DROP TABLE AIOPS_NOISE_REDUCTION_TIMELINE_TABLE @
+DROP VIEW INCIDENT_DASHBOARD @
 
 COMMIT WORK @

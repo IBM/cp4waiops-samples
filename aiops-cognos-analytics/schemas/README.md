@@ -173,8 +173,6 @@ INCIDENTS_AUDIT_PRIORITY - Audit of incident priority changes
 
 INCIDENTS_AUDIT_STATE - Audit of incident status changes
 
-AIOPS_NOISE_REDUCTION_TIMELINE_TABLE - Noise reduction over time
-
 ### Views
 ALERTS_STATUS_VW - View similar to alerts list in the UI
 
@@ -183,6 +181,8 @@ ALERTS_AUDIT - View of audited alert state changes
 INCIDENTS_STATUS_VW - View similar to incidents list in the UI
 
 INCIDENTS_AUDIT - View of audited incident state changes
+
+INCIDENT_DASHBOARD - Example view of incident health
 
 ### Indexes
 ALERTS_AUDIT_OWNER_IDX - Index for alert owner audit
