@@ -794,7 +794,7 @@ fi
 
 if [[ "$1" == "version" ]]
 then
-    echo "0.0.30"
+    echo "0.0.31"
     exit 0
 fi
 
@@ -1215,10 +1215,18 @@ then
     then 
         getSubscriptionStatus "ibm-secure-tunnel-operator" "$INSTALLATION_NAMESPACE" 
     fi
-    getSubscriptionStatus "ibm-watson-aiops-ui-operator" "$INSTALLATION_NAMESPACE" 
-    getSubscriptionStatus "ir-ai-operator" "$INSTALLATION_NAMESPACE" 
-    getSubscriptionStatus "ir-core-operator" "$INSTALLATION_NAMESPACE" 
-    getSubscriptionStatus "ir-lifecycle-operator" "$INSTALLATION_NAMESPACE" 
+    getSubscriptionStatus "ibm-watson-aiops-ui-operator" "$INSTALLATION_NAMESPACE"
+
+    if [[ "${VERSION_AIOPSORCHESTRATOR}" == "4.7" ]]; then
+        getSubscriptionStatus "ibm-aiops-ir-ai" "$INSTALLATION_NAMESPACE" 
+        getSubscriptionStatus "ibm-aiops-ir-core" "$INSTALLATION_NAMESPACE" 
+        getSubscriptionStatus "ibm-aiops-ir-lifecycle" "$INSTALLATION_NAMESPACE"
+    else
+        getSubscriptionStatus "ir-ai-operator" "$INSTALLATION_NAMESPACE" 
+        getSubscriptionStatus "ir-core-operator" "$INSTALLATION_NAMESPACE" 
+        getSubscriptionStatus "ir-lifecycle-operator" "$INSTALLATION_NAMESPACE"
+    fi
+
     if [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.3" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.4" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.5" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.6" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.7" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "4.1" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "4.2" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "4.3" ]];
     then 
         getSubscriptionStatus "redis" "$INSTALLATION_NAMESPACE" 
@@ -1334,20 +1342,36 @@ then
             then 
                 getSubscriptionStatus "cloud-native-postgresql" "$INSTALLATION_NAMESPACE" 
             fi
-            getSubscriptionStatus "ibm-idp-config-ui-operator" "$INSTALLATION_NAMESPACE"
+
+            if [[ "${VERSION_AIOPSORCHESTRATOR}" == "4.7" ]]; then
+                getSubscriptionStatus "ibm-commonui-operator-app" "$INSTALLATION_NAMESPACE"
+            else
+                getSubscriptionStatus "ibm-idp-config-ui-operator" "$INSTALLATION_NAMESPACE"
+            fi
+            
             if [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.3" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.4" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.5" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.6" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.7" ]];
             then
                 getSubscriptionStatus "ibm-crossplane-operator-app" "$INSTALLATION_NAMESPACE"
                 getSubscriptionStatus "ibm-crossplane-provider-kubernetes-operator-app" "$INSTALLATION_NAMESPACE"
             fi
             getSubscriptionStatus "ibm-events-operator" "$INSTALLATION_NAMESPACE"
-            getSubscriptionStatus "ibm-im-operator" "$INSTALLATION_NAMESPACE"
+
+            if [[ "$VERSION_AIOPSORCHESTRATOR" == "4.7" ]];  then
+                getSubscriptionStatus "ibm-iam-operator" "$INSTALLATION_NAMESPACE"
+            else
+                getSubscriptionStatus "ibm-im-operator" "$INSTALLATION_NAMESPACE"
+            fi
 
             if [[ "$VERSION_AIOPSORCHESTRATOR" != "4.6" && "$VERSION_AIOPSORCHESTRATOR" != "4.7" ]]; then
                 getSubscriptionStatus "ibm-im-mongodb-operator" "$INSTALLATION_NAMESPACE"
             fi
             
-            getSubscriptionStatus "ibm-platformui-operator" "$INSTALLATION_NAMESPACE"
+            if [[ "$VERSION_AIOPSORCHESTRATOR" == "4.7" ]]; then
+                getSubscriptionStatus "ibm-zen-operator" "$INSTALLATION_NAMESPACE"
+            else
+                getSubscriptionStatus "ibm-platformui-operator" "$INSTALLATION_NAMESPACE"
+            fi
+
             getSubscriptionStatus "operand-deployment-lifecycle-manager-app" "$INSTALLATION_NAMESPACE"
             getSubscriptionStatusGrep "aiops-ibm-common-services" "$INSTALLATION_NAMESPACE"
 
