@@ -12,10 +12,11 @@
 -- To run this script, you must do the following:
 --   (1) Put this script in directory of your choice.
 
---   (2) At the DB2 command prompt, run this script.
+--   (2) At the command prompt, run this script.
 
---       EXAMPLE:    db2 -td@ -vf c:\temp\db2_reporter_aiops_alerts.sql
+--       EXAMPLE:    db2 -td@ -vf c:\temp\db2\reporter_aiops_alerts.sql
 --------------------------------------------------------------------------------
+--#SET TERMINATOR @
 
 --\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
 -- THIS SECTION OF THE SCRIPT CREATES ALL THE TABLES DIRECTLY

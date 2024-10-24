@@ -16,7 +16,7 @@
 
 --   (2) At the command prompt, run this script.
 
---       EXAMPLE:    db2 -td@ -vf c:\temp\db2_reporter_aiops_noise_reduction.sql
+--       EXAMPLE:    db2 -td@ -vf c:\temp\reporter_aiops_noise_reduction.sql
 --------------------------------------------------------------------------------
 
 --\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
