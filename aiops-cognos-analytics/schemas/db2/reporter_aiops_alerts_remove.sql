@@ -1,4 +1,4 @@
--------------------------------------------------------------------------------
+
 --
 -- © Copyright IBM Corp. 2024
 
@@ -12,11 +12,11 @@
 -- To run this script, you must do the following:
 --   (1) Put this script in directory of your choice.
 
---   (2) At the DB2 command window prompt, run this script.
+--   (2) At the command window prompt, run this script.
 
---       EXAMPLE:    db2 -td@ -vf c:\temp\db2_reporter_aiops_alerts_remove.sql
+--       EXAMPLE:    db2 -td@ -vf c:\temp\db2\reporter_aiops_alerts_remove.sql
 --------------------------------------------------------------------------------
-
+--#SET DELIMITER @
 ------------------------------------------------------------------------------
 -- Drop indexes on required tables.
 ------------------------------------------------------------------------------

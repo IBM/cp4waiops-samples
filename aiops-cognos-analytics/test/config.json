@@ -1,0 +1,10 @@
+{
+  "client": "db2",
+  "connection": {
+    "user": "",
+    "password": "",
+    "host": "",
+    "port": 50000,
+    "database": ""
+  }
+}
