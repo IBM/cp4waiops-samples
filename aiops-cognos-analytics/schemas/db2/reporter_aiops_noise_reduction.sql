@@ -41,12 +41,18 @@ CREATE VIEW INCIDENT_DASHBOARD (
         alertCount, 
         incidentCount,
         unassignedCount,
+        assignedCount,
         inProgressCount,
+        onHoldCount,
+        resolvedCount,
         ticketedCount,
         criticalPct) 
 AS SELECT
         SUM(EVENTCOUNT),
         COUNT(*),
+        CAST(NULL AS BIGINT),
+        CAST(NULL AS BIGINT),
+        CAST(NULL AS BIGINT),
         CAST(NULL AS BIGINT),
         CAST(NULL AS BIGINT),
         CAST(NULL AS BIGINT),
@@ -59,7 +65,10 @@ UNION SELECT
         CAST(NULL AS BIGINT),
         SUM(case when STATE <> 'closed' then 1 else 0 end),
         SUM(case when STATE = 'unassigned' then 1 else 0 end),
+        SUM(case when STATE in ('assignedToTeam', 'assignedToIndividual') then 1 else 0 end),
         SUM(case when STATE = 'inProgress' then 1 else 0 end),
+        SUM(case when STATE = 'onHold' then 1 else 0 end),
+        SUM(case when STATE = 'resolved' then 1 else 0 end),
         SUM(case when TICKETS > 0 and STATE <> 'closed' then 1 else 0 end),
         CAST(CAST(SUM(case when PRIORITY = 1 then 1 else 0 end) AS FLOAT) / SUM(case when STATE <> 'closed' then 1 else 0 end) * 100 AS DECIMAL(5,2))
 FROM INCIDENTS_REPORTER_STATUS @
