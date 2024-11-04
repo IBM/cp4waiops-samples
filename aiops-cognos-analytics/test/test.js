@@ -387,10 +387,13 @@ describe('Schema test', () => {
       const columnNames = results.rows.map((result) => result.name.toLowerCase());
       expect(columnNames).to.eql([
         'alertcount',
+        'assignedcount',
         'criticalpct',
         'eventcount',
         'incidentcount',
         'inprogresscount',
+        'onholdcount',
+        'resolvedcount',
         'ticketedcount',
         'unassignedcount'
       ]);
