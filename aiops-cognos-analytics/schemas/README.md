@@ -151,7 +151,8 @@ db2 -td@ -vf db2/reporter_aiops_noise_reduction_remove.sql
 ## Testing
 1. Complete the `config.json` with database connection details. You can also set these values in the command-line window, e.g. `export connection__user=db2inst1`.
 2. Make sure the database is running.
-3. Run `npm run test`.
+3. Connect to the database defined in the config file, e.g. `db2 connect to bludb user db2inst1`
+4. Run `npm run test`.
 > NOTE: Testing from Linux AMD64 is currently supported.
 
 ## Reference
@@ -227,14 +228,3 @@ INCIDENTS_AUDIT_UPDATE_OWNER - Updates previous incident owner state
 INCIDENTS_AUDIT_UPDATE_TEAM - Updates previous incident team state
 
 INCIDENTS_AUDIT_UPDATE_STATE - Updates previous incident status
-
-AIOPS_ALERT_COUNT_UPDATER_ON_UPDATE - Updates tallys when an alert is updated
-
-ALERT_AIOPS_COUNT_UPDATER_ON_INSERT - Updates tallys when an alert is created
-
-AIOPS_INCIDENT_COUNT_UPDATER_ON_UPDATE - Updates tallys when an incident is updated
-
-AIOPS_INCIDENT_COUNT_UPDATER_ON_INSERT - Updates tallys when an incident is created
-
-### Stored procedures
-INSERT_ALERT_COUNTS_UPDATE - Inserts a tally of event instances, alerts and incidents at the current point in time
