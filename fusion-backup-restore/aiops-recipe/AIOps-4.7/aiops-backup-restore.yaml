@@ -16,7 +16,7 @@ spec:
       type: resource
       includedResourceTypes:
         - subscriptions.operators.coreos.com
-      labelSelector: operators.coreos.com/ibm-aiops-orchestrator.cp4aiops=
+      labelSelector: manual=ibm-aiops-orchestrator
     - name: aiops-configmap
       type: resource
       includedResourceTypes:
@@ -25,8 +25,6 @@ spec:
       essential: false
     - name: ibm-entitlement-key-secret
       type: resource
-      includedNamespaces:
-        - cp4aiops
       includedResourceTypes:
         - secrets
       labelSelector: manual=ibm-entitlement-key-secret
@@ -198,7 +196,7 @@ spec:
     ops:
     - name: cancel-lifecycletrigger-jobids
       command: |
-        ["/bin/bash", "-c", "while true; do output=$(curl -X GET --cacert /var/run/secrets/kubernetes.io/serviceaccount/ca.crt -H \"Authorization: Bearer `cat /var/run/secrets/kubernetes.io/serviceaccount/token`\" -H 'Content-Type: application/merge-patch+json' -H 'Accept: application/json' -k https://kubernetes.default.svc/apis/lifecycle.ir.aiops.ibm.com/v1beta1/namespaces/cp4aiops/lifecycletriggers/aiops | grep jid | cut -d':' -f 2 | tr -d '\", '); echo \"Output: '$output'\"; if [ \\( ! -z \"$output\" \\) -a \\( $(echo $output | wc -l) -gt 0 \\) ]; then data='['; first=true; for line in $output; do if [ $first = true ]; then { data+=\"\\\"$line\\\"\";  first=false; } else data+=\", \\\"$line\\\"\"; fi done; data+=']'; break; else { echo \"Sleeping for 1 sec\"; sleep 1; } fi done; echo \"Data: '$data'\"; jdata='{\\\"spec\\\":{\\\"cancelJobs\\\":$data}}'; eval \"data=$jdata\"; echo \"Final:'$data'\"; curl -X PATCH --cacert /var/run/secrets/kubernetes.io/serviceaccount/ca.crt -H \"Authorization: Bearer `cat /var/run/secrets/kubernetes.io/serviceaccount/token`\" -H 'Content-Type: application/merge-patch+json' -H 'Accept: application/json' -k https://kubernetes.default.svc/apis/lifecycle.ir.aiops.ibm.com/v1beta1/namespaces/cp4aiops/lifecycletriggers/aiops -d $data"]
+        ["/bin/bash", "-c", "while true; do output=$(curl -X GET --cacert /var/run/secrets/kubernetes.io/serviceaccount/ca.crt -H \"Authorization: Bearer `cat /var/run/secrets/kubernetes.io/serviceaccount/token`\" -H 'Content-Type: application/merge-patch+json' -H 'Accept: application/json' -k https://kubernetes.default.svc/apis/lifecycle.ir.aiops.ibm.com/v1beta1/namespaces/${GROUP.aiops-volumes.namespace}/lifecycletriggers/aiops | grep jid | cut -d':' -f 2 | tr -d '\", '); echo \"Output: '$output'\"; if [ \\( ! -z \"$output\" \\) -a \\( $(echo $output | wc -l) -gt 0 \\) ]; then data='['; first=true; for line in $output; do if [ $first = true ]; then { data+=\"\\\"$line\\\"\";  first=false; } else data+=\", \\\"$line\\\"\"; fi done; data+=']'; break; else { echo \"Sleeping for 1 sec\"; sleep 1; } fi done; echo \"Data: '$data'\"; jdata='{\\\"spec\\\":{\\\"cancelJobs\\\":$data}}'; eval \"data=$jdata\"; echo \"Final:'$data'\"; curl -X PATCH --cacert /var/run/secrets/kubernetes.io/serviceaccount/ca.crt -H \"Authorization: Bearer `cat /var/run/secrets/kubernetes.io/serviceaccount/token`\" -H 'Content-Type: application/merge-patch+json' -H 'Accept: application/json' -k https://kubernetes.default.svc/apis/lifecycle.ir.aiops.ibm.com/v1beta1/namespaces/${GROUP.aiops-volumes.namespace}/lifecycletriggers/aiops -d $data"]
       container: manager
       timeout: 900
   - name: ibm-aiops-orchestrator-pod-exec
@@ -229,12 +227,12 @@ spec:
     type: check
     namespace: ${GROUP.aiops-volumes.namespace}
     selectResource: deployment
-    labelSelector: operators.coreos.com/ibm-redis-cp.cp4aiops=
-    timeout: 2592000
+    nameSelector: ibm-redis-cp-operator
+    timeout: 1500
     onError: fail
     chks:
     - name: replicasReady
-      timeout: 2592000
+      timeout: 1500
       onError: fail
       condition: "{$.spec.replicas} == {$.status.readyReplicas}"
   - name: ibm-cp-aiops-redis-server-check
@@ -242,35 +240,35 @@ spec:
     namespace: ${GROUP.aiops-volumes.namespace}
     selectResource: statefulset
     labelSelector: app.kubernetes.io/name=rediscp
-    timeout: 2592000
+    timeout: 1200
     onError: fail
     chks:
     - name: replicasReady
-      timeout: 2592000
+      timeout: 1200
       onError: fail
       condition: "{$.spec.replicas} == {$.status.readyReplicas}"
   - name: ibm-aiops-orchestrator-controller-manager-check
     type: check
     namespace: ${GROUP.aiops-volumes.namespace}
     selectResource: deployment
-    labelSelector: operators.coreos.com/ibm-aiops-orchestrator.cp4aiops=
-    timeout: 2592000
+    nameSelector: ibm-aiops-orchestrator-controller-manager
+    timeout: 240
     onError: fail
     chks:
     - name: replicasReady
-      timeout: 2592000
+      timeout: 240
       onError: fail
       condition: "{$.spec.replicas} == {$.status.readyReplicas}"
   - name: ibm-common-service-operator-check
     type: check
     namespace: ${GROUP.aiops-volumes.namespace}
     selectResource: deployment
-    labelSelector: operators.coreos.com/ibm-common-service-operator.cp4aiops=
-    timeout: 2592000
+    nameSelector: ibm-common-service-operator
+    timeout: 600
     onError: fail
     chks:
     - name: replicasReady
-      timeout: 2592000
+      timeout: 600
       onError: fail
       condition: "{$.spec.replicas} == {$.status.readyReplicas}"
   - name: aiops-topology-cassandra-check
@@ -278,11 +276,11 @@ spec:
     namespace: ${GROUP.aiops-volumes.namespace}
     selectResource: statefulset
     labelSelector: app=cassandra
-    timeout: 2592000
+    timeout: 1200
     onError: fail
     chks:
     - name: replicasReady
-      timeout: 2592000
+      timeout: 1200
       onError: fail
       condition: "{$.spec.replicas} == {$.status.readyReplicas}"
   - name: couchdbcluster-check
@@ -290,11 +288,11 @@ spec:
     type: check
     selectResource: statefulset
     labelSelector: app.kubernetes.io/component=couchdb,app.kubernetes.io/instance=aiops
-    timeout: 2592000
+    timeout: 1800
     onError: fail
     chks:
     - name: replicasReady
-      timeout: 2592000
+      timeout: 1800
       onError: fail
       condition: "{$.spec.replicas} == {$.status.readyReplicas}"
   - name: installations-check
@@ -302,11 +300,11 @@ spec:
     type: check
     selectResource: orchestrator.aiops.ibm.com/v1alpha1/installations
     nameSelector: ibm-cp-aiops
-    timeout: 2592000
+    timeout: 1500
     onError: fail
     chks:
     - name: phaseRunning
-      timeout: 2592000
+      timeout: 1500
       onError: fail
       condition: "{$.status.phase} == {\"Running\"}"
   - name: aimanager-aimanager-check
@@ -314,11 +312,11 @@ spec:
     type: check
     selectResource: ai-manager.watson-aiops.ibm.com/v1beta1/aimanagers
     labelSelector: operator.ibm.com/opreq-control=true
-    timeout: 2592000
+    timeout: 240
     onError: fail
     chks:
     - name: phaseCompleted
-      timeout: 2592000
+      timeout: 240
       onError: fail
       condition: "{$.status.phase} == {\"Completed\"}"
   - name: lifecycleservices-aiops-check
@@ -326,11 +324,11 @@ spec:
     type: check
     selectResource: lifecycle.ir.aiops.ibm.com/v1beta1/lifecycleservices
     labelSelector: app.kubernetes.io/managed-by=ir-lifecycle-operator
-    timeout: 2592000
+    timeout: 5400
     onError: fail
     chks:
     - name: statusReady
-      timeout: 2592000
+      timeout: 5400
       onError: fail
       condition: "{$.status.conditions[?(@.type==\"Ready\")].status} == {\"True\"}"
   - name: cassandra-pod-exec
