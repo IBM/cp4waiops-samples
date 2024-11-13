@@ -5,14 +5,14 @@ set -eo pipefail
 
 ## Resource size for 4.7
 # These defaults are given in section 'IBM Cloud Pak for AIOps only Hardware requirement totals' under
-# 'Hardware requirements - IBM Cloud Pak for AIOps only' https://ibm.biz/aiops_hardware_470
+# 'Hardware requirements - IBM Cloud Pak for AIOps only' https://ibm.biz/aiops_hardware_471
 # Minimum resource values for starter sized 4.7.x (base install)
 NODE_COUNT_SMALL_4_5=3
 VCPU_SMALL_4_5=47
 MEMORY_SMALL_4_5=123
 
 
-# Minumim resource values for Base install, plus Log Anomaly Detection (LAD) -- Starter
+# Minumim resource values for starter extended
 VCPU_SMALL_LAD=55
 MEM_SMALL_LAD=136
 
@@ -23,7 +23,7 @@ VCPU_LARGE_4_5=136
 MEMORY_LARGE_4_5=310
 
 
-# Minumim resource values for Base install, plus LAD -- Prod.
+# Minumim resource values for production extended
 VCPU_LARGE_LAD=162
 MEM_LARGE_LAD=368
 
@@ -225,34 +225,7 @@ function checkPlatformVersion {
         log $INFO "You are using Openshift Container Platform"
         OCP_VER=$(${CLI} get clusterversion version -o=jsonpath='{.status.desired.version}')
         OCP_MINOR_VER=`echo $OCP_VER | awk '{split($0,a,"."); print a[3]}'`
-        if [[ $OCP_VER == *"4.13"* ]]; then
-            if [[ $OCP_MINOR_VER -ge 34 ]]; then
-                printf "$pass_color$INFO OCP version $OCP_VER is compatible.$color_end\n"
-
-                OCP_VER_RES=$pass_msg
-                startEndSection "Platform Version Check"
-                return 0
-            else
-                printf "$fail_color$ERROR OCP version $OCP_VER is incompatible. Minimum version for OCP v4.13 is v4.13.34$color_end\n"
-                OCP_VER_RES=$fail_msg
-                startEndSection "Platform Version Check"
-                return 1
-            fi
-            return 0
-        elif [[ $OCP_VER == *"4.12"* ]]; then
-            if [[ $OCP_MINOR_VER -ge 50 ]]; then
-                printf "$pass_color$INFO OCP version $OCP_VER is compatible.$color_end\n"
-
-                OCP_VER_RES=$pass_msg
-                startEndSection "Platform Version Check"
-                return 0
-            else
-                printf "$fail_color$ERROR OCP version $OCP_VER is incompatible. Minimum version for OCP v4.12 is v4.12.50$color_end\n"
-                OCP_VER_RES=$fail_msg
-                startEndSection "Platform Version Check"
-                return 1
-            fi
-        elif [[ $OCP_VER == *"4.16"* ]]; then
+        if [[ $OCP_VER == *"4.16"* ]]; then
             if [[ $OCP_MINOR_VER -ge 4 ]]; then
                 printf "$pass_color$INFO OCP version $OCP_VER is compatible but only nodes with AMD64 architectures are supported at this time. $color_end\n"
                 OCP_VER_RES=$pass_msg
@@ -266,7 +239,7 @@ function checkPlatformVersion {
                 startEndSection "Platform Version Check"
                 return 1
             fi
-        elif [[ $OCP_VER == *"4.14"* || $OCP_VER == *"4.15"* ]]; then
+        elif [[ $OCP_VER == *"4.14"* || $OCP_VER == *"4.15"* || $OCP_VER == *"4.17"* ]]; then
             printf "$pass_color$INFO OCP version $OCP_VER is compatible but only nodes with AMD64 architectures are supported at this time. $color_end\n"
             OCP_VER_RES=$pass_msg
             startEndSection "Platform Version Check"
@@ -314,17 +287,32 @@ function checkAllowVolumeExpansion() {
     return 0
 }
 
-function checkIBMSpectrum {
+function checkIBMSFHCI {
+    printf "\nChecking if IBM Storage Fusion HCI System is configured properly...\n"
+
+    IBM_SF_HCI_VE=$(checkAllowVolumeExpansion ibm-storage-fusion-cp-sc)
+    if [[ "$?" == "1" ]]; then
+        printf "${fail_color}${ERROR} StorageClass ibm-storage-fusion-cp-sc does not have allowedVolumeExpansion enabled. This is required for all Production sized installs and strongly recommended for starter sized installs. See \"Storage Class Requirements\" section in https://ibm.biz/storage_consideration_471 for details.$color_end\n"
+        storageCheckRes+=("fail")
+        return 1       
+    fi
+
+    storageCheckRes+=("pass")
+    printf "IBM Storage Fusion HCI System looks fine."
+    return 0
+}
+
+function checkIBMStorageFusion {
     MEETS_OCP_VERSION="false"
 
     printf "\nChecking if IBM Storage Fusion is configured properly...\n"
 
     OCP_VER=$(${CLI} get clusterversion version -o=jsonpath='{.status.desired.version}')
-    if [[ "$OCP_VER" == *"4.12"* || "$OCP_VER" == *"4.14"* || "$OCP_VER" == *"4.15"* ]]; then
+    if [[ "$OCP_VER" == *"4.14"* || "$OCP_VER" == *"4.15"* || "$OCP_VER" == *"4.16"* ]]; then
         # If it meets the ocp version requirement... check if ibm-spectrum-scale-sc storageclass has volume expansion enabled
         IBM_SPEC_VE=$(checkAllowVolumeExpansion ibm-spectrum-scale-sc)
         if [[ "$?" == "1" ]]; then
-            printf "${fail_color}${ERROR} StorageClass ibm-spectrum-scale-sc does not have allowedVolumeExpansion enabled. This is required for all Production sized installs and strongly recommended for starter sized installs. See \"Storage Class Requirements\" section in https://ibm.biz/storage_consideration_470 for details.$color_end\n"
+            printf "${fail_color}${ERROR} StorageClass ibm-spectrum-scale-sc does not have allowedVolumeExpansion enabled. This is required for all Production sized installs and strongly recommended for starter sized installs. See \"Storage Class Requirements\" section in https://ibm.biz/storage_consideration_471 for details.$color_end\n"
             storageCheckRes+=("fail")
             return 1
         fi
@@ -334,7 +322,7 @@ function checkIBMSpectrum {
         return 0
     else
         # OCP 4.12 was not found... fail this check
-        printf "${fail_color}${ERROR}If you intend to use Storage Fusion with AIOPS 4.7, you must have OCP 4.12, 4.14, or 4.15 $color_end\n"
+        printf "${fail_color}${ERROR}If you intend to use Storage Fusion with AIOPS 4.7, you must have OCP 4.14, 4.15, or 4.16 $color_end\n"
         log $INFO "See Readme for more info about this."
         storageCheckRes+=("fail")
         return 1
@@ -376,7 +364,7 @@ function checkODF {
     for s in "${ODF_STORAGECLASSES[@]}"; do
         VE_CHECK=$(checkAllowVolumeExpansion $s)
         if [[ "$?" == "1" ]]; then
-            printf " $fail_color $ERROR StorageClass $s does not have allowedVolumeExpansion enabled. This is required for all Production sized installs and strongly recommended for starter sized installs. See \"Storage Class Requirements\" section in https://ibm.biz/storage_consideration_470 for details.$color_end\n"
+            printf " $fail_color $ERROR StorageClass $s does not have allowedVolumeExpansion enabled. This is required for all Production sized installs and strongly recommended for starter sized installs. See \"Storage Class Requirements\" section in https://ibm.biz/storage_consideration_471 for details.$color_end\n"
             ODF_VE_FLAG="true"
         fi
     done
@@ -400,7 +388,7 @@ function checkNonCSIPortworx {
     if [[ "$?" == "0" ]]; then
         log $INFO "StorageClass \"portworx-fs\" exists."
     else
-        printf " $fail_color $ERROR No valid Portworx StorageClass found. See \"Storage Class Requirements\" section in https://ibm.biz/storage_consideration_470 for details.$color_end\n"
+        printf " $fail_color $ERROR No valid Portworx StorageClass found. See \"Storage Class Requirements\" section in https://ibm.biz/storage_consideration_471 for details.$color_end\n"
         return 1
     fi
 
@@ -409,21 +397,21 @@ function checkNonCSIPortworx {
     if [[ "$?" == "0" ]]; then
         log $INFO "StorageClass \"portworx-aiops\" exists."
     else
-        printf "$fail_color$ERROR No valid Portworx StorageClass found. See \"Storage Class Requirements\" section in https://ibm.biz/storage_consideration_470 for details.$color_end\n"
+        printf "$fail_color$ERROR No valid Portworx StorageClass found. See \"Storage Class Requirements\" section in https://ibm.biz/storage_consideration_471 for details.$color_end\n"
         return 1
     fi
     
     checkAllowVolumeExpansion portworx-aiops
     if [[ "$?" == "1" ]]; then
         echo
-        printf "$fail_color$ERROR StorageClass portworx-aiops does not have allowedVolumeExpansion enabled. This is required for all Production sized installs and strongly recommended for starter sized installs. See the \"Storage Class Requirements\" section in https://ibm.biz/storage_consideration_470 for details.$color_end\n"
+        printf "$fail_color$ERROR StorageClass portworx-aiops does not have allowedVolumeExpansion enabled. This is required for all Production sized installs and strongly recommended for starter sized installs. See the \"Storage Class Requirements\" section in https://ibm.biz/storage_consideration_471 for details.$color_end\n"
         return 1
     fi
 
     checkAllowVolumeExpansion portworx-fs
     if [[ "$?" == "1" ]]; then
         echo
-        printf "$fail_color$ERROR StorageClass portworx-fs does not have allowedVolumeExpansion enabled. This is required for all Production sized installs and strongly recommended for starter sized installs. See the \"Storage Class Requirements\" section in https://ibm.biz/storage_consideration_470 for details.$color_end\n"
+        printf "$fail_color$ERROR StorageClass portworx-fs does not have allowedVolumeExpansion enabled. This is required for all Production sized installs and strongly recommended for starter sized installs. See the \"Storage Class Requirements\" section in https://ibm.biz/storage_consideration_471 for details.$color_end\n"
         return 1
     fi
 
@@ -443,7 +431,7 @@ function checkPortworx {
         checkAllowVolumeExpansion px-csi-aiops
         if [[ "$?" == "1" ]]; then
             echo
-            printf "$fail_color$ERROR StorageClass px-csi-aiops does not have allowedVolumeExpansion enabled. This is required for all Production sized installs and strongly recommended for starter sized installs. See the \"Storage Class Requirements\" section in https://ibm.biz/storage_consideration_470 for details.$color_end\n"
+            printf "$fail_color$ERROR StorageClass px-csi-aiops does not have allowedVolumeExpansion enabled. This is required for all Production sized installs and strongly recommended for starter sized installs. See the \"Storage Class Requirements\" section in https://ibm.biz/storage_consideration_471 for details.$color_end\n"
             storageCheckRes+=("fail")
             return 1
         fi
@@ -457,7 +445,7 @@ function checkPortworx {
             checkAllowVolumeExpansion px-csi-aiops-mz
             if [[ "$?" == "1" ]]; then
                 echo
-                printf "$fail_color$ERROR StorageClass px-csi-aiops-mz does not have allowedVolumeExpansion enabled. This is required for all Production sized installs and strongly recommended for starter sized installs. See the \"Storage Class Requirements\" section in https://ibm.biz/storage_consideration_470 for details.$color_end\n"
+                printf "$fail_color$ERROR StorageClass px-csi-aiops-mz does not have allowedVolumeExpansion enabled. This is required for all Production sized installs and strongly recommended for starter sized installs. See the \"Storage Class Requirements\" section in https://ibm.biz/storage_consideration_471 for details.$color_end\n"
                 storageCheckRes+=("fail")
                 return 1
             fi
@@ -488,21 +476,21 @@ function checkIBMCFileGoldGidStorage {
     block=$(${CLI} get storageclass ibmc-block-gold --ignore-not-found=true)
 
     if [[ "$file" == "" || "$block" == "" ]]; then
-        printf "$fail_color $ERROR Both ibmc-block-gold and ibmc-file-gold-gid need to exist to use IBM Cloud Storage. See \"Storage\" section in https://ibm.biz/storage_consideration_470 for details. $color_end\n"
+        printf "$fail_color $ERROR Both ibmc-block-gold and ibmc-file-gold-gid need to exist to use IBM Cloud Storage. See \"Storage\" section in https://ibm.biz/storage_consideration_471 for details. $color_end\n"
         storageCheckRes+=("fail")
         return 1 
     fi
 
     VE_BLOCK=$(checkAllowVolumeExpansion ibmc-block-gold)
     if [[ "$?" == "1" ]]; then
-        printf " $fail_color $ERROR StorageClass ibmc-block-gold does not have allowedVolumeExpansion enabled. This is required for all Production sized installs and strongly recommended for starter sized installs. See \"Storage Class Requirements\" section in https://ibm.biz/storage_consideration_470 for details.$color_end\n"
+        printf " $fail_color $ERROR StorageClass ibmc-block-gold does not have allowedVolumeExpansion enabled. This is required for all Production sized installs and strongly recommended for starter sized installs. See \"Storage Class Requirements\" section in https://ibm.biz/storage_consideration_471 for details.$color_end\n"
         storageCheckRes+=("fail")
         return 1
     fi
 
     VE_FILE=$(checkAllowVolumeExpansion ibmc-file-gold-gid)
     if [[ "$?" == "1" ]]; then
-        printf " $fail_color $ERROR StorageClass ibmc-file-gold-gid does not have allowedVolumeExpansion enabled. This is required for all Production sized installs and strongly recommended for starter sized installs. See \"Storage Class Requirements\" section in https://ibm.biz/storage_consideration_470 for details.$color_end\n"
+        printf " $fail_color $ERROR StorageClass ibmc-file-gold-gid does not have allowedVolumeExpansion enabled. This is required for all Production sized installs and strongly recommended for starter sized installs. See \"Storage Class Requirements\" section in https://ibm.biz/storage_consideration_471 for details.$color_end\n"
         storageCheckRes+=("fail")
         return 1
     fi
@@ -528,13 +516,22 @@ function checkStorage {
     log $INFO "Checking storage providers"
 
     # Check for Storage Fusion
-    IBM_SPEC_FUSION=$(${CLI} get storageclass ibm-spectrum-scale-sc --ignore-not-found=true)
-    if [[ "$IBM_SPEC_FUSION" != "" ]]; then
+    IBM_SPEC_SCALE=$(${CLI} get storageclass ibm-spectrum-scale-sc --ignore-not-found=true)
+    if [[ "$IBM_SPEC_SCALE" != "" ]]; then
         echo
-        log $INFO "A storage class related to Storage Fusion was found."
+        log $INFO "A storage class related to IBM Storage Fusion was found."
         storageFound+=("ibm-spec")
     else
         log $INFO "No IBM Storage Fusion Found... Skipping configuration check."
+    fi
+
+    IBM_SF_HCI=$(${CLI} get storageclass ibm-storage-fusion-cp-sc --ignore-not-found=true)
+    if [[ "$IBM_SF_HCI" != "" ]]; then
+        echo
+        log $INFO "A storage class related to IBM Storage Fusion HCI System was found."
+        storageFound+=("ibm-spec-fusion-hci")
+    else
+        log $INFO "No IBM Storage Fusion HCI System... Skipping configuration check."
     fi
 
     # Check for any hints portworx is deployed. In this scenario, we look for any storage clusters that are deployed in all namespaces. Then
@@ -573,7 +570,7 @@ function checkStorage {
     if [ ${#storageFound[@]} -eq 0 ]; then
         STORAGE_PROVIDER_RES=$fail_msg
         printf "$fail_color$ERROR At least one of the four Storage Providers are required$color_end\n"
-        printf "$fail_color$ERROR The supported Storage Providers are Portworx, Openshift Data Foundation, IBM Cloud Storage for ROKS, or IBM Spectrum Fusion/IBM Spectrum Scale Container Native. See https://ibm.biz/storage_consideration_470 for details.$color_end\n"
+        printf "$fail_color$ERROR The supported Storage Providers are Portworx, Openshift Data Foundation, IBM Cloud Storage for ROKS, or IBM Spectrum Fusion/IBM Spectrum Scale Container Native. See https://ibm.biz/storage_consideration_471 for details.$color_end\n"
         STORAGE_PROVIDER_RES=$fail_msg
         startEndSection "Storage Provider"
         return 1
@@ -595,7 +592,11 @@ function checkStorage {
     fi
 
     if [[ " ${storageFound[*]} " =~ "ibm-spec" ]]; then
-        checkIBMSpectrum
+        checkIBMStorageFusion
+    fi
+
+    if [[ " ${storageFound[*]} " =~ "ibm-spec-fusion-hci" ]]; then
+        checkIBMSFHCI
     fi
 
     # Check if there are any failing configurations, if so we can automatically send a failure result for this check

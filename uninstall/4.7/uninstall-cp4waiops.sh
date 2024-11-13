@@ -94,17 +94,6 @@ if [[ ! -z "$CP4WAIOPS_PROJECT"  ]]; then
       exit 1
   fi
   log $INFO "No remaining user-created instances, proceeding ahead..."
-
-   # Check if asm instances exist outside the ai mgr ns, and decide whether to delete those CRDs
-   # There is an overlap with Event Mgr CRDs
-   check_additional_asm_exists
-   if [[ $DELETE_ASM == "true" ]]; then
-      checkForLeftOverCustomResources "${ASM_CRDS[@]}" "ASM"   
-      log $INFO "Deleting ASM CRDs..."
-      delete_crd_group ASM_CRDS
-   else
-      log $INFO "Skipping ASM CRD deletion."
-   fi
    
    # Cleanup remaining connections
    delete_connections
@@ -248,6 +237,24 @@ if [[ ! -z "$CP4WAIOPS_PROJECT"  ]]; then
    else
       log $INFO "Skipping delete of Dependent CRDs based on configuration in uninstall-cp4waiops.props"
    fi
+
+    # Delete all asm instances in install namespace
+   for cr in ${ASM_CRDS[@]}; do
+      oc delete $cr --all -n $CP4WAIOPS_PROJECT
+   done
+
+   # Check if asm instances exist outside the ai mgr ns, and decide whether to delete those CRDs
+   # There is an overlap with Event Mgr CRDs
+   check_additional_asm_exists
+   if [[ $DELETE_CRDS == "true" && $DELETE_ASM == "true" ]]; then
+      # Check and see if there are leftover crs, if none --  delete crds
+      checkForLeftOverCustomResources "${ASM_CRDS[@]}" "ASM"   
+      log $INFO "Deleting ASM CRDs..."
+      delete_crd_group ASM_CRDS
+   else
+      log $INFO "Skipping ASM CRD deletion because ASM CRs were found in other namespaces."
+   fi
+
       
    # At this point we have cleaned up everything in the project
    log "[SUCCESS]" "----Congratulations! IBM Cloud Pak for AIOps has been uninstalled!----"

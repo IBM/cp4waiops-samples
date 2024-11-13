@@ -608,14 +608,12 @@ check_additional_installation_exists(){
 }
 
 check_additional_asm_exists() {
-    log $INFO "Checking if any additional ASM resources (ie from Event Manager installation) are on the cluster."
-    if [ `oc get asms.asm.ibm.com -A --no-headers | while read a b; do echo $a | grep -vw $CP4WAIOPS_PROJECT; done | wc -l`  -gt 0 ] ||
-     [ `oc get asmformations.asm.ibm.com -A --no-headers | while read a b; do echo $a | grep -vw $CP4WAIOPS_PROJECT; done | wc -l` -gt 0 ] ; then
-        log $INFO "ASM resource instances were found outside the $CP4WAIOPS_PROJECT namespace"
+    log $INFO "Checking if any additional ASM resources are on the cluster."
+    if [ $(oc get asms.asm.ibm.com -A --no-headers | wc -l) -gt 0 ] || [ $(oc get asmformations.asm.ibm.com -A --no-headers | wc -l) -gt 0 ]; then
+        log $INFO "ASM resource instances were found in the cluster."
         DELETE_ASM="false"
     else
-        log $INFO "No ASM resource instances were found outside the $CP4WAIOPS_PROJECT namespace, so the ASM CRDs can be deleted."
-        DELETE_ASM="true"
+        log $INFO "No ASM resource instances were found outside the $CP4WAIOPS_PROJECT namespace, so the ASM CRDs can be deleted."        DELETE_ASM="true"
     fi
 }
 
@@ -820,6 +818,8 @@ deleteMiscBedrockResources() {
     # Edge Case #3: CS map only contains our namespace
     # Delete the cfgmap
     deleteBRMappingAndCRDS $controlPlane
+
+    oc delete cm cloud-native-postgresql-image-list --ignore-not-found
     return 0
 }
 
@@ -829,7 +829,7 @@ checkForLeftOverCustomResources() {
    # Get the last argument of the function
    local last_index=$((${#CRDS[@]}-1))
    local CUSTOM_RESOURCE_TYPE="${CRDS[$last_index]}"
-   # Remove the last argument from the array. This is necessary because CRDS is an array of all arguments
+   # Remove the last argument from the array. This is necessary because $CRDS is an array of all arguments
    unset CRDS[$last_index]
    
    resourceCheckCounter=1
@@ -850,10 +850,10 @@ checkForLeftOverCustomResources() {
         log $INFO "Resource Check Attempt: $resourceCheckCounter"
         for CR in ${CRDS[@]}; do
             echo $CR
-            check="$(oc get $CR -n $CP4WAIOPS_PROJECT)"
+            check="$(oc get $CR -A)"
             if [[ -n "${check}" ]]; then
                 RESOURCE_FLAG="true"
-                oc get $CR -n $CP4WAIOPS_PROJECT
+                oc get $CR -A
                 echo
             else
                 echo "None Found"
@@ -865,6 +865,7 @@ checkForLeftOverCustomResources() {
         # After all crds have been searched for, if the RESOURCE_FLAG is still false -- we know all CRDs are safe to delete. We can
         # break out of the while-loop now.
         if [[ "${RESOURCE_FLAG}" == "false" ]]; then
+            log $INFO "CRDs from $CUSTOM_RESOURCE_TYPE are safe to be deleted"
             break
         fi
 
