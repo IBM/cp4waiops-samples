@@ -1,4 +1,4 @@
-# Reporting schemas
+# Schemas
 
 Schemas for reporting in Cloud Pak for AIOps using Cognos Analytics with DB2
 
@@ -18,7 +18,7 @@ db2 CONNECT TO <name> USER <user> USING <password>
 If you wish to namespace the reporting tables, you can also use a DB2 SCHEMA in which the new reporting tables will belong. Refer to DB2 documentation on using a DB2 SCHEMA.
 
 ### Customization
-The alerts table provides a number of basic columns for reporting, but it's often the case where you have enriched alerts with custom properties. To include custom properties in this schema, simply edit the db2_reporter_aiops_alerts.sql and add columns to the ALERTS_REPORTER_STATUS table.
+The alerts table provides a number of basic columns for reporting, but it's often the case where you have enriched alerts with custom properties. To include custom properties in this schema, simply edit the db2/reporter_aiops_alerts.sql and add columns to the ALERTS_REPORTER_STATUS table.
 
 ```
 --+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -35,13 +35,13 @@ CREATE TABLE ALERTS_REPORTER_STATUS (
 ## Installing
 You may install alerts and incidents schemas from the DB2 command line.
 ```
-db2 -td@ -vf db2_reporter_aiops_alerts.sql
+db2 -td@ -vf db2/reporter_aiops_alerts.sql
 ```
 ```
-db2 -td@ -vf db2_reporter_aiops_incidents.sql
+db2 -td@ -vf db2/reporter_aiops_incidents.sql
 ```
 ```
-db2 -td@ -vf db2_reporter_aiops_noise_reduction.sql
+db2 -td@ -vf db2/reporter_aiops_noise_reduction.sql
 ```
 
 If you prefer to use the UI (as with IBM DB2 on Cloud), paste the contents of each script into the SQL command window to run. Make sure to configure the command terminator to use @.
@@ -139,14 +139,21 @@ Now you're all set to create reports in Cognos Analytics. See AIOps product docu
 > DANGER: This will remove all reporting data and schema components from your database.
 
 ```
-db2 -td@ -vf db2_reporter_aiops_alerts_remove.sql
+db2 -td@ -vf db2/reporter_aiops_alerts_remove.sql
 ```
 ```
-db2 -td@ -vf db2_reporter_aiops_incidents_remove.sql
+db2 -td@ -vf db2/reporter_aiops_incidents_remove.sql
 ```
 ```
-db2 -td@ -vf db2_reporter_aiops_noise_reduction_remove.sql
+db2 -td@ -vf db2/reporter_aiops_noise_reduction_remove.sql
 ```
+
+## Testing
+1. Complete the `config.json` with database connection details. You can also set these values in the command-line window, e.g. `export connection__user=db2inst1`.
+2. Make sure the database is running.
+3. Connect to the database defined in the config file, e.g. `db2 connect to bludb user db2inst1`
+4. Run `npm run test`.
+> NOTE: Testing from Linux AMD64 is currently supported.
 
 ## Reference
 
@@ -173,8 +180,6 @@ INCIDENTS_AUDIT_PRIORITY - Audit of incident priority changes
 
 INCIDENTS_AUDIT_STATE - Audit of incident status changes
 
-AIOPS_NOISE_REDUCTION_TIMELINE_TABLE - Noise reduction over time
-
 ### Views
 ALERTS_STATUS_VW - View similar to alerts list in the UI
 
@@ -183,6 +188,8 @@ ALERTS_AUDIT - View of audited alert state changes
 INCIDENTS_STATUS_VW - View similar to incidents list in the UI
 
 INCIDENTS_AUDIT - View of audited incident state changes
+
+INCIDENT_DASHBOARD - Example view of incident health
 
 ### Indexes
 ALERTS_AUDIT_OWNER_IDX - Index for alert owner audit
@@ -221,14 +228,3 @@ INCIDENTS_AUDIT_UPDATE_OWNER - Updates previous incident owner state
 INCIDENTS_AUDIT_UPDATE_TEAM - Updates previous incident team state
 
 INCIDENTS_AUDIT_UPDATE_STATE - Updates previous incident status
-
-AIOPS_ALERT_COUNT_UPDATER_ON_UPDATE - Updates tallys when an alert is updated
-
-ALERT_AIOPS_COUNT_UPDATER_ON_INSERT - Updates tallys when an alert is created
-
-AIOPS_INCIDENT_COUNT_UPDATER_ON_UPDATE - Updates tallys when an incident is updated
-
-AIOPS_INCIDENT_COUNT_UPDATER_ON_INSERT - Updates tallys when an incident is created
-
-### Stored procedures
-INSERT_ALERT_COUNTS_UPDATE - Inserts a tally of event instances, alerts and incidents at the current point in time
