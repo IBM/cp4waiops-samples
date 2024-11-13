@@ -1,0 +1,406 @@
+apiVersion: v1
+data:
+  backup_original.yaml: "apiVersion: velero.io/v1\nkind: Backup\nmetadata:\n  name: BACKUP-NAME\n  namespace: {{ .Values.oadpNamespace }}\nspec:\n  ttl: {{ .Values.ttl }}\n  storageLocation: {{ .Values.backupStorageLocation }}\n  includeClusterResources: true\n  includedNamespaces:\n  - CS_NAMESPACE\n  - AIOPS_NAMESPACE\n  excludedNamespaces:\n  - openshift\n  - openshift-apiserver\n  - openshift-apiserver-operator\n  - openshift-authentication\n  - openshift-authentication-operator\n  - openshift-cloud-credential-operator\n  - openshift-cluster-machine-approver \n  - openshift-cluster-node-tuning-operator\n  - openshift-cluster-samples-operator\n  - openshift-cluster-storage-operator\n  - openshift-cluster-version  \n  - openshift-config \n  - openshift-config-managed\n  - openshift-console\n  - openshift-console-operator\n  - openshift-controller-manager \n  - openshift-controller-manager-operator\n  - openshift-dns\n  - openshift-dns-operator\n  - openshift-etcd\n  - openshift-image-registry\n  - openshift-infra\n  - openshift-ingress \n  - openshift-ingress-operator\n  - openshift-insights\n  - openshift-kni-infra\n  - openshift-kube-apiserver\n  - openshift-kube-apiserver-operator\n  - openshift-kube-controller-manager\n  - openshift-kube-controller-manager-operator\n  - openshift-kube-proxy\n  - openshift-kube-scheduler \n  - openshift-kube-scheduler-operator\n  - openshift-machine-api\n  - openshift-machine-config-operator\n  - openshift-marketplace\n  - openshift-monitoring\n  - openshift-multus\n  - openshift-network-operator\n  - openshift-node\n  - openshift-openstack-infra\n  - openshift-operator-lifecycle-manager\n  - openshift-operators\n  - openshift-ovirt-infra\n  - openshift-service-ca\n  - openshift-service-ca-operator\n  - openshift-service-catalog-apiserver-operator\n  - openshift-service-catalog-controller-manager-operator \n  - openshift-user-workload-monitoring\n  - velero\n  includedResources:\n  - '*'\n  labelSelector:\n    matchLabels:\n     cp4aiops.ibm.com/backup: t"
+  pod-annotation-details.json: |-
+    {
+      "details": [
+        {
+          "namespace": "CS_NAMESPACE",
+          "pod": "backup-imedb",
+          "volume": "data"
+        },
+        {
+          "namespace": "AIOPS_NAMESPACE",
+          "pod": "es-backup",
+          "volume": "elasticsearch-backups"
+        },
+        {
+          "namespace": "AIOPS_NAMESPACE",
+          "pod": "backup-back-aiops-topology-cassandra",
+          "volume": "backup"
+        },
+        {
+          "namespace": "AIOPS_NAMESPACE",
+          "pod": "backup-data-c-example-couchdbcluster-m",
+          "volume": "backup"
+        },
+        {
+          "namespace": "AIOPS_NAMESPACE",
+          "pod": "{{ .Values.redisBackupPod }}",
+          "volume": "backup"
+        },
+        {
+          "namespace": "AIOPS_NAMESPACE",
+          "pod": "backup-export-aimanager-ibm-minio",
+          "volume": "backup"
+        },
+        {
+          "namespace": "AIOPS_NAMESPACE",
+          "pod": "backup-metastore",
+          "volume": "data"
+        },
+        {
+          "namespace": "AIOPS_NAMESPACE",
+          "pod": "backup-postgres",
+          "volume": "backup"
+        },
+        {
+          "namespace": "AIOPS_NAMESPACE",
+          "pod": "backup-other-resources",
+          "volume": "data"
+        },
+        {
+          "namespace": "AIOPS_NAMESPACE",
+          "pod": "backup-cam",
+          "volume": "data"
+        }
+      ]
+    }
+  resource-label-details.json: |-
+    [
+      {
+        "resourceType": "pvc",
+        "resourceName": "imedb-backup-data",
+        "labels": [
+          "cp4aiops.ibm.com/backup=t",
+          "bedrock.cp4aiops.ibm.com/backup=t"
+        ],
+        "namespace": "CS_NAMESPACE"
+      },
+      {
+        "resourceType": "pod",
+        "resourceName": "backup-imedb",
+        "labels": [
+          "cp4aiops.ibm.com/backup=t",
+          "bedrock.cp4aiops.ibm.com/backup=t"
+        ],
+        "namespace": "CS_NAMESPACE"
+      },
+      {
+        "resourceType": "pod",
+        "resourceName": "es-backup",
+        "labels": [
+          "cp4aiops.ibm.com/backup=t",
+          "elasticsearch.cp4aiops.ibm.com/backup=t"
+        ],
+        "namespace": "AIOPS_NAMESPACE"
+      },
+      {
+        "resourceType": "pvc",
+        "resourceName": "iaf-system-elasticsearch-es-snap-es-backup-pvc",
+        "labels": [
+          "cp4aiops.ibm.com/backup=t",
+          "elasticsearch.cp4aiops.ibm.com/backup=t"
+        ],
+        "namespace": "AIOPS_NAMESPACE"
+      },
+      {
+        "resourceType": "cm",
+        "resourceName": "es-bcdr-config",
+        "labels": [
+          "cp4aiops.ibm.com/backup=t",
+          "elasticsearch.cp4aiops.ibm.com/backup=t"
+        ],
+        "namespace": "AIOPS_NAMESPACE"
+      },
+      {
+        "resourceType": "pod",
+        "resourceName": "backup-back-aiops-topology-cassandra",
+        "labels": [
+          "cp4aiops.ibm.com/backup=t",
+          "cassandra.cp4aiops.ibm.com/backup=t"
+        ],
+        "namespace": "AIOPS_NAMESPACE"
+      },
+      {
+        "resourceType": "pvc",
+        "resourceName": "back-aiops-topology-cassandra-",
+        "labels": [
+          "cp4aiops.ibm.com/backup=t",
+          "cassandra.cp4aiops.ibm.com/backup=t"
+        ],
+        "namespace": "AIOPS_NAMESPACE"
+      },
+      {
+        "resourceType": "cm",
+        "resourceName": "cassandra-bcdr-config",
+        "labels": [
+          "cp4aiops.ibm.com/backup=t",
+          "cassandra.cp4aiops.ibm.com/backup=t"
+        ],
+        "namespace": "AIOPS_NAMESPACE"
+      },
+      {
+        "resourceType": "pod",
+        "resourceName": "backup-data-c-example-couchdbcluster-m",
+        "labels": [
+          "cp4aiops.ibm.com/backup=t",
+          "couchdb.cp4aiops.ibm.com/backup=t"
+        ],
+        "namespace": "AIOPS_NAMESPACE"
+      },
+      {
+        "resourceType": "pvc",
+        "resourceName": "data-c-example-couchdbcluster-m-",
+        "labels": [
+          "cp4aiops.ibm.com/backup=t",
+          "couchdb.cp4aiops.ibm.com/backup=t"
+        ],
+        "namespace": "AIOPS_NAMESPACE"
+      },
+      {
+        "resourceType": "secret",
+        "resourceName": "aiops-ir-core-model-secret",
+        "labels": [
+          "cp4aiops.ibm.com/backup=t",
+          "couchdb.cp4aiops.ibm.com/backup=t"
+        ],
+        "namespace": "AIOPS_NAMESPACE"
+      }, 
+      {
+        "resourceType": "pod",
+        "resourceName": "{{ .Values.redisBackupPod }}",
+        "labels": [
+          "cp4aiops.ibm.com/backup=t",
+          "redis.cp4aiops.ibm.com/backup=t"
+        ],
+        "namespace": "AIOPS_NAMESPACE"
+      },
+      {
+        "resourceType": "pvc",
+        "resourceName": "{{ .Values.redisPVC }}",
+        "labels": [
+          "cp4aiops.ibm.com/backup=t",
+          "redis.cp4aiops.ibm.com/backup=t"
+        ],
+        "namespace": "AIOPS_NAMESPACE"
+      },
+      {
+        "resourceType": "secret",
+        "resourceName": "{{ .Values.redisSecret }}",
+        "labels": [
+          "cp4aiops.ibm.com/backup=t",
+          "redis.cp4aiops.ibm.com/backup=t"
+        ],
+        "namespace": "AIOPS_NAMESPACE"
+      },
+      {
+        "resourceType": "pod",
+        "resourceName": "backup-export-aimanager-ibm-minio",
+        "labels": [
+          "cp4aiops.ibm.com/backup=t",
+          "minio.cp4aiops.ibm.com/backup=t"
+        ],
+        "namespace": "AIOPS_NAMESPACE"
+      },
+      {
+        "resourceType": "secret",
+        "resourceName": "aimanager-ibm-minio-access-secret",
+        "labels": [
+          "cp4aiops.ibm.com/backup=t",
+          "minio.cp4aiops.ibm.com/backup=t"
+        ],
+        "namespace": "AIOPS_NAMESPACE"
+      },
+      {
+        "resourceType": "pvc",
+        "resourceName": "export-aimanager-ibm-minio-",
+        "labels": [
+          "cp4aiops.ibm.com/backup=t",
+          "minio.cp4aiops.ibm.com/backup=t"
+        ],
+        "namespace": "AIOPS_NAMESPACE"
+      },
+      {
+        "resourceType": "pod",
+        "resourceName": "backup-metastore",
+        "labels": [
+          "cp4aiops.ibm.com/backup=t",
+          "metastore.cp4aiops.ibm.com/backup=t"
+        ],
+        "namespace": "AIOPS_NAMESPACE"
+      },
+      {
+        "resourceType": "pvc",
+        "resourceName": "metastore-backup-data",
+        "labels": [
+          "cp4aiops.ibm.com/backup=t",
+          "metastore.cp4aiops.ibm.com/backup=t"
+        ],
+        "namespace": "AIOPS_NAMESPACE"
+      },
+      {
+        "resourceType": "secret",
+        "resourceName": "zen-secrets-aes-key",
+        "labels": [
+          "cp4aiops.ibm.com/backup=t",
+          "metastore.cp4aiops.ibm.com/backup=t"
+        ],
+        "namespace": "AIOPS_NAMESPACE"
+      },
+      {
+        "resourceType": "cm",
+        "resourceName": "metastore-bcdr-config",
+        "labels": [
+          "cp4aiops.ibm.com/backup=t",
+          "metastore.cp4aiops.ibm.com/backup=t"
+        ],
+        "namespace": "AIOPS_NAMESPACE"
+      },
+      {
+        "resourceType": "pod",
+        "resourceName": "backup-postgres",
+        "labels": [
+          "cp4aiops.ibm.com/backup=t",
+          "postgres.cp4aiops.ibm.com/backup=t"
+        ],
+        "namespace": "AIOPS_NAMESPACE"
+      },
+      {
+        "resourceType": "pvc",
+        "resourceName": "postgres-backup-data",
+        "labels": [
+          "cp4aiops.ibm.com/backup=t",
+          "postgres.cp4aiops.ibm.com/backup=t"
+        ],
+        "namespace": "AIOPS_NAMESPACE"
+      },
+      {
+        "resourceType": "namespace",
+        "resourceName": "CS_NAMESPACE",
+        "labels": ["cp4aiops.ibm.com/backup=t"],
+        "namespace": ""
+      },
+      {
+        "resourceType": "namespace",
+        "resourceName": "AIOPS_NAMESPACE",
+        "labels": ["cp4aiops.ibm.com/backup=t"],
+        "namespace": ""
+      },
+      {
+        "resourceType": "BundleManifest",
+        "resourceName": "*",
+        "labels": [
+          "cp4aiops.ibm.com/backup=t",
+          "connector.cp4aiops.ibm.com/backup=t"
+        ],
+        "namespace": "AIOPS_NAMESPACE"
+      },
+      {
+        "resourceType": "secret",
+        "resourceName": "aiopsedge-config-encryption-history",
+        "labels": [
+          "cp4aiops.ibm.com/backup=t",
+          "connectorsecret.cp4aiops.ibm.com/backup=t"
+        ],
+        "namespace": "AIOPS_NAMESPACE"
+      },
+      {
+        "resourceType": "secret",
+        "resourceName": "aiopsedge-config-encryption-key",
+        "labels": [
+          "cp4aiops.ibm.com/backup=t",
+          "connectorsecret.cp4aiops.ibm.com/backup=t"
+        ],
+        "namespace": "AIOPS_NAMESPACE"
+      },
+      {
+        "resourceType": "ConnectorConfiguration",
+        "resourceName": "*",
+        "labels": [
+          "cp4aiops.ibm.com/backup=t",
+          "connector.cp4aiops.ibm.com/backup=t"
+        ],
+        "namespace": "AIOPS_NAMESPACE"
+      },
+      {
+        "resourceType": "ConnectorSchemas",
+        "resourceName": "*",
+        "labels": [
+          "cp4aiops.ibm.com/backup=t",
+          "connector.cp4aiops.ibm.com/backup=t"
+        ],
+        "namespace": "AIOPS_NAMESPACE"
+      },
+      {
+        "resourceType": "ConnectorComponent",
+        "resourceName": "*",
+        "labels": [
+          "velero.io/exclude-from-backup=true"
+        ],
+        "namespace": "AIOPS_NAMESPACE"
+      },
+      {
+        "resourceType": "GitApp",
+        "resourceName": "*",
+        "labels": [
+          "velero.io/exclude-from-backup=true"
+        ],
+        "namespace": "AIOPS_NAMESPACE"
+      },
+      {
+        "resourceType": "pod",
+        "resourceName": "backup-other-resources",
+        "labels": [
+          "cp4aiops.ibm.com/backup=t",
+          "otherresources.cp4aiops.ibm.com/backup=t"
+        ],
+        "namespace": "AIOPS_NAMESPACE"
+      },
+      {
+        "resourceType": "pvc",
+        "resourceName": "other-resources-backup-data",
+        "labels": [
+          "cp4aiops.ibm.com/backup=t",
+          "otherresources.cp4aiops.ibm.com/backup=t"
+        ],
+        "namespace": "AIOPS_NAMESPACE"
+      },
+      {
+        "resourceType": "pod",
+        "resourceName": "backup-cam",
+        "labels": [
+          "cp4aiops.ibm.com/backup=t",
+          "cam.cp4aiops.ibm.com/backup=t"
+        ],
+        "namespace": "AIOPS_NAMESPACE"
+      },
+      {
+        "resourceType": "pvc",
+        "resourceName": "cam-mongo-pv",
+        "labels": [
+          "cp4aiops.ibm.com/backup=t",
+          "cam.cp4aiops.ibm.com/backup=t"
+        ],
+        "namespace": "AIOPS_NAMESPACE"
+      },
+      {
+        "resourceType": "secret",
+        "resourceName": "cam-secure-values-secret",
+        "labels": [
+          "cp4aiops.ibm.com/backup=t",
+          "cam.cp4aiops.ibm.com/backup=t"
+        ],
+        "namespace": "AIOPS_NAMESPACE"
+      }
+    ]
+  enabled-namespaces.json: |-
+    [
+       {{- join "," .Values.enabledNamespaces }}
+    ] 
+  enabled-components.json: |-
+    [
+       {{- join "," .Values.enabledComponents }}
+    ]   
+  aiops-config.json: |-
+    {
+      "aiopsNamespace": "{{ .Values.aiopsNamespace }}",
+      "csNamespace": "{{ .Values.csNamespace }}",
+      "oadpNamespace": "{{ .Values.oadpNamespace }}",
+      "backupNameSuffix": "{{ .Values.backupNameSuffix }}",
+      "aiopsVersion": "4.7.1"
+    }
+kind: ConfigMap
+metadata:
+  name: backup-config
+  namespace: {{ .Values.oadpNamespace }}
