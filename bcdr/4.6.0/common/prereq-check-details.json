@@ -1,0 +1,34 @@
+{
+  "aiopspodsLabel": [
+    {
+      "podlabel": "app=cassandra",
+      "description": "Cassandra pod label"
+    },
+    {
+      "podlabel": "app.kubernetes.io/component=zen-metastore-edb",
+      "description": "Metastore pod label"
+    },
+    {
+      "podlabel": "postgresql",
+      "description": "Postgres pod label"
+    },
+    {
+      "podlabel": "app.kubernetes.io/name=elasticsearch",
+      "description": "ElasticSearch pod label"
+    },
+    {
+      "podlabel": "app.kubernetes.io/name=ibm-minio",
+      "description": "Minio pod label"
+    },
+    {
+      "podlabel": "app.kubernetes.io/name=IssueResolutionCoreCouchDB",
+      "description": "Couchdb pod label"
+    }
+  ],
+  "aiopsPvc": [
+    {
+      "pvcName": "iaf-system-elasticsearch-es-snap-es-backup-pvc",
+      "description": "ElastiSearch PVC"
+    }
+  ]
+}
