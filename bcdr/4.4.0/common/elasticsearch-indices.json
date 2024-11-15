@@ -1,0 +1,200 @@
+{
+  "description": "This file centralizes the list of elastic search indices used by components of AIOps. It is organized by component for ease of use.",
+  "components": [
+    {
+      "name": "ai-platform",
+      "squad": "ai-model-mgmt",
+      "owner": "Hiten.Gupta@ibm.com",
+      "indices": [
+        {
+          "name": "algorithmregistry",
+          "description": ""
+        },
+        {
+          "name": "dataset",
+          "description": ""
+        },
+        {
+          "name": "postchecktrainingdetails",
+          "description": ""
+        },
+        {
+          "name": "precheckrun",
+          "description": ""
+        },
+        {
+          "name": "prechecksrunning",
+          "description": ""
+        },
+        {
+          "name": "precheckstatus",
+          "description": ""
+        },
+        {
+          "name": "prechecktrainingdetails",
+          "description": ""
+        },
+        {
+          "name": "trainingdefinition",
+          "description": ""
+        },
+        {
+          "name": "trainingrun",
+          "description": ""
+        },
+        {
+          "name": "trainingsrunning",
+          "description": ""
+        },
+        {
+          "name": "trainingstatus",
+          "description": ""
+        }
+      ]
+    },
+    {
+      "name": "change-risk",
+      "squad": "change-risk ",
+      "owner": "zlati.gardev@ibm.com",
+      "indices": [
+        {
+          "name": "snowchangerequest",
+          "description": "stores raw change ticket data"
+        },
+        {
+          "name": "snowincident",
+          "description": "stores raw incidents data"
+        },
+        {
+          "name": "change_risk_assessments",
+          "description": "stores risk assessments produced by the change risk algorithm"
+        },
+        {
+          "name": "1000-1000-changerisk_models_latest",
+          "description": "stores the last version of the model"
+        },
+        {
+          "name": "problematic-changes-v*",
+          "description": ""
+        }
+      ]
+    },
+    {
+      "name": "log-anomaly-detector",
+      "squad": "log-anomaly-similar-incidents",
+      "owner": "changha@us.ibm.com",
+      "description": "{VERSION} is a wildcard. All indices that follow the pattern should be backed up.",
+      "indices": [
+        {
+          "name": "1000-1000-v*-anomalies",
+          "description": ""
+        },
+        {
+          "name": "1000-1000-v*-applications",
+          "description": ""
+        },
+        {
+          "name": "1000-1000-v*-embedding_pca_fe",
+          "description": ""
+        },
+        {
+          "name": "1000-1000-v*-embedding_pca_model",
+          "description": ""
+        },
+        {
+          "name": "1000-1000-v*-training_count_vectors",
+          "description": ""
+        },
+        {
+          "name": "1000-1000-v*-oob_anomaly_group_id",
+          "description": ""
+        },
+        {
+          "name": "1000-1000-v*-pca_anomaly_group_id",
+          "description": ""
+        },
+        {
+          "name": "1000-1000-oob_model_update",
+          "description": ""
+        },
+        {
+          "name": "1000-1000-reference_oob_websphere",
+          "description": ""
+        },
+        {
+          "name": "1000-1000-lad_registration",
+          "description": ""
+        },
+        {
+          "name": "1000-1000-v*-pca_fe",
+          "description": ""
+        },
+        {
+          "name": "1000-1000-v*-pca_model",
+          "description": ""
+        },
+        {
+          "name": "1000-1000-v*-templates",
+          "description": ""
+        },
+        {
+          "name": "1000-1000-log_models_latest",
+          "description": ""
+        },
+        {
+          "name": "1000-1000-v*-models",
+          "description": ""
+        }
+      ]
+    },
+    {
+      "name": "connectors",
+      "squad": "automation-and-connector-framework",
+      "owner": "sghung@ca.ibm.com",
+      "indices": [
+        {
+          "name": "snowproblem",
+          "description": "contains the Service Now data from the problem table (/api/now/v2/table/problem). This data is collected by the user via the historical or live data mode via the Service Now data connector. Currently, problems are not being used by any consumers in this product, but can be used by a 3rd party connector."
+        }
+      ]
+    },
+    {
+      "name": "similar-incidents",
+      "squad": "log-anomaly-similar-incidents",
+      "owner": "haibinliu@us.ibm.com",
+      "indices": [
+        {
+          "name": "normalized-incidents-1000-1000",
+          "description": "similar incident cleaned/normalized data"
+        },
+        {
+          "name": "si_models_latest",
+          "description": "similar incident models"
+        }
+      ]
+    },
+    {
+      "name": "resource-related",
+      "squad": "resource-and-application",
+      "owner": "notsure@us.ibm.com",
+      "release-updates": "None",
+      "indices": [
+        {
+          "name": "aiops-searchservice_v*",
+          "description": "indice related to resource resource group and application"
+        }
+      ]
+    },
+    {
+      "name": "insights-dashboard",
+      "squad": "dashboard",
+      "owner": "skzhang@us.ibm.com",
+      "indices": [
+        {
+          "name": "insights-dashboard-story-*",
+          "description": "this index pattern contains all story based metrics, the full naming convention is insights-dashboard-story-raw-${AIOPS_VERSION}-${TENANT_ID}-${DATE}"
+        }
+      ]
+    }
+  ]
+}
