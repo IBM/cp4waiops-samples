@@ -3,5 +3,5 @@
   "csNamespace": "ibm-common-services",
   "oadpNamespace": "velero",
   "backupNameSuffix": "1",
-  "aiopsVersion": "0.1.0"
+  "aiopsVersion": "4.5.0"
 }
