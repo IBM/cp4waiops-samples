@@ -262,14 +262,25 @@ getKafkaStatus() {
 }
 
 getElasticsearchStatus() {
-    # Elastic status
-    INSTANCE_ELASTIC=$(oc get elasticsearches.elastic.automation.ibm.com iaf-system -o custom-columns='KIND:.kind,NAMESPACE:.metadata.namespace,NAME:.metadata.name,STATUS:.status.conditions[?(@.type=="Ready")].status')
-    STATUS_ELASTIC=$(oc get elasticsearches.elastic.automation.ibm.com iaf-system -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}')
-    if [[ "$1" == "status-summary" ]];
-    then
-        printStatus "$STATUS_ELASTIC" "True" "$INSTANCE_ELASTIC" "status-summary"
-    else    
-        printStatus "$STATUS_ELASTIC" "True" "$INSTANCE_ELASTIC"
+    if [[ "${VERSION_AIOPSORCHESTRATOR}" != "4.8" ]]; then
+        # Elastic status
+        INSTANCE_ELASTIC=$(oc get elasticsearches.elastic.automation.ibm.com iaf-system -o custom-columns='KIND:.kind,NAMESPACE:.metadata.namespace,NAME:.metadata.name,STATUS:.status.conditions[?(@.type=="Ready")].status')
+        STATUS_ELASTIC=$(oc get elasticsearches.elastic.automation.ibm.com iaf-system -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}')
+        if [[ "$1" == "status-summary" ]];
+        then
+            printStatus "$STATUS_ELASTIC" "True" "$INSTANCE_ELASTIC" "status-summary"
+        else    
+            printStatus "$STATUS_ELASTIC" "True" "$INSTANCE_ELASTIC"
+        fi
+    else
+        INSTANCE_ELASTIC=$(oc get elasticsearchcluster.elasticsearch.opencontent.ibm.com aiops -o custom-columns='KIND:.kind,NAMESPACE:.metadata.namespace,NAME:.metadata.name,STATUS:.status.phase')
+        STATUS_ELASTIC=$(oc get elasticsearchcluster.elasticsearch.opencontent.ibm.com aiops -o jsonpath='{.status.phase}')
+        if [[ "$1" == "status-summary" ]];
+        then
+            printStatus "$STATUS_ELASTIC" "Ready" "$INSTANCE_ELASTIC" "status-summary"
+        else
+            printStatus "$STATUS_ELASTIC" "Ready" "$INSTANCE_ELASTIC"
+        fi
     fi
 }
 
@@ -794,7 +805,7 @@ fi
 
 if [[ "$1" == "version" ]]
 then
-    echo "0.0.31"
+    echo "0.0.32"
     exit 0
 fi
 
@@ -1012,7 +1023,7 @@ then
         getPostgresDBStatus
     fi
 
-    if [[ "${VERSION_AIOPSORCHESTRATOR}" == "4.7" ]]; then
+    if [[ "${VERSION_AIOPSORCHESTRATOR}" == "4.7" || "${VERSION_AIOPSORCHESTRATOR}" == "4.8" ]]; then
         echo "______________________________________________________________"
         echo "FlinkDeployment:" && echo "" 
 
@@ -1047,9 +1058,14 @@ then
         getCSVStatus "$INSTALLATION_NAMESPACE" "ibm-automation-eventprocessing"
         getCSVStatus "$INSTALLATION_NAMESPACE" "ibm-automation.v"
     fi
-    getCSVStatus "$INSTALLATION_NAMESPACE" "ibm-automation-elastic"
+
+    if [[ "${VERSION_AIOPSORCHESTRATOR}" != 4.8 ]]; then
+        getCSVStatus "$INSTALLATION_NAMESPACE" "ibm-automation-elastic"
+    else
+        getCSVStatus "$INSTALLATION_NAMESPACE" "ibm-elasticsearch-operator"
+    fi
     
-    if [[ "${VERSION_AIOPSORCHESTRATOR}" != "4.7" ]];
+    if [[ "${VERSION_AIOPSORCHESTRATOR}" != "4.7" && "${VERSION_AIOPSORCHESTRATOR}" != "4.8" ]];
     then
         getCSVStatus "$INSTALLATION_NAMESPACE" "ibm-automation-flink"
     else
@@ -1193,9 +1209,14 @@ then
             getSubscriptionStatusGrep "ibm-automation-core" "$INSTALLATION_NAMESPACE"
             getSubscriptionStatusGrep "ibm-automation-eventprocessing" "$INSTALLATION_NAMESPACE" 
         fi
-        getSubscriptionStatusGrep "ibm-automation-elastic" "$INSTALLATION_NAMESPACE" 
+
+        if [[ "${VERSION_AIOPSORCHESTRATOR}" != "4.8" ]]; then
+            getSubscriptionStatusGrep "ibm-automation-elastic" "$INSTALLATION_NAMESPACE"
+        else
+            getSubscriptionStatusGrep "ibm-elasticsearch-operator" "$INSTALLATION_NAMESPACE"
+        fi
         
-        if [[ "${VERSION_AIOPSORCHESTRATOR}" != "4.7" ]];
+        if [[ "${VERSION_AIOPSORCHESTRATOR}" != "4.7" ]] && [[ "${VERSION_AIOPSORCHESTRATOR}" != "4.8" ]];
         then
             getSubscriptionStatusGrep "ibm-automation-flink" "$INSTALLATION_NAMESPACE"
         else
@@ -1203,7 +1224,7 @@ then
         fi
     fi
 
-    if [[ "$VERSION_AIOPSORCHESTRATOR" != "4.6" && "$VERSION_AIOPSORCHESTRATOR" != "4.7"  ]]; then
+    if [[ "$VERSION_AIOPSORCHESTRATOR" != "4.6" && "$VERSION_AIOPSORCHESTRATOR" != "4.7"  && "$VERSION_AIOPSORCHESTRATOR" != "4.8" ]]; then
         getSubscriptionStatus "ibm-management-kong" "$INSTALLATION_NAMESPACE" 
     fi
 
@@ -1217,7 +1238,7 @@ then
     fi
     getSubscriptionStatus "ibm-watson-aiops-ui-operator" "$INSTALLATION_NAMESPACE"
 
-    if [[ "${VERSION_AIOPSORCHESTRATOR}" == "4.7" ]]; then
+    if [[ "${VERSION_AIOPSORCHESTRATOR}" == "4.7" || "${VERSION_AIOPSORCHESTRATOR}" == "4.8" ]]; then
         getSubscriptionStatus "ibm-aiops-ir-ai" "$INSTALLATION_NAMESPACE" 
         getSubscriptionStatus "ibm-aiops-ir-core" "$INSTALLATION_NAMESPACE" 
         getSubscriptionStatus "ibm-aiops-ir-lifecycle" "$INSTALLATION_NAMESPACE"
@@ -1343,7 +1364,7 @@ then
                 getSubscriptionStatus "cloud-native-postgresql" "$INSTALLATION_NAMESPACE" 
             fi
 
-            if [[ "${VERSION_AIOPSORCHESTRATOR}" == "4.7" ]]; then
+            if [[ "${VERSION_AIOPSORCHESTRATOR}" == "4.7" || "${VERSION_AIOPSORCHESTRATOR}" == "4.8" ]]; then
                 getSubscriptionStatus "ibm-commonui-operator-app" "$INSTALLATION_NAMESPACE"
             else
                 getSubscriptionStatus "ibm-idp-config-ui-operator" "$INSTALLATION_NAMESPACE"
@@ -1356,17 +1377,17 @@ then
             fi
             getSubscriptionStatus "ibm-events-operator" "$INSTALLATION_NAMESPACE"
 
-            if [[ "$VERSION_AIOPSORCHESTRATOR" == "4.7" ]];  then
+            if [[ "$VERSION_AIOPSORCHESTRATOR" == "4.7" || "$VERSION_AIOPSORCHESTRATOR" == "4.8" ]];  then
                 getSubscriptionStatus "ibm-iam-operator" "$INSTALLATION_NAMESPACE"
             else
                 getSubscriptionStatus "ibm-im-operator" "$INSTALLATION_NAMESPACE"
             fi
 
-            if [[ "$VERSION_AIOPSORCHESTRATOR" != "4.6" && "$VERSION_AIOPSORCHESTRATOR" != "4.7" ]]; then
+            if [[ "$VERSION_AIOPSORCHESTRATOR" != "4.6" && "$VERSION_AIOPSORCHESTRATOR" != "4.7" && "$VERSION_AIOPSORCHESTRATOR" != "4.8" ]]; then
                 getSubscriptionStatus "ibm-im-mongodb-operator" "$INSTALLATION_NAMESPACE"
             fi
             
-            if [[ "$VERSION_AIOPSORCHESTRATOR" == "4.7" ]]; then
+            if [[ "$VERSION_AIOPSORCHESTRATOR" == "4.7" || "$VERSION_AIOPSORCHESTRATOR" == "4.8" ]]; then
                 getSubscriptionStatus "ibm-zen-operator" "$INSTALLATION_NAMESPACE"
             else
                 getSubscriptionStatus "ibm-platformui-operator" "$INSTALLATION_NAMESPACE"
@@ -1667,6 +1688,15 @@ then
         MAJORVERSION_ASM="2.25"
     }
 
+    component-versions-48() {
+        MAJORVERSION_AIOPSUI="4.8"
+        MAJORVERSION_AIMANAGER="4.8"
+        MAJORVERSION_IRCORE="4.8"
+        MAJORVERSION_LIFECYCLESERVICE="4.8"
+        MAJORVERSION_AIOPSANALYTICSORCHESTRATOR="4.8"
+        MAJORVERSION_ASM="2.26"
+    }
+
     aiopsEdgeBaseUpgradeStatus() {    
         UPGRADED=$(oc get aiopsedge aiopsedge -o jsonpath='{.status.conditions[?(@.type=="UpgradeReady")].status}')
         CONFIGURED=$(oc get aiopsedge aiopsedge -o jsonpath='{.status.phase}')
@@ -1896,7 +1926,9 @@ then
     }
 
     # Check current instance version and component status checks for that version of CP4AIOps
-    if [ "${VERSION_AIOPSORCHESTRATOR}" == "4.7" ];
+    if [[ "${VERSION_AIOPSORCHESTRATOR}" == "4.8" ]]; then
+        component-versions-48
+    elif [ "${VERSION_AIOPSORCHESTRATOR}" == "4.7" ];
     then
         component-versions-47
     elif [ "${VERSION_AIOPSORCHESTRATOR}" == "4.6" ];
@@ -1934,17 +1966,17 @@ then
         component-versions-33
     elif [ "${VERSION_AIOPSORCHESTRATOR}" == "0.1" ];
     then
-        # for developer builds (v0.1), we will check against release-4.7 versions
-        component-versions-47
+        # for developer builds (v0.1), we will check against release-4.8 versions
+        component-versions-48
         echo ""
         echo "${red}${bold}NOTE: ${normal}Your Cloud Pak for AIOps install appears to be an internal dev version (v${VERSION_AIOPSORCHESTRATOR})."
-        echo "      The status-upgrade command checks the status of upgrades to v3.3 - v3.7 and v4.1 - v4.7 only." 
+        echo "      The status-upgrade command checks the status of upgrades to v3.3 - v3.7 and v4.1 - v4.8 only." 
         echo "      Therefore, the upgrade checks below will be against v4.7 component versions."
-        echo "      This may influence your results below if your dev build is not based on release-4.7.${normal}"
+        echo "      This may influence your results below if your dev build is not based on release-4.8.${normal}"
     else
         echo ""
         echo "${red}${bold}ERROR: ${normal}Your Cloud Pak for AIOps install appears to be v${VERSION_AIOPSORCHESTRATOR}."
-        echo "       The status-upgrade command checks the status of upgrades to v3.3 - v3.7 and v4.1 - v4.7 only." 
+        echo "       The status-upgrade command checks the status of upgrades to v3.3 - v3.7 and v4.1 - v4.8 only." 
         echo "       The version you are using is not supported for use with the status-upgrade command. Exiting."
         echo ""
         exit 0
@@ -1973,7 +2005,7 @@ then
     postgresUpgradeStatus
     secureTunnelUpgradeStatus
     asmUpgradeStatus
-    if [[ "${VERSION_AIOPSORCHESTRATOR}" != "4.7" ]];
+    if [[ "${VERSION_AIOPSORCHESTRATOR}" != "4.7" && "${VERSION_AIOPSORCHESTRATOR}" != "4.8" ]];
     then
         FlinkEventProcessorUpgradeStatus
     fi
