@@ -65,7 +65,7 @@ ______________________________________________________________
 Installation instances:
 
 NAME                 PHASE     LICENSE    STORAGECLASS   STORAGECLASSLARGEBLOCK   AGE
-aiops-installation   Running   Accepted   rook-cephfs    rook-ceph-rbd            3h6m
+aiops-installation   Running   Accepted   rook-cephfs    rook-ceph-rbd            3h21m
 
 ______________________________________________________________
 ZenService instances:
@@ -125,6 +125,15 @@ KIND      NAMESPACE   NAME                              STATUS
 Cluster   cp4aiops    aiops-installation-edb-postgres   Cluster in healthy state
 Cluster   cp4aiops    common-service-db                 Cluster in healthy state
 Cluster   cp4aiops    zen-metastore-edb                 Cluster in healthy state
+
+______________________________________________________________
+FlinkDeployment:
+
+NAME              JOB STATUS   LIFECYCLE STATE
+aiops-lad-flink   FINISHED     STABLE
+
+NAME                       JOB STATUS   LIFECYCLE STATE
+aiops-ir-lifecycle-flink                STABLE
 
 ______________________________________________________________
 Secure Tunnel instances:
@@ -522,11 +531,11 @@ zen-minio-certificate   2025-11-21T15:26:36Z   True    Certificate is up to date
 ______________________________________________________________
 ODLM pod current status:
 
-cp4aiops                                           operand-deployment-lifecycle-manager-6664b457d9-wzhgs                     1/1     Running       0              3h4m
+cp4aiops                                           operand-deployment-lifecycle-manager-6664b457d9-wzhgs                     1/1     Running     0               3h20m
 ______________________________________________________________
 Orchestrator pod current status:
 
-cp4aiops                                           ibm-aiops-orchestrator-controller-manager-659f6cf8f-pxg6k                 1/1     Running       0              3h10m
+cp4aiops                                           ibm-aiops-orchestrator-controller-manager-659f6cf8f-pxg6k                 1/1     Running     0               3h26m
 ```
 
 ## How to use

@@ -1023,7 +1023,7 @@ then
         getPostgresDBStatus
     fi
 
-    if [[ "${VERSION_AIOPSORCHESTRATOR}" == "4.7" ]]; then
+    if [[ "${VERSION_AIOPSORCHESTRATOR}" == "4.7" || "${VERSION_AIOPSORCHESTRATOR}" == "4.8" ]]; then
         echo "______________________________________________________________"
         echo "FlinkDeployment:" && echo "" 
 
