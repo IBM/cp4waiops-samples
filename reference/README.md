@@ -1,10 +1,6 @@
 # Reference Scripts
-These are a collection of scripts that may be of use when installing IBM CloudPak for AIOps
+his collection of scripts can be used to assist with the installation of IBM Cloud Pak for AIOps. The scripts provide an automated approach for some ancillary options such as ODF storage and cluster logging, with reasonable default values and some customizations.
 
-They are one automation of the steps provided in the respective documentation, provide hopefully "reasonable" defaults and some customizations.
-They can be used in production enviroments but are no substitute for proper planning and understanding of the consequences.
-In some cases, they might help clarify the docs.
-It is expected they will be modified after reviewing to meet policies or constraints that the scripts have not considered.
-Using these can help shorten the install time of AIOps especially in a proof of concept environment.
+Use of these scripts might help to reduce the installation time of IBM Cloud Pak for AIOPs, especially in a proof of concept environment. The scripts can also be used in a production environment, but are not a substitute for thorough planning or an understanding of the installation process and its consequences. It is important to review and modify these scripts to ensure that they align with your organization's policies and constraints.
 
 ---

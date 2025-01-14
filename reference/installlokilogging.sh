@@ -3,18 +3,22 @@
 # © Copyright IBM Corp. 2024
 # SPDX-License-Identifier: Apache2.0
 #
-# This reference script can be used to install the OpenShift LokiStack for cluster logging as documented in
+#This reference script can be used to install the OpenShift LokiStack for
+# cluster logging as documented in:
 #   https://docs.openshift.com/container-platform/4.15/observability/logging/cluster-logging-deploying.html#logging-loki-cli-install_cluster-logging-deploying
 # and
 #   https://docs.openshift.com/container-platform/4.15/observability/logging/log_storage/cluster-logging-loki.html
 #
-# It can be used for a production environment, but is no substitute for proper planning as outlined
-#   in the documentation and is merely one automated implementation of those steps.
-# Further customization/modifications to this script should be expected as it cannot account 
-#   for every enterprise's nuiances.
+#The script can be used in a production environment, but is not a substitute
+# for thorough planning or an understanding of the installation process and its
+# consequences.
 #
-# Note: LOKI requires some sort of object storage, so ensure it is available: [ s3, azure, gcs, swift ]
-#       Only local ODF S3 was attempted using this script.
+#Important:
+# - Further customizations and modifications to this script are expected to
+#   ensure that it aligns with your requirements.
+# - LOKI requires object storage, so ensure that object storage is available
+#   [ s3, azure, gcs, swift ]. Only local ODF S3 was attempted with this script.
+#
 
 #set -x
 

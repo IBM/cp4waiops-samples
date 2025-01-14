@@ -3,14 +3,15 @@
 # © Copyright IBM Corp. 2022, 2024
 # SPDX-License-Identifier: Apache2.0
 #
-# This reference script can be used to quickly install ODF as publicly documented
-#   by Red Hat with "reasonable" defaults and some customization.  It can be used
-#   for production environments but is no substitute for proper planning. It is
-#   suitable for bare metal or classical VM with "locally" attached storage. 
+# This reference script can be used to quickly install ODF as publicly
+#   documented by Red Hat with reasonable default values and some customization.
 #
 # This script automates the manual instructions found here:
 #   https://access.redhat.com/documentation/en-us/red_hat_openshift_data_foundation/4.15/html-single/deploying_openshift_data_foundation_using_bare_metal_infrastructure/index
 # 
+# The script can be used in a production environment, but is not a substitute
+#   for thorough planning or an understanding of the installation process and
+#   its consequences.
 #
 # Minimal Resource Requirements:
 #   - https://access.redhat.com/documentation/en-us/red_hat_openshift_data_foundation/4.15/html-single/planning_your_deployment/index#resource-requirements_rhodf
