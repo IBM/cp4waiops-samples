@@ -66,7 +66,7 @@ CREATE TABLE ALERTS_REPORTER_STATUS (
     lastStateChangeTime TIMESTAMP,
     langId              VARCHAR(32),
     expirySeconds       INTEGER,
-    uuid                VARCHAR(255) NOT NULL GENERATED ALWAYS AS (CONCAT(CONCAT(tenantid,'_'),id)),
+    uuid                VARCHAR(255) NOT NULL,
     PRIMARY KEY (uuid) )@
 --DATA CAPTURE NONE@
 

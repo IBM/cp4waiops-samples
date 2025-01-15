@@ -52,7 +52,7 @@ CREATE TABLE INCIDENTS_REPORTER_STATUS (
     chatOpsIntegrations INTEGER,
     resourceId          VARCHAR(255),
     policyId            VARCHAR(64),
-    uuid                VARCHAR(255) NOT NULL GENERATED ALWAYS AS (CONCAT(CONCAT(tenantid,'_'),id)),
+    uuid                VARCHAR(255) NOT NULL,
     PRIMARY KEY (uuid) )@
 --DATA CAPTURE NONE@
 
