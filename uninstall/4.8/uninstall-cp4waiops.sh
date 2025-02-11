@@ -46,6 +46,7 @@ if [[ $SKIP_CONFIRM != "true" ]]; then
   log $INFO "CAUTION: Data loss is possible if uninstall-cp4waiops.props is not reviewed and configured carefully."
   log $INFO ""
   log $INFO "Cluster context: $(oc config current-context)"
+  log $INFO "Target namespace: ${CP4WAIOPS_PROJECT}"
   log $INFO ""
   display_script_properties
   read -p "Please confirm you have reviewed and configured uninstall-cp4waiops.props and would like to proceed with uninstall. Y or y to continue: " -n 1 -r

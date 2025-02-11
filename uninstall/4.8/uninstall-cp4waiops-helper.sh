@@ -275,12 +275,6 @@ delete_installation_instance () {
         log $INFO "The $installation_name installation instance is not found, skipping the deletion of $installation_name."
     fi
 
-    check_additional_installation_exists
-    # if return code of check_additional_installation_exists is 1... change the value of $project to newly found namespace
-    if [[ "$?" == "1" ]]; then
-        project=$CP4WAIOPS_PROJECT
-    fi
-
     log $INFO "Checking if operandrequests are all deleted "        
     LOOP_COUNT=0
     while [ $(aiops_operands_exists $project) == "true" ]
@@ -582,29 +576,6 @@ log $INFO "DELETE_PVCS=\033[1;36m$DELETE_PVCS\033[0m"
 log $INFO "DELETE_CRDS=\033[1;36m$DELETE_CRDS\033[0m"
 log $INFO
 log $INFO "##### Properties in uninstall-cp4waiops.props #####"
-}
-
-check_additional_installation_exists(){
-  log $INFO "Checking if any additional installation resources found in the cluster."
-  installation_returned_value=$(oc get installations.orchestrator.aiops.ibm.com -A)
-  if [[ ! -z $installation_returned_value  ]] ; then
-     log $ERROR "Remaining installation cr found : "
-     oc get installations.orchestrator.aiops.ibm.com -A
-     log $INFO "Deleting remaining installation"
-     
-     # Get name and namespace of additional install
-     local INSTALLATION_NAME=$(oc get installations.orchestrator.aiops.ibm.com -A --no-headers=true | awk '{print $2}')
-     local CP4WAIOPS_PROJECT=$(oc get installations.orchestrator.aiops.ibm.com -A --no-headers=true | awk '{print $1}')
-     # Change the value of the name and namespace in the props file
-     sed -i -e "s,^CP4WAIOPS_PROJECT=\".*\",CP4WAIOPS_PROJECT=\"$CP4WAIOPS_PROJECT\",;  s,^INSTALLATION_NAME=\".*\",INSTALLATION_NAME=\"$INSTALLATION_NAME\"," ./uninstall-cp4waiops.props
-     . ./uninstall-cp4waiops.props
-
-     oc delete installation.orchestrator.aiops.ibm.com $INSTALLATION_NAME -n $CP4WAIOPS_PROJECT
-     return 1
-  else
-     log $INFO "No additional installation resources found in the cluster."
-     return 0
-  fi
 }
 
 check_additional_asm_exists() {
