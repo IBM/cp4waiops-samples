@@ -1,4 +1,4 @@
-<!-- © Copyright IBM Corp. 2020, 2024-->
+<!-- © Copyright IBM Corp. 2020, 2025-->
 
 #### ***NOTE**: from CP4AIOps v4.1.0 onwards, the use of the status, status-all, status-upgrade functions are now considered **deprecated**. Please primarily refer to the installation status messages provided directly in the installation.orchestrator.aiops.ibm.com CR instance of your cluster's installation.*
 
@@ -60,18 +60,18 @@ Cloud Pak for AIOps v4.7 installation status:
 
 ### Detailed installation status checker output (`oc waiops status-all`)
 ```
-Cloud Pak for AIOps v4.8 installation status:
+Cloud Pak for AIOps v4.9 installation status:
 ______________________________________________________________
 Installation instances:
 
 NAME                 PHASE     LICENSE    STORAGECLASS   STORAGECLASSLARGEBLOCK   AGE
-aiops-installation   Running   Accepted   rook-cephfs    rook-ceph-rbd            3h21m
+aiops-installation   Running   Accepted   rook-cephfs    rook-ceph-rbd            3h16m
 
 ______________________________________________________________
 ZenService instances:
 
 KIND         NAME                 NAMESPACE   VERSION   STATUS      PROGRESS   MESSAGE
-ZenService   iaf-zen-cpdservice   cp4aiops    5.1.10    Completed   100%       The Current Operation Is Completed
+ZenService   iaf-zen-cpdservice   cp4aiops    5.1.12    Completed   100%       The Current Operation Is Completed
 
 ______________________________________________________________
 Kafka and Elasticsearch instances:
@@ -86,37 +86,37 @@ ______________________________________________________________
 IRCore and AIOpsAnalyticsOrchestrator instances:
 
 KIND                  NAMESPACE   NAME    VERSION   STATUS   MESSAGE
-IssueResolutionCore   cp4aiops    aiops   4.8.0     Ready    All Services Ready
+IssueResolutionCore   cp4aiops    aiops   4.9.0     Ready    All Services Ready
 
 KIND                         NAMESPACE   NAME    VERSION   STATUS   MESSAGE
-AIOpsAnalyticsOrchestrator   cp4aiops    aiops   4.8.0     Ready    All Services Ready
+AIOpsAnalyticsOrchestrator   cp4aiops    aiops   4.9.0     Ready    All Services Ready
 
 ______________________________________________________________
 LifecycleService instances:
 
 KIND               NAMESPACE   NAME    VERSION   STATUS   MESSAGE
-LifecycleService   cp4aiops    aiops   4.8.0     Ready    All Services Ready
+LifecycleService   cp4aiops    aiops   4.9.0     Ready    All Services Ready
 
 ______________________________________________________________
 BaseUI instances:
 
 KIND     NAMESPACE   NAME              VERSION   STATUS   MESSAGE
-BaseUI   cp4aiops    baseui-instance   4.8.0     True     Ready
+BaseUI   cp4aiops    baseui-instance   4.9.0     True     Ready
 
 ______________________________________________________________
 AIManager, ASM, AIOpsEdge, and AIOpsUI instances:
 
 KIND        NAMESPACE   NAME        VERSION   STATUS      MESSAGE
-AIManager   cp4aiops    aimanager   4.8.0     Completed   AI Manager is ready
+AIManager   cp4aiops    aimanager   4.9.0     Completed   AI Manager is ready
 
 KIND   NAMESPACE   NAME             VERSION   STATUS
-ASM    cp4aiops    aiops-topology   2.26.0    OK
+ASM    cp4aiops    aiops-topology   2.28.0    OK
 
 KIND        NAMESPACE   NAME        STATUS       MESSAGE
 AIOpsEdge   cp4aiops    aiopsedge   Configured   all critical components are reporting healthy
 
 KIND      NAMESPACE   NAME               VERSION   STATUS   MESSAGE
-AIOpsUI   cp4aiops    aiopsui-instance   4.8.0     True     Ready
+AIOpsUI   cp4aiops    aiopsui-instance   4.9.0     True     Ready
 
 ______________________________________________________________
 Postgres instances:
@@ -125,15 +125,6 @@ KIND      NAMESPACE   NAME                              STATUS
 Cluster   cp4aiops    aiops-installation-edb-postgres   Cluster in healthy state
 Cluster   cp4aiops    common-service-db                 Cluster in healthy state
 Cluster   cp4aiops    zen-metastore-edb                 Cluster in healthy state
-
-______________________________________________________________
-FlinkDeployment:
-
-NAME              JOB STATUS   LIFECYCLE STATE
-aiops-lad-flink   FINISHED     STABLE
-
-NAME                       JOB STATUS   LIFECYCLE STATE
-aiops-ir-lifecycle-flink                STABLE
 
 ______________________________________________________________
 Secure Tunnel instances:
@@ -145,79 +136,79 @@ ______________________________________________________________
 CSVs from cp4aiops namespace:
 
 NAME                                     DISPLAY                VERSION              REPLACES   PHASE
-aimanager-operator.v4.8.0-202411211445   IBM AIOps AI Manager   4.8.0-202411211445              Succeeded
+aimanager-operator.v4.9.0-202502251245   IBM AIOps AI Manager   4.9.0-202502251245              Succeeded
 
 NAME                                     DISPLAY          VERSION              REPLACES   PHASE
-aiopsedge-operator.v4.8.0-202411211445   IBM AIOps Edge   4.8.0-202411211445              Succeeded
+aiopsedge-operator.v4.9.0-202502251245   IBM AIOps Edge   4.9.0-202502251245              Succeeded
 
 NAME                               DISPLAY                             VERSION              REPLACES   PHASE
-asm-operator.v4.8.0-202411211445   IBM Netcool Agile Service Manager   4.8.0-202411211445              Succeeded
+asm-operator.v4.9.0-202502251245   IBM Netcool Agile Service Manager   4.9.0-202502251245              Succeeded
 
 NAME                                  DISPLAY                                            VERSION              REPLACES   PHASE
-ibm-aiops-ir-ai.v4.8.0-202411211445   IBM Watson AIOps Issue Resolution AI & Analytics   4.8.0-202411211445              Succeeded
+ibm-aiops-ir-ai.v4.9.0-202502251245   IBM Watson AIOps Issue Resolution AI & Analytics   4.9.0-202502251245              Succeeded
 
 NAME                                    DISPLAY                                  VERSION              REPLACES   PHASE
-ibm-aiops-ir-core.v4.8.0-202411211445   IBM Watson AIOps Issue Resolution Core   4.8.0-202411211445              Succeeded
+ibm-aiops-ir-core.v4.9.0-202502251245   IBM Watson AIOps Issue Resolution Core   4.9.0-202502251245              Succeeded
 
 NAME                                         DISPLAY                                    VERSION              REPLACES   PHASE
-ibm-aiops-ir-lifecycle.v4.8.0-202411211445   IBM Cloud Pak for Watson AIOps Lifecycle   4.8.0-202411211445              Succeeded
+ibm-aiops-ir-lifecycle.v4.9.0-202502251245   IBM Cloud Pak for Watson AIOps Lifecycle   4.9.0-202502251245              Succeeded
 
 NAME                                         DISPLAY                   VERSION              REPLACES   PHASE
-ibm-aiops-orchestrator.v4.8.0-202411211445   IBM Cloud Pak for AIOps   4.8.0-202411211445              Succeeded
+ibm-aiops-orchestrator.v4.9.0-202502251245   IBM Cloud Pak for AIOps   4.9.0-202502251245              Succeeded
 
 NAME                                   DISPLAY                         VERSION    REPLACES   PHASE
-ibm-elasticsearch-operator.v1.1.2346   IBM OpenContent Elasticsearch   1.1.2346              Succeeded
+ibm-elasticsearch-operator.v1.1.2570   IBM OpenContent Elasticsearch   1.1.2570              Succeeded
 
 NAME                           DISPLAY                          VERSION   REPLACES   PHASE
-ibm-opencontent-flink.v2.0.6   IBM OpenContent Flink Operator   2.0.6                Succeeded
+ibm-opencontent-flink.v2.0.8   IBM OpenContent Flink Operator   2.0.8                Succeeded
 
 NAME                  DISPLAY                   VERSION   REPLACES   PHASE
-ibm-redis-cp.v1.2.2   ibm-redis-cp-controller   1.2.2                Succeeded
+ibm-redis-cp.v1.2.4   ibm-redis-cp-controller   1.2.4                Succeeded
 
-NAME                                 DISPLAY                               VERSION   REPLACES   PHASE
-ibm-common-service-operator.v4.6.8   IBM Cloud Pak foundational services   4.6.8                Succeeded
+NAME                                  DISPLAY                               VERSION   REPLACES   PHASE
+ibm-common-service-operator.v4.6.10   IBM Cloud Pak foundational services   4.6.10               Succeeded
 
 NAME                                             DISPLAY             VERSION              REPLACES   PHASE
-ibm-secure-tunnel-operator.v4.8.0-202411211445   IBM Secure Tunnel   4.8.0-202411211445              Succeeded
+ibm-secure-tunnel-operator.v4.9.0-202502251245   IBM Secure Tunnel   4.9.0-202502251245              Succeeded
 
 NAME                                               DISPLAY        VERSION              REPLACES   PHASE
-ibm-watson-aiops-ui-operator.v4.8.0-202411211445   IBM AIOps UI   4.8.0-202411211445              Succeeded
+ibm-watson-aiops-ui-operator.v4.9.0-202502251245   IBM AIOps UI   4.9.0-202502251245              Succeeded
 
 NAME                              DISPLAY                       VERSION   REPLACES                          PHASE
-cloud-native-postgresql.v1.22.7   EDB Postgres for Kubernetes   1.22.7    cloud-native-postgresql.v1.22.5   Succeeded
+cloud-native-postgresql.v1.22.8   EDB Postgres for Kubernetes   1.22.8    cloud-native-postgresql.v1.22.7   Succeeded
 
 NAME                                DISPLAY            VERSION   REPLACES   PHASE
-ibm-cert-manager-operator.v4.2.10   IBM Cert Manager   4.2.10               Succeeded
+ibm-cert-manager-operator.v4.2.12   IBM Cert Manager   4.2.12               Succeeded
 
 NAME                           DISPLAY         VERSION   REPLACES   PHASE
-ibm-commonui-operator.v4.4.7   Ibm Common UI   4.4.7                Succeeded
+ibm-commonui-operator.v4.4.9   Ibm Common UI   4.4.9                Succeeded
 
 NAME                         DISPLAY               VERSION   REPLACES   PHASE
 ibm-events-operator.v5.0.1   IBM Events Operator   5.0.1                Succeeded
 
 NAME                      DISPLAY           VERSION   REPLACES   PHASE
-ibm-iam-operator.v4.5.7   IBM IM Operator   4.5.7                Succeeded
+ibm-iam-operator.v4.5.9   IBM IM Operator   4.5.9                Succeeded
 
 NAME                       DISPLAY           VERSION   REPLACES   PHASE
-ibm-zen-operator.v5.1.10   IBM Zen Service   5.1.10               Succeeded
+ibm-zen-operator.v5.1.12   IBM Zen Service   5.1.12               Succeeded
 
 NAME                                          DISPLAY                                VERSION   REPLACES   PHASE
-operand-deployment-lifecycle-manager.v4.3.7   Operand Deployment Lifecycle Manager   4.3.7                Succeeded
+operand-deployment-lifecycle-manager.v4.3.9   Operand Deployment Lifecycle Manager   4.3.9                Succeeded
 
 ______________________________________________________________
 Subscriptions from cp4aiops namespace:
 
 NAME                 PACKAGE              SOURCE                  CHANNEL
-aimanager-operator   aimanager-operator   ibm-cp-waiops-catalog   v4.8
+aimanager-operator   aimanager-operator   ibm-cp-waiops-catalog   v4.9
 
 NAME                 PACKAGE              SOURCE                  CHANNEL
-aiopsedge-operator   aiopsedge-operator   ibm-cp-waiops-catalog   v4.8
+aiopsedge-operator   aiopsedge-operator   ibm-cp-waiops-catalog   v4.9
 
 NAME           PACKAGE        SOURCE                  CHANNEL
-asm-operator   asm-operator   ibm-cp-waiops-catalog   v4.8
+asm-operator   asm-operator   ibm-cp-waiops-catalog   v4.9
 
 NAME                     PACKAGE                  SOURCE                  CHANNEL
-ibm-aiops-orchestrator   ibm-aiops-orchestrator   ibm-cp-waiops-catalog   v4.8
+ibm-aiops-orchestrator   ibm-aiops-orchestrator   ibm-cp-waiops-catalog   v4.9
 
 NAME                         PACKAGE                      SOURCE                  CHANNEL
 ibm-elasticsearch-operator   ibm-elasticsearch-operator   ibm-cp-waiops-catalog   v1.1
@@ -226,19 +217,19 @@ NAME                    PACKAGE                 SOURCE                  CHANNEL
 ibm-opencontent-flink   ibm-opencontent-flink   ibm-cp-waiops-catalog   v2.0
 
 NAME                         PACKAGE                      SOURCE                  CHANNEL
-ibm-secure-tunnel-operator   ibm-secure-tunnel-operator   ibm-cp-waiops-catalog   v4.8
+ibm-secure-tunnel-operator   ibm-secure-tunnel-operator   ibm-cp-waiops-catalog   v4.9
 
 NAME                           PACKAGE                        SOURCE                  CHANNEL
-ibm-watson-aiops-ui-operator   ibm-watson-aiops-ui-operator   ibm-cp-waiops-catalog   v4.8
+ibm-watson-aiops-ui-operator   ibm-watson-aiops-ui-operator   ibm-cp-waiops-catalog   v4.9
 
 NAME              PACKAGE           SOURCE                  CHANNEL
-ibm-aiops-ir-ai   ibm-aiops-ir-ai   ibm-cp-waiops-catalog   v4.8
+ibm-aiops-ir-ai   ibm-aiops-ir-ai   ibm-cp-waiops-catalog   v4.9
 
 NAME                PACKAGE             SOURCE                  CHANNEL
-ibm-aiops-ir-core   ibm-aiops-ir-core   ibm-cp-waiops-catalog   v4.8
+ibm-aiops-ir-core   ibm-aiops-ir-core   ibm-cp-waiops-catalog   v4.9
 
 NAME                     PACKAGE                  SOURCE                  CHANNEL
-ibm-aiops-ir-lifecycle   ibm-aiops-ir-lifecycle   ibm-cp-waiops-catalog   v4.8
+ibm-aiops-ir-lifecycle   ibm-aiops-ir-lifecycle   ibm-cp-waiops-catalog   v4.9
 
 NAME           PACKAGE        SOURCE                  CHANNEL
 ibm-redis-cp   ibm-redis-cp   ibm-cp-waiops-catalog   v1.2
@@ -268,274 +259,280 @@ ______________________________________________________________
 OperandRequest instances:
 
 NAMESPACE   NAME                   PHASE     CREATED AT
-cp4aiops    ibm-aiops-ai-manager   Running   2024-11-21T15:21:00Z
+cp4aiops    ibm-aiops-ai-manager   Running   2025-02-25T13:14:01Z
 
 NAMESPACE   NAME                         PHASE     CREATED AT
-cp4aiops    ibm-aiops-aiops-foundation   Running   2024-11-21T15:21:00Z
+cp4aiops    ibm-aiops-aiops-foundation   Running   2025-02-25T13:14:01Z
 
 NAMESPACE   NAME                   PHASE     CREATED AT
-cp4aiops    ibm-aiops-connection   Running   2024-11-21T15:21:00Z
+cp4aiops    ibm-aiops-connection   Running   2025-02-25T13:14:01Z
 
 NAMESPACE   NAME              PHASE     CREATED AT
-cp4aiops    ibm-iam-service   Running   2024-11-21T15:22:27Z
+cp4aiops    ibm-iam-service   Running   2025-02-25T13:16:38Z
 
 NAMESPACE   NAME              PHASE     CREATED AT
-cp4aiops    ibm-iam-request   Running   2024-11-21T15:19:06Z
+cp4aiops    ibm-iam-request   Running   2025-02-25T13:14:16Z
 
 ______________________________________________________________
 AIOps certificate status:
 
 NAME                    RENEWAL                READY   MESSAGE
-aimanager-certificate   2025-01-20T15:45:24Z   True    Certificate is up to date and has not expired
+aimanager-certificate   2025-04-26T13:36:48Z   True    Certificate is up to date and has not expired
 
 NAME                       RENEWAL                READY   MESSAGE
-aiops-appconnect-ir-cert   2026-03-23T07:22:44Z   True    Certificate is up to date and has not expired
+aiops-appconnect-ir-cert   2025-04-26T13:15:38Z   True    Certificate is up to date and has not expired
 
-NAME                                 RENEWAL                READY   MESSAGE
-aiops-ibm-elasticsearch-tls-secret   2025-01-20T15:19:07Z   True    Certificate is up to date and has not expired
-
-NAME                                          RENEWAL                READY   MESSAGE
-aiops-installation-edb-postgres-client-cert   2025-01-20T15:21:26Z   True    Certificate is up to date and has not expired
+NAME                RENEWAL                READY   MESSAGE
+aiops-elastic-tls   2025-04-26T13:13:56Z   True    Certificate is up to date and has not expired
 
 NAME                                          RENEWAL                READY   MESSAGE
-aiops-installation-edb-postgres-server-cert   2025-01-20T15:21:26Z   True    Certificate is up to date and has not expired
+aiops-installation-edb-postgres-client-cert   2025-04-26T13:14:31Z   True    Certificate is up to date and has not expired
+
+NAME                                          RENEWAL                READY   MESSAGE
+aiops-installation-edb-postgres-server-cert   2025-04-26T13:14:26Z   True    Certificate is up to date and has not expired
 
 NAME                                    RENEWAL                READY   MESSAGE
-aiops-installation-edb-postgres-ss-ca   2025-01-20T15:21:12Z   True    Certificate is up to date and has not expired
+aiops-installation-edb-postgres-ss-ca   2025-04-26T13:14:11Z   True    Certificate is up to date and has not expired
 
 NAME                                   RENEWAL                READY   MESSAGE
-aiops-installation-redis-client-cert   2025-01-20T15:15:32Z   True    Certificate is up to date and has not expired
+aiops-installation-redis-client-cert   2025-04-26T13:10:49Z   True    Certificate is up to date and has not expired
 
 NAME                                   RENEWAL                READY   MESSAGE
-aiops-installation-redis-server-cert   2025-01-20T15:15:32Z   True    Certificate is up to date and has not expired
+aiops-installation-redis-server-cert   2025-04-26T13:10:49Z   True    Certificate is up to date and has not expired
 
 NAME                             RENEWAL                READY   MESSAGE
-aiops-installation-redis-ss-ca   2025-01-20T15:15:31Z   True    Certificate is up to date and has not expired
+aiops-installation-redis-ss-ca   2025-04-26T13:10:48Z   True    Certificate is up to date and has not expired
 
 NAME                        RENEWAL                READY   MESSAGE
-aiops-installation-tls-ca   2025-01-20T15:15:42Z   True    Certificate is up to date and has not expired
+aiops-installation-tls-ca   2025-04-26T13:10:53Z   True    Certificate is up to date and has not expired
 
 NAME                            RENEWAL                READY   MESSAGE
-aiops-ir-analytics-classifier   2025-01-20T15:32:12Z   True    Certificate is up to date and has not expired
+aiops-ir-analytics-classifier   2025-04-26T13:25:51Z   True    Certificate is up to date and has not expired
 
 NAME                            RENEWAL                READY   MESSAGE
-aiops-ir-analytics-metric-api   2025-01-20T15:32:13Z   True    Certificate is up to date and has not expired
+aiops-ir-analytics-metric-api   2025-04-26T13:25:52Z   True    Certificate is up to date and has not expired
 
 NAME                              RENEWAL                READY   MESSAGE
-aiops-ir-analytics-metric-spark   2025-01-20T15:32:16Z   True    Certificate is up to date and has not expired
+aiops-ir-analytics-metric-spark   2025-04-26T13:25:53Z   True    Certificate is up to date and has not expired
 
 NAME                               RENEWAL                READY   MESSAGE
-aiops-ir-analytics-probablecause   2025-01-20T15:27:13Z   True    Certificate is up to date and has not expired
+aiops-ir-analytics-probablecause   2025-04-26T13:20:30Z   True    Certificate is up to date and has not expired
 
 NAME                              RENEWAL                READY   MESSAGE
-aiops-ir-analytics-spark-master   2025-01-20T15:32:20Z   True    Certificate is up to date and has not expired
+aiops-ir-analytics-spark-master   2025-04-26T13:26:01Z   True    Certificate is up to date and has not expired
 
 NAME                                         RENEWAL                READY   MESSAGE
-aiops-ir-analytics-spark-pipeline-composer   2025-01-20T15:32:23Z   True    Certificate is up to date and has not expired
+aiops-ir-analytics-spark-pipeline-composer   2025-04-26T13:25:57Z   True    Certificate is up to date and has not expired
 
 NAME                RENEWAL                READY   MESSAGE
-aiops-ir-core-api   2025-01-20T15:28:17Z   True    Certificate is up to date and has not expired
+aiops-ir-core-api   2025-04-26T13:21:39Z   True    Certificate is up to date and has not expired
 
 NAME                      RENEWAL                READY   MESSAGE
-aiops-ir-core-archiving   2025-01-20T15:28:10Z   True    Certificate is up to date and has not expired
+aiops-ir-core-archiving   2025-04-26T13:21:38Z   True    Certificate is up to date and has not expired
 
 NAME                      RENEWAL                READY   MESSAGE
-aiops-ir-core-cem-users   2025-01-20T15:27:54Z   True    Certificate is up to date and has not expired
+aiops-ir-core-cem-users   2025-04-26T13:21:39Z   True    Certificate is up to date and has not expired
 
 NAME                        RENEWAL                READY   MESSAGE
-aiops-ir-core-couchdb-api   2025-01-20T15:26:59Z   True    Certificate is up to date and has not expired
+aiops-ir-core-couchdb-api   2025-04-26T13:20:25Z   True    Certificate is up to date and has not expired
 
 NAME                        RENEWAL                READY   MESSAGE
-aiops-ir-core-esarchiving   2025-01-20T15:28:10Z   True    Certificate is up to date and has not expired
+aiops-ir-core-esarchiving   2025-04-26T13:21:17Z   True    Certificate is up to date and has not expired
 
 NAME                      RENEWAL                READY   MESSAGE
-aiops-ir-core-ncobackup   2025-01-20T15:27:48Z   True    Certificate is up to date and has not expired
+aiops-ir-core-ncobackup   2025-04-26T13:21:36Z   True    Certificate is up to date and has not expired
 
 NAME                      RENEWAL                READY   MESSAGE
-aiops-ir-core-ncodl-api   2025-01-20T15:28:12Z   True    Certificate is up to date and has not expired
-
-NAME                      RENEWAL                READY   MESSAGE
-aiops-ir-core-ncodl-std   2025-01-20T15:28:11Z   True    Certificate is up to date and has not expired
-
-NAME                       RENEWAL                READY   MESSAGE
-aiops-ir-core-ncoprimary   2025-01-20T15:27:50Z   True    Certificate is up to date and has not expired
-
-NAME                   RENEWAL                READY   MESSAGE
-aiops-ir-core-rba-as   2025-01-20T15:28:13Z   True    Certificate is up to date and has not expired
-
-NAME                    RENEWAL                READY   MESSAGE
-aiops-ir-core-rba-rbs   2025-01-20T15:28:11Z   True    Certificate is up to date and has not expired
-
-NAME                    RENEWAL                READY   MESSAGE
-aiops-ir-core-usercfg   2025-01-20T15:28:18Z   True    Certificate is up to date and has not expired
-
-NAME                       RENEWAL                READY   MESSAGE
-aiops-ir-lifecycle-flink   2025-01-20T15:22:37Z   True    Certificate is up to date and has not expired
-
-NAME                           RENEWAL                READY   MESSAGE
-aiops-ir-lifecycle-flink-api   2025-01-20T15:22:19Z   True    Certificate is up to date and has not expired
-
-NAME                            RENEWAL                READY   MESSAGE
-aiops-ir-lifecycle-flink-rest   2025-01-20T15:22:33Z   True    Certificate is up to date and has not expired
-
-NAME                                     RENEWAL                READY   MESSAGE
-aiops-ir-lifecycle-policy-registry-svc   2025-01-20T15:22:25Z   True    Certificate is up to date and has not expired
-
-NAME              RENEWAL                READY   MESSAGE
-aiops-lad-flink   2025-01-20T15:21:13Z   True    Certificate is up to date and has not expired
-
-NAME                  RENEWAL                READY   MESSAGE
-aiops-lad-flink-api   2025-01-20T15:21:07Z   True    Certificate is up to date and has not expired
-
-NAME                   RENEWAL                READY   MESSAGE
-aiops-lad-flink-rest   2025-01-20T15:21:07Z   True    Certificate is up to date and has not expired
-
-NAME                            RENEWAL                READY   MESSAGE
-aiops-topology-cassandra-cert   2031-07-21T23:24:31Z   True    Certificate is up to date and has not expired
-
-NAME                                RENEWAL                READY   MESSAGE
-aiops-topology-file-observer-cert   2025-02-08T19:24:29Z   True    Certificate is up to date and has not expired
-
-NAME                            RENEWAL                READY   MESSAGE
-aiops-topology-inventory-cert   2025-02-08T19:24:38Z   True    Certificate is up to date and has not expired
-
-NAME                                      RENEWAL                READY   MESSAGE
-aiops-topology-kubernetes-observer-cert   2025-02-08T19:24:41Z   True    Certificate is up to date and has not expired
-
-NAME                         RENEWAL                READY   MESSAGE
-aiops-topology-layout-cert   2025-02-08T19:24:09Z   True    Certificate is up to date and has not expired
-
-NAME                        RENEWAL                READY   MESSAGE
-aiops-topology-merge-cert   2025-02-08T19:24:38Z   True    Certificate is up to date and has not expired
-
-NAME                                   RENEWAL                READY   MESSAGE
-aiops-topology-observer-service-cert   2025-02-08T19:24:14Z   True    Certificate is up to date and has not expired
-
-NAME                                RENEWAL                READY   MESSAGE
-aiops-topology-rest-observer-cert   2025-02-08T19:24:31Z   True    Certificate is up to date and has not expired
-
-NAME                                      RENEWAL                READY   MESSAGE
-aiops-topology-servicenow-observer-cert   2025-02-08T19:24:40Z   True    Certificate is up to date and has not expired
-
-NAME                                  RENEWAL                READY   MESSAGE
-aiops-topology-sevone-observer-cert   2025-02-08T19:24:32Z   True    Certificate is up to date and has not expired
-
-NAME                         RENEWAL                READY   MESSAGE
-aiops-topology-status-cert   2025-02-08T19:24:33Z   True    Certificate is up to date and has not expired
-
-NAME                           RENEWAL                READY   MESSAGE
-aiops-topology-topology-cert   2025-02-08T19:24:29Z   True    Certificate is up to date and has not expired
-
-NAME                         RENEWAL                READY   MESSAGE
-aiops-topology-ui-api-cert   2025-02-08T19:24:16Z   True    Certificate is up to date and has not expired
-
-NAME                                     RENEWAL                READY   MESSAGE
-aiops-topology-vmvcenter-observer-cert   2025-02-08T19:23:58Z   True    Certificate is up to date and has not expired
-
-NAME                       RENEWAL                READY   MESSAGE
-aiops-ui-tls-certificate   2025-01-20T15:44:23Z   True    Certificate is up to date and has not expired
-
-NAME                    RENEWAL                READY   MESSAGE
-aiopsedge-client-cert   2026-10-22T15:22:57Z   True    Certificate is up to date and has not expired
-
-NAME                                       RENEWAL                READY   MESSAGE
-aiopsedge-generic-topology-cert-9de3ea38   2025-01-20T15:25:51Z   True    Certificate is up to date and has not expired
-
-NAME                                       RENEWAL                READY   MESSAGE
-aiopsedge-im-topology-inte-cert-810804c2   2025-01-20T15:25:59Z   True    Certificate is up to date and has not expired
-
-NAME                                       RENEWAL                READY   MESSAGE
-aiopsedge-instana-topology-cert-0233cca2   2025-01-20T15:25:56Z   True    Certificate is up to date and has not expired
-
-NAME          RENEWAL                READY   MESSAGE
-aiopsedgeca   2026-10-22T15:22:37Z   True    Certificate is up to date and has not expired
-
-NAME                                            RENEWAL                READY   MESSAGE
-automationbase-sample-automationbase-ab-ss-ca   2025-01-20T15:17:55Z   True    Certificate is up to date and has not expired
-
-NAME                            RENEWAL                READY   MESSAGE
-common-service-db-im-tls-cert   2025-01-20T15:19:33Z   True    Certificate is up to date and has not expired
-
-NAME                                 RENEWAL                READY   MESSAGE
-common-service-db-replica-tls-cert   2025-01-20T15:19:25Z   True    Certificate is up to date and has not expired
-
-NAME                         RENEWAL                READY   MESSAGE
-common-service-db-tls-cert   2025-10-22T15:19:26Z   True    Certificate is up to date and has not expired
-
-NAME                             RENEWAL                READY   MESSAGE
-common-service-db-zen-tls-cert   2025-01-20T15:19:31Z   True    Certificate is up to date and has not expired
-
-NAME                    RENEWAL                READY   MESSAGE
-common-web-ui-ca-cert   2025-08-26T15:20:15Z   True    Certificate is up to date and has not expired
-
-NAME                             RENEWAL                READY   MESSAGE
-connector-bridge-cert-e4b355c9   2026-03-23T07:25:42Z   True    Certificate is up to date and has not expired
-
-NAME                              RENEWAL                READY   MESSAGE
-connector-manager-cert-263bc402   2025-01-20T15:25:40Z   True    Certificate is up to date and has not expired
-
-NAME                                   RENEWAL                READY   MESSAGE
-connector-orchestrator-cert-daef468e   2025-01-20T15:25:43Z   True    Certificate is up to date and has not expired
-
-NAME                          RENEWAL                READY   MESSAGE
-cp4waiops-connectors-deploy   2025-01-20T15:22:44Z   True    Certificate is up to date and has not expired
-
-NAME                RENEWAL                READY   MESSAGE
-cs-ca-certificate   2026-03-23T07:18:14Z   True    Certificate is up to date and has not expired
-
-NAME                  RENEWAL                READY   MESSAGE
-flink-operator-cert   2025-01-20T15:17:52Z   True    Certificate is up to date and has not expired
-
-NAME                                RENEWAL                READY   MESSAGE
-ibm-zen-metastore-edb-certificate   2025-01-20T15:32:25Z   True    Certificate is up to date and has not expired
+aiops-ir-core-ncodl-api   2025-04-26T13:21:41Z   True    Certificate is up to date and has not expired
 
 NAME                     RENEWAL                READY   MESSAGE
-identity-provider-cert   2025-08-26T15:19:28Z   True    Certificate is up to date and has not expired
-
-NAME                       RENEWAL                READY   MESSAGE
-internal-tls-certificate   2025-01-20T15:25:12Z   True    Certificate is up to date and has not expired
-
-NAME                              RENEWAL                READY   MESSAGE
-internal-tls-pkcs12-certificate   2025-01-20T15:25:14Z   True    Certificate is up to date and has not expired
-
-NAME                             RENEWAL                READY   MESSAGE
-internal-tls-pkcs8-certificate   2025-01-20T15:25:04Z   True    Certificate is up to date and has not expired
-
-NAME                 RENEWAL                READY   MESSAGE
-platform-auth-cert   2025-08-26T15:19:18Z   True    Certificate is up to date and has not expired
-
-NAME                           RENEWAL                READY   MESSAGE
-platform-identity-management   2025-08-26T15:19:32Z   True    Certificate is up to date and has not expired
-
-NAME             RENEWAL                READY   MESSAGE
-saml-auth-cert   2025-08-26T15:19:19Z   True    Certificate is up to date and has not expired
+aiops-ir-core-ncodl-if   2025-04-26T13:21:44Z   True    Certificate is up to date and has not expired
 
 NAME                         RENEWAL                READY   MESSAGE
-sre-tunnel-tunnel-api-cert   2031-07-22T00:00:54Z   True    Certificate is up to date and has not expired
+aiops-ir-core-ncodl-jobmgr   2025-04-26T13:21:23Z   True    Certificate is up to date and has not expired
 
-NAME                                RENEWAL                READY   MESSAGE
-sre-tunnel-tunnel-controller-cert   2031-07-22T00:00:55Z   True    Certificate is up to date and has not expired
+NAME                      RENEWAL                READY   MESSAGE
+aiops-ir-core-ncodl-std   2025-04-26T13:21:48Z   True    Certificate is up to date and has not expired
 
-NAME                          RENEWAL                READY   MESSAGE
-sre-tunnel-tunnel-ui-secret   2031-07-22T00:00:52Z   True    Certificate is up to date and has not expired
+NAME                       RENEWAL                READY   MESSAGE
+aiops-ir-core-ncoprimary   2025-04-26T13:21:41Z   True    Certificate is up to date and has not expired
 
-NAME                                           RENEWAL                READY   MESSAGE
-zen-metastore-edb-replica-client-certificate   2025-01-20T15:25:16Z   True    Certificate is up to date and has not expired
-
-NAME                                   RENEWAL                READY   MESSAGE
-zen-metastore-edb-server-certificate   2025-10-22T15:25:09Z   True    Certificate is up to date and has not expired
+NAME                   RENEWAL                READY   MESSAGE
+aiops-ir-core-rba-as   2025-04-26T13:21:32Z   True    Certificate is up to date and has not expired
 
 NAME                    RENEWAL                READY   MESSAGE
-zen-minio-certificate   2025-11-21T15:26:36Z   True    Certificate is up to date and has not expired
+aiops-ir-core-rba-rbs   2025-04-26T13:21:48Z   True    Certificate is up to date and has not expired
+
+NAME                    RENEWAL                READY   MESSAGE
+aiops-ir-core-usercfg   2025-04-26T13:21:46Z   True    Certificate is up to date and has not expired
+
+NAME                       RENEWAL                READY   MESSAGE
+aiops-ir-lifecycle-flink   2025-04-26T13:15:42Z   True    Certificate is up to date and has not expired
+
+NAME                           RENEWAL                READY   MESSAGE
+aiops-ir-lifecycle-flink-api   2025-04-26T13:15:46Z   True    Certificate is up to date and has not expired
+
+NAME                            RENEWAL                READY   MESSAGE
+aiops-ir-lifecycle-flink-rest   2025-04-26T13:15:41Z   True    Certificate is up to date and has not expired
+
+NAME                                     RENEWAL                READY   MESSAGE
+aiops-ir-lifecycle-policy-registry-svc   2025-04-26T13:15:37Z   True    Certificate is up to date and has not expired
+
+NAME              RENEWAL                READY   MESSAGE
+aiops-lad-flink   2025-04-26T13:14:03Z   True    Certificate is up to date and has not expired
+
+NAME                  RENEWAL                READY   MESSAGE
+aiops-lad-flink-api   2025-04-26T13:13:46Z   True    Certificate is up to date and has not expired
+
+NAME                   RENEWAL                READY   MESSAGE
+aiops-lad-flink-rest   2025-04-26T13:13:51Z   True    Certificate is up to date and has not expired
+
+NAME                            RENEWAL                READY   MESSAGE
+aiops-topology-cassandra-cert   2031-10-25T21:17:35Z   True    Certificate is up to date and has not expired
+
+NAME                                RENEWAL                READY   MESSAGE
+aiops-topology-file-observer-cert   2025-05-15T17:17:54Z   True    Certificate is up to date and has not expired
+
+NAME                            RENEWAL                READY   MESSAGE
+aiops-topology-inventory-cert   2025-05-15T17:17:27Z   True    Certificate is up to date and has not expired
+
+NAME                                      RENEWAL                READY   MESSAGE
+aiops-topology-kubernetes-observer-cert   2025-05-15T17:17:20Z   True    Certificate is up to date and has not expired
+
+NAME                         RENEWAL                READY   MESSAGE
+aiops-topology-layout-cert   2025-05-15T17:17:47Z   True    Certificate is up to date and has not expired
+
+NAME                        RENEWAL                READY   MESSAGE
+aiops-topology-merge-cert   2025-05-15T17:17:57Z   True    Certificate is up to date and has not expired
+
+NAME                                   RENEWAL                READY   MESSAGE
+aiops-topology-observer-service-cert   2025-05-15T17:17:38Z   True    Certificate is up to date and has not expired
+
+NAME                                RENEWAL                READY   MESSAGE
+aiops-topology-rest-observer-cert   2025-05-15T17:17:47Z   True    Certificate is up to date and has not expired
+
+NAME                                      RENEWAL                READY   MESSAGE
+aiops-topology-servicenow-observer-cert   2025-05-15T17:17:40Z   True    Certificate is up to date and has not expired
+
+NAME                                  RENEWAL                READY   MESSAGE
+aiops-topology-sevone-observer-cert   2025-05-15T17:17:33Z   True    Certificate is up to date and has not expired
+
+NAME                         RENEWAL                READY   MESSAGE
+aiops-topology-status-cert   2025-05-15T17:17:47Z   True    Certificate is up to date and has not expired
+
+NAME                           RENEWAL                READY   MESSAGE
+aiops-topology-topology-cert   2025-05-15T17:17:47Z   True    Certificate is up to date and has not expired
+
+NAME                         RENEWAL                READY   MESSAGE
+aiops-topology-ui-api-cert   2025-05-15T17:17:54Z   True    Certificate is up to date and has not expired
+
+NAME                                     RENEWAL                READY   MESSAGE
+aiops-topology-vmvcenter-observer-cert   2025-05-15T17:17:51Z   True    Certificate is up to date and has not expired
+
+NAME                       RENEWAL                READY   MESSAGE
+aiops-ui-tls-certificate   2025-04-26T13:36:20Z   True    Certificate is up to date and has not expired
+
+NAME                    RENEWAL                READY   MESSAGE
+aiopsedge-client-cert   2027-01-26T13:16:41Z   True    Certificate is up to date and has not expired
+
+NAME                                       RENEWAL                READY   MESSAGE
+aiopsedge-generic-topology-cert-e96f1f80   2025-04-26T13:18:50Z   True    Certificate is up to date and has not expired
+
+NAME                                       RENEWAL                READY   MESSAGE
+aiopsedge-im-topology-inte-cert-b6f0cde3   2025-04-26T13:18:59Z   True    Certificate is up to date and has not expired
+
+NAME                                       RENEWAL                READY   MESSAGE
+aiopsedge-instana-topology-cert-ad0a37c3   2025-04-26T13:19:05Z   True    Certificate is up to date and has not expired
+
+NAME          RENEWAL                READY   MESSAGE
+aiopsedgeca   2027-01-26T13:15:37Z   True    Certificate is up to date and has not expired
+
+NAME                                            RENEWAL                READY   MESSAGE
+automationbase-sample-automationbase-ab-ss-ca   2025-04-26T13:12:50Z   True    Certificate is up to date and has not expired
+
+NAME                            RENEWAL                READY   MESSAGE
+common-service-db-im-tls-cert   2025-04-26T13:14:48Z   True    Certificate is up to date and has not expired
+
+NAME                                 RENEWAL                READY   MESSAGE
+common-service-db-replica-tls-cert   2025-04-26T13:14:46Z   True    Certificate is up to date and has not expired
+
+NAME                         RENEWAL                READY   MESSAGE
+common-service-db-tls-cert   2026-01-26T13:14:51Z   True    Certificate is up to date and has not expired
+
+NAME                             RENEWAL                READY   MESSAGE
+common-service-db-zen-tls-cert   2025-04-26T13:14:54Z   True    Certificate is up to date and has not expired
+
+NAME                    RENEWAL                READY   MESSAGE
+common-web-ui-ca-cert   2025-11-30T13:16:05Z   True    Certificate is up to date and has not expired
+
+NAME                             RENEWAL                READY   MESSAGE
+connector-bridge-cert-f7ab618b   2026-06-27T05:18:37Z   True    Certificate is up to date and has not expired
+
+NAME                              RENEWAL                READY   MESSAGE
+connector-manager-cert-697fdd53   2025-04-26T13:18:35Z   True    Certificate is up to date and has not expired
+
+NAME                                   RENEWAL                READY   MESSAGE
+connector-orchestrator-cert-306617b2   2025-04-26T13:18:42Z   True    Certificate is up to date and has not expired
+
+NAME                          RENEWAL                READY   MESSAGE
+cp4waiops-connectors-deploy   2025-04-26T13:15:38Z   True    Certificate is up to date and has not expired
+
+NAME                RENEWAL                READY   MESSAGE
+cs-ca-certificate   2026-06-27T05:13:01Z   True    Certificate is up to date and has not expired
+
+NAME                  RENEWAL                READY   MESSAGE
+flink-operator-cert   2025-04-26T13:12:49Z   True    Certificate is up to date and has not expired
+
+NAME                                RENEWAL                READY   MESSAGE
+ibm-zen-metastore-edb-certificate   2025-04-26T13:25:31Z   True    Certificate is up to date and has not expired
+
+NAME                     RENEWAL                READY   MESSAGE
+identity-provider-cert   2025-11-30T13:14:48Z   True    Certificate is up to date and has not expired
+
+NAME                       RENEWAL                READY   MESSAGE
+internal-tls-certificate   2025-04-26T13:19:20Z   True    Certificate is up to date and has not expired
+
+NAME                              RENEWAL                READY   MESSAGE
+internal-tls-pkcs12-certificate   2025-04-26T13:19:16Z   True    Certificate is up to date and has not expired
+
+NAME                             RENEWAL                READY   MESSAGE
+internal-tls-pkcs8-certificate   2025-04-26T13:19:09Z   True    Certificate is up to date and has not expired
+
+NAME                 RENEWAL                READY   MESSAGE
+platform-auth-cert   2025-11-30T13:14:26Z   True    Certificate is up to date and has not expired
+
+NAME                           RENEWAL                READY   MESSAGE
+platform-identity-management   2025-11-30T13:14:33Z   True    Certificate is up to date and has not expired
+
+NAME             RENEWAL                READY   MESSAGE
+saml-auth-cert   2025-11-30T13:14:51Z   True    Certificate is up to date and has not expired
+
+NAME                         RENEWAL                READY   MESSAGE
+sre-tunnel-tunnel-api-cert   2031-10-25T21:37:52Z   True    Certificate is up to date and has not expired
+
+NAME                                RENEWAL                READY   MESSAGE
+sre-tunnel-tunnel-controller-cert   2031-10-25T21:37:47Z   True    Certificate is up to date and has not expired
+
+NAME                          RENEWAL                READY   MESSAGE
+sre-tunnel-tunnel-ui-secret   2031-10-25T21:37:52Z   True    Certificate is up to date and has not expired
+
+NAME                                           RENEWAL                READY   MESSAGE
+zen-metastore-edb-replica-client-certificate   2025-04-26T13:19:21Z   True    Certificate is up to date and has not expired
+
+NAME                                   RENEWAL                READY   MESSAGE
+zen-metastore-edb-server-certificate   2026-01-26T13:19:16Z   True    Certificate is up to date and has not expired
+
+NAME                    RENEWAL                READY   MESSAGE
+zen-minio-certificate   2026-02-25T13:20:21Z   True    Certificate is up to date and has not expired
 
 ______________________________________________________________
 ODLM pod current status:
 
-cp4aiops                                           operand-deployment-lifecycle-manager-6664b457d9-wzhgs                     1/1     Running     0               3h20m
+cp4aiops                                           operand-deployment-lifecycle-manager-7476f497cb-m2twh                     1/1     Running     0               3h16m
 ______________________________________________________________
 Orchestrator pod current status:
 
-cp4aiops                                           ibm-aiops-orchestrator-controller-manager-659f6cf8f-pxg6k                 1/1     Running     0               3h26m
+cp4aiops                                           ibm-aiops-orchestrator-controller-manager-84b8bcbd4f-9djcq                1/1     Running     0               3h20m
 ```
 
 ## How to use
