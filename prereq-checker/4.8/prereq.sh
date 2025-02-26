@@ -1179,7 +1179,7 @@ function Multizone() {
         zones_Mem+=($zm)
     done
 
-    CPU_per_zone_large=$(( (($VCPU_LARGE_4_5 / $uniqueZones) + ($VCPU_LARGE_4_5 / (($uniqueZones - 1) * $uniqueZones))) + 1))
+    CPU_per_zone_large=$(( (($VCPU_LARGE_4_5 / $uniqueZones) + ($VCPU_LARGE_4_5 / (($uniqueZones - 1) * $uniqueZones))) + 2))
     for i in "${zones_CPU[@]}"; do
         zone="${i%%:*}"
         cpu="${i#*:}"
@@ -1195,7 +1195,7 @@ function Multizone() {
 
     echo
 
-    Mem_per_zone_large=$(( (($MEMORY_LARGE_4_5 / $uniqueZones) + ($MEMORY_LARGE_4_5 / (($uniqueZones - 1) * $uniqueZones))) + 1))
+    Mem_per_zone_large=$(( (($MEMORY_LARGE_4_5 / $uniqueZones) + ($MEMORY_LARGE_4_5 / (($uniqueZones - 1) * $uniqueZones))) + 2))
     for i in "${zones_Mem[@]}"; do
         zone="${i%%:*}"
         m="${i#*:}"
