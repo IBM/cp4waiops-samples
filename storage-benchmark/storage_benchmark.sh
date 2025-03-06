@@ -7,7 +7,7 @@ if [ -z "${STORAGE_CLASS}" ]; then
 fi
 
 if [ -z "${IMAGE}" ]; then
-    IMAGE="icr.io/cpopen/cp4waiops/storage-benchmark@sha256:845d4ed75feb4f6770e409288f5ef09ec215d0e252b1d4f7a2b45f0bf48fe81a"
+    IMAGE="icr.io/cpopen/cp4waiops/storage-benchmark@sha256:2fe040c8aa646c6e3524ce9eb48c1cf7b9cd23afbec57543212d0b3b3cfa793f"
 fi
 
 if [ -z "${SIZE}" ]; then
