@@ -1,0 +1,238 @@
+#
+# © Copyright IBM Corp. 2020, 2025
+# SPDX-License-Identifier: Apache2.0
+#
+# Supplementary file to uninstall-cp4waiops.sh script for uninstalling 
+# IBM Cloud Pak for AIOps version 4.9
+
+# Below are the PVC's that would be deleted if DELETE_PVCS in uninstall-cp4waiops-props.props is set to true
+# 1. app.kubernetes.io/instance=aimanager : This PVC is for minio StatefulSet. Change risk model and all the training logs are in the minio pvc.
+# 2. app.kubernetes.io/instance=example-couchdbcluster: This PVC contains AI training schedules and history
+# 3. app.kubernetes.io/managed-by=ir-core-operator : This PVC contains information about current and recent events and stories 
+# 4. app.kubernetes.io/managed-by=ibm-elasticsearch : This PVC  is used for storing log training data, AI models and training information, the Insights Dashboard, and as a policy registry
+CP4AIOPS_PVC_LABEL=("app.kubernetes.io/instance=aimanager"
+                    "app.kubernetes.io/instance=example-couchdbcluster"
+                    "app.kubernetes.io/managed-by=ir-core-operator"
+                    "app.kubernetes.io/managed-by=ibm-elastic-operator"
+                    "app.kubernetes.io/managed-by=ibm-elasticsearch")
+
+# These secrets are linked with PVC, hence deleting them if those PVC's are deleted.
+CP4AIOPS_LINKED_SECRETS=( "secret/aimanager-ca-certificate-secret"
+                           "secret/aimanager-certificate-secret"
+                           "secret/aiops-ir-core-model-secret"
+                           "secret/aiops-ir-core-omni-secret"
+                           "secret/kafka-truststore"
+                           "secret/aiops-topology-asm-iafelastic-ca"
+                           "secret/aiops-topology-asm-iafkafka-ca"
+                           "secret/aiops-metrics-processor"
+                           "secret/iaf-system-cluster-ca"
+                           "secret/iaf-system-cluster-ca-cert")
+
+# All the dependent CRDS related to below operators:
+# Elasticsearch, RedisDB, CouchDB, Events, Postgres, SecureTunnel, Vault, Camel-k , Kong
+CP4AIOPS_DEPENDENT_CRDS=(#elasticsearch
+                          "elasticsearchdetails.elasticsearch.cloudpackopen.ibm.com"
+                          "elasticsearches.elasticsearch.cloudpackopen.ibm.com"
+                          #RedisDB
+                          "backups.redis.databases.cloud.ibm.com"
+                          "buckets.redis.databases.cloud.ibm.com"
+                          "formationlocks.redis.databases.cloud.ibm.com"
+                          "formations.redis.databases.cloud.ibm.com"
+                          "recipes.redis.databases.cloud.ibm.com"
+                          "recipetemplates.redis.databases.cloud.ibm.com"
+                          "redissentinels.redis.databases.cloud.ibm.com"
+                          "releases.redis.databases.cloud.ibm.com"
+                          #SecureTunnel
+                          "applications.tunnel.management.ibm.com"
+                          "tunnels.sretooling.management.ibm.com"
+                          #Vault
+                          "vaultaccesses.vault.aiops.ibm.com"
+                          "vaultdeploys.vault.aiops.ibm.com"
+                          #Kong
+                          "kongs.management.ibm.com"
+                          "kongclusterplugins.configuration.konghq.com"
+                          "kongconsumers.configuration.konghq.com"
+                          "kongcredentials.configuration.konghq.com"
+                          "kongingresses.configuration.konghq.com"
+                          "kongplugins.configuration.konghq.com"
+                          "tcpingresses.configuration.konghq.com"
+                          "udpingresses.configuration.konghq.com"
+                          "ingressclassparameterses.configuration.konghq.com"
+                          "aiopsuiextensions.consoleui.aiops.ibm.com"
+                          "customsizes.orchestrator.aiops.ibm.com")
+            
+
+
+########## INTERNAL RESOURCES TO BE CLEANED UP AFTER UNINSTALL OF OPERATOR ##########
+                    
+# These PVC's are to be deleted everytime the uninstall is run.
+CP4AIOPS_INTERNAL_PVC=("app=cassandra"
+                        "formation_type=redis"
+                        "app.kubernetes.io/component=ep")
+
+# Delete these internal secrets always
+CP4AIOPS_INTERNAL_SECRETS_LABELS=("release=aiops-topology")
+
+# Delete these internal secrets always
+# CertMgr secrets are not deleted by default and not configurable via instance or namespace
+# https://cert-manager.io/docs/usage/certificate/#cleaning-up-secrets-when-certificates-are-deleted
+CP4AIOPS_INTERNAL_SECRETS=("secret/aiops-ir-lifecycle-eventprocessor-ep-zk-client-cert-kp"
+                           "secret/aiops-ir-lifecycle-eventprocessor-ep-client-cert-kp"
+                           "secret/aiops-ir-lifecycle-eventprocessor-ep-internal-cert-kp"
+                           "secret/aiops-ir-lifecycle-eventprocessor-ep-ss-cacert-kp"
+                           "secret/cp4waiops-eventprocessor-eve-29ee-ep-zk-client-cert-kp"
+                           "secret/cp4waiops-eventprocessor-eve-29ee-ep-client-cert-kp"
+                           "secret/cp4waiops-eventprocessor-eve-29ee-ep-ss-cacert-kp"
+                           "secret/cp4waiops-eventprocessor-eve-29ee-ep-internal-cert-kp"
+                           "secret/aiopsedgeca-cert-secret"
+                           "secret/aiops-topology-cassandra-cert-manager-ca"
+                           "secret/app-api-user-jwt"
+                           "secret/automationbase-sample-automationbase-ab-ss-ca"
+                           "secret/iaf-system-elasticsearch-es-client-cert-kp"
+                           "secret/iaf-system-elasticsearch-es-ss-cacert-kp"
+                           "secret/connector-bridge-cert-secret"
+                           "secret/sre-tunnel-tunnel-ui-secret"
+                           "secret/sre-tunnel-tunnel-api-cert"
+                           "secret/aiops-appconnect-ir-secret"
+                           "secret/cp4waiops-cartridge-es-auth")
+
+CP4AIOPS_CONFIGMAPS_INTERNAL=("configmap/ff20eae3.connectors.aiops.ibm.com"
+            "configmap/aiopsedge-maven-settings"
+            "configmap/aiops-topology-cassandra-bootstrap-config"
+            "configmap/cloud-native-postgresql-image-list")
+
+CP4AIOPS_KAFKATOPICS_LABELS=("ibmevents.ibm.com/cluster=iaf-system")
+
+CP4AIOPS_INTERNAL_SERVICEACCOUNTS=("serviceaccount/cp4waiops-eventprocessor-eve-29ee-ep"
+                "serviceaccount/flink")
+CP4AIOPS_SHARED_SERVICEACCOUNTS=("serviceaccount/postgresql-operator-manager")
+
+CP4AIOPS_MISC=("rolebinding.authorization.openshift.io/example-redis"
+                "role.authorization.openshift.io/example-redis"
+                "role/cp4waiops-eventprocessor-eve-29ee-ep-role"
+                "rolebinding/cp4waiops-eventprocessor-eve-29ee-ep-role"
+                "rolebinding.rbac.authorization.k8s.io/cp4waiops-eventprocessor-eve-29ee-ep-rb"
+                "rolebinding.authorization.openshift.io/cp4waiops-eventprocessor-eve-29ee-ep-rb"
+                "networkpolicy.networking.k8s.io/c-example-redis-default-deny"
+                "secret/aiopsedge-client-cert"
+                "priorityclass.scheduling.k8s.io/high-priority"
+                "priorityclass.scheduling.k8s.io/aiops-topology-cassandra-priority"
+                "issuers.cert-manager.io/aiops-flink-issuer"
+                "issuers.cert-manager.io/aiops-flink-ss-issuer"
+                "issuers.cert-manager.io/automationbase-sample-automationbase-ab-ss-issuer"
+                "priorityclass.scheduling.k8s.io/aimanager-aio-luigi-priority"
+                "rolebinding/flink-role-binding"
+                "role/flink")
+
+CP4AIOPS_LEASE=("lease.coordination.k8s.io/9efbc0e4.aiops.ibm.com"
+                "lease.coordination.k8s.io/5ba58da1.ai.ir.aiops.ibm.com"
+                "lease.coordination.k8s.io/e1d7d41e.ibm.com"
+                "lease.coordination.k8s.io/fc7f2af9.ibm.com"
+                "lease.coordination.k8s.io/ff20eae3.connectors.aiops.ibm.com"
+                "lease.coordination.k8s.io/aiopsedge-connector-manager")
+
+CP4AIOPS_CRDS=("aimanagermainprods.ai-manager.watson-aiops.ibm.com" 
+                "aimanagers.ai-manager.watson-aiops.ibm.com"
+                "aimodeluis.consoleui.aiops.ibm.com"
+                "aiopskafkatopics.connectors.aiops.ibm.com"
+                "algorithms.ai-manager.watson-aiops.ibm.com"
+                "applicationmanageragents.aiops.ibm.com"
+                "applicationmanagers.aiops.ibm.com"
+                "applicationuis.consoleui.aiops.ibm.com"
+                "baseuis.consoleui.aiops.ibm.com"
+                "connectoruis.consoleui.aiops.ibm.com"
+                "eventmanagergateways.ai-manager.watson-aiops.ibm.com"
+                "installations.orchestrator.aiops.ibm.com"
+                "aiopsanalyticsorchestrators.ai.ir.aiops.ibm.com"
+                "aiopsedges.connectors.aiops.ibm.com"
+                "aiopsuis.consoleui.aiops.ibm.com"
+                "automationactions.connectors.aiops.ibm.com"
+                "bundlemanifests.connectors.aiops.ibm.com"
+                "bundlemanifests.cp4waiops.management.ibm.com"
+                "connectorcomponents.connectors.aiops.ibm.com"
+                "connectorconfigurations.connectors.aiops.ibm.com"
+                "connectorschemas.connectors.aiops.ibm.com"
+                "dashboarduis.consoleui.aiops.ibm.com"
+                "gitapps.connectors.aiops.ibm.com"
+                "insightsuis.consoleui.aiops.ibm.com"
+                "issueresolutioncores.core.ir.aiops.ibm.com"
+                "lifecycleservices.lifecycle.ir.aiops.ibm.com"
+                "lifecycletriggers.lifecycle.ir.aiops.ibm.com"
+                "modeltrains.modeltrain.ibm.com"
+                "microedgeconfigurations.connectors.aiops.ibm.com"
+                "flinkclusters.flink.automation.ibm.com"
+                "flinkdeployments.flink.ibm.com"
+                "flinksessionjobs.flink.ibm.com"
+                )
+
+# Event Manager may have overlap with these CRDs
+# This CRD group will not be deleted if instances are found outside ai mgr ns
+
+ASM_CRDS=("asmformations.asm.ibm.com"
+          "asms.asm.ibm.com")
+
+
+#### Cert Manager ####
+CERTMANAGER=(
+        # eventproccesor
+        "certificates.cert-manager.io/cp4waiops-eventprocessor-eve-29ee-ep-client-cert"
+        "certificates.cert-manager.io/cp4waiops-eventprocessor-eve-29ee-ep-internal-cert"
+        "certificates.cert-manager.io/cp4waiops-eventprocessor-eve-29ee-ep-ss-ca"
+
+        # EDB
+        "certificates.cert-manager.io/ibm-cp-aiops-edb-postgres-client-cert"
+        "certificates.cert-manager.io/ibm-cp-aiops-edb-postgres-server-cert"
+        "certificates.cert-manager.io/ibm-cp-aiops-edb-postgres-ss-ca"
+)
+
+BEDROCK_LEASES=("lease.coordination.k8s.io/2124ed9c.eventprocessing.flink.automation.ibm.com"
+            "lease.coordination.k8s.io/2133ec8b.automation.ibm.com"
+            "lease.coordination.k8s.io/ibmevents-cluster-operator"
+            "lease.coordination.k8s.io/db9c8771.k8s.enterprisedb.io")
+                        
+BEDROCK_CONFIGMAPS=("configmap/2124ed9c.eventprocessing.flink.automation.ibm.com"
+                "configmap/2133ec8b.automation.ibm.com"
+                "configmap/ibm-cpp-config"
+                "configmap/namespace-scope")
+
+BEDROCK_PVCS_LABELS=("app.kubernetes.io/instance=iaf-system"
+                     "app=icp-mongodb")
+
+BEDROCK_CRDS=("authentications.operator.ibm.com"
+                "clients.oidc.security.ibm.com"
+                "commonservices.operator.ibm.com"
+                "commonwebuis.operators.ibm.com"
+                "kafkamirrormaker2s.ibmevents.ibm.com"
+                "kafkamirrormakers.ibmevents.ibm.com"
+                "kafkas.ibmevents.ibm.com"
+                "kafkatopics.ibmevents.ibm.com"
+                "kafkausers.ibmevents.ibm.com"
+                "mongodbs.operator.ibm.com"
+                "navconfigurations.foundation.ibm.com"
+                "operandbindinfos.operator.ibm.com"
+                "operandconfigs.operator.ibm.com"
+                "operandregistries.operator.ibm.com"
+                "operandrequests.operator.ibm.com"
+                "switcheritems.operators.ibm.com"
+                "zenservices.zen.cpd.ibm.com"
+                "strimzipodsets.core.ibmevents.ibm.com"
+                "zenextensions.zen.cpd.ibm.com ")
+
+BEDROCK_SECRETS=("icp-mongodb-admin"
+                 "icp-mongodb-client-cert"
+                 "mongodb-root-ca-cert"
+                 "platform-identity-management"
+                 "mongodb-root-ca-cert"
+                 "internal-tls-pkcs12"
+                 "identity-provider-secret")
+
+ZENEXTENSIONS=("aimanager-nginx"
+               "ai-model-ui-ext"
+               "aiops-akora-ui-ext"
+               "aiops-baseui-frontdoor-ext"
+               "common-web-ui-zen-extension"
+               "connections-ui-ext"
+               "insights-ui-ext"
+               "kong-gateway-extension"
+               "sre-tunnel-tunnel-ui-zen-extension"
+               "aiops-api-frontdoor-ext")
