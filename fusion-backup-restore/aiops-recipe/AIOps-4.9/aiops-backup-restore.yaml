@@ -1,0 +1,481 @@
+apiVersion: spp-data-protection.isf.ibm.com/v1alpha1
+kind: Recipe
+metadata:
+  name: aiops-backup-restore-recipe
+  namespace: ibm-spectrum-fusion-ns
+spec:
+  appType: aiops-ns
+  groups:
+    - name: aiops-catalog-source
+      type: resource
+      includedResourceTypes:
+        - catalogsource.operators.coreos.com
+      essential: false
+    - name: asm-resources
+      type: resource
+      includedResourceTypes:
+        - asms.asm.ibm.com
+    - name: aiops-volumes
+      type: volume
+    - name: aiops-operatorgroup
+      type: resource
+      includedResourceTypes:
+        - operatorgroups
+    - name: aiops-subscription
+      type: resource
+      includedResourceTypes:
+        - subscriptions.operators.coreos.com
+      labelSelector: manual=ibm-aiops-orchestrator
+    - name: aiops-configmap
+      type: resource
+      includedResourceTypes:
+        - configmaps
+      labelSelector: cm=aiops-custom-size-profile
+      essential: false
+    - name: ibm-entitlement-key-secret
+      type: resource
+      includedResourceTypes:
+        - secrets
+      labelSelector: manual=ibm-entitlement-key-secret
+      essential: false
+    - name: aiops-installation
+      type: resource
+      includedResourceTypes:
+        - installations.orchestrator.aiops.ibm.com
+    - name: aiops-topology-cassandra-auth-secret
+      type: resource
+      includedResourceTypes:
+        - secrets
+      labelSelector: app.kubernetes.io/name=aiops-topology-cassandra-auth-secret
+    - name: omni-secret
+      type: resource
+      includedResourceTypes:
+        - secrets
+      labelSelector: app.kubernetes.io/component=omni-secret
+    - name: model-secret
+      type: resource
+      includedResourceTypes:
+        - secrets
+      labelSelector: app.kubernetes.io/component=model-secret
+    - name: aiops-ai-model-ui-service
+      type: resource
+      includedResourceTypes:
+        - services
+      labelSelector: app.kubernetes.io/component=aiops-aiops-ai-model-ui
+    - name: aimanager-aio-chatops-slack-integrator-service
+      type: resource
+      includedResourceTypes:
+        - services
+      labelSelector: app.kubernetes.io/component=chatops-slack-integrator
+    - name: aiops-akora-ui-service
+      type: resource
+      includedResourceTypes:
+        - services
+      labelSelector: app.kubernetes.io/component=aiops-aiops-akora-ui
+    - name: aimanager-aio-chatops-teams-integrator-service
+      type: resource
+      includedResourceTypes:
+        - services
+      labelSelector: app.kubernetes.io/component=chatops-teams-integrator
+    - name: aimanager-aio-addon-service
+      type: resource
+      includedResourceTypes:
+        - services
+      labelSelector: app.kubernetes.io/component=addon
+    - name: aimanager-aio-controller-service
+      type: resource
+      includedResourceTypes:
+        - services
+      labelSelector: app.kubernetes.io/component=controller
+    - name: aiops-base-ui-service
+      type: resource
+      includedResourceTypes:
+        - services
+      labelSelector: app.kubernetes.io/component=aiops-aiops-base-ui
+    - name: aiops-connections-ui-service
+      type: resource
+      includedResourceTypes:
+        - services
+      labelSelector: app.kubernetes.io/component=aiops-aiops-connections-ui
+    - name: aiops-insights-ui-service
+      type: resource
+      includedResourceTypes:
+        - services
+      labelSelector: app.kubernetes.io/component=aiops-aiops-insights-ui
+    - name: aimanager-aio-cr-api
+      type: resource
+      includedResourceTypes:
+        - services
+      labelSelector: app.kubernetes.io/component=cr-api
+    - name: aiops-sre-tunnel-ui
+      type: resource
+      includedResourceTypes:
+        - services
+      labelSelector: app.kubernetes.io/name=sre-tunnel-tunnel-ui
+      essential: false
+    - name: aimanager-aimanager
+      type: resource
+      includedResourceTypes:
+        - aimanagers.ai-manager.watson-aiops.ibm.com
+      labelSelector: operator.ibm.com/opreq-control=true
+    - name: restore-aimanager-aimanager
+      backupRef: aimanager-aimanager
+      restoreOverwriteResources: true
+      type: resource
+    - name: connectorconfiguration
+      type: resource
+      includedResourceTypes:
+        - connectorconfiguration.connectors.aiops.ibm.com
+        - bundlemanifests.connectors.aiops.ibm.com
+        - connectorschemas.connectors.aiops.ibm.com
+      essential: false
+    - name: aimanager-edb-postgresdb-secret
+      type: resource
+      includedResourceTypes:
+        - secrets
+      labelSelector: app.kubernetes.io/component=aimanager-edb-postgresdb-secret
+    - name: ibm-cp-aiops-edb-secret
+      type: resource
+      includedResourceTypes:
+        - secrets
+      labelSelector: manual=ibm-cp-aiops-edb-secret
+    - name: aiops-ir-core-model-secret
+      type: resource
+      includedResourceTypes:
+        - secrets
+      labelSelector: app.kubernetes.io/component=model-secret
+    - name: ibm-cp-aiops-redis-secret
+      type: resource
+      includedResourceTypes:
+        - secrets
+      labelSelector: manual=ibm-cp-aiops-redis-secret
+    - name: aimanager-ibm-minio-access-secret
+      type: resource
+      includedResourceTypes:
+        - secrets
+      labelSelector: app.kubernetes.io/component=minio-access
+    - name: zen-secrets-aes-key
+      type: resource
+      includedResourceTypes:
+        - secrets
+      labelSelector: app.kubernetes.io/name=zen-secrets-aes-key
+    - name: ibm-zen-secret-jwks
+      type: resource
+      includedResourceTypes:
+        - secrets
+      labelSelector: manual=ibm-zen-secret-jwks
+    - name: ibm-zen-secret-jwt
+      type: resource
+      includedResourceTypes:
+        - secrets
+      labelSelector: manual=ibm-zen-secret-jwt
+    - name: ibm-zen-secret-jwt-private
+      type: resource
+      includedResourceTypes:
+        - secrets
+      labelSelector: manual=ibm-zen-secret-jwt-private
+    - name: admin-user-details-secret
+      type: resource
+      includedResourceTypes:
+        - secrets
+      labelSelector: app.kubernetes.io/name=admin-user-details
+    - name: aiopsedge-config-encryption-history-secret
+      type: resource
+      includedResourceTypes:
+        - secrets
+      labelSelector: manual=aiopsedge-config-encryption-history
+    - name: platform-auth-ldaps-ca-cert-secret
+      type: resource
+      includedResourceTypes:
+        - secrets
+      labelSelector: manual=platform-auth-ldaps-ca-cert
+    - name: ibm-secure-tunnel-operator-secret
+      type: resource
+      includedResourceTypes:
+        - secrets
+      labelSelector: app.kubernetes.io/managed-by=ibm-secure-tunnel-operator
+      essential: false
+  hooks:
+  - name: ibm-aiops-catalogsource-check
+    type: check
+    essential: false
+    namespace: ${GROUP.aiops-volumes.namespace}
+    selectResource: operators.coreos.com/v1alpha1/catalogsources
+    nameSelector: aiops-catalog
+    timeout: 600
+    onError: fail
+    chks:
+    - name: status
+      timeout: 600
+      onError: fail
+      condition: "{$.status.connectionState.lastObservedState} == {\"READY\"}"
+  - name: odlm-pod-exec
+    type: exec
+    namespace: ${GROUP.aiops-volumes.namespace}
+    labelSelector: app.kubernetes.io/name=operand-deployment-lifecycle-manager
+    timeout: 900
+    onError: fail
+    ops:
+    - name: cancel-lifecycletrigger-jobids
+      command: |
+        ["/bin/bash", "-c", "while true; do output=$(curl -X GET --cacert /var/run/secrets/kubernetes.io/serviceaccount/ca.crt -H \"Authorization: Bearer `cat /var/run/secrets/kubernetes.io/serviceaccount/token`\" -H 'Content-Type: application/merge-patch+json' -H 'Accept: application/json' -k https://kubernetes.default.svc/apis/lifecycle.ir.aiops.ibm.com/v1beta1/namespaces/${GROUP.aiops-volumes.namespace}/lifecycletriggers/aiops | grep jid | cut -d':' -f 2 | tr -d '\", '); echo \"Output: '$output'\"; if [ \\( ! -z \"$output\" \\) -a \\( $(echo $output | wc -l) -gt 0 \\) ]; then data='['; first=true; for line in $output; do if [ $first = true ]; then { data+=\"\\\"$line\\\"\";  first=false; } else data+=\", \\\"$line\\\"\"; fi done; data+=']'; break; else { echo \"Sleeping for 1 sec\"; sleep 1; } fi done; echo \"Data: '$data'\"; jdata='{\\\"spec\\\":{\\\"cancelJobs\\\":$data}}'; eval \"data=$jdata\"; echo \"Final:'$data'\"; curl -X PATCH --cacert /var/run/secrets/kubernetes.io/serviceaccount/ca.crt -H \"Authorization: Bearer `cat /var/run/secrets/kubernetes.io/serviceaccount/token`\" -H 'Content-Type: application/merge-patch+json' -H 'Accept: application/json' -k https://kubernetes.default.svc/apis/lifecycle.ir.aiops.ibm.com/v1beta1/namespaces/${GROUP.aiops-volumes.namespace}/lifecycletriggers/aiops -d $data"]
+      container: manager
+      timeout: 900
+  - name: ibm-aiops-orchestrator-pod-exec
+    type: exec
+    namespace: ${GROUP.aiops-volumes.namespace}
+    labelSelector: name=ibm-aiops-orchestrator
+    timeout: 900
+    onError: fail
+    ops:
+    - name: sleep-a-minute
+      command: >
+        ["/bin/bash", "-c", "sleep 300"]
+      container: manager
+      timeout: 900
+  - name: edb-postgresql-pod-exec
+    type: exec
+    namespace: ${GROUP.aiops-volumes.namespace}
+    labelSelector: k8s.enterprisedb.io/podRole=instance,role=primary
+    timeout: 1800
+    onError: fail
+    ops:
+    - name: checkpoint
+      command: >
+        ["/bin/bash", "-c", "for db in `psql -U postgres -At -c 'SELECT datname FROM pg_database WHERE datistemplate = false'`; do psql -U postgres -d $db -c 'CHECKPOINT' & done; wait"]
+      container: postgres
+      timeout: 2400
+  - name: ibm-cloud-databases-redis-operator-check
+    type: check
+    namespace: ${GROUP.aiops-volumes.namespace}
+    selectResource: deployment
+    nameSelector: ibm-redis-cp-operator
+    timeout: 1500
+    onError: fail
+    chks:
+    - name: replicasReady
+      timeout: 1500
+      onError: fail
+      condition: "{$.spec.replicas} == {$.status.readyReplicas}"
+  - name: ibm-cp-aiops-redis-server-check
+    type: check
+    namespace: ${GROUP.aiops-volumes.namespace}
+    selectResource: statefulset
+    labelSelector: app.kubernetes.io/name=rediscp
+    timeout: 1200
+    onError: fail
+    chks:
+    - name: replicasReady
+      timeout: 1200
+      onError: fail
+      condition: "{$.spec.replicas} == {$.status.readyReplicas}"
+  - name: ibm-aiops-orchestrator-controller-manager-check
+    type: check
+    namespace: ${GROUP.aiops-volumes.namespace}
+    selectResource: deployment
+    nameSelector: ibm-aiops-orchestrator-controller-manager
+    timeout: 240
+    onError: fail
+    chks:
+    - name: replicasReady
+      timeout: 240
+      onError: fail
+      condition: "{$.spec.replicas} == {$.status.readyReplicas}"
+  - name: ibm-common-service-operator-check
+    type: check
+    namespace: ${GROUP.aiops-volumes.namespace}
+    selectResource: deployment
+    nameSelector: ibm-common-service-operator
+    timeout: 600
+    onError: fail
+    chks:
+    - name: replicasReady
+      timeout: 600
+      onError: fail
+      condition: "{$.spec.replicas} == {$.status.readyReplicas}"
+  - name: aiops-topology-cassandra-check
+    type: check
+    namespace: ${GROUP.aiops-volumes.namespace}
+    selectResource: statefulset
+    labelSelector: app=cassandra
+    timeout: 1200
+    onError: fail
+    chks:
+    - name: replicasReady
+      timeout: 1200
+      onError: fail
+      condition: "{$.spec.replicas} == {$.status.readyReplicas}"
+  - name: couchdbcluster-check
+    namespace: ${GROUP.aiops-volumes.namespace}
+    type: check
+    selectResource: statefulset
+    labelSelector: app.kubernetes.io/component=couchdb,app.kubernetes.io/instance=aiops
+    timeout: 1800
+    onError: fail
+    chks:
+    - name: replicasReady
+      timeout: 1800
+      onError: fail
+      condition: "{$.spec.replicas} == {$.status.readyReplicas}"
+  - name: installations-check
+    namespace: ${GROUP.aiops-volumes.namespace}
+    type: check
+    selectResource: orchestrator.aiops.ibm.com/v1alpha1/installations
+    nameSelector: ibm-cp-aiops
+    timeout: 1500
+    onError: fail
+    chks:
+    - name: phaseRunning
+      timeout: 1500
+      onError: fail
+      condition: "{$.status.phase} == {\"Running\"}"
+  - name: aimanager-aimanager-check
+    namespace: ${GROUP.aiops-volumes.namespace}
+    type: check
+    selectResource: ai-manager.watson-aiops.ibm.com/v1beta1/aimanagers
+    labelSelector: operator.ibm.com/opreq-control=true
+    timeout: 240
+    onError: fail
+    chks:
+    - name: phaseCompleted
+      timeout: 240
+      onError: fail
+      condition: "{$.status.phase} == {\"Completed\"}"
+  - name: lifecycleservices-aiops-check
+    namespace: ${GROUP.aiops-volumes.namespace}
+    type: check
+    selectResource: lifecycle.ir.aiops.ibm.com/v1beta1/lifecycleservices
+    labelSelector: app.kubernetes.io/managed-by=ir-lifecycle-operator
+    timeout: 5400
+    onError: fail
+    chks:
+    - name: statusReady
+      timeout: 5400
+      onError: fail
+      condition: "{$.status.conditions[?(@.type==\"Ready\")].status} == {\"True\"}"
+  - name: cassandra-pod-exec
+    type: exec
+    namespace: ${GROUP.aiops-volumes.namespace}
+    labelSelector: app=cassandra
+    timeout: 120
+    onError: fail
+    ops:
+    - name: nodetool-flush
+      command: >
+        ["/bin/bash", "-c", "nodetool compactionstats | grep 'pending tasks: 0' && nodetool flush || { echo 'Take backup another time, repair in-progress'; nodetool compactionstats; false; }"]
+      container: aiops-topology-cassandra
+      timeout: 1800
+    - name: nodetool-verify
+      command: >
+        ["/bin/bash", "-c", "nodetool verify -f && echo 'nodetool verify -f completed successfully.' || nodetool repair -local"]
+      container: aiops-topology-cassandra
+      timeout: 1800
+  - name: ibm-cp-aiops-redis-server-pod-exec
+    type: exec
+    namespace: ${GROUP.aiops-volumes.namespace}
+    labelSelector: app.kubernetes.io/component=ibm-redis-cp,redis-app=ibm-cp-aiops-redis
+    singlePodOnly: true
+    timeout: 300
+    onError: fail
+    ops:
+    - name: "bgsave"
+      command: >
+        ["/usr/bin/bash", "-c", "export REDISCLI_AUTH=$(cat /etc/.secrets/AUTH); redis-cli -h ibm-cp-aiops-redis-master-svc bgsave; while [ $(redis-cli -h ibm-cp-aiops-redis-master-svc INFO persistence | grep rdb_bgsave_in_progress | tr -d '\r' | awk 'BEGIN{FS=\":\"} {print $NF}') -ne 0 ]; do echo \"Sleeping for a millisecond\"; sleep 0.001; done"]
+      container: redis
+  workflows:
+  - name: backup
+    failOn: essential-error
+    sequence:
+    - group: aiops-catalog-source
+    - group: aiops-operatorgroup
+    - group: aiops-ai-model-ui-service
+    - group: aimanager-aio-chatops-slack-integrator-service
+    - group: aiops-akora-ui-service
+    - group: aimanager-aio-chatops-teams-integrator-service
+    - group: aimanager-aio-addon-service
+    - group: aimanager-aio-controller-service
+    - group: aiops-base-ui-service
+    - group: aiops-connections-ui-service
+    - group: aiops-insights-ui-service
+    - group: aimanager-aio-cr-api
+    - group: aiops-sre-tunnel-ui
+    - group: aiops-subscription
+    - group: aiops-configmap
+    - group: ibm-entitlement-key-secret
+    - group: aiops-topology-cassandra-auth-secret
+    - group: omni-secret
+    - group: model-secret
+    - group: aiops-installation
+    - group: aimanager-aimanager
+    - group: connectorconfiguration
+    - group: aimanager-edb-postgresdb-secret
+    - group: ibm-cp-aiops-edb-secret
+    - group: aiops-ir-core-model-secret
+    - group: ibm-cp-aiops-redis-secret
+    - group: aimanager-ibm-minio-access-secret
+    - group: zen-secrets-aes-key
+    - group: ibm-zen-secret-jwks
+    - group: ibm-zen-secret-jwt
+    - group: ibm-zen-secret-jwt-private
+    - group: asm-resources
+    - group: admin-user-details-secret
+    - group: aiopsedge-config-encryption-history-secret
+    - group: ibm-secure-tunnel-operator-secret
+    - group: platform-auth-ldaps-ca-cert-secret
+    - hook: ibm-cp-aiops-redis-server-pod-exec/bgsave
+    - hook: edb-postgresql-pod-exec/checkpoint
+    - hook: cassandra-pod-exec/nodetool-flush
+    - group: aiops-volumes
+  - name: restore
+    failOn: essential-error
+    sequence:
+    - group: aiops-catalog-source
+    - hook: ibm-aiops-catalogsource-check/status
+    - group: aiops-operatorgroup
+    - group: aiops-ai-model-ui-service
+    - group: aimanager-aio-chatops-slack-integrator-service
+    - group: aiops-akora-ui-service
+    - group: aimanager-aio-chatops-teams-integrator-service
+    - group: aimanager-aio-addon-service
+    - group: aimanager-aio-controller-service
+    - group: aiops-base-ui-service
+    - group: aiops-connections-ui-service
+    - group: aiops-insights-ui-service
+    - group: aimanager-aio-cr-api
+    - group: aiops-sre-tunnel-ui
+    - group: aiops-subscription
+    - hook: ibm-aiops-orchestrator-controller-manager-check/replicasReady
+    - group: aiops-topology-cassandra-auth-secret
+    - group: omni-secret
+    - group: model-secret
+    - group: aiops-configmap
+    - group: ibm-entitlement-key-secret
+    - group: aimanager-edb-postgresdb-secret
+    - group: ibm-cp-aiops-edb-secret
+    - group: aiops-ir-core-model-secret
+    - group: ibm-cp-aiops-redis-secret
+    - group: aimanager-ibm-minio-access-secret
+    - group: zen-secrets-aes-key
+    - group: ibm-zen-secret-jwks
+    - group: ibm-zen-secret-jwt
+    - group: ibm-zen-secret-jwt-private
+    - group: admin-user-details-secret
+    - group: aiopsedge-config-encryption-history-secret
+    - group: ibm-secure-tunnel-operator-secret
+    - group: platform-auth-ldaps-ca-cert-secret
+    - group: aiops-volumes
+    - group: aiops-installation
+    - hook: ibm-common-service-operator-check/replicasReady
+    - hook: ibm-cloud-databases-redis-operator-check/replicasReady
+    - hook: ibm-cp-aiops-redis-server-check/replicasReady
+    - hook: couchdbcluster-check/replicasReady
+    - hook: aiops-topology-cassandra-check/replicasReady
+    - hook: lifecycleservices-aiops-check/statusReady
+    - hook: ibm-aiops-orchestrator-pod-exec/sleep-a-minute
+    - hook: odlm-pod-exec/cancel-lifecycletrigger-jobids
+    - hook: installations-check/phaseRunning
+    - hook: cassandra-pod-exec/nodetool-verify
+    - group: restore-aimanager-aimanager
+    - hook: aimanager-aimanager-check/phaseCompleted
+    - group: connectorconfiguration
+    - group: asm-resources
