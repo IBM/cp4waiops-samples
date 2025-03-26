@@ -1,0 +1,9 @@
+{
+    "aws_access_key_id": "******",
+    "aws_secret_access_key": "***************",
+    "namespace": "velero",
+    "bucket_name": "aiops-bcdr-poc",
+    "bucket_region": "us-east-1",
+    "backup_label": "aiops-cluster-test"
+
+}
