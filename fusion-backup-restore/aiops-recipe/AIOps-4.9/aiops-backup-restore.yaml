@@ -322,11 +322,11 @@ spec:
     type: check
     selectResource: orchestrator.aiops.ibm.com/v1alpha1/installations
     nameSelector: ibm-cp-aiops
-    timeout: 1500
+    timeout: 3000
     onError: fail
     chks:
     - name: phaseRunning
-      timeout: 1500
+      timeout: 3000
       onError: fail
       condition: "{$.status.phase} == {\"Running\"}"
   - name: aimanager-aimanager-check
