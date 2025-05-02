@@ -361,6 +361,10 @@ deleteCertManagerResources () {
 deleteIAM_Workaround () {
     log $INFO "Delete MISC IAM ConfigMap and Role/Rolebinding"
     oc delete configmap cs-keycloak-theme -n $CP4WAIOPS_PROJECT
+
+    log $INFO "Delete role and rolebinding"
+    oc delete rolebinding leader-election-rolebinding -n $CP4WAIOPS_PROJECT
+    oc delete role leader-election-role -n $CP4WAIOPS_PROJECT
 }
 
 # Check if Infrastructure Automation is installed by looking for the CSV
@@ -496,13 +500,11 @@ delete_bedrock () {
             oc delete $CONFIGMAP -n $CP4WAIOPS_PROJECT --ignore-not-found
         done
 
-        if [[ "$DELETE_PVCS" == "true" ]]; then
-            log $INFO "Deleting CPFS PVCs in $CP4WAIOPS_PROJECT"
-            for PVC in ${BEDROCK_PVCS_LABELS[@]}; do
-                log $INFO "Deleting PVC $PVC.."
-                oc delete pvc -l $PVC -n $CP4WAIOPS_PROJECT --ignore-not-found
-            done
-        fi
+        log $INFO "Deleting CPFS PVCs in $CP4WAIOPS_PROJECT"
+        for PVC in ${BEDROCK_PVCS_LABELS[@]}; do
+            log $INFO "Deleting PVC $PVC.."
+            oc delete pvc -l $PVC -n $CP4WAIOPS_PROJECT --ignore-not-found
+        done
 
         log $INFO "Deleting Namespaced Bedrock Secrets"
         for s in ${BEDROCK_SECRETS[@]}; do
@@ -712,6 +714,7 @@ delete_redis_resources() {
     log $INFO "Delete Redis resources in $CP$WAIOPS_PROJECT Namespace"
     oc delete serviceaccount ibm-redis-cp-operator-serviceaccount -n $CP4WAIOPS_PROJECT
     oc delete lease.coordination.k8s.io/ibm-redis-cp-operator -n $CP4WAIOPS_PROJECT
+    oc delete configmap ibm-redis-cp-operator -n $CP4WAIOPS_PROJECT
 
     log $INFO "Delete Redis Secrets"
     oc delete secret -n $CP4WAIOPS_PROJECT $INSTALLATION_NAME-redis-client-cert

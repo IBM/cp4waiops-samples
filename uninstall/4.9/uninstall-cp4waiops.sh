@@ -158,15 +158,16 @@ if [[ ! -z "$CP4WAIOPS_PROJECT"  ]]; then
 
    delete_EDB_related_resources
    delete_redis_resources  
+
+   #Delete these PVC's always without user's consent
+   log $INFO "Deleting Internal PVCs in $CP4WAIOPS_PROJECT"
+   for PVC in ${CP4AIOPS_INTERNAL_PVC[@]}; do
+      log $INFO "Deleting PVCs with label $PVC.."
+      oc delete pvc -l $PVC -n $CP4WAIOPS_PROJECT --ignore-not-found
+   done
    
    # Confirm with user we want to delete PVCs
    if [[ $DELETE_PVCS == "true" ]]; then
-      log $INFO "Deleting Internal PVCs in $CP4WAIOPS_PROJECT"
-      for PVC in ${CP4AIOPS_INTERNAL_PVC[@]}; do
-         log $INFO "Deleting PVCs with label $PVC.."
-         oc delete pvc -l $PVC -n $CP4WAIOPS_PROJECT --ignore-not-found
-      done
-
       log $INFO "Deleting PVCs in $CP4WAIOPS_PROJECT"
       for PVC in ${CP4AIOPS_PVC_LABEL[@]}; do
          log $INFO "Deleting PVCs with label $PVC.."
@@ -208,6 +209,12 @@ if [[ ! -z "$CP4WAIOPS_PROJECT"  ]]; then
          oc delete $SERVICEACCOUNT -n $CP4WAIOPS_PROJECT --ignore-not-found
       done
    fi
+
+   # Remove Redis annotation from the namespace.  Leaving the annotation
+   # would prevent a Redis re-install in the namespace.  Note that the
+   # hyphen on the end of the annotation key is what tells oc to delete
+   # the annotation rather than update it.
+   oc annotate namespace $CP4WAIOPS_PROJECT redis.databases.cloud.ibm.com/account-hash-
    
    # Delete Bedrock
    check_namespaced_bedrock
