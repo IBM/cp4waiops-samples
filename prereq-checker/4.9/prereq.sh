@@ -8,16 +8,14 @@ res_file=$(mktemp)
 ## Resource size for 4.9
 # These defaults are given in section 'IBM Cloud Pak for AIOps only Hardware requirement totals' under
 # Minimum resource values for Production sized 4.9.x (base install)
-# Values are based on  Minimum requirements for starter and production deployments, without Red Hat OpenShift.
-# This is assuming OCP is already installed.
 NODE_COUNT_LARGE_4_5=6
-VCPU_LARGE_4_5=136
-MEMORY_LARGE_4_5=310
+VCPU_LARGE_4_5=148
+MEMORY_LARGE_4_5=358
 
 
 # Minumim resource values for production extended
-VCPU_LARGE_LAD=162
-MEM_LARGE_LAD=368
+VCPU_LARGE_LAD=174
+MEM_LARGE_LAD=416
 
 
 # Utilities
@@ -86,7 +84,7 @@ display_help() {
     echo " ./prereq.sh -m"
     echo "  -m Enabling this check will allow the prereq script validate if the cluster is properly configured for multizone."
     echo " ./prereq.sh --ignore-allocated"
-    echo "  --ignore-allocated Will ignore allocated resources available for new installs and focus on capacity instead for nodes that are \"x86_64 (amd64)\" and \"Linux® on IBM Z® and LinuxONE (s390x)\" architecture and lack a taint called NoSchedule."
+    echo "  --ignore-allocated Will ignore allocated resources available for new installs and focus on capacity instead for nodes that are x86_64 (amd64) architecture and lack a taint called NoSchedule."
     echo " ./prereq.sh --cli <cli>"
     echo "  --cli You can pass either \"kubectl\" or \"oc\" to force the script to use the given CLI."
     echo " ./prereq.sh --skip-operator-checks"
@@ -187,7 +185,7 @@ function checkPlatformVersion {
         OCP_MINOR_VER=`echo $OCP_VER | awk '{split($0,a,"."); print a[3]}'`
         if [[ $OCP_VER == *"4.16"* ]]; then
             if [[ $OCP_MINOR_VER -ge 4 ]]; then
-                log $INFO "OCP version $OCP_VER is compatible but only nodes with \"x86_64 (amd64)\" and \"Linux® on IBM Z® and LinuxONE (s390x)\" architectures are supported at this time." $pass_color
+                log $INFO "OCP version $OCP_VER is compatible but only nodes with x86_64 (amd64) architectures are supported at this time." $pass_color
                 OCP_VER_RES=$pass_msg
                 startEndSection "Platform Version Check"
                 return 0
@@ -200,7 +198,7 @@ function checkPlatformVersion {
                 return 1
             fi
         elif [[ $OCP_VER == *"4.14"* || $OCP_VER == *"4.15"* || $OCP_VER == *"4.17"* || $OCP_VER == *"4.18"* ]]; then
-            log $INFO "OCP version $OCP_VER is compatible but only nodes with \"x86_64 (amd64)\" and \"Linux® on IBM Z® and LinuxONE (s390x)\" architectures are supported at this time." $pass_color
+            log $INFO "OCP version $OCP_VER is compatible but only nodes with x86_64 (amd64) architectures are supported at this time." $pass_color
             OCP_VER_RES=$pass_msg
             startEndSection "Platform Version Check"
             return 0
