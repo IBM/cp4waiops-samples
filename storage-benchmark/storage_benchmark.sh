@@ -14,17 +14,16 @@ if [ -z "${SIZE}" ]; then
     SIZE="5Gi"
 fi
 
+if [ -z "${NAMESPACE}" ]; then
+    NAMESPACE="aiops"
+fi
+
 cat << EOF | kubectl apply --validate -f -
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: aiops-storage-benchmark
----
 kind: PersistentVolumeClaim
 apiVersion: v1
 metadata:
-  name: storage-benchmark
-  namespace: aiops-storage-benchmark
+  name: aiops-storage-benchmark
+  namespace: ${NAMESPACE}
 spec:
   storageClassName: ${STORAGE_CLASS}
   accessModes:
@@ -36,8 +35,8 @@ spec:
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: storage-benchmark
-  namespace: aiops-storage-benchmark
+  name: aiops-storage-benchmark
+  namespace: ${NAMESPACE}
 spec:
   template:
     spec:
@@ -79,7 +78,7 @@ spec:
       volumes:
       - name: storage-benchmark-pv
         persistentVolumeClaim:
-          claimName: storage-benchmark
+          claimName: aiops-storage-benchmark
       securityContext:
         runAsNonRoot: true
   backoffLimit: 4

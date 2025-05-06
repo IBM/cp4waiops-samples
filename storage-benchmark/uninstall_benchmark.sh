@@ -1,6 +1,9 @@
 #!/bin/sh
 set -e
 
-kubectl delete job storage-benchmark -n aiops-storage-benchmark --ignore-not-found
-kubectl delete persistentvolumeclaim storage-benchmark -n aiops-storage-benchmark --ignore-not-found
-kubectl delete namespace aiops-storage-benchmark --ignore-not-found
+if [ -z "${NAMESPACE}" ]; then
+    NAMESPACE="aiops"
+fi
+
+kubectl delete job aiops-storage-benchmark -n ${NAMESPACE} --ignore-not-found
+kubectl delete persistentvolumeclaim aiops-storage-benchmark -n ${NAMESPACE} --ignore-not-found
