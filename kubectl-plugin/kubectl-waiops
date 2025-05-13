@@ -262,7 +262,7 @@ getKafkaStatus() {
 }
 
 getElasticsearchStatus() {
-    if [[ "${VERSION_AIOPSORCHESTRATOR}" != "4.8" && "${VERSION_AIOPSORCHESTRATOR}" != "4.9" ]]; then
+    if [[ "${VERSION_AIOPSORCHESTRATOR}" != "4.8" && "${VERSION_AIOPSORCHESTRATOR}" != "4.9" && "${VERSION_AIOPSORCHESTRATOR}" != "4.10" && "${VERSION_AIOPSORCHESTRATOR}" != "0.1" ]]; then
         # Elastic status
         INSTANCE_ELASTIC=$(oc get elasticsearches.elastic.automation.ibm.com iaf-system -o custom-columns='KIND:.kind,NAMESPACE:.metadata.namespace,NAME:.metadata.name,STATUS:.status.conditions[?(@.type=="Ready")].status')
         STATUS_ELASTIC=$(oc get elasticsearches.elastic.automation.ibm.com iaf-system -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}')
@@ -272,7 +272,7 @@ getElasticsearchStatus() {
         else    
             printStatus "$STATUS_ELASTIC" "True" "$INSTANCE_ELASTIC"
         fi
-    else
+    elif [[ "${VERSION_AIOPSORCHESTRATOR}" != "4.10" && "${VERSION_AIOPSORCHESTRATOR}" != "0.1" ]]; then
         INSTANCE_ELASTIC=$(oc get elasticsearchcluster.elasticsearch.opencontent.ibm.com aiops -o custom-columns='KIND:.kind,NAMESPACE:.metadata.namespace,NAME:.metadata.name,STATUS:.status.phase')
         STATUS_ELASTIC=$(oc get elasticsearchcluster.elasticsearch.opencontent.ibm.com aiops -o jsonpath='{.status.phase}')
         if [[ "$1" == "status-summary" ]];
@@ -280,6 +280,15 @@ getElasticsearchStatus() {
             printStatus "$STATUS_ELASTIC" "Ready" "$INSTANCE_ELASTIC" "status-summary"
         else
             printStatus "$STATUS_ELASTIC" "Ready" "$INSTANCE_ELASTIC"
+        fi
+    else
+        INSTANCE_ELASTIC=$(oc get clusters.opensearch.cloudpackopen.ibm.com aiops-opensearch -o custom-columns='KIND:.kind,NAMESPACE:.metadata.namespace,NAME:.metadata.name,STATUS:.status.phase')
+        STATUS_ELASTIC=$(oc get clusters.opensearch.cloudpackopen.ibm.com aiops-opensearch -o jsonpath='{.status.phase}')
+        if [[ "$1" == "status-summary" ]];
+        then
+            printStatus "$STATUS_ELASTIC" "Available" "$INSTANCE_ELASTIC" "status-summary"
+        else
+            printStatus "$STATUS_ELASTIC" "Available" "$INSTANCE_ELASTIC"
         fi
     fi
 }
@@ -902,7 +911,7 @@ then
         getAIOpsEventProcessorStatus
     else
         echo "______________________________________________________________"
-        echo "Kafka and Elasticsearch instances:" && echo ""   
+        echo "Kafka and Opensearch instances:" && echo ""   
         getKafkaStatus
         getElasticsearchStatus
     fi
