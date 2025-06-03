@@ -264,8 +264,6 @@ getKafkaStatus() {
 getElasticsearchStatus() {
     if [[ "${VERSION_AIOPSORCHESTRATOR}" != "4.8" && "${VERSION_AIOPSORCHESTRATOR}" != "4.9" && "${VERSION_AIOPSORCHESTRATOR}" != "4.10" && "${VERSION_AIOPSORCHESTRATOR}" != "0.1" ]]; then
         # Elastic status
-        echo "gunjanwashere"
-        echo $VERSION_AIOPSORCHESTRATOR 
         INSTANCE_ELASTIC=$(oc get elasticsearches.elastic.automation.ibm.com iaf-system -o custom-columns='KIND:.kind,NAMESPACE:.metadata.namespace,NAME:.metadata.name,STATUS:.status.conditions[?(@.type=="Ready")].status')
         STATUS_ELASTIC=$(oc get elasticsearches.elastic.automation.ibm.com iaf-system -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}')
         if [[ "$1" == "status-summary" ]];
