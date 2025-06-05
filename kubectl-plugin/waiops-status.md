@@ -64,75 +64,75 @@ ______________________________________________________________
 Installation instances:
 
 NAME                 PHASE     LICENSE    STORAGECLASS   STORAGECLASSLARGEBLOCK   AGE
-aiops-installation   Running   Accepted   rook-cephfs    rook-ceph-rbd            3h54m
+ibm-cp-aiops   Running   Accepted   rook-cephfs    rook-ceph-rbd            3h54m
 
 ______________________________________________________________
 ZenService instances:
 
 KIND         NAME                 NAMESPACE   VERSION   STATUS      PROGRESS   MESSAGE
-ZenService   iaf-zen-cpdservice   katamari    5.1.15    Completed   100%       The Current Operation Is Completed
+ZenService   iaf-zen-cpdservice   cp4aiops    5.1.15    Completed   100%       The Current Operation Is Completed
 
 ______________________________________________________________
 Kafka and Elasticsearch instances:
 
 KIND    NAMESPACE   NAME         STATUS
-Kafka   katamari    iaf-system   True
+Kafka   cp4aiops    iaf-system   True
 
 KIND      NAMESPACE   NAME               STATUS
-Cluster   katamari    aiops-opensearch   Available
+Cluster   cp4aiops    aiops-opensearch   Available
 
 ______________________________________________________________
 IRCore and AIOpsAnalyticsOrchestrator instances:
 
 KIND                  NAMESPACE   NAME    VERSION   STATUS   MESSAGE
-IssueResolutionCore   katamari    aiops   4.10.0    Ready    All Services Ready
+IssueResolutionCore   cp4aiops    aiops   4.10.0    Ready    All Services Ready
 
 KIND                         NAMESPACE   NAME    VERSION   STATUS   MESSAGE
-AIOpsAnalyticsOrchestrator   katamari    aiops   4.10.0    Ready    All Services Ready
+AIOpsAnalyticsOrchestrator   cp4aiops    aiops   4.10.0    Ready    All Services Ready
 
 ______________________________________________________________
 LifecycleService instances:
 
 KIND               NAMESPACE   NAME    VERSION   STATUS   MESSAGE
-LifecycleService   katamari    aiops   4.10.0    Ready    All Services Ready
+LifecycleService   cp4aiops    aiops   4.10.0    Ready    All Services Ready
 
 ______________________________________________________________
 BaseUI instances:
 
 KIND     NAMESPACE   NAME              VERSION   STATUS   MESSAGE
-BaseUI   katamari    baseui-instance   4.10.0    True     Ready
+BaseUI   cp4aiops    baseui-instance   4.10.0    True     Ready
 
 ______________________________________________________________
 AIManager, ASM, AIOpsEdge, and AIOpsUI instances:
 
 KIND        NAMESPACE   NAME        VERSION   STATUS      MESSAGE
-AIManager   katamari    aimanager   4.10.0    Completed   AI Manager is ready
+AIManager   cp4aiops    aimanager   4.10.0    Completed   AI Manager is ready
 
 KIND   NAMESPACE   NAME             VERSION   STATUS
-ASM    katamari    aiops-topology   2.30.0    OK
+ASM    cp4aiops    aiops-topology   2.30.0    OK
 
 KIND        NAMESPACE   NAME        STATUS       MESSAGE
-AIOpsEdge   katamari    aiopsedge   Configured   all critical components are reporting healthy
+AIOpsEdge   cp4aiops    aiopsedge   Configured   all critical components are reporting healthy
 
 KIND      NAMESPACE   NAME               VERSION   STATUS   MESSAGE
-AIOpsUI   katamari    aiopsui-instance   4.10.0    True     Ready
+AIOpsUI   cp4aiops    aiopsui-instance   4.10.0    True     Ready
 
 ______________________________________________________________
 Postgres instances:
 
 KIND      NAMESPACE   NAME                              STATUS
-Cluster   katamari    aiops-installation-edb-postgres   Cluster in healthy state
-Cluster   katamari    common-service-db                 Cluster in healthy state
-Cluster   katamari    zen-metastore-edb                 Cluster in healthy state
+Cluster   cp4aiops    ibm-cp-aiops-edb-postgres   Cluster in healthy state
+Cluster   cp4aiops    common-service-db                 Cluster in healthy state
+Cluster   cp4aiops    zen-metastore-edb                 Cluster in healthy state
 
 ______________________________________________________________
 Secure Tunnel instances:
 
 KIND     NAMESPACE   NAME         STATUS
-Tunnel   katamari    sre-tunnel   True
+Tunnel   cp4aiops    sre-tunnel   True
 
 ______________________________________________________________
-CSVs from katamari namespace:
+CSVs from cp4aiops namespace:
 
 NAME                                      DISPLAY                VERSION               REPLACES   PHASE
 aimanager-operator.v4.10.0-202506031045   IBM AIOps AI Manager   4.10.0-202506031045              Succeeded
@@ -195,7 +195,7 @@ NAME                                           DISPLAY                          
 operand-deployment-lifecycle-manager.v4.3.13   Operand Deployment Lifecycle Manager   4.3.13               Succeeded
 
 ______________________________________________________________
-Subscriptions from katamari namespace:
+Subscriptions from cp4aiops namespace:
 
 NAME                 PACKAGE              SOURCE                  CHANNEL
 aimanager-operator   aimanager-operator   ibm-cp-waiops-catalog   v4.10
@@ -258,19 +258,19 @@ ______________________________________________________________
 OperandRequest instances:
 
 NAMESPACE   NAME                   PHASE     CREATED AT
-katamari    ibm-aiops-ai-manager   Running   2025-06-03T13:15:02Z
+cp4aiops    ibm-aiops-ai-manager   Running   2025-06-03T13:15:02Z
 
 NAMESPACE   NAME                         PHASE     CREATED AT
-katamari    ibm-aiops-aiops-foundation   Running   2025-06-03T13:15:02Z
+cp4aiops    ibm-aiops-aiops-foundation   Running   2025-06-03T13:15:02Z
 
 NAMESPACE   NAME                   PHASE     CREATED AT
-katamari    ibm-aiops-connection   Running   2025-06-03T13:15:02Z
+cp4aiops    ibm-aiops-connection   Running   2025-06-03T13:15:02Z
 
 NAMESPACE   NAME              PHASE     CREATED AT
-katamari    ibm-iam-service   Running   2025-06-03T13:17:17Z
+cp4aiops    ibm-iam-service   Running   2025-06-03T13:17:17Z
 
 NAMESPACE   NAME              PHASE     CREATED AT
-katamari    ibm-iam-request   Running   2025-06-03T13:14:44Z
+cp4aiops    ibm-iam-request   Running   2025-06-03T13:14:44Z
 
 ______________________________________________________________
 AIOps certificate status:
@@ -282,25 +282,25 @@ NAME                       RENEWAL                READY   MESSAGE
 aiops-appconnect-ir-cert   2025-08-02T13:17:26Z   True    Certificate is up to date and has not expired
 
 NAME                                          RENEWAL                READY   MESSAGE
-aiops-installation-edb-postgres-client-cert   2025-08-02T13:16:08Z   True    Certificate is up to date and has not expired
+ibm-cp-aiops-edb-postgres-client-cert   2025-08-02T13:16:08Z   True    Certificate is up to date and has not expired
 
 NAME                                          RENEWAL                READY   MESSAGE
-aiops-installation-edb-postgres-server-cert   2025-08-02T13:16:08Z   True    Certificate is up to date and has not expired
+ibm-cp-aiops-edb-postgres-server-cert   2025-08-02T13:16:08Z   True    Certificate is up to date and has not expired
 
 NAME                                    RENEWAL                READY   MESSAGE
-aiops-installation-edb-postgres-ss-ca   2025-08-02T13:15:43Z   True    Certificate is up to date and has not expired
+ibm-cp-aiops-edb-postgres-ss-ca   2025-08-02T13:15:43Z   True    Certificate is up to date and has not expired
 
 NAME                                   RENEWAL                READY   MESSAGE
-aiops-installation-redis-client-cert   2025-08-02T13:11:46Z   True    Certificate is up to date and has not expired
+ibm-cp-aiops-redis-client-cert   2025-08-02T13:11:46Z   True    Certificate is up to date and has not expired
 
 NAME                                   RENEWAL                READY   MESSAGE
-aiops-installation-redis-server-cert   2025-08-02T13:11:46Z   True    Certificate is up to date and has not expired
+ibm-cp-aiops-redis-server-cert   2025-08-02T13:11:46Z   True    Certificate is up to date and has not expired
 
 NAME                             RENEWAL                READY   MESSAGE
-aiops-installation-redis-ss-ca   2025-08-02T13:11:25Z   True    Certificate is up to date and has not expired
+ibm-cp-aiops-redis-ss-ca   2025-08-02T13:11:25Z   True    Certificate is up to date and has not expired
 
 NAME                        RENEWAL                READY   MESSAGE
-aiops-installation-tls-ca   2025-08-02T13:11:49Z   True    Certificate is up to date and has not expired
+ibm-cp-aiops-tls-ca   2025-08-02T13:11:49Z   True    Certificate is up to date and has not expired
 
 NAME                            RENEWAL                READY   MESSAGE
 aiops-ir-analytics-classifier   2025-08-02T13:28:25Z   True    Certificate is up to date and has not expired
@@ -530,11 +530,11 @@ zen-minio-certificate   2026-06-03T13:21:07Z   True    Certificate is up to date
 ______________________________________________________________
 ODLM pod current status:
 
-katamari                                           operand-deployment-lifecycle-manager-8d468d997-d2ng7                      1/1     Running     0               3h58m
+cp4aiops                                           operand-deployment-lifecycle-manager-8d468d997-d2ng7                      1/1     Running     0               3h58m
 ______________________________________________________________
 Orchestrator pod current status:
 
-katamari                                           ibm-aiops-orchestrator-controller-manager-8fd95cd6-rmbq6                  1/1     Running     0               4h3m
+cp4aiops                                           ibm-aiops-orchestrator-controller-manager-8fd95cd6-rmbq6                  1/1     Running     0               4h3m
 ```
 
 ## How to use
