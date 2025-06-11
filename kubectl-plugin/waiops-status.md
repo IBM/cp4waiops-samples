@@ -14,15 +14,15 @@ Run `oc waiops multizone pods` to view which zone each pod is in.
   * **NOTE**: These functions require bash to be at least version **4**  (MacOS ships with a very old version)
   * **NOTE**: If you have installed/upgraded bash to a path other than `/bin/bash` change the first line of the script to that fully qualified path.
 
-Run `oc waiops status` to print the statuses of some of your instance's main components. If you see components with issues (or are generally facing issues on your cluster), run `oc waiops status-all` for a more detailed printout with more components.
+Run `oc waiops status <namespace>` to print the statuses of some of your instance's main components. If you see components with issues (or are generally facing issues on your cluster), run `oc waiops status-all <namespace>` for a more detailed printout with more components.
 
-If you are upgrading your instance to the latest version, run `oc waiops status-upgrade`, which returns a list of components that have (and have not) completed upgrading. 
+If you are upgrading your instance to the latest version, run `oc waiops status-upgrade <namespace>`, which returns a list of components that have (and have not) completed upgrading. 
 
 Below are example outputs of these commands.
 
-### Installation status checker output (`oc waiops status`)
+### Installation status checker output (`oc waiops status cp4aiops`)
 ```
-$ oc waiops status
+$ oc waiops status cp4aiops
 Already on project "cp4aiops" on server "https://my.cool.domain.com:6443".
 
 Cloud Pak for AIOps v4.7 installation status:
@@ -58,7 +58,7 @@ Cloud Pak for AIOps v4.7 installation status:
 ```
 
 
-### Detailed installation status checker output (`oc waiops status-all`)
+### Detailed installation status checker output (`oc waiops status-all cp4aiops`)
 ``` 
 ______________________________________________________________
 Installation instances:
@@ -563,7 +563,7 @@ chmod +x cp4waiops-samples/kubectl-plugin/kubectl-waiops
 cp cp4waiops-samples/kubectl-plugin/kubectl-waiops /usr/local/bin/kubectl-waiops
 
 oc waiops multizone status
-oc waiops status
-oc waiops status-all
-oc waiops status-upgrade
+oc waiops status <namespace>
+oc waiops status-all <namespace>
+oc waiops status-upgrade <namespace>
 ```

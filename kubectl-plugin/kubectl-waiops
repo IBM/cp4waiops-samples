@@ -7,30 +7,8 @@
 # If any of the components are incomplete or are not reconciled after a significant period of time, 
 # please refer to the IBM troubleshooting docs online or open a support case. 
 
-COMMAND=$1
-shift
 
-case "$COMMAND" in 
-    status|status-upgrade|status-all)
-    INSTALLATION_NAMESPACE=""
-    
-    while getopts "n:" opt; do
-        case $opt in
-         n) INSTALLATION_NAMESPACE="$OPTARG";;
-         *) echo "Usage: oc waiops $COMMAND -n <namespace>"; exit 1;;
-         esac
-    done
-
-    if [[ -z "$INSTALLATION_NAMESPACE" ]]; then
-        echo "Error: Namespace is required. Please provide it by using -n <namespace>."
-        exit 1
-    fi
-    ;;
-    *)
-        echo "Unkown command: $COMMAND"
-        exit 1
-        ;;
-esac
+INSTALLATION_NAMESPACE=""
 
 # Various formatting elements
 newline='\n\n'
@@ -55,10 +33,10 @@ Available Commands:
   multizone pods     Print the node topology and pods with zone distribution
   multizone status   Print the node topology and report status
 
-  status             Print the status of the main components in the CloudPak
-  status-summary     Print a brief summary status of the CloudPak
-  status-upgrade     Print the upgrade status of the components in the CloudPak
-  status-all         Print the most detail about the components in the CloudPak
+  status <namespace>             Print the status of the main components in the CloudPak
+  status-summary <namespace>     Print a brief summary status of the CloudPak
+  status-upgrade <namespace>     Print the upgrade status of the components in the CloudPak
+  status-all <namespace>         Print the most detail about the components in the CloudPak
 
 EOF
 }
@@ -867,7 +845,14 @@ if [[ "$1" == "multizone" ]]; then
   exit 0
 fi
 
-
+if [[ "$1" == "status" || "$1" == "status-all" || "$1" == "status-upgrade" || "$1" == "status-summary" ]]; then
+    if [[ ! -z "$2" ]]; then
+        INSTALLATION_NAMESPACE=$2
+    else
+        echo "Error: Use oc waiops $1 <namespace>."
+        exit 1
+    fi
+fi
 
 # Environment variables including installation info (gathered from existing installation instance on the cluster) and version
 CLUSTER_ADMIN=$(oc auth can-i '*' '*' --all-namespaces)
