@@ -7,6 +7,9 @@
 # If any of the components are incomplete or are not reconciled after a significant period of time, 
 # please refer to the IBM troubleshooting docs online or open a support case. 
 
+
+INSTALLATION_NAMESPACE=""
+
 # Various formatting elements
 newline='\n\n'
 red=$(tput setaf 1)
@@ -30,10 +33,10 @@ Available Commands:
   multizone pods     Print the node topology and pods with zone distribution
   multizone status   Print the node topology and report status
 
-  status             Print the status of the main components in the CloudPak
-  status-summary     Print a brief summary status of the CloudPak
-  status-upgrade     Print the upgrade status of the components in the CloudPak
-  status-all         Print the most detail about the components in the CloudPak
+  status <namespace>             Print the status of the main components in the CloudPak
+  status-summary <namespace>     Print a brief summary status of the CloudPak
+  status-upgrade <namespace>     Print the upgrade status of the components in the CloudPak
+  status-all <namespace>         Print the most detail about the components in the CloudPak
 
 EOF
 }
@@ -842,7 +845,14 @@ if [[ "$1" == "multizone" ]]; then
   exit 0
 fi
 
-
+if [[ "$1" == "status" || "$1" == "status-all" || "$1" == "status-upgrade" || "$1" == "status-summary" ]]; then
+    if [[ ! -z "$2" ]]; then
+        INSTALLATION_NAMESPACE=$2
+    else
+        echo "Error: Use oc waiops $1 <namespace>."
+        exit 1
+    fi
+fi
 
 # Environment variables including installation info (gathered from existing installation instance on the cluster) and version
 CLUSTER_ADMIN=$(oc auth can-i '*' '*' --all-namespaces)
@@ -859,20 +869,15 @@ then
     exit 0
 fi
 
-if [[ "$CLUSTER_ADMIN" == "yes" ]];
-then
-    INSTALLATION_NAME=$(oc get installations.orchestrator.aiops.ibm.com -A --no-headers | while read a b c; do echo "$b"; done; 2>/dev/null)
-    INSTALLATION_NAMESPACE=$(oc get installations.orchestrator.aiops.ibm.com -A --no-headers | while read a b c; do echo "$a"; done; 2>/dev/null)
-    CSV_NAME=$(oc get csvs -o name --no-headers=true -n $INSTALLATION_NAMESPACE | grep ibm-aiops-orchestrator)
+if [[ "$CLUSTER_ADMIN" == "yes" ]]; then
+    INSTALLATION_NAME=$(oc get installations.orchestrator.aiops.ibm.com -n $INSTALLATION_NAMESPACE --no-headers | awk '{ print $1 }')
+    CSV_NAME=$(oc get csv -n $INSTALLATION_NAMESPACE -o name --no-headers | grep ibm-aiops-orchestrator)
     VERSION_AIOPSORCHESTRATOR=$(oc get $CSV_NAME -n $INSTALLATION_NAMESPACE -o jsonpath='{.spec.version}' | cut -d. -f1-2)
-    CLUSTER_SCOPE_INSTALL=$(if [[ $(oc get subscription.operators.coreos.com -A  | grep ibm-aiops-orchestrator | awk '{ print $1 }') == "openshift-operators" ]]; then echo "true"; else echo "false"; fi)
+    CLUSTER_SCOPE_INSTALL=$(if [[ $(oc get subscription.operators.coreos.com -A | grep ibm-aiops-orchestrator | awk '{ print $1}') == "openshift-operators" ]]; then echo "true"; else echo "false"; fi)
 else
-    # ask user if they are in the project namespace.
-    # if they are, set INSTALLATION_NAMESPACE=current project
-    INSTALLATION_NAME=$(oc get installations.orchestrator.aiops.ibm.com --no-headers | while read a b c; do echo "$a"; done; 2>/dev/null)
-    INSTALLATION_NAMESPACE=$(oc get installation $INSTALLATION_NAME -o jsonpath='{.metadata.namespace}')
-    CSV_NAME=$(oc get csvs -o name --no-headers=true | grep ibm-aiops-orchestrator)
-    VERSION_AIOPSORCHESTRATOR=$(oc get $CSV_NAME -o jsonpath='{.spec.version}'| cut -d. -f1-2)
+    INSTALLATION_NAME=$(oc get installations.orchestrator.aiops.ibm.com -n $INSTALLATION_NAMESPACE --no-headers | awk '{ print $1 }')
+    CSV_NAME=$(oc get csv -n $INSTALLATION_NAMESPACE -o name --no-headers | grep ibm-aiops-orchestrator)
+    VERSION_AIOPSORCHESTRATOR=$(oc get $CSV_NAME -n $INSTALLATION_NAMESPACE -o jsonpath='{.spec.version}' | cut -d. -f1-2)
 fi
 
 
