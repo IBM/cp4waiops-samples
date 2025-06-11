@@ -7,6 +7,31 @@
 # If any of the components are incomplete or are not reconciled after a significant period of time, 
 # please refer to the IBM troubleshooting docs online or open a support case. 
 
+COMMAND=$1
+shift
+
+case "$COMMAND" in 
+    status|status-upgrade|status-all)
+    INSTALLATION_NAMESPACE=""
+    
+    while getopts "n:" opt; do
+        case $opt in
+         n) INSTALLATION_NAMESPACE="$OPTARG";;
+         *) echo "Usage: oc waiops $COMMAND -n <namespace>"; exit 1;;
+         esac
+    done
+
+    if [[ -z "$INSTALLATION_NAMESPACE" ]]; then
+        echo "Error: Namespace is required. Please provide it by using -n <namespace>."
+        exit 1
+    fi
+    ;;
+    *)
+        echo "Unkown command: $COMMAND"
+        exit 1
+        ;;
+esac
+
 # Various formatting elements
 newline='\n\n'
 red=$(tput setaf 1)
@@ -859,20 +884,15 @@ then
     exit 0
 fi
 
-if [[ "$CLUSTER_ADMIN" == "yes" ]];
-then
-    INSTALLATION_NAME=$(oc get installations.orchestrator.aiops.ibm.com -A --no-headers | while read a b c; do echo "$b"; done; 2>/dev/null)
-    INSTALLATION_NAMESPACE=$(oc get installations.orchestrator.aiops.ibm.com -A --no-headers | while read a b c; do echo "$a"; done; 2>/dev/null)
-    CSV_NAME=$(oc get csvs -o name --no-headers=true -n $INSTALLATION_NAMESPACE | grep ibm-aiops-orchestrator)
+if [[ "$CLUSTER_ADMIN" == "yes" ]]; then
+    INSTALLATION_NAME=$(oc get installations.orchestrator.aiops.ibm.com -n $INSTALLATION_NAMESPACE --no-headers | awk '{ print $1 }')
+    CSV_NAME=$(oc get csv -n $INSTALLATION_NAMESPACE -o name --no-headers | grep ibm-aiops-orchestrator)
     VERSION_AIOPSORCHESTRATOR=$(oc get $CSV_NAME -n $INSTALLATION_NAMESPACE -o jsonpath='{.spec.version}' | cut -d. -f1-2)
-    CLUSTER_SCOPE_INSTALL=$(if [[ $(oc get subscription.operators.coreos.com -A  | grep ibm-aiops-orchestrator | awk '{ print $1 }') == "openshift-operators" ]]; then echo "true"; else echo "false"; fi)
+    CLUSTER_SCOPE_INSTALL=$(if [[ $(oc get subscription.operators.coreos.com -A | grep ibm-aiops-orchestrator | awk '{ print $1}') == "openshift-operators" ]]; then echo "true"; else echo "false"; fi)
 else
-    # ask user if they are in the project namespace.
-    # if they are, set INSTALLATION_NAMESPACE=current project
-    INSTALLATION_NAME=$(oc get installations.orchestrator.aiops.ibm.com --no-headers | while read a b c; do echo "$a"; done; 2>/dev/null)
-    INSTALLATION_NAMESPACE=$(oc get installation $INSTALLATION_NAME -o jsonpath='{.metadata.namespace}')
-    CSV_NAME=$(oc get csvs -o name --no-headers=true | grep ibm-aiops-orchestrator)
-    VERSION_AIOPSORCHESTRATOR=$(oc get $CSV_NAME -o jsonpath='{.spec.version}'| cut -d. -f1-2)
+    INSTALLATION_NAME=$(oc get installations.orchestrator.aiops.ibm.com -n $INSTALLATION_NAMESPACE --no-headers | awk '{ print $1 }')
+    CSV_NAME=$(oc get csv -n $INSTALLATION_NAMESPACE -o name --no-headers | grep ibm-aiops-orchestrator)
+    VERSION_AIOPSORCHESTRATOR=$(oc get $CSV_NAME -n $INSTALLATION_NAMESPACE -o jsonpath='{.spec.version}' | cut -d. -f1-2)
 fi
 
 
