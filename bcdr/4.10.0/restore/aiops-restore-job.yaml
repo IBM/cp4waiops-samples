@@ -7,8 +7,6 @@ spec:
   backoffLimit: 0
   template:
     spec:
-      imagePullSecrets:
-        - name: restore-secret
       serviceAccountName: restore-sa
       volumes:
         - name: restore-data-config
@@ -20,7 +18,7 @@ spec:
         - name: workdir
           emptyDir: {}
       containers:
-      - image: "<IMAGE NAME>"
+      - image: "icr.io/cpopen/cp4waiops/cp4waiops-bcdr@sha256:b0641292a65f2a2bb11daee6bed035bd21db608c91778bd7c4b28ab2ebacf951"
         imagePullPolicy: Always
         name: aiops-restore
         command: ["/bin/bash", "/bcdr/restore/restore.sh","-aiops"]
