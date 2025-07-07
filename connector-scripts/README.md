@@ -37,8 +37,9 @@ Update the following fields in the script:
 ```python
 instana_base_url = "<BaseURL>"                  # Example: "https://instana.yourcompany.com"
 access_token = "<AccessToken>"                  # Instana API Token
-metrics_config_json = "<Metric Configuration>"  # 
+metrics_config_json = "<Metric Configuration>"  # Plugin and metric mapping
 polling_interval_minutes = 5                    # Polling interval in minutes (default: 5)
+quota_utilization_percentage = 75               # Max % of search zone limit to be used (e.g., 75%)
 ```
 
 ## Usage
