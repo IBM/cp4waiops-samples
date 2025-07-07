@@ -4,7 +4,6 @@ import requests
 from prettytable import PrettyTable
 from collections import defaultdict
 from datetime import datetime
-from copy import deepcopy
 from math import ceil
 
 # ---------------------- Configurable Inputs ----------------------
@@ -34,6 +33,7 @@ metrics_config_json = '''
 ]
 '''
 polling_interval_minutes = 5
+max_utilization_percent = 75
 # ------------------------------------------------------------------
 
 # Plugins to exclude from search zone calculation
@@ -173,11 +173,12 @@ if __name__ == "__main__":
             print(f"Estimated Number of Instana Connector Integrations: {estimated_integrations}")
 
             print("\n Suggested Plugin Grouping for Balanced Integrations")
-            
+            effective_limit = int(search_zone_limit * (max_utilization_percent / 100))
+            print(f"\nUsing {max_utilization_percent}% of search zone limit per integration ({effective_limit} requests max)")
             integration_groups = generate_integrations_group(
                 plugin_snapshot_map,
                 metrics_config,
-                search_zone_limit
+                effective_limit
             )
 
             for idx, group in enumerate(integration_groups, 1):
@@ -196,7 +197,7 @@ if __name__ == "__main__":
                 print(table)
                 print(f"  Total Requests: {total_integration_requests}")
                 if (total_integration_requests > search_zone_limit):
-                    print(red(f"\n  WARNING: Due to a large host count, total hourly requests exceed the search zone limit ({search_zone_limit}). Please set a host filter or increase the search zone limit to resolve this."))
+                    print(red(f"\n  WARNING: Due to a large host count, total hourly requests exceed the search zone limit ({search_zone_limit}). Please set a host filter or adjust the poll interval or increase the search zone limit to resolve this."))
                 
             print(f"\nReport generated at: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
         
