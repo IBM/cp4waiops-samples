@@ -1,13 +1,14 @@
 #!/bin/bash
 #
-# © Copyright IBM Corp. 2024
+# © Copyright IBM Corp. 2024, 2025
 # SPDX-License-Identifier: Apache2.0
 #
 #This reference script can be used to install the OpenShift LokiStack for
 # cluster logging as documented in:
-#   https://docs.openshift.com/container-platform/4.15/observability/logging/cluster-logging-deploying.html#logging-loki-cli-install_cluster-logging-deploying
+#   https://docs.redhat.com/en/documentation/openshift_container_platform/4.18/html/logging/logging-6-2#installing-loki-and-logging-cli_installing-logging-6-2
+#   https://docs.redhat.com/en/documentation/openshift_container_platform/4.15/html/logging/cluster-logging-deploying#logging-loki-cli-install_cluster-logging-deploying
 # and
-#   https://docs.openshift.com/container-platform/4.15/observability/logging/log_storage/cluster-logging-loki.html
+#   https://docs.redhat.com/en/documentation/openshift_container_platform/4.15/observability/logging/log_storage/cluster-logging-loki.html
 #
 #The script can be used in a production environment, but is not a substitute
 # for thorough planning or an understanding of the installation process and its
@@ -17,33 +18,45 @@
 # - Further customizations and modifications to this script are expected to
 #   ensure that it aligns with your requirements.
 # - LOKI requires object storage, so ensure that object storage is available
-#   [ s3, azure, gcs, swift ]. Only local ODF S3 was attempted with this script.
+#   [ s3, azure, gcs, swift ]. Only local ODF S3 was attempted/tested with this script.
 #
 
-#set -x
-
 # LOKI Logging size and consequences
-#   https://docs.openshift.com/container-platform/4.15/observability/logging/log_storage/installing-log-storage.html#loki-deployment-sizing_installing-log-storage
+#   https://docs.redhat.com/en/documentation/openshift_container_platform/4.15/html/logging/log-storage-3#loki-deployment-sizing_installing-log-storage
 #
 #  demo:        minimal cpu/memory, 80G disk usage no replication
 #  extra-small: 16cpu,  35G memory, 750G disk 2 replicas
 #  small:       42cpu,  83G memory, 750G disk 2 replicas
 #  medium:      70cpu, 171G memory, 910G disk 2 replicas
 
+#set -x
+
+case $(oc version -o yaml | sed -n 's/^openshiftVersion:  *\([^.]*\.[^.]*\)\..*/\1/p') in
+  4.15|4.16)
+    DEFCHANNEL=stable-5.9
+    ;;
+  4.17)
+    DEFCHANNEL=stable-6.2
+    ;;
+  *)
+    DEFCHANNEL=stable-6.3
+    ;;
+esac
+
 #
 # Customization environment variables
 #
-: "${OCPLOG_CHANNEL:=stable}"  # install channel
+: "${OCPLOG_CHANNEL:=${DEFCHANNEL}}"  # install channel
 : "${OCPLOG_SIZE:=demo}"
 # unit is days, 4 to handle anything that might have happened over the weekend
 : "${OCPLOG_MAX_RETENTION:=4}"   
 : "${OCPLOG_MAX_RETENTION_APP:=${OCPLOG_MAX_RETENTION}}"
 : "${OCPLOG_MAX_RETENTION_INFRA:=${OCPLOG_MAX_RETENTION}}"
 : "${OCPLOG_MAX_RETENTION_AUDIT:=${OCPLOG_MAX_RETENTION}}"
-# https://docs.openshift.com/container-platform/4.15/observability/logging/log_storage/cluster-logging-loki.html#loki-rate-limit-errors_cluster-logging-loki
+# https://docs.redhat.com/en/documentation/openshift_container_platform/4.15/html/logging/log-storage-3#loki-rate-limit-errors_cluster-logging-loki
 : "${OCPLOG_MAX_INGEST_BURST:=16}"
 : "${OCPLOG_MAX_INGEST_RATE:=8}"
-# https://docs.openshift.com/container-platform/4.15/observability/logging/log_storage/cluster-logging-loki.html#logging-creating-new-group-cluster-admin-user-role_cluster-logging-loki
+# https://docs.redhat.com/en/documentation/openshift_container_platform/4.15/html/logging/log-storage-3#logging-creating-new-group-cluster-admin-user-role_cluster-logging-loki
 : "${OCPLOG_USERS:=$(oc whoami)}"
 # object storage settings
 : "${OCPLOG_STORAGE_TYPE:=s3}"
@@ -92,7 +105,7 @@ if [[ -n "$b" ]]; then
   exit $LINENO
 fi
 if [[ "${OCPLOG_STORAGE_CLASS}" == "ocs-storagecluster-ceph-rgw" ]]; then
-  sc=$(oc get sc ${OCPLOG_STORAGE_CLASS} -o jsonpath='{.metadata.name}')
+  sc=$(oc get sc --ignore-not-found ${OCPLOG_STORAGE_CLASS} -o jsonpath='{.metadata.name}')
   if [[ -z "$sc" ]]; then
     echo ERROR: OCPLOG_STORAGE_CLASS is set to ${OCPLOG_STORAGE_CLASS} but that storage class does not exist.
     exit $LINENO
@@ -103,18 +116,18 @@ if [[ "${OCPLOG_STORAGE_CLASS}" == "ocs-storagecluster-ceph-rgw" ]]; then
     use_odf_bucketclaim=true
   fi
 else
-  sc=$(oc get sc ${OCPLOG_STORAGE_CLASS} -o jsonpath='{.metadata.name}')
+  sc=$(oc get sc --ignore-not-found ${OCPLOG_STORAGE_CLASS} -o jsonpath='{.metadata.name}')
   if [[ -z "$sc" ]]; then
     echo "WARNING: OCPLOG_STORAGE_CLASS is set to ${OCPLOG_STORAGE_CLASS} but that storage class does not exist."
   fi
   obc=$(oc get crd --ignore-not-found objectbucketclaims.objectbucket.io -o jsonpath='{.metadata.name}')
   if [[ -z "$obc" ]]; then
-    s=$(oc get secret -n openshift-logging ${OCPLOG_STORAGE_SECRET})
+    s=$(oc get secret --ignore-not-found -n openshift-logging ${OCPLOG_STORAGE_SECRET})
     if [[ -z "$s" ]]; then
       echo "ERROR: ODF is not installed and cannot find the secret '${OCPLOG_STORAGE_SECRET}'"
       echo "       in the project openshift-logging."
       echo "       Configure storage logging storage first as described in"
-      echo '       https://docs.openshift.com/container-platform/4.15/observability/logging/log_storage/installing-log-storage.html#logging-loki-storage_installing-log-storage'
+      echo '       https://docs.redhat.com/en/documentation/openshift_container_platform/4.15/observability/logging/log_storage/installing-log-storage.html#logging-loki-storage_installing-log-storage'
       exit $LINENO
     elif [[ -z "${OCPLOG_BLIND_OVERRIDE}" ]]; then
       echo "WARNING: Found OCPLOG_STORAGE_TYPE ${OCPLOG_STORAGE_TYPE}"
@@ -126,6 +139,14 @@ else
   fi
 fi
 
+OCPLOG_VERSION=$(echo ${OCPLOG_CHANNEL} | sed -n 's/stable-\([^.][^.]*\)\..*/\1/p')
+if [[ -z "${OCPLOG_VERSION}" ]]; then
+  echo "ERROR: Could not determine version from channel ${OCPLOG_CHANNEL}"
+  exit $LINENO
+elif [[ ${OCPLOG_VERSION} -ne 5  && ${OCPLOG_VERSION} -ne 6 ]]; then
+  echo "ERROR: Unknown OCP Logging version ${OCPLOG_VERSION}"
+  exit $LINENO
+fi
 
 cat << EOF | oc apply --validate -f -
 apiVersion: project.openshift.io/v1
@@ -157,7 +178,14 @@ spec:
   name: cluster-logging
   source: redhat-operators 
   sourceNamespace: openshift-marketplace
+  config:
+    nodeSelector:
+      ${OCPLOG_NODE_SELECTOR_LABEL}: "${OCPLOG_NODE_SELECTOR_VALUE}"
 EOF
+
+if [[ "${OCPLOG_NODE_SELECTOR_LABEL}" == "none" ]]; then
+  oc patch Subscription cluster-logging -n openshift-logging --type json -p '[{"op": "remove", "path": "/spec/config"}]'
+fi
 
 echo -n 'Waiting for OpenShift Logging Operator to be installed...'
 while true; do
@@ -207,7 +235,7 @@ spec:
 EOF
 
 if [[ "${OCPLOG_NODE_SELECTOR_LABEL}" == "none" ]]; then
-  oc patch Subscription loki-operator --type json -p '[{"op": "remove", "path": "/spec/config"}]'
+  oc patch Subscription loki-operator -n openshift-operators-redhat --type json -p '[{"op": "remove", "path": "/spec/config"}]'
 fi
 
 echo -n 'Waiting for OpenShift Loki Operator to be installed...'
@@ -263,6 +291,20 @@ metadata:
 spec:
   generateBucketName: ${obcname}
   storageClassName: ${OCPLOG_STORAGE_CLASS}
+  additionalConfig:
+    bucketLifecycle: |
+      {
+        "Rules": [
+          {
+            "ID": "ExpireAfterDays",
+            "Status": "Enabled",
+            "Prefix": "",
+            "Expiration": {
+              "Days": ${OCPLOG_MAX_RETENTION}
+            }
+          }
+        ]
+      }
 EOF
 
   echo -n 'Waiting for OpenShift LOKI ObjectBucketClaim to be ready...'
@@ -467,6 +509,138 @@ while true; do
 done
 echo done
 
+if [[ "${OCPLOG_VERSION}" == "6" ]]; then
+
+  oc create sa logging-collector -n openshift-logging --dry-run=client -o yaml \
+     | oc apply --validate -f -
+  oc adm policy add-cluster-role-to-user logging-collector-logs-writer \
+     -z logging-collector -n openshift-logging --dry-run=client -o yaml \
+     | oc apply --validate -f -
+  oc adm policy add-cluster-role-to-user collect-audit-logs \
+     -z logging-collector -n openshift-logging --dry-run=client -o yaml \
+     | oc apply --validate -f -
+  oc adm policy add-cluster-role-to-user collect-application-logs \
+     -z logging-collector -n openshift-logging --dry-run=client -o yaml \
+     | oc apply --validate -f -
+  oc adm policy add-cluster-role-to-user collect-infrastructure-logs \
+     -z logging-collector -n openshift-logging --dry-run=client -o yaml \
+     | oc apply --validate -f -
+
+  cat << EOF | oc apply --validate -f -
+apiVersion: observability.openshift.io/v1
+kind: ClusterLogForwarder
+metadata:
+  name: instance
+  namespace: openshift-logging
+spec:
+  serviceAccount:
+    name: logging-collector
+  outputs:
+  - name: lokistack-out
+    type: lokiStack
+    lokiStack:
+      target:
+        name: logging-loki
+        namespace: openshift-logging
+      authentication:
+        token:
+          from: serviceAccount
+    tls:
+      ca:
+        key: service-ca.crt
+        configMapName: openshift-service-ca.crt
+  pipelines:
+  - name: infra-app-logs
+    inputRefs:
+    - audit
+    - application
+    - infrastructure
+    outputRefs:
+    - lokistack-out
+EOF
+
+  echo -n 'Waiting for OpenShift ClusterLogForwarder to be ready...'
+  while true; do
+    s=$(oc get ClusterLogForwarder instance --ignore-not-found -n openshift-logging -o jsonpath='{.status.conditions[?(@.type=="observability.openshift.io/Valid")].status}')
+    if [ "$s" == "True" ]; then break; fi
+    sleep 5;
+    echo -n .
+  done
+  echo done
+
+  cat << EOF | oc apply --validate -f -
+apiVersion: project.openshift.io/v1
+kind: Project
+metadata:
+  name: openshift-cluster-observability-operator
+  annotations:
+    openshift.io/node-selector: ""
+spec: {}
+---
+apiVersion: operators.coreos.com/v1
+kind: OperatorGroup
+metadata:
+  name: openshift-cluster-observability-operator
+  namespace: openshift-cluster-observability-operator
+spec: {}
+---
+apiVersion: operators.coreos.com/v1alpha1
+kind: Subscription
+metadata:
+  labels:
+    operators.coreos.com/cluster-observability-operator.openshift-cluster-observability: ""
+  name: cluster-observability-operator
+  namespace: openshift-cluster-observability-operator
+spec:
+  channel: stable
+  installPlanApproval: Automatic
+  name: cluster-observability-operator
+  source: redhat-operators
+  sourceNamespace: openshift-marketplace
+  config:
+    nodeSelector:
+      ${OCPLOG_NODE_SELECTOR_LABEL}: "${OCPLOG_NODE_SELECTOR_VALUE}"
+EOF
+
+  if [[ "${OCPLOG_NODE_SELECTOR_LABEL}" == "none" ]]; then
+    oc patch Subscription cluster-observability-operator -n openshift-cluster-observability-operator \
+      --type json -p '[{"op": "remove", "path": "/spec/config"}]'
+  fi
+
+  echo -n 'Waiting for OpenShift Observability Operator to be installed...'
+  while true; do
+    s=$(oc get csvs -n openshift-cluster-observability-operator -o jsonpath='{.items[?(@.spec.displayName=="Cluster Observability Operator")].status.phase}')
+    if [[ "$s" == "Succeeded" ]]; then break; fi
+    echo -n .
+    sleep 5
+  done
+  echo done
+
+  cat << EOF | oc apply --validate -f -
+apiVersion: observability.openshift.io/v1alpha1
+kind: UIPlugin
+metadata:
+  name: logging
+spec:
+  type: Logging
+  logging:
+    lokiStack:
+      name: logging-loki
+EOF
+
+  echo -n 'Waiting for UIPlugin to be ready...'
+  while true; do
+    r=$(oc get deployment logging --ignore-not-found -n openshift-cluster-observability-operator -o jsonpath='{.status.replicas}')
+    s=$(oc get deployment logging --ignore-not-found -n openshift-cluster-observability-operator -o jsonpath='{.status.readyReplicas}')
+    if [[ -n "$r"  &&  "$s" == "$r" ]]; then break; fi
+    echo -n .
+    sleep 5
+  done
+  echo done
+r=
+
+elif [[ "${OCPLOG_VERSION}" == "5" ]]; then
+
 cat << EOF | oc apply --validate -f -
 apiVersion: logging.openshift.io/v1
 kind: ClusterLogging
@@ -492,28 +666,28 @@ spec:
     type: vector
 EOF
 
-if [[ "${OCPLOG_NODE_SELECTOR_LABEL}" == "none" ]]; then
-  oc patch ClusterLogging instance -n openshift-logging --type json -p '[{"op": "remove", "path": "/spec/visualization/nodeSelector"}]'
-fi
-if [[ -n "${OCPLOG_ON_CONTROL_PLANE}" ]]; then
-  oc patch ClusterLogging instance -n openshift-logging --type json -p \
-    '[{"op": "add", "path": "/spec/visualization/tolerations/0", "value": {"key":"'${OCPLOG_ON_CONTROL_PLANE}'", "operator":"Exists"}}]'
-fi
+  if [[ "${OCPLOG_NODE_SELECTOR_LABEL}" == "none" ]]; then
+    oc patch ClusterLogging instance -n openshift-logging --type json -p '[{"op": "remove", "path": "/spec/visualization/nodeSelector"}]'
+  fi
+  if [[ -n "${OCPLOG_ON_CONTROL_PLANE}" ]]; then
+    oc patch ClusterLogging instance -n openshift-logging --type json -p \
+      '[{"op": "add", "path": "/spec/visualization/tolerations/0", "value": {"key":"'${OCPLOG_ON_CONTROL_PLANE}'", "operator":"Exists"}}]'
+  fi
 
 
-echo -n 'Waiting for OpenShift Logging Cluster to be ready...'
-while true; do
-  s=$(oc get ClusterLogging instance --ignore-not-found -n openshift-logging -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}')
-  if [ "$s" == "True" ]; then break; fi
-  sleep 5;
-  echo -n .
-done
-echo done
+  echo -n 'Waiting for OpenShift Logging Cluster to be ready...'
+  while true; do
+    s=$(oc get ClusterLogging instance --ignore-not-found -n openshift-logging -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}')
+    if [ "$s" == "True" ]; then break; fi
+    sleep 5;
+    echo -n .
+  done
+  echo done
 
+  #Enable logging on the OpenShift console
+  p=$(oc get console.operator cluster -o jsonpath='{.spec.plugins[?(@=="logging-view-plugin")]}')
+  if [[ -z "$p" ]]; then
+    oc patch console.operator cluster --type json -p '[{"op": "add", "path": "/spec/plugins/0", "value": "logging-view-plugin"}]'
+  fi
 
-#Enable logging on the OpenShift console
-p=$(oc get console.operator cluster -o jsonpath='{.spec.plugins[?(@=="logging-view-plugin")]}')
-if [[ -z "$p" ]]; then
-  oc patch console.operator cluster --type json -p '[{"op": "add", "path": "/spec/plugins/0", "value": "logging-view-plugin"}]'
 fi 
-
