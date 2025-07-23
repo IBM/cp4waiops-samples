@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# © Copyright IBM Corp. 2022, 2024
+# © Copyright IBM Corp. 2022, 2025
 # SPDX-License-Identifier: Apache2.0
 #
 # This reference script can be used to quickly install ODF as publicly
@@ -43,11 +43,18 @@
 #       https://access.redhat.com/documentation/en-us/red_hat_openshift_data_foundation/4.15/html-single/managing_and_allocating_storage_resources/index#how-to-use-dedicated-worker-nodes-for-openshift-data-foundation_rhodf
 #   - ODF_DEVICE_PATHS
 #       A comma separated list of block disks to use for local storage
-#         - /dev/odf/localstorage or /dev/vdb,/dev/vdc or /dev/sdb,/dev/sdc or /dev/hdb,/dev/hdc
+#         - /dev/localstorage/odf or /dev/vdb,/dev/vdc or /dev/sdb,/dev/sdc or /dev/hdb,/dev/hdc
 #       NOTE:
 #         - Whitespaces are not allowed
 #         - ODF uses more CPU and memory for each path found. Consider using an LVM
-#           or some other means of presenting a single path to OCP local storage
+#           or some other means of presenting a single path to OCP local storage.
+#           For example, if you have 2 block devices available (/dev/vdb /dev/vdc):
+#             # pvcreate /dev/vdb /dev/vdc
+#             # vgcreate localstorage /dev/vdb /dev/vdc
+#             # lvcreate localstorage -n odf -l 100%FREE
+#             # lvs -a
+#           then:
+#             # export ODF_DEVICE_PATHS=/dev/localstorage/odf
 #         - https://docs.openshift.com/container-platform/4.15/storage/persistent_storage/persistent_storage_local/persistent-storage-local.html
 #   - ODF_DEVICE_TYPES=disk
 #       A comma separated list of types of devices ODF should search for on the
@@ -185,7 +192,7 @@ function discover_disks {
 }
 
 
-echo Installing Local Storage
+echo Installing Local Storage Operator...
 cat << EOF | oc apply --validate -f -
 apiVersion: project.openshift.io/v1
 kind: Project
@@ -224,7 +231,7 @@ spec:
 EOF
 
 
-echo -n 'Waiting for Local Storage to be installed...'
+echo -n 'Waiting for the Local Storage operator to be installed...'
 while true; do
   sleep 5;
   s=$(oc get csvs -n openshift-local-storage -o jsonpath='{.items[?(@.spec.displayName=="Local Storage")].status.phase}')
@@ -277,7 +284,7 @@ spec:
       effect: NoSchedule
 EOF
 
-echo -n 'Waiting for ODF to be installed...'
+echo -n 'Waiting for the ODF operator to be installed...'
 while true; do
   sleep 5;
   s=$(oc get csvs -n openshift-storage -o jsonpath='{.items[?(@.spec.displayName=="OpenShift Data Foundation")].status.phase}')
