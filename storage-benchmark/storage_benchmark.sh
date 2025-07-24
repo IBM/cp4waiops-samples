@@ -7,24 +7,23 @@ if [ -z "${STORAGE_CLASS}" ]; then
 fi
 
 if [ -z "${IMAGE}" ]; then
-    IMAGE="icr.io/cpopen/cp4waiops/storage-benchmark@sha256:2803d2f79651f5ccd1c8a0467a429076281120599f9ef03ef4c15924c31db51c"
+    IMAGE="icr.io/cpopen/cp4waiops/storage-benchmark@sha256:d28697ec009ee73e03a70af5271f1ee8dd1abea688f75df632870affb86834de"
 fi
 
 if [ -z "${SIZE}" ]; then
     SIZE="5Gi"
 fi
 
+if [ -z "${NAMESPACE}" ]; then
+    NAMESPACE="aiops"
+fi
+
 cat << EOF | kubectl apply --validate -f -
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: aiops-storage-benchmark
----
 kind: PersistentVolumeClaim
 apiVersion: v1
 metadata:
-  name: storage-benchmark
-  namespace: aiops-storage-benchmark
+  name: aiops-storage-benchmark
+  namespace: ${NAMESPACE}
 spec:
   storageClassName: ${STORAGE_CLASS}
   accessModes:
@@ -36,8 +35,8 @@ spec:
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: storage-benchmark
-  namespace: aiops-storage-benchmark
+  name: aiops-storage-benchmark
+  namespace: ${NAMESPACE}
 spec:
   template:
     spec:
@@ -79,7 +78,7 @@ spec:
       volumes:
       - name: storage-benchmark-pv
         persistentVolumeClaim:
-          claimName: storage-benchmark
+          claimName: aiops-storage-benchmark
       securityContext:
         runAsNonRoot: true
   backoffLimit: 4

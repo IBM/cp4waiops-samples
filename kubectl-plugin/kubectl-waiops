@@ -1,11 +1,14 @@
 #!/bin/bash
 
-# © Copyright IBM Corp. 2020, 2024
+# © Copyright IBM Corp. 2020, 2025
 
 # The CP4AIOps status checker tool prints out several components to indicate the status of your install.
 # In a successful install, the components below should all have a successful STATUS/PROGRESS/PHASE indicator.
 # If any of the components are incomplete or are not reconciled after a significant period of time, 
 # please refer to the IBM troubleshooting docs online or open a support case. 
+
+
+INSTALLATION_NAMESPACE=""
 
 # Various formatting elements
 newline='\n\n'
@@ -30,10 +33,10 @@ Available Commands:
   multizone pods     Print the node topology and pods with zone distribution
   multizone status   Print the node topology and report status
 
-  status             Print the status of the main components in the CloudPak
-  status-summary     Print a brief summary status of the CloudPak
-  status-upgrade     Print the upgrade status of the components in the CloudPak
-  status-all         Print the most detail about the components in the CloudPak
+  status <namespace>             Print the status of the main components in the CloudPak
+  status-summary <namespace>     Print a brief summary status of the CloudPak
+  status-upgrade <namespace>     Print the upgrade status of the components in the CloudPak
+  status-all <namespace>         Print the most detail about the components in the CloudPak
 
 EOF
 }
@@ -262,7 +265,7 @@ getKafkaStatus() {
 }
 
 getElasticsearchStatus() {
-    if [[ "${VERSION_AIOPSORCHESTRATOR}" != "4.8" ]]; then
+    if [[ "${VERSION_AIOPSORCHESTRATOR}" != "4.8" && "${VERSION_AIOPSORCHESTRATOR}" != "4.9" && "${VERSION_AIOPSORCHESTRATOR}" != "4.10" && "${VERSION_AIOPSORCHESTRATOR}" != "0.1" ]]; then
         # Elastic status
         INSTANCE_ELASTIC=$(oc get elasticsearches.elastic.automation.ibm.com iaf-system -o custom-columns='KIND:.kind,NAMESPACE:.metadata.namespace,NAME:.metadata.name,STATUS:.status.conditions[?(@.type=="Ready")].status')
         STATUS_ELASTIC=$(oc get elasticsearches.elastic.automation.ibm.com iaf-system -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}')
@@ -272,7 +275,7 @@ getElasticsearchStatus() {
         else    
             printStatus "$STATUS_ELASTIC" "True" "$INSTANCE_ELASTIC"
         fi
-    else
+    elif [[ "${VERSION_AIOPSORCHESTRATOR}" != "4.10" && "${VERSION_AIOPSORCHESTRATOR}" != "0.1" ]]; then
         INSTANCE_ELASTIC=$(oc get elasticsearchcluster.elasticsearch.opencontent.ibm.com aiops -o custom-columns='KIND:.kind,NAMESPACE:.metadata.namespace,NAME:.metadata.name,STATUS:.status.phase')
         STATUS_ELASTIC=$(oc get elasticsearchcluster.elasticsearch.opencontent.ibm.com aiops -o jsonpath='{.status.phase}')
         if [[ "$1" == "status-summary" ]];
@@ -280,6 +283,15 @@ getElasticsearchStatus() {
             printStatus "$STATUS_ELASTIC" "Ready" "$INSTANCE_ELASTIC" "status-summary"
         else
             printStatus "$STATUS_ELASTIC" "Ready" "$INSTANCE_ELASTIC"
+        fi
+    else
+        INSTANCE_ELASTIC=$(oc get clusters.opensearch.cloudpackopen.ibm.com aiops-opensearch -o custom-columns='KIND:.kind,NAMESPACE:.metadata.namespace,NAME:.metadata.name,STATUS:.status.phase')
+        STATUS_ELASTIC=$(oc get clusters.opensearch.cloudpackopen.ibm.com aiops-opensearch -o jsonpath='{.status.phase}')
+        if [[ "$1" == "status-summary" ]];
+        then
+            printStatus "$STATUS_ELASTIC" "Available" "$INSTANCE_ELASTIC" "status-summary"
+        else
+            printStatus "$STATUS_ELASTIC" "Available" "$INSTANCE_ELASTIC"
         fi
     fi
 }
@@ -805,7 +817,7 @@ fi
 
 if [[ "$1" == "version" ]]
 then
-    echo "0.0.32"
+    echo "0.0.35"
     exit 0
 fi
 
@@ -833,7 +845,14 @@ if [[ "$1" == "multizone" ]]; then
   exit 0
 fi
 
-
+if [[ "$1" == "status" || "$1" == "status-all" || "$1" == "status-upgrade" || "$1" == "status-summary" ]]; then
+    if [[ ! -z "$2" ]]; then
+        INSTALLATION_NAMESPACE=$2
+    else
+        echo "Error: Use oc waiops $1 <namespace>."
+        exit 1
+    fi
+fi
 
 # Environment variables including installation info (gathered from existing installation instance on the cluster) and version
 CLUSTER_ADMIN=$(oc auth can-i '*' '*' --all-namespaces)
@@ -850,20 +869,15 @@ then
     exit 0
 fi
 
-if [[ "$CLUSTER_ADMIN" == "yes" ]];
-then
-    INSTALLATION_NAME=$(oc get installations.orchestrator.aiops.ibm.com -A --no-headers | while read a b c; do echo "$b"; done; 2>/dev/null)
-    INSTALLATION_NAMESPACE=$(oc get installations.orchestrator.aiops.ibm.com -A --no-headers | while read a b c; do echo "$a"; done; 2>/dev/null)
-    CSV_NAME=$(oc get csvs -o name --no-headers=true -n $INSTALLATION_NAMESPACE | grep ibm-aiops-orchestrator)
-    VERSION_AIOPSORCHESTRATOR=$(oc get $CSV_NAME -n $INSTALLATION_NAMESPACE -o jsonpath='{.spec.version}' | awk '{ print substr( $0, 0, 3 ) }')
-    CLUSTER_SCOPE_INSTALL=$(if [[ $(oc get subscription.operators.coreos.com -A  | grep ibm-aiops-orchestrator | awk '{ print $1 }') == "openshift-operators" ]]; then echo "true"; else echo "false"; fi)
+if [[ "$CLUSTER_ADMIN" == "yes" ]]; then
+    INSTALLATION_NAME=$(oc get installations.orchestrator.aiops.ibm.com -n $INSTALLATION_NAMESPACE --no-headers | awk '{ print $1 }')
+    CSV_NAME=$(oc get csv -n $INSTALLATION_NAMESPACE -o name --no-headers | grep ibm-aiops-orchestrator)
+    VERSION_AIOPSORCHESTRATOR=$(oc get $CSV_NAME -n $INSTALLATION_NAMESPACE -o jsonpath='{.spec.version}' | cut -d. -f1-2)
+    CLUSTER_SCOPE_INSTALL=$(if [[ $(oc get subscription.operators.coreos.com -A | grep ibm-aiops-orchestrator | awk '{ print $1}') == "openshift-operators" ]]; then echo "true"; else echo "false"; fi)
 else
-    # ask user if they are in the project namespace.
-    # if they are, set INSTALLATION_NAMESPACE=current project
-    INSTALLATION_NAME=$(oc get installations.orchestrator.aiops.ibm.com --no-headers | while read a b c; do echo "$a"; done; 2>/dev/null)
-    INSTALLATION_NAMESPACE=$(oc get installation $INSTALLATION_NAME -o jsonpath='{.metadata.namespace}')
-    CSV_NAME=$(oc get csvs -o name --no-headers=true | grep ibm-aiops-orchestrator)
-    VERSION_AIOPSORCHESTRATOR=$(oc get $CSV_NAME -o jsonpath='{.spec.version}' | awk '{ print substr( $0, 0, 3 ) }')
+    INSTALLATION_NAME=$(oc get installations.orchestrator.aiops.ibm.com -n $INSTALLATION_NAMESPACE --no-headers | awk '{ print $1 }')
+    CSV_NAME=$(oc get csv -n $INSTALLATION_NAMESPACE -o name --no-headers | grep ibm-aiops-orchestrator)
+    VERSION_AIOPSORCHESTRATOR=$(oc get $CSV_NAME -n $INSTALLATION_NAMESPACE -o jsonpath='{.spec.version}' | cut -d. -f1-2)
 fi
 
 
@@ -902,7 +916,7 @@ then
         getAIOpsEventProcessorStatus
     else
         echo "______________________________________________________________"
-        echo "Kafka and Elasticsearch instances:" && echo ""   
+        echo "Kafka and Opensearch instances:" && echo ""   
         getKafkaStatus
         getElasticsearchStatus
     fi
@@ -1059,13 +1073,15 @@ then
         getCSVStatus "$INSTALLATION_NAMESPACE" "ibm-automation.v"
     fi
 
-    if [[ "${VERSION_AIOPSORCHESTRATOR}" != 4.8 ]]; then
-        getCSVStatus "$INSTALLATION_NAMESPACE" "ibm-automation-elastic"
-    else
+    if [[ "${VERSION_AIOPSORCHESTRATOR}" == "4.10" || "${VERSION_AIOPSORCHESTRATOR}" == "0.1" ]]; then
+        getCSVStatus "$INSTALLATION_NAMESPACE" "ibm-opensearch-operator" 
+    elif [[ "${VERSION_AIOPSORCHESTRATOR}" == "4.8" || "${VERSION_AIOPSORCHESTRATOR}" == "4.9" ]]; then
         getCSVStatus "$INSTALLATION_NAMESPACE" "ibm-elasticsearch-operator"
+    else
+        getCSVStatus "$INSTALLATION_NAMESPACE" "ibm-automation-elastic"
     fi
     
-    if [[ "${VERSION_AIOPSORCHESTRATOR}" != "4.7" && "${VERSION_AIOPSORCHESTRATOR}" != "4.8" ]];
+    if [[ "${VERSION_AIOPSORCHESTRATOR}" != "4.7" && "${VERSION_AIOPSORCHESTRATOR}" != "4.8" && "${VERSION_AIOPSORCHESTRATOR}" != "4.9" && "${VERSION_AIOPSORCHESTRATOR}" != "4.10" ]];
     then
         getCSVStatus "$INSTALLATION_NAMESPACE" "ibm-automation-flink"
     else
@@ -1210,21 +1226,23 @@ then
             getSubscriptionStatusGrep "ibm-automation-eventprocessing" "$INSTALLATION_NAMESPACE" 
         fi
 
-        if [[ "${VERSION_AIOPSORCHESTRATOR}" != "4.8" ]]; then
-            getSubscriptionStatusGrep "ibm-automation-elastic" "$INSTALLATION_NAMESPACE"
-        else
+        if [[ "${VERSION_AIOPSORCHESTRATOR}" == "4.10" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "0.1" ]] ; then
+            getSubscriptionStatusGrep "ibm-opensearch-operator" "$INSTALLATION_NAMESPACE"
+        elif [[ "${VERSION_AIOPSORCHESTRATOR}" == "4.8" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "4.9" ]]; then
             getSubscriptionStatusGrep "ibm-elasticsearch-operator" "$INSTALLATION_NAMESPACE"
+        else
+            getSubscriptionStatusGrep "ibm-automation-elastic" "$INSTALLATION_NAMESPACE"
         fi
         
-        if [[ "${VERSION_AIOPSORCHESTRATOR}" != "4.7" ]] && [[ "${VERSION_AIOPSORCHESTRATOR}" != "4.8" ]];
+        if [[ "${VERSION_AIOPSORCHESTRATOR}" == "4.9" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "4.10" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "0.1" ]];
         then
-            getSubscriptionStatusGrep "ibm-automation-flink" "$INSTALLATION_NAMESPACE"
-        else
             getSubscriptionStatusGrep "ibm-opencontent-flink" "$INSTALLATION_NAMESPACE"
+        else
+            getSubscriptionStatusGrep "ibm-automation-flink" "$INSTALLATION_NAMESPACE"
         fi
     fi
 
-    if [[ "$VERSION_AIOPSORCHESTRATOR" != "4.6" && "$VERSION_AIOPSORCHESTRATOR" != "4.7"  && "$VERSION_AIOPSORCHESTRATOR" != "4.8" ]]; then
+    if [[ "$VERSION_AIOPSORCHESTRATOR" != "4.6" && "$VERSION_AIOPSORCHESTRATOR" != "4.7"  && "$VERSION_AIOPSORCHESTRATOR" != "4.8" && "$VERSION_AIOPSORCHESTRATOR" != "4.9" && "$VERSION_AIOPSORCHESTRATOR" != "4.10" ]]; then
         getSubscriptionStatus "ibm-management-kong" "$INSTALLATION_NAMESPACE" 
     fi
 
@@ -1238,7 +1256,7 @@ then
     fi
     getSubscriptionStatus "ibm-watson-aiops-ui-operator" "$INSTALLATION_NAMESPACE"
 
-    if [[ "${VERSION_AIOPSORCHESTRATOR}" == "4.7" || "${VERSION_AIOPSORCHESTRATOR}" == "4.8" ]]; then
+    if [[ "${VERSION_AIOPSORCHESTRATOR}" == "4.7" || "${VERSION_AIOPSORCHESTRATOR}" == "4.8" || "${VERSION_AIOPSORCHESTRATOR}" == "4.9" || "${VERSION_AIOPSORCHESTRATOR}" == "4.10" ]]; then
         getSubscriptionStatus "ibm-aiops-ir-ai" "$INSTALLATION_NAMESPACE" 
         getSubscriptionStatus "ibm-aiops-ir-core" "$INSTALLATION_NAMESPACE" 
         getSubscriptionStatus "ibm-aiops-ir-lifecycle" "$INSTALLATION_NAMESPACE"
@@ -1364,7 +1382,7 @@ then
                 getSubscriptionStatus "cloud-native-postgresql" "$INSTALLATION_NAMESPACE" 
             fi
 
-            if [[ "${VERSION_AIOPSORCHESTRATOR}" == "4.7" || "${VERSION_AIOPSORCHESTRATOR}" == "4.8" ]]; then
+            if [[ "${VERSION_AIOPSORCHESTRATOR}" == "4.7" || "${VERSION_AIOPSORCHESTRATOR}" == "4.8" || "${VERSION_AIOPSORCHESTRATOR}" == "4.9" || "${VERSION_AIOPSORCHESTRATOR}" == "4.10" ]]; then
                 getSubscriptionStatus "ibm-commonui-operator-app" "$INSTALLATION_NAMESPACE"
             else
                 getSubscriptionStatus "ibm-idp-config-ui-operator" "$INSTALLATION_NAMESPACE"
@@ -1377,17 +1395,17 @@ then
             fi
             getSubscriptionStatus "ibm-events-operator" "$INSTALLATION_NAMESPACE"
 
-            if [[ "$VERSION_AIOPSORCHESTRATOR" == "4.7" || "$VERSION_AIOPSORCHESTRATOR" == "4.8" ]];  then
+            if [[ "$VERSION_AIOPSORCHESTRATOR" == "4.7" || "$VERSION_AIOPSORCHESTRATOR" == "4.8" || "$VERSION_AIOPSORCHESTRATOR" == "4.9" || "$VERSION_AIOPSORCHESTRATOR" == "4.10" ]];  then
                 getSubscriptionStatus "ibm-iam-operator" "$INSTALLATION_NAMESPACE"
             else
                 getSubscriptionStatus "ibm-im-operator" "$INSTALLATION_NAMESPACE"
             fi
 
-            if [[ "$VERSION_AIOPSORCHESTRATOR" != "4.6" && "$VERSION_AIOPSORCHESTRATOR" != "4.7" && "$VERSION_AIOPSORCHESTRATOR" != "4.8" ]]; then
+            if [[ "$VERSION_AIOPSORCHESTRATOR" != "4.6" && "$VERSION_AIOPSORCHESTRATOR" != "4.7" && "$VERSION_AIOPSORCHESTRATOR" != "4.8" && "$VERSION_AIOPSORCHESTRATOR" != "4.9" && "$VERSION_AIOPSORCHESTRATOR" != "4.10" ]]; then
                 getSubscriptionStatus "ibm-im-mongodb-operator" "$INSTALLATION_NAMESPACE"
             fi
             
-            if [[ "$VERSION_AIOPSORCHESTRATOR" == "4.7" || "$VERSION_AIOPSORCHESTRATOR" == "4.8" ]]; then
+            if [[ "$VERSION_AIOPSORCHESTRATOR" == "4.7" || "$VERSION_AIOPSORCHESTRATOR" == "4.8" || "$VERSION_AIOPSORCHESTRATOR" == "4.9" || "$VERSION_AIOPSORCHESTRATOR" == "4.10" ]]; then
                 getSubscriptionStatus "ibm-zen-operator" "$INSTALLATION_NAMESPACE"
             else
                 getSubscriptionStatus "ibm-platformui-operator" "$INSTALLATION_NAMESPACE"
@@ -1697,6 +1715,25 @@ then
         MAJORVERSION_ASM="2.26"
     }
 
+    component-versions-49() {
+        MAJORVERSION_AIOPSUI="4.9"
+        MAJORVERSION_AIMANAGER="4.9"
+        MAJORVERSION_IRCORE="4.9"
+        MAJORVERSION_LIFECYCLESERVICE="4.9"
+        MAJORVERSION_AIOPSANALYTICSORCHESTRATOR="4.9"
+        MAJORVERSION_ASM="2.28"
+    }
+
+    component-versions-410() {
+        MAJORVERSION_AIOPSUI="4.10"
+        MAJORVERSION_AIMANAGER="4.10"
+        MAJORVERSION_IRCORE="4.10"
+        MAJORVERSION_LIFECYCLESERVICE="4.10"
+        MAJORVERSION_AIOPSANALYTICSORCHESTRATOR="4.10"
+        MAJORVERSION_ASM="2.30"
+    }
+
+
     aiopsEdgeBaseUpgradeStatus() {    
         UPGRADED=$(oc get aiopsedge aiopsedge -o jsonpath='{.status.conditions[?(@.type=="UpgradeReady")].status}')
         CONFIGURED=$(oc get aiopsedge aiopsedge -o jsonpath='{.status.phase}')
@@ -1712,7 +1749,7 @@ then
     }
 
     aiopsUIUpgradeStatus() {    
-        CURRENT_MAJOR_VERSION=$(oc get aiopsui aiopsui-instance -o jsonpath='{.status.versions.reconciled}' | cut -c1-3)
+        CURRENT_MAJOR_VERSION=$(oc get aiopsui aiopsui-instance -o jsonpath='{.status.versions.reconciled}' | cut -d. -f1-2)
         DETAILS=$(oc get aiopsui -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:status.versions.reconciled,STATUS:status.conditions[?(@.type==\"Ready\")].status,MESSAGE:status.conditions[?(@.type==\"Ready\")].reason")
         if [ "${CURRENT_MAJOR_VERSION}" == "${MAJORVERSION_AIOPSUI}" ];
         then 
@@ -1740,7 +1777,7 @@ then
 
     aiManagerUpgradeStatus() {    
         PHASE_STATUS=$(oc get aimanager aimanager -o jsonpath='{.status.phase}')
-        CURRENT_MAJOR_VERSION=$(oc get aimanager aimanager -o jsonpath='{.status.versions.reconciled}' | cut -c1-3)
+        CURRENT_MAJOR_VERSION=$(oc get aimanager aimanager -o jsonpath='{.status.versions.reconciled}' | cut -d. -f1-2)
         DETAILS=$(oc get AIManager -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:status.versions.reconciled,STATUS:status.phase,MESSAGE:status.message")
         if [ "${PHASE_STATUS}" == "Completed" ] && [ "${CURRENT_MAJOR_VERSION}" == "${MAJORVERSION_AIMANAGER}" ];
         then 
@@ -1756,7 +1793,7 @@ then
         UPGRADED=$(oc get ircore aiops -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}')
         METADATA_GENERATION=$(oc get ircore aiops -o jsonpath='{.metadata.generation}')   
         OBSERVED_GENERATION=$(oc get ircore aiops -o jsonpath='{.status.conditions[].observedGeneration}')        
-        CURRENT_MAJOR_VERSION=$(oc get ircore aiops -o jsonpath='{.status.versions.reconciled}' | cut -c1-3)
+        CURRENT_MAJOR_VERSION=$(oc get ircore aiops -o jsonpath='{.status.versions.reconciled}' | cut -d. -f1-2)
         DETAILS=$(oc get ircore -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:status.versions.reconciled,STATUS:status.conditions[?(@.type==\"Ready\")].reason,MESSAGE:status.conditions[?(@.type==\"Ready\")].message")
         if [ "${UPGRADED}" == "True" ] && [ "${OBSERVED_GENERATION}" == ${METADATA_GENERATION} ] && [ "${CURRENT_MAJOR_VERSION}" == "${MAJORVERSION_IRCORE}" ];
         then 
@@ -1772,7 +1809,7 @@ then
         UPGRADED=$(oc get lifecycleservices aiops -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}')
         METADATA_GENERATION=$(oc get lifecycleservices aiops -o jsonpath='{.metadata.generation}')   
         OBSERVED_GENERATION=$(oc get lifecycleservices aiops -o jsonpath='{.status.observedGeneration}')
-        CURRENT_MAJOR_VERSION=$(oc get lifecycleservices aiops -o jsonpath='{.status.versions.reconciled}' | cut -c1-3)
+        CURRENT_MAJOR_VERSION=$(oc get lifecycleservices aiops -o jsonpath='{.status.versions.reconciled}' | cut -d. -f1-2)
         if [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.3" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.4" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.5" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.6" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.7" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "4.1" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "4.2" ]];
         then
             DETAILS=$(oc get lifecycleservice -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:status.versions.reconciled,STATUS:status.conditions[?(@.type==\"Lifecycle Service Ready\")].reason,MESSAGE:status.conditions[?(@.type==\"Ready\")].message")
@@ -1794,7 +1831,7 @@ then
         UPGRADED=$(oc get AIOpsAnalyticsOrchestrator aiops -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}')
         METADATA_GENERATION=$(oc get AIOpsAnalyticsOrchestrator aiops -o jsonpath='{.metadata.generation}')   
         OBSERVED_GENERATION=$(oc get AIOpsAnalyticsOrchestrator aiops -o jsonpath='{.status.observedGeneration}')
-        CURRENT_MAJOR_VERSION=$(oc get AIOpsAnalyticsOrchestrator aiops -o jsonpath='{.status.versions.reconciled}' | cut -c1-3)
+        CURRENT_MAJOR_VERSION=$(oc get AIOpsAnalyticsOrchestrator aiops -o jsonpath='{.status.versions.reconciled}' | cut -d. -f1-2)
         DETAILS=$(oc get AIOpsAnalyticsOrchestrator  -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:status.versions.reconciled,STATUS:status.conditions[?(@.type==\"Ready\")].reason,MESSAGE:status.conditions[?(@.type==\"Ready\")].message")
         if [ "${UPGRADED}" == "True" ] && [ "${OBSERVED_GENERATION}" == ${METADATA_GENERATION} ] && [ "${CURRENT_MAJOR_VERSION}" == "${MAJORVERSION_AIOPSANALYTICSORCHESTRATOR}" ];
         then 
@@ -1808,7 +1845,7 @@ then
 
     vaultDeployUpgradeStatus() {
         VAULTDEPLOY_COMPLETED=$(oc get vaultdeploy ibm-vault-deploy -o jsonpath='{.status.conditions[?(@.type=="Completed")].status}')
-        CURRENT_MAJOR_VERSION=$(oc get vaultdeploy ibm-vault-deploy -o jsonpath='{.metadata.annotations.productVersion}' | cut -c1-3)
+        CURRENT_MAJOR_VERSION=$(oc get vaultdeploy ibm-vault-deploy -o jsonpath='{.metadata.annotations.productVersion}' | cut -d. -f1-2)
         DETAILS=$(oc get vaultdeploy  -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:metadata.annotations.productVersion,STATUS:status.conditions[?(@.type==\"Completed\")].status,MESSAGE:status.conditions[?(@.type==\"Completed\")].message")
         if [ "${VAULTDEPLOY_COMPLETED}" == "True" ] && [ "${CURRENT_MAJOR_VERSION}" == "${MAJORVERSION_VAULTDEPLOY}" ];
         then 
@@ -1822,7 +1859,7 @@ then
 
     vaultAccessUpgradeStatus() {
         VAULTACCESS_COMPLETED=$(oc get vaultaccess ibm-vault-access -o jsonpath='{.status.conditions[?(@.type=="Completed")].status}')
-        CURRENT_MAJOR_VERSION=$(oc get vaultaccess ibm-vault-access -o jsonpath='{.metadata.annotations.productVersion}' | cut -c1-3)
+        CURRENT_MAJOR_VERSION=$(oc get vaultaccess ibm-vault-access -o jsonpath='{.metadata.annotations.productVersion}' | cut -d. -f1-2)
         DETAILS=$(oc get vaultaccess -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:metadata.annotations.productVersion,STATUS:status.conditions[?(@.type==\"Completed\")].status,MESSAGE:status.conditions[?(@.type==\"Completed\")].message")
         if [ "${VAULTACCESS_COMPLETED}" == "True" ] && [ "${CURRENT_MAJOR_VERSION}" == "${MAJORVERSION_VAULTACCESS}" ];
         then 
@@ -1849,8 +1886,8 @@ then
             POSTGRES_SENTINEL_REPLICA_COUNT=$(oc get deployment cp4waiops-postgres-sentinel -o jsonpath='{.status.replicas}')
             POSTGRES_SENTINEL_CURRENT_REPLICA_COUNT=$(oc get deployment cp4waiops-postgres-sentinel -o jsonpath='{.status.availableReplicas}')
 
-            POSTGRESERVICE_CURRENT_MAJOR_VERSION=$(oc get postgreservices cp4waiops-postgres -o jsonpath='{.spec.version}' | cut -c1-3)
-            POSTGRESDB_CURRENT_MAJOR_VERSION=$(oc get postgresdb cp4waiops-postgresdb -o jsonpath='{.spec.version}' | cut -c1-3)
+            POSTGRESERVICE_CURRENT_MAJOR_VERSION=$(oc get postgreservices cp4waiops-postgres -o jsonpath='{.spec.version}' | cut -d. -f1-2)
+            POSTGRESDB_CURRENT_MAJOR_VERSION=$(oc get postgresdb cp4waiops-postgresdb -o jsonpath='{.spec.version}' | cut -d. -f1-2)
             DETAILS=$(oc get postgreservices,postgresdb -A  -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:spec.version,STATUS:status.conditions[?(@.type==\"Completed\")].status,MESSAGE:status.conditions[?(@.type==\"Completed\")].message")
             if [ "${POSTGRESERVICE_COMPLETED}" == "${POSTGRESDB_COMPLETED}" ] && [ "${STATEFULSET_REPLICA_COUNT}" == "${STATEFULSET_CURRENT_REPLICA_COUNT}" ] && [ "${POSTGRES_PROXY_REPLICA_COUNT}" == "${POSTGRES_PROXY_CURRENT_REPLICA_COUNT}" ] && [ "${POSTGRES_SENTINEL_REPLICA_COUNT}" == "${POSTGRES_SENTINEL_CURRENT_REPLICA_COUNT}" ] && [ "${POSTGRESERVICE_CURRENT_MAJOR_VERSION}" == "${MAJORVERSION_POSTGRESERVICE}" ] && [ "${POSTGRESDB_CURRENT_MAJOR_VERSION}" == "${MAJORVERSION_POSTGRESDB}" ];
             then 
@@ -1865,12 +1902,7 @@ then
 
     asmUpgradeStatus() {
         ASM_COMPLETED=$(oc get asm aiops-topology -o jsonpath='{.status.phase}')
-        if [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.3" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.4" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.5" ]];
-        then 
-            CURRENT_MAJOR_VERSION=$(oc get asm aiops-topology -o jsonpath='{.status.versions.reconciled}' | cut -c1-3)
-        else           
-            CURRENT_MAJOR_VERSION=$(oc get asm aiops-topology -o jsonpath='{.status.versions.reconciled}' | cut -c1-4)
-        fi
+        CURRENT_MAJOR_VERSION=$(oc get asm aiops-topology -o jsonpath='{.status.versions.reconciled}' | cut -d. -f1-2)
 
         DETAILS=$(oc get asm -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,VERSION:status.versions.reconciled,STATUS:status.phase")
         if [ "${ASM_COMPLETED}" == "OK" ] && [ "${CURRENT_MAJOR_VERSION}" == "${MAJORVERSION_ASM}" ];
@@ -1885,7 +1917,7 @@ then
 
     FlinkEventProcessorUpgradeStatus() {
         FLINK_EP_COMPLETED=$(oc get EventProcessor cp4waiops-eventprocessor -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}')
-        CURRENT_MAJOR_VERSION=$(oc get EventProcessor cp4waiops-eventprocessor -o jsonpath='{.status.versions.reconciled}' | cut -c1-3)
+        CURRENT_MAJOR_VERSION=$(oc get EventProcessor cp4waiops-eventprocessor -o jsonpath='{.status.versions.reconciled}' | cut -d. -f1-2)
         DETAILS=$(oc get EventProcessor cp4waiops-eventprocessor -o custom-columns='KIND:.kind,NAMESPACE:.metadata.namespace,NAME:.metadata.name,VERSION:status.versions.reconciled,STATUS:.status.conditions[?(@.type=="Ready")].status,MESSAGE:.status.conditions[?(@.type=="Ready")].message')
         if [ "${FLINK_EP_COMPLETED}" == "True" ] && [ "${CURRENT_MAJOR_VERSION}" == "${MAJORVERSION_FLINKEP}" ];
         then 
@@ -1926,7 +1958,14 @@ then
     }
 
     # Check current instance version and component status checks for that version of CP4AIOps
-    if [[ "${VERSION_AIOPSORCHESTRATOR}" == "4.8" ]]; then
+    if [[ "${VERSION_AIOPSORCHESTRATOR}" == "4.10" ]]; 
+    then
+        component-versions-410
+    elif [[ "${VERSION_AIOPSORCHESTRATOR}" == "4.9" ]]; 
+    then
+        component-versions-49
+    elif [[ "${VERSION_AIOPSORCHESTRATOR}" == "4.8" ]]; 
+    then
         component-versions-48
     elif [ "${VERSION_AIOPSORCHESTRATOR}" == "4.7" ];
     then
@@ -1967,7 +2006,7 @@ then
     elif [ "${VERSION_AIOPSORCHESTRATOR}" == "0.1" ];
     then
         # for developer builds (v0.1), we will check against release-4.8 versions
-        component-versions-48
+        component-versions-410
         echo ""
         echo "${red}${bold}NOTE: ${normal}Your Cloud Pak for AIOps install appears to be an internal dev version (v${VERSION_AIOPSORCHESTRATOR})."
         echo "      The status-upgrade command checks the status of upgrades to v3.3 - v3.7 and v4.1 - v4.8 only." 
@@ -2005,7 +2044,7 @@ then
     postgresUpgradeStatus
     secureTunnelUpgradeStatus
     asmUpgradeStatus
-    if [[ "${VERSION_AIOPSORCHESTRATOR}" != "4.7" && "${VERSION_AIOPSORCHESTRATOR}" != "4.8" ]];
+    if [[ "${VERSION_AIOPSORCHESTRATOR}" != "4.7" && "${VERSION_AIOPSORCHESTRATOR}" != "4.8" && "${VERSION_AIOPSORCHESTRATOR}" != "4.9" && "${VERSION_AIOPSORCHESTRATOR}" != "4.10" ]];
     then
         FlinkEventProcessorUpgradeStatus
     fi

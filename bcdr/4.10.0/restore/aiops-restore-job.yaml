@@ -1,0 +1,38 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: aiops-restore-job
+  namespace: velero
+spec:
+  backoffLimit: 0
+  template:
+    spec:
+      serviceAccountName: restore-sa
+      volumes:
+        - name: restore-data-config
+          configMap:
+            name: restore-config
+        - name: aiops-config
+          configMap:
+            name: restore-config
+        - name: workdir
+          emptyDir: {}
+      containers:
+      - image: "icr.io/cpopen/cp4waiops/cp4waiops-bcdr@sha256:b0641292a65f2a2bb11daee6bed035bd21db608c91778bd7c4b28ab2ebacf951"
+        imagePullPolicy: Always
+        name: aiops-restore
+        command: ["/bin/bash", "/bcdr/restore/restore.sh","-aiops"]
+        resources: {}
+        env:
+        - name: WORKDIR
+          value: "/bcdr"
+        volumeMounts:
+          - name: restore-data-config
+            mountPath: /bcdr/restore/restore-data.json
+            subPath: restore-data.json 
+          - name: aiops-config
+            mountPath: /bcdr/common/aiops-config.json
+            subPath: aiops-config.json
+          - mountPath: /workdir
+            name: workdir
+      restartPolicy: Never

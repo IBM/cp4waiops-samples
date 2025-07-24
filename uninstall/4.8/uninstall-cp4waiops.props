@@ -1,0 +1,34 @@
+#
+# © Copyright IBM Corp. 2020, 2025
+# SPDX-License-Identifier: Apache2.0
+#
+##################################################################################################
+##### This is the configuration file for the uninstall-cp4waiops.sh script that uninstalls   #####
+##### IBM Cloud Pak for AIOps v4.8 from your cluster.          #####
+#####                                                                                        #####
+##### Review and update each of the properties below to indicate what you want to uninstall. #####
+##### This script also removes dependencies that may be shared by other IBM Cloud Paks on    #####
+##### the cluster or in the project. Review these configuration properties carefully.        #####
+##################################################################################################
+
+# Set the name of OpenShift project where IBM Cloud Pak for AIOps is installed.
+# You may know it as a "namespace" - an OpenShift "project" is an alternative representation of a Kubernetes "namespace"
+CP4WAIOPS_PROJECT="cp4aiops"
+
+# Set the name of installation custom resource (CR) to delete. You can leave this blank if you've already deleted the installation CR.
+INSTALLATION_NAME="ibm-cp-aiops"
+
+# If true, this will delete all of the resources created by CP4WAIOps (see uninstall-cp4waiops-resource-groups.props)
+DELETE_ALL="false"
+
+######################### ADVANCED CUSTOM CONFIGURATIONS BELOW ##############################
+
+# You must set DELETE_ALL to false in order to specify uninstall of specific resources as configured below.
+
+# Delete the PVCs created by IBM Cloud Pak for AIOps.
+# WARNING: CHOOSING TO DELETE PVCs CAN RESULT IN DATA LOSS. 
+# SEE uninstall-cp4waiops-resource-groups.props FOR PVCs THAT WILL BE REMOVED
+DELETE_PVCS="false"
+
+# Setting this to true will delete all CRDs created by IBM Cloud Pak for AIOps and IBM Cloud Pak Foundational Services.
+DELETE_CRDS="false"

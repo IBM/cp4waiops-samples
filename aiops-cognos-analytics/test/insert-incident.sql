@@ -1,6 +1,7 @@
 INSERT INTO INCIDENTS_REPORTER_STATUS (
     tenantid,
     id,
+    uuid,
     createdTime,
     createdBy,
     title,
@@ -22,6 +23,7 @@ INSERT INTO INCIDENTS_REPORTER_STATUS (
 ) VALUES (
     'cfd95b7e-3bc7-4006-a4a8-a73a79c71255',
     '24fba2e3-0000-4000-8000-000000000002',
+    'cfd95b7e-3bc7-4006-a4a8-a73a79c71255_24fba2e3-0000-4000-8000-000000000002',
     $1,
     'Sue',
     'service card payment is down 1',

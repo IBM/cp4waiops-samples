@@ -1,0 +1,16 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+ name: bcdr-np
+ namespace: {{ .Values.aiopsNamespace }}
+spec:
+ podSelector:
+  matchLabels:
+   ibm-es-server: aiops-ibm-elasticsearch-es-server
+ ingress:
+ - from:
+   - namespaceSelector:
+      matchLabels:
+       kubernetes.io/metadata.name: {{ .Values.oadpNamespace }}
+ policyTypes:
+ - Ingress

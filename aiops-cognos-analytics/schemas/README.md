@@ -48,6 +48,12 @@ If you prefer to use the UI (as with IBM DB2 on Cloud), paste the contents of ea
 
 > If you run the install script multiple times, only those components that do not yet exist will be created.
 
+## Upgrading
+If you have already installed schemas from an earlier version of Cloud Pak for AIOps, run the upgrade script to get the latest changes. While not required, if you would like to backup your DB2 database before upgrading instructions can be found [here](https://www.ibm.com/docs/en/db2/11.5?topic=ad-backing-up-restoring-db2).
+```
+db2 -t -vf db2/upgrade.sql
+```
+
 ## Using the schemas
 
 Now that the schemas have been installed, you can take steps to integrate with AIOps. The following are the basic steps to get data into DB2 to be used in Cognos. Refer to AIOps and Cognos documentation for complete details.
