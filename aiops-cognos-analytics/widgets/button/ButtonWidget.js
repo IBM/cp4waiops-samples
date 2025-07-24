@@ -177,5 +177,3 @@ class Renderer extends BaseRenderer {
 }
 
 export default Renderer;
-
-// Made with Bob

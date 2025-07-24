@@ -72,5 +72,3 @@ webpack(webpackConfig, (err, stats) => {
     process.exit(1);
   });
 });
-
-// Made with Bob

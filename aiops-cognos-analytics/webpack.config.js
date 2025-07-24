@@ -63,5 +63,3 @@ module.exports = {
     hints: false
   }
 };
-
-// Made with Bob

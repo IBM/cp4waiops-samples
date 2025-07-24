@@ -88,11 +88,11 @@ function prereqCheck() {
     usage
   else
     curl -ks $url >/dev/null 2>&1
-    # if [ $? -gt 0 ]; then
-    #   echo "URL $url is not valid."
-    #   echo
-    #   exit 1
-    # fi
+    if [ $? -gt 0 ]; then
+      echo "URL $url is not valid."
+      echo
+      exit 1
+    fi
   fi
 
   echo "Checking prereqs ..."
