@@ -3,16 +3,16 @@
 # -------------------------------------------------------------------------------
 # --
 # -- © Copyright IBM Corp. 2024
-# 
+#
 # -- This source code is licensed under the Apache-2.0 license found in the
 # -- LICENSE file in the root directory of this source tree.
 # --
 # -------------------------------------------------------------------------------
 # -- This script will install AIOps custom widgets into Cognos.
-# 
+#
 # -- Before running this script, perform the following:
 # --   Have your Cognos server URL and API key available
-# 
+#
 # --   Usage: installWidgets.sh -u cognos_url [-k cognos_api_key] [-e]
 # --------------------------------------------------------------------------------
 args=$*
@@ -31,7 +31,7 @@ function usage() {
 }
 
 function prereqCheck() {
-  vars=$(getopt u:k:e $args)  
+  vars=$(getopt u:k:e $args)
   set -- $vars
   while :; do
     case "$1" in
@@ -47,8 +47,8 @@ function prereqCheck() {
       embedded=true
       shift
       ;;
-    --) shift; 
-      break 
+    --) shift;
+      break
       ;;
     esac
   done

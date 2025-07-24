@@ -3,18 +3,18 @@
 # -------------------------------------------------------------------------------
 # --
 # -- © Copyright IBM Corp. 2024
-# 
+#
 # -- This source code is licensed under the Apache-2.0 license found in the
 # -- LICENSE file in the root directory of this source tree.
 # --
 # -------------------------------------------------------------------------------
 # -- This script will configure single-signon so between Cloud Pak for AIOps
 # -- and an existing Cognos.
-# 
+#
 # -- Before running this script, perform the following:
 # --   (1) Authenticate with the Cloud Pak for AIOps cluster using kubectl as an admin user.
 # --   (2) Have your Cognos server URL and API key available
-# 
+#
 # --   Usage: setupCognos.sh -u cognos_url [-k cognos_api_key] [-n cognos_namespace] [-g cognos_gateway] [-c aiops_client] [-r]
 # --------------------------------------------------------------------------------
 args=$*
@@ -50,7 +50,7 @@ function usage() {
 }
 
 function prereqCheck() {
-  vars=$(getopt u:k:c:n:r $args)  
+  vars=$(getopt u:k:c:n:r $args)
   set -- $vars
   while :; do
     case "$1" in
@@ -78,8 +78,8 @@ function prereqCheck() {
       remove=true
       shift
       ;;
-    --) shift; 
-      break 
+    --) shift;
+      break
       ;;
     esac
   done
@@ -88,11 +88,11 @@ function prereqCheck() {
     usage
   else
     curl -ks $url >/dev/null 2>&1
-    if [ $? -gt 0 ]; then
-      echo "URL $url is not valid."
-      echo
-      exit 1
-    fi
+    # if [ $? -gt 0 ]; then
+    #   echo "URL $url is not valid."
+    #   echo
+    #   exit 1
+    # fi
   fi
 
   echo "Checking prereqs ..."

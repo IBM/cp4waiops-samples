@@ -1,6 +1,6 @@
 /* ******************************************************** {COPYRIGHT-TOP} ****
- * Copyright IBM Corp. 2024
- * 
+ * Copyright IBM Corp. 2024, 2025
+ *
  * This source code is licensed under the Apache-2.0 license found in the
  * LICENSE file in the root directory of this source tree.
  ********************************************************* {COPYRIGHT-END} ****/
@@ -16,6 +16,7 @@ const FILTERS_QUERY = `filters(condition: $condition) {
     operator
     conditions
   }
+  whereClause
 }`;
 
 const VIEWS_QUERY = `views(viewType: $viewType) {
