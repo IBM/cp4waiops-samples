@@ -1,12 +1,12 @@
 /* ******************************************************** {COPYRIGHT-TOP} ****
- * Copyright IBM Corp. 2024
- * 
+ * Copyright IBM Corp. 2024, 2025
+ *
  * This source code is licensed under the Apache-2.0 license found in the
  * LICENSE file in the root directory of this source tree.
  ********************************************************* {COPYRIGHT-END} ****/
 import AlertSummaryAPI from '../common/AlertSummaryAPI';
 import FilterViewAPI from '../common/FilterViewAPI';
-import {conditionSetToAPIQuery} from '../common/convertConditionSet';
+import {conditionSetToAPIQuery, resolveQuery} from '../common/convertConditionSet';
 import BaseRenderer from '../common/BaseRenderer';
 
 class Renderer extends BaseRenderer {
@@ -86,15 +86,33 @@ class Renderer extends BaseRenderer {
     this.buttonElement.style = style;
   }
 
+  compileWhereClause(whereClause) {
+    try {
+      return resolveQuery(whereClause);
+    } catch (error) {
+      console.error('Error compiling whereClause with handlebars:', error);
+      return whereClause; // Return original whereClause if compilation fails
+    }
+  }
+
   async getAlertSummaryAndUpdateButton({filterId, buttonShape}) {
     // fetch the filter based on filterId
     const fetchedFilter = await this.filterViewAPI.getData(filterId);
     const filter = fetchedFilter?.data?.tenant?.filters[0];
     if (!filter) {
       this.buttonElement.title = 'Filter not found';
+      return;
     }
+
     // convert the filter conditionSet to api query
-    const apiQuery = conditionSetToAPIQuery(filter.conditionSet);
+    let apiQuery;
+    if (filter.whereClause) {
+      // Compile whereClause using handlebars if it exists
+      apiQuery = this.compileWhereClause(filter.whereClause);
+    } else {
+      apiQuery = conditionSetToAPIQuery(filter.conditionSet);
+    }
+
     // fetch alert summary for selected filter
     const alertSummary = await this.alertSummaryAPI.getData({filter: decodeURIComponent(apiQuery)});
     this.updatedButton({alertSummary, filterName: filter?.name, buttonShape});

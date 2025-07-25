@@ -1,10 +1,24 @@
 /* ******************************************************** {COPYRIGHT-TOP} ****
- * Copyright IBM Corp. 2024
- * 
+ * Copyright IBM Corp. 2024, 2025
+ *
  * This source code is licensed under the Apache-2.0 license found in the
  * LICENSE file in the root directory of this source tree.
  ********************************************************* {COPYRIGHT-END} ****/
 import { INSIGHT_PATH } from './InsightColumns';
+import Handlebars from 'handlebars';
+import datetimeHelpers from './datetime';
+
+// Register all datetime helpers with Handlebars in a single function
+function registerDatetimeHelpers() {
+  Object.entries(datetimeHelpers).forEach(([name, func]) => {
+    if (typeof func === 'function') {
+      Handlebars.registerHelper(name, func);
+    }
+  });
+}
+
+// Register all helpers
+registerDatetimeHelpers();
 
 // need to add mapping for more operators which are different
 // for MemDB and API
@@ -106,4 +120,16 @@ export const conditionSetToAPIQuery = (conditionSets) => {
   }
 
   return query;
+};
+
+export const resolveQuery = (queryString) => {
+  const placeholder = /(\{\{[^\{\}]*\}\})/g;
+  const resolved = queryString?.replace(placeholder, (value) => {
+    let val = Handlebars.compile(value)({});
+    if (val.startsWith('"') && val.endsWith('"')) {
+      val = val.substring(1, val.length - 1);
+    }
+    return val;
+  });
+  return resolved;
 };
