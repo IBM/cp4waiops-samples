@@ -861,28 +861,3 @@ removingLeftoverOS_workaround() {
     oc delete servicemonitor -n $CP4WAIOPS_PROJECT ibm-opensearch-operator-controller-manager-metrics-monitor
     oc delete lease -n $CP4WAIOPS_PROJECT 5336b8a1.opensearch.cloudpakopen.ibm.com 
 }
-
-deleteInstallationNoWaitAndRemoveCC() {
-    local installation_name=$1
-    local project=$2
-
-    oc delete installations.orchestrator.aiops.ibm.com $installation_name -n $project --ignore-not-found --wait=false
-
-    echo "Checking for installation CR"
-    while true; do
-        oc get installation $installation_name -n $project &>/dev/null
-        if [[ "$?" == "1" ]]; then
-            break
-        else
-            ccs=$(oc get connectorconfigurations.connectors.aiops.ibm.com -n $project -o jsonpath='{range .items[*]}{.metadata.name}{"\n"}{end}')
-            for cc in $ccs; do
-                sleep 5
-                echo
-                oc patch connectorconfigurations.connectors.aiops.ibm.com $cc -n $project --type merge -p '{"metadata":{"finalizers": []}}'
-             done
-        fi
-        echo -n "."
-        sleep 2
-    done
-    echo
-}
