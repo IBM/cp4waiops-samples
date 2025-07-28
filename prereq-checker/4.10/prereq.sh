@@ -1376,6 +1376,8 @@ checkResourceQuota() {
 
 function main {
 
+    log $WARNING "The prerequisite checker tool script has been deprecated and is no longer supported. To check prerequisites for IBM Cloud Pak for AIOps, please use the aiopsctl plugin." $warn_color
+
     fail_found=0
 
     echo CLI: ${CLI}
