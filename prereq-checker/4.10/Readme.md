@@ -1,6 +1,6 @@
 # IBM Cloud Pak for AIOps prerequisite checker tool
 
-**Note: The prerequisite checker tool script has been deprecated and is no longer supported. To check prerequisites for IBM Cloud Pak for AIOps, please use the aiopsctl plugin. For more info, please refer to the offical IBM Docs regarding CP4AIOPs installation.**
+**Note: For IBM Cloud Pak for AIOps v4.10.1+, the prerequisite checker tool script has been deprecated and is no longer supported. To check prerequisites for CP4AIOPS, please use the aiopsctl plugin. For more info, please refer to the offical IBM Docs regarding CP4AIOPs installation [here](https://ibm.biz/cp4aiops_4101_install).**
 
 The prerequisite checker tool can be used to validate whether a Red Hat OpenShift Container Platform cluster has the required resources and prerequisites available to enable a successful installation of IBM Cloud Pak for AIOps. This tool completes the following checks and generates an installation readiness report:
 
