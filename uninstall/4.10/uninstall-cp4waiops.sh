@@ -99,9 +99,6 @@ if [[ ! -z "$CP4WAIOPS_PROJECT"  ]]; then
    
    # Cleanup remaining connections
    delete_connections
-
-   #TODO:REMOVE in 4.10.1
-   deleteInstallationNoWaitAndRemoveCC $INSTALLATION_NAME $CP4WAIOPS_PROJECT
  
    # Delete the installation CR
 	log $INFO "Deleting the installation CR..."
