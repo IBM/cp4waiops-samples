@@ -1,0 +1,590 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: restore-role
+rules:
+- apiGroups:
+  - velero.io
+  resources:
+  - restores
+  - backups
+  - podvolumerestores
+  - downloadrequests
+  verbs:
+  - create
+  - get
+  - list
+- apiGroups:
+  - ""
+  resources:
+  - pods/exec
+  - namespaces
+  verbs:
+  - list
+  - get
+  - patch
+  - delete
+  - create
+- apiGroups:
+  - "route.openshift.io"
+  resources: ["*"]
+  verbs: ["*"]
+- apiGroups:
+  - "ai.ir.aiops.ibm.com"
+  resources:
+  - aiopsanalyticsorchestrators
+  verbs:
+  - list
+  - get
+- apiGroups:
+  - "batch"
+  resources:
+  - cronjobs
+  verbs:
+  - list
+  - get
+  - patch
+  - create
+  - delete
+- apiGroups:
+  - "connectors.aiops.ibm.com"
+  resources:
+  - bundlemanifests
+  verbs:
+  - list
+  - get
+  - patch
+  - create
+  - delete
+- apiGroups:
+  - "connectors.aiops.ibm.com"
+  resources:
+  - connectorconfigurations
+  verbs:
+  - list
+  - get
+  - patch
+  - create
+  - delete
+- apiGroups:
+  - "connectors.aiops.ibm.com"
+  resources:
+  - connectorschemas
+  verbs:
+  - list
+  - get
+  - patch
+  - create
+  - delete
+- apiGroups:
+  - "connectors.aiops.ibm.com"
+  resources:
+  - connectorcomponents
+  verbs:
+  - list
+  - get
+  - patch
+  - create
+  - delete
+- apiGroups:
+  - "connectors.aiops.ibm.com"
+  resources:
+  - gitapps
+  verbs:
+  - list
+  - get
+  - patch
+  - create
+  - delete
+- apiGroups:
+  - "sretooling.management.ibm.com"
+  resources:
+  - tunnels
+  verbs:
+  - list
+  - get
+  - patch
+  - create
+  - delete
+- apiGroups:
+  - "securetunnel.management.ibm.com"
+  resources:
+  - tunnelconnections
+  verbs:
+  - list
+  - get
+  - patch
+  - create
+  - delete
+- apiGroups:
+  - "securetunnel.management.ibm.com"
+  resources:
+  - applicationmappings
+  verbs:
+  - list
+  - get
+  - patch
+  - create
+  - delete
+- apiGroups:
+  - "securetunnel.management.ibm.com"
+  resources:
+  - templates
+  verbs:
+  - list
+  - get
+  - patch
+  - create
+  - delete
+- apiGroups:
+  - "consoleui.aiops.ibm.com"
+  resources:
+  - baseuis
+  verbs:
+  - list
+  - get
+- apiGroups:
+  - "ai-manager.watson-aiops.ibm.com"
+  resources:
+  - aimanagermainprods
+  verbs:
+  - list
+  - get
+  - patch
+- apiGroups:
+  - "ai-manager.watson-aiops.ibm.com"
+  resources:
+  - aimanagers
+  verbs:
+  - list
+  - get
+  - patch
+- apiGroups:
+  - "connectors.aiops.ibm.com"
+  resources:
+  - aiopsedges
+  verbs:
+  - list
+  - get
+- apiGroups:
+  - "asm.ibm.com"
+  resources:
+  - asms
+  verbs:
+  - list
+  - get
+- apiGroups:
+  - "lifecycle.ir.aiops.ibm.com"
+  resources:
+  - lifecycleservices
+  - lifecycletriggers
+  verbs:
+  - list
+  - get
+  - patch
+  - create
+  - update
+- apiGroups:
+  - "base.automation.ibm.com"
+  resources:
+  - automationbases
+  verbs:
+  - list
+  - get
+  - patch
+- apiGroups:
+  - "elastic.automation.ibm.com"
+  resources:
+  - elasticsearches
+  verbs:
+  - list
+  - get
+  - patch
+- apiGroups:
+  - "core.ir.aiops.ibm.com"
+  resources:
+  - issueresolutioncores
+  verbs:
+  - list
+  - get
+  - patch
+  - update
+  - create
+- apiGroups:
+  - ""
+  resources:
+  - persistentvolumeclaims
+  - configmaps
+  - pods
+  - pods/finalizers
+  - secrets
+  - serviceaccounts
+  - services
+  - services/finalizers
+  verbs: ["*"]
+- apiGroups:
+  - "certmanager.k8s.io"
+  resources:
+  - certificates
+  verbs:
+  - get
+  - create
+  - patch
+  - list
+  - update
+  - delete
+- apiGroups:
+  - "orchestrator.aiops.ibm.com"
+  resources:
+  - installations
+  verbs:
+  - list
+  - get 
+- apiGroups:
+  - "apiextensions.k8s.io"
+  resources:
+  - customresourcedefinitions
+  verbs:
+  - get
+  - patch  
+- apiGroups:
+  - "apps"
+  resources:
+  - statefulsets
+  - daemonsets
+  - statefulsets/scale
+  verbs:
+  - get
+  - create
+  - patch
+  - list
+  - update
+  - delete
+- apiGroups:
+  - "apps"
+  resources:
+  - deployments
+  - deployments/scale
+  - replicasets
+  - deployments/finalizers
+  verbs: ["*"]
+- apiGroups:
+  - "extensions"
+  resources:
+  - deployments
+  - deployments/scale
+  - networkpolicies
+  verbs: ["*"]
+- apiGroups:
+  - ""
+  resources:
+  - replicationcontrollers
+  - jobs
+  verbs:
+  - get
+  - list
+  - create
+  - patch
+  - delete
+- apiGroups:
+  - "declarativemonitoring.management.ibm.com"
+  resources:
+  - slobundles
+  - syntheticbundles
+  verbs:
+  - get
+  - patch
+- apiGroups:
+  - "batch"
+  resources:
+  - jobs
+  verbs:
+  - get
+  - list
+  - delete
+  - create
+  - patch
+  - update
+- apiGroups:
+  - "securityenforcement.admission.cloud.ibm.com"
+  resources:
+  - clusterimagepolicies
+  verbs:
+  - create
+  - get
+- apiGroups:
+  - velero.io
+  resources:
+  - deletebackuprequests
+  - podvolumebackups
+  verbs:
+  - list
+- apiGroups:
+  - "postgresql.k8s.enterprisedb.io"
+  resources:
+  - clusters
+  verbs:
+  - get
+  - list
+  - delete
+  - create
+  - patch
+- apiGroups:  
+  - "autoscaling"
+  resources:
+  - horizontalpodautoscalers
+  verbs:
+  - get
+  - list
+  - delete
+  - create
+  - patch
+- apiGroups:
+  - "apps.openshift.io"
+  resources:
+  - deploymentconfigs
+  verbs:
+  - get
+  - list
+  - delete
+  - create
+  - patch
+- apiGroups:
+  - "build.openshift.io"
+  resources:
+  - buildconfigs
+  - builds
+  verbs:
+  - get
+  - list
+  - delete
+  - create
+  - patch
+- apiGroups:
+  - "image.openshift.io"
+  resources:
+  - imagestreams
+  verbs:
+  - get
+  - list
+  - delete
+  - create
+  - patch
+- apiGroups:
+  - "manageiq.org"
+  resources: ["*"]
+  verbs: ["*"]
+- apiGroups:
+  - "infra.management.ibm.com"
+  resources: ["*"]
+  verbs: ["*"]
+- apiGroups:
+  - "networking.k8s.io"
+  resources:
+  - ingresses
+  - networkpolicies
+  verbs: ["*"]
+- apiGroups:
+  - "oidc.security.ibm.com"
+  resources:
+  - clients
+  verbs:
+  - get
+  - list
+  - delete
+  - create
+  - patch
+  - update
+- apiGroups:
+  - "monitoring.coreos.com"
+  resources:
+  - servicemonitors
+  verbs:
+  - create
+  - get
+- apiGroups:
+  - "operators.coreos.com"
+  resources:
+  - operatorconditions
+  - clusterserviceversions
+  verbs:
+  - get
+  - list
+  - delete
+  - create
+  - update
+  - patch
+- apiGroups:
+  - "rbac.authorization.k8s.io"
+  resources:
+  - rolebindings
+  - roles
+  verbs: ["*"]
+- apiGroups:
+  - "vault.aiops.ibm.com"
+  resources:
+  - vaultdeploys
+  - vaultaccesses
+  verbs:
+  - get
+  - list
+  - delete
+  - create
+  - update
+  - patch
+- apiGroups:
+  - "sretooling.management.ibm.com"
+  resources:
+  - tunnels/finalizers
+  verbs: ["*"]
+- apiGroups:
+  - "zen.cpd.ibm.com"
+  resources:
+  - zenservices
+  verbs:
+  - get
+  - list
+  - create
+  - update
+  - patch
+- apiGroups:
+  - "elasticsearch.opencontent.ibm.com"
+  resources:
+  - elasticsearchclusters
+  verbs:
+  - list
+  - get
+  - patch
+  - update
+  - create
+- apiGroups:
+  - "flink.ibm.com"
+  resources:
+  - flinkdeployments
+  verbs:
+  - get
+  - list
+  - create
+  - update
+  - patch
+- apiGroups:
+  - "opensearch.cloudpackopen.ibm.com"
+  resources:
+  - clusters
+  verbs:
+  - get
+  - list
+  - delete
+  - create
+  - update
+  - patch
+- apiGroups:
+  - "cdi.kubevirt.io"
+  resources:
+  - dataimportcrons
+  - datasources
+  - datavolumes
+  verbs:
+  - get
+  - list
+  - delete
+  - create
+  - update
+  - patch
+- apiGroups:
+  - "clone.kubevirt.io"
+  resources:
+  - virtualmachineclones
+  verbs:
+  - get
+  - list
+  - delete
+  - create
+  - update
+  - patch
+- apiGroups:
+  - "export.kubevirt.io"
+  resources:
+  - virtualmachineexports
+  verbs:
+  - get
+  - list
+  - delete
+  - create
+  - update
+  - patch
+- apiGroups:
+  - "hco.kubevirt.io"
+  resources:
+  - hyperconvergeds
+  verbs:
+  - get
+  - list
+  - delete
+  - create
+  - update
+  - patch
+- apiGroups:
+  - "instancetype.kubevirt.io"
+  resources:
+  - roles
+  resources:
+  - virtualmachineinstancetypes
+  - virtualmachinepreferences
+  verbs:
+  - get
+  - list
+  - delete
+  - create
+  - update
+  - patch
+- apiGroups:
+  - "kubevirt.io"
+  resources:
+  - virtualmachineinstancemigrations
+  - virtualmachineinstancepresets
+  - virtualmachineinstancereplicasets
+  - virtualmachineinstances
+  - virtualmachines
+  verbs:
+  - get
+  - list
+  - delete
+  - create
+  - update
+  - patch
+- apiGroups:
+  - "migrations.kubevirt.io"
+  resources:
+  - migrationpolicies
+  verbs:
+  - get
+  - list
+  - delete
+  - create
+  - update
+  - patch
+- apiGroups:
+  - "pool.kubevirt.io"
+  resources:
+  - virtualmachinepools
+  verbs:
+  - get
+  - list
+  - delete
+  - create
+  - update
+  - patch
+- apiGroups:
+  - "snapshot.kubevirt.io"
+  resources:
+  - virtualmachinerestores
+  - virtualmachinesnapshotcontents
+  - virtualmachinesnapshots
+  verbs:
+  - get
+  - list
+  - delete
+  - create
+  - update
+  - patch
