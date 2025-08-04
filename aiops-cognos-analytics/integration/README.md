@@ -1,4 +1,4 @@
-# Standalone Cognos Analytics
+# IBM Cognos Analytics + Cloud Pak for AIOps
 
 Configure OIDC authentication and single sign-on (SSO) between IBM Cloud Pak for AIOps and Cognos Analytics.
 

@@ -1,7 +1,0 @@
-ace_catalog_name: ibm-operator-catalog
-ace_catalog_namespace: openshift-marketplace
-ace_catalog_image: icr.io/cpopen/ibm-operator-catalog:latest
-approval_type: automatic 
-
-operator_namespace: aiops
-ace_package: ibm-appconnect

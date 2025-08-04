@@ -1,6 +1,6 @@
 # Schemas
 
-Schemas for reporting in Cloud Pak for AIOps using Cognos Analytics with DB2
+Schemas for reporting in IBM Cloud Pak for AIOps using Cognos Analytics with DB2
 
 ## Before installing
 
@@ -138,7 +138,7 @@ db2 SELECT * from INCIDENTS_REPORTER_STATUS
 ```
 You should see a row for every alert and incident that has been created or updated based on the policy conditions and triggers.
 
-Now you're all set to create reports in Cognos Analytics. See AIOps product documentation on how set up the data server connection and import data.
+Now you're all set to create reports in IBM Cognos Analytics. See AIOps product documentation on how set up the data server connection and import data.
 
 ## Removing
 

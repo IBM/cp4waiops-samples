@@ -1,8 +1,0 @@
-# IBM Entitlement Key Lookup
-# -----------------------------------------------------------------------------
-aiops_instance: "{{ lookup('env', 'AIOPS_INSTANCE') | default('ibm-aiops', true) }}"
-aiops_namespace: "{{ lookup('env', 'AIOPS_NAMESPACE') | default('aiops', true) }}"
-global_pull_secret_name: "pull-secret"
-global_pull_secret_namespace: "openshift-config"
-
-db2_registry: "{{ lookup('env', 'DB2_REGISTRY') | default('cp.icr.io', true) }}"

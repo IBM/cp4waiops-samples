@@ -25,13 +25,13 @@ aiopsNamespace=
 authHeader=
 
 function usage() {
-  echo "Usage: $0 -u cognos_url [-k cognos_api_key] [-e]" 1>&2
+  echo "Usage: $0 -u cognos_url [-k cognos_api_key]" 1>&2
   echo
   exit 1
 }
 
 function prereqCheck() {
-  vars=$(getopt u:k:e $args)
+  vars=$(getopt u:k: $args)
   set -- $vars
   while :; do
     case "$1" in
@@ -42,10 +42,6 @@ function prereqCheck() {
     -k)
       apiKey=$2
       shift; shift
-      ;;
-    -e)
-      embedded=true
-      shift
       ;;
     --) shift;
       break
@@ -65,42 +61,6 @@ function prereqCheck() {
   fi
 
   echo "Checking prereqs ..."
-
-  if [[ ! -z $embedded ]]; then
-    type kubectl > /dev/null 2>&1
-    if [ $? -gt 0 ]; then
-      echo "kubectl command not found. Make sure this is in your PATH."
-      echo
-      exit 1
-    fi
-
-    kubectl auth can-i "*" "*" <<< test > /dev/null 2>&1
-    if [ $? -gt 0 ]; then
-      echo "Authenticate with the Cloud Pak for AIOps cluster using kubectl or oc as an admin user."
-      echo
-      exit 1
-    fi
-
-    aiopsNamespace=$(kubectl get subscriptions.operators.coreos.com -A 2>/dev/null | grep ibm-aiops-orchestrator | awk '{print $1}')
-    if [ -z $aiopsNamespace ]; then
-      echo "Cloud Pak for AIOps namespace not found. Make sure you're logged into the right cluster and have access to this namespace"
-      echo
-      exit 1
-    fi
-
-    cpdRoute="https://$(kubectl get route cpd -n ${aiopsNamespace} -o jsonpath={.spec.host} 2>/dev/null)"
-    if [ -z $cpdRoute ]; then
-      echo "Cloud Pak for AIOps route not found. Make sure you're logged into the right cluster and have access to the AIOps namespace."
-      echo
-      exit 1
-    fi
-
-    adminUser=$(kubectl -n ${aiopsNamespace} get secret platform-auth-idp-credentials -o jsonpath={.data.admin_username} | base64 -d)
-    adminPass=$(kubectl -n ${aiopsNamespace} get secret platform-auth-idp-credentials -o jsonpath={.data.admin_password} | base64 -d)
-    accessToken=$(curl -k -H "username: ${adminUser}" -H "password: ${adminPass}" ${cpdRoute}/v1/preauth/validateAuth 2> /dev/null | jq -r '.accessToken')
-    authHeader="Authorization: Bearer ${accessToken}"
-    url=$url/cognosanalytics/${aiopsNamespace}
-  fi
 
   nodeVer=$(node -v | grep "^v18" 2>&1)
   if [ -z $nodeVer ]; then
@@ -122,9 +82,9 @@ function loginCognos() {
   if [[ $sessionKey = "null" ]] || [[ -z $sessionKey ]]; then
     echo
     if [ -z $apiKey ]; then
-      echo "Error logging into Cognos server $url. Check the URL, and ensure anonymous access is enabled. If Cognos is embedded within AIOps, use the -e option."
+      echo "Error logging into Cognos server $url. Check the URL, and ensure anonymous access is enabled."
     else
-      echo "Error logging into Cognos server $url. Check the URL and API key, and ensure the server is running. If Cognos is embedded within AIOps, use the -e option."
+      echo "Error logging into Cognos server $url. Check the URL and API key, and ensure the server is running."
     fi
     exit 1
   fi
