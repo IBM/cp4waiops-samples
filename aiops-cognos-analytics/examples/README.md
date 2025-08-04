@@ -1,7 +1,7 @@
 # Examples
 This folder contains dashboard examples.  <br />
 
-This requires IBM Cognos Analytics **version 11.2 or higher**.
+This requires IBM Cognos Analytics **version 12.0.x**.
 
 ## Files
 
@@ -12,43 +12,10 @@ This requires IBM Cognos Analytics **version 11.2 or higher**.
 
 #### 1. Find the location for Cognos extensions
 
-_For Cognos running within an OpenShift cluster, locate the pod that contains /data/deployment/. Search for `ca-` to find Cognos pods_.
-
-``` bash
-kubectl get pods | grep ca-
-```
-
-``` bash
-ca1721852474940188-artifacts-bc9d68dc4-gzk6p 1/1 Running 0 21d
-ca1721852474940188-ca-cpd-cm-78676c5d8f-gctsj 1/1 Running 0 21d
-ca1721852474940188-ca-cpd-reporting-94bd774b8-d2thf 2/2 Running 0 21d
-ca1721852474940188-ca-cpd-rest-bd5667547-m7dxq 2/2 Running 0 21d
-ca1721852474940188-ca-cpd-smarts-7bbdd6ff97-vnwvl 2/2 Running 0 21d
-ibm-ca-operator-controller-manager-7b7d67667b-tks6b 1/1 Running 6 (4h36m ago) 21d
-```
-
-_Check if the pod has /data/deployment/_.
-
-``` bash
-kubectl exec <pod_name> -- find / -type d -name 'deployment' 2>/dev/null
-```
-
-``` bash
-/data/deployment
-/deployment
-```
-
-_For standalone Cognos, this file will be on the Cognos server typically under `/opt/ibm/cognos/analytics/deployment`._
+_This file will be on the Cognos server typically in the path `/opt/ibm/cognos/analytics/deployment`_
 
 #### 2. Install the example zip file
 
-_For Cognos running within an OpenShift cluster_
-
-``` bash
-kubectl cp ./Cloud_Pak_for_AIOps_examples.zip <pod_name>:/data/deployment/Cloud_Pak_for_AIOps_examples.zip
-```
-
-_For a standalone Cognos server_
 ```bash
  cp ./Cloud_Pak_for_AIOps_examples.zip /opt/ibm/cognos/analytics/deployment/Cloud_Pak_for_AIOps_examples.zip
 ```
@@ -69,7 +36,7 @@ _For a standalone Cognos server_
 
 #### 10. Click Finish, Run, OK. The examples package should then show up in the content list.
 
-#### 11. The incident dashboard example requires a custom funnel extension. [Download](https://accelerator.ca.analytics.ibm.com/bi/?perspective=authoring&pathRef=.public_folders%2FIBM%2BAccelerator%2BCatalog%2FContent%2FVIZ00024&id=iD8FDBEAFC25E4D1BA440A9FFA9FD5401&objRef=iD8FDBEAFC25E4D1BA440A9FFA9FD5401&action=run&format=HTML&cmPropStr=%7B%22id%22%3A%22iD8FDBEAFC25E4D1BA440A9FFA9FD5401%22%2C%22type%22%3A%22reportView%22%2C%22defaultName%22%3A%22VIZ00024%22%2C%22permissions%22%3A%5B%22execute%22%2C%22read%22%2C%22traverse%22%5D%7D) then install this from the `Manage > Customization > Custom Visuals` menu option on the Cognos Analytics home page.
+#### 11. The incident dashboard example requires a custom funnel extension. [Download](https://accelerator.ca.analytics.ibm.com/bi/?perspective=authoring&pathRef=.public_folders%2FIBM%2BAccelerator%2BCatalog%2FContent%2FVIZ00024&id=iD8FDBEAFC25E4D1BA440A9FFA9FD5401&objRef=iD8FDBEAFC25E4D1BA440A9FFA9FD5401&action=run&format=HTML&cmPropStr=%7B%22id%22%3A%22iD8FDBEAFC25E4D1BA440A9FFA9FD5401%22%2C%22type%22%3A%22reportView%22%2C%22defaultName%22%3A%22VIZ00024%22%2C%22permissions%22%3A%5B%22execute%22%2C%22read%22%2C%22traverse%22%5D%7D) then install this from the `Manage > Customization > Custom Visuals` menu option on the IBM Cognos Analytics home page.
 
 #### 12. The examples folder will show up under `Content > Team content` from the IBM Cognos Analytics home page.
 - If you don't immediately see the examples, you may need to wait a minute and reload the `Team content` page.

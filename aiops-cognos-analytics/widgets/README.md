@@ -12,16 +12,14 @@ Build and install Cloud Pak for AIOps widgets for Cognos.
   - The Cognos administrator will first need to "Renew" credentials if "My credentials - Manage" is disabled.
   ![credentials](../images/credentials.png)
   - The Cognos user should have Portal Administrator or System Administrator privileges.
-- If the Cognos server is embedded within Cloud Pak for AIOps, use `kubectl` or `oc` to login as an admin user.
 
 ## Install widgets
 From the `aiops-cognos-analytics/widgets` path run
 ```bash
-./installWidgets.sh -u cognos_url [-k cognos_api_key] [-e]
+./installWidgets.sh -u cognos_url [-k cognos_api_key]
 ```
 
 `-u cognos_url` (required) Cognos server in the form of `http(s)://hostname:port`
 
 `-k cognos_api_key` (optional) API key of the Cognos user installing the widgets. If no API key is specified, anonymous user will be used.
 
-`-e` (optional) indicates that Cognos is embedded within an AIOps cluster. The default is *not* embedded (standalone) Cognos.

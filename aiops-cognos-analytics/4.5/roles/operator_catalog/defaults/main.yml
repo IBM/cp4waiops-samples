@@ -1,6 +1,0 @@
-catalog_name: ibm-operator-catalog
-catalog_displayname: "IBM Test Operator catalog"
-catalog_publisher: ibm
-catalog_namespace: openshift-marketplace
-catalog_image: icr.io/cpopen/ibm-operator-catalog:latest
-approval_type: automatic 
