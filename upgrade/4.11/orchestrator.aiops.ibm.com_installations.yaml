@@ -1,0 +1,515 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.18.0
+  name: installations.orchestrator.aiops.ibm.com
+spec:
+  group: orchestrator.aiops.ibm.com
+  names:
+    kind: Installation
+    listKind: InstallationList
+    plural: installations
+    shortNames:
+    - install
+    singular: installation
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .status.phase
+      name: Phase
+      type: string
+    - jsonPath: .status.licenseacceptance
+      name: License
+      type: string
+    - jsonPath: .status.storageclass
+      name: StorageClass
+      type: string
+    - jsonPath: .status.storageclasslargeblock
+      name: StorageClassLargeBlock
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        description: Leverage advanced, explainable AI to resolve incidents faster,
+          gain visibility into critical workloads, and intelligently manage key application
+          resources. [Learn More](https://ibm.biz/cp4aiops_4110-readme). By installing
+          this product you accept the [license terms](https://ibm.biz/cp4aiops-4110-license).
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: For detailed information about the following settings, see
+              the IBM Documentation at https://ibm.biz/cp4aiops_4110_install
+            properties:
+              automationFoundation:
+                description: |-
+                  AutomationFoundation contains parameters that can be used to customize how
+                  the IBM Automation Foundation objects are configured.
+                properties:
+                  automationBase:
+                    description: |-
+                      AutomationBase is the name of the IBM Automation Foundation "AutomationBase"
+                      CR instance that the Cloud Pak should use.  If a name is not specified, and no
+                      "AutomationBase" instances exist in the namespace, the Cloud Pak will attempt
+                      to provision one.
+                    type: string
+                  automationUIConfig:
+                    description: |-
+                      AutomationUIConfig is the name of the IBM Automation Foundation "AutomationUIConfig"
+                      CR instance that the Cloud Pak should use.  If a name is not specified, and no
+                      "AutomationUIConfig" instances exist in the namespace, the Cloud Pak will attempt
+                      to provision one.
+                    type: string
+                  enabled:
+                    description: |-
+                      The Enabled flag controls whether the Cloud Pak will register with IBM Automation Foundation.
+                      The default value is 'true'.  When the flag is set to 'false', the Cloud Pak will not create
+                      any Automation Foundation objects, including those referenced in other parts of the
+                      AutomationFoundation spec.
+                    type: boolean
+                type: object
+              enableConnectionModule:
+                description: Use the Secure Tunnel to safely connect to remote data
+                  sources.
+                type: boolean
+              groupProfiles:
+                description: GroupProfiles contains settings for group profile features.
+                properties:
+                  enabled:
+                    description: Enabled, if set to true, turns on the group profiles
+                      features.
+                    type: boolean
+                type: object
+              imagePullSecret:
+                description: Select the image pull secret to use for the Cloud Pak.
+                  If no secret is selected, the global pull secret will be used.
+                type: string
+              installPlanApproval:
+                description: |-
+                  Approval is the user approval policy for an InstallPlan.
+                  It must be one of "Automatic" or "Manual".
+                type: string
+              license:
+                description: License acceptance is required to create resources.
+                properties:
+                  accept:
+                    description: I accept the product license after reading it at
+                      https://ibm.biz/cp4aiops-4110-license
+                    type: boolean
+                required:
+                - accept
+                type: object
+              pakModules:
+                description: Pak Modules are modular pieces that may be enabled for
+                  deployment
+                items:
+                  description: PakModule is a type of module that may be installed
+                    by the Cloud Pak
+                  properties:
+                    config:
+                      description: Config is the set of configurations for the operators
+                        in the module
+                      items:
+                        description: Config is the configuration of the specific operator
+                          in the module
+                        properties:
+                          enabled:
+                            description: Enabled is the installation mode of the operator
+                            type: boolean
+                          name:
+                            description: Name is the name of the Operator Config
+                            type: string
+                          spec:
+                            additionalProperties:
+                              type: object
+                              x-kubernetes-preserve-unknown-fields: true
+                            description: Spec is the spec overrides to be passed into
+                              the operator
+                            type: object
+                            x-kubernetes-preserve-unknown-fields: true
+                        required:
+                        - name
+                        type: object
+                      type: array
+                    enabled:
+                      description: Enabled is installation mode of the module
+                      type: boolean
+                    name:
+                      description: Name is the name of the module
+                      type: string
+                  required:
+                  - name
+                  type: object
+                type: array
+              proxyServer:
+                description: |-
+                  If the target cluster is air-gapped, specify the address and port number of an HTTP proxy that
+                  will provide access to the Slack or MS Teams service used for ChatOps, for example, proxy.company.com:8080.
+                type: string
+              resourceOverrides:
+                description: Specify the name of a configmap that finely tunes the
+                  capabilities and capacity of an installation.
+                type: string
+              size:
+                description: Select a size to determine the amount of virtual resources
+                  requested and the level of high availability support.
+                type: string
+              storage:
+                description: CP4AIOps storage configuration.
+                properties:
+                  aiops-ir-analytics-postgres:
+                    description: Override aiops-ir-analytics-postgres PVC properties.
+                    properties:
+                      size:
+                        description: Specify the size of the PVC for each replica
+                          with units.
+                        type: string
+                      storageClass:
+                        description: |-
+                          Specify the storage class for the PVC.
+                          The Installation storage classes will be used by default if no value is provided.
+                        type: string
+                    type: object
+                  aiops-ir-analytics-postgres-wal:
+                    description: Override aiops-ir-analytics-postgres-wal PVC properties.
+                    properties:
+                      size:
+                        description: Specify the size of the PVC for each replica
+                          with units.
+                        type: string
+                      storageClass:
+                        description: |-
+                          Specify the storage class for the PVC.
+                          The Installation storage classes will be used by default if no value is provided.
+                        type: string
+                    type: object
+                  aiops-ir-core-postgres:
+                    description: Override aiops-ir-core-postgres PVC properties.
+                    properties:
+                      size:
+                        description: Specify the size of the PVC for each replica
+                          with units.
+                        type: string
+                      storageClass:
+                        description: |-
+                          Specify the storage class for the PVC.
+                          The Installation storage classes will be used by default if no value is provided.
+                        type: string
+                    type: object
+                  aiops-ir-core-postgres-wal:
+                    description: Override aiops-ir-core-postgres-wal PVC properties.
+                    properties:
+                      size:
+                        description: Specify the size of the PVC for each replica
+                          with units.
+                        type: string
+                      storageClass:
+                        description: |-
+                          Specify the storage class for the PVC.
+                          The Installation storage classes will be used by default if no value is provided.
+                        type: string
+                    type: object
+                  aiops-orchestrator-postgres:
+                    description: Override aiops-orchestrator-postgres PVC properties.
+                    properties:
+                      size:
+                        description: Specify the size of the PVC for each replica
+                          with units.
+                        type: string
+                      storageClass:
+                        description: |-
+                          Specify the storage class for the PVC.
+                          The Installation storage classes will be used by default if no value is provided.
+                        type: string
+                    type: object
+                  aiops-orchestrator-postgres-wal:
+                    description: Override aiops-orchestrator-postgres-wal PVC properties.
+                    properties:
+                      size:
+                        description: Specify the size of the PVC for each replica
+                          with units.
+                        type: string
+                      storageClass:
+                        description: |-
+                          Specify the storage class for the PVC.
+                          The Installation storage classes will be used by default if no value is provided.
+                        type: string
+                    type: object
+                  aiops-topology-postgres:
+                    description: Override aiops-topology-postgres PVC properties.
+                    properties:
+                      size:
+                        description: Specify the size of the PVC for each replica
+                          with units.
+                        type: string
+                      storageClass:
+                        description: |-
+                          Specify the storage class for the PVC.
+                          The Installation storage classes will be used by default if no value is provided.
+                        type: string
+                    type: object
+                  aiops-topology-postgres-wal:
+                    description: Override aiops-topology-postgres-wal PVC properties.
+                    properties:
+                      size:
+                        description: Specify the size of the PVC for each replica
+                          with units.
+                        type: string
+                      storageClass:
+                        description: |-
+                          Specify the storage class for the PVC.
+                          The Installation storage classes will be used by default if no value is provided.
+                        type: string
+                    type: object
+                  data-aiops-ibm-elasticsearch-es-server-all:
+                    description: |-
+                      Override data-aiops-ibm-elasticsearch-es-server-all PVC properties.
+                      If in a multizone environment, PVC on the cluster will have a different suffix than `all`.
+                    properties:
+                      size:
+                        description: Specify the size of the PVC for each replica
+                          with units.
+                        type: string
+                      storageClass:
+                        description: |-
+                          Specify the storage class for the PVC.
+                          The Installation storage classes will be used by default if no value is provided.
+                        type: string
+                    type: object
+                  data-aiops-topology-cassandra:
+                    description: Override data-aiops-topology-cassandra PVC properties.
+                    properties:
+                      size:
+                        description: Specify the size of the PVC for each replica
+                          with units.
+                        type: string
+                      storageClass:
+                        description: |-
+                          Specify the storage class for the PVC.
+                          The Installation storage classes will be used by default if no value is provided.
+                        type: string
+                    type: object
+                  data-c-example-couchdbcluster-m:
+                    description: Override data-c-example-couchdbcluster-m PVC properties.
+                    properties:
+                      size:
+                        description: Specify the size of the PVC for each replica
+                          with units.
+                        type: string
+                      storageClass:
+                        description: |-
+                          Specify the storage class for the PVC.
+                          The Installation storage classes will be used by default if no value is provided.
+                        type: string
+                    type: object
+                  data-iaf-system-kafka:
+                    description: Override data-iaf-system-kafka PVC properties.
+                    properties:
+                      size:
+                        description: Specify the size of the PVC for each replica
+                          with units.
+                        type: string
+                      storageClass:
+                        description: |-
+                          Specify the storage class for the PVC.
+                          The Installation storage classes will be used by default if no value is provided.
+                        type: string
+                    type: object
+                  data-ibm-cp-aiops-redis-server:
+                    description: Override data-ibm-cp-aiops-redis-server PVC properties.
+                    properties:
+                      size:
+                        description: Specify the size of the PVC for each replica
+                          with units.
+                        type: string
+                      storageClass:
+                        description: |-
+                          Specify the storage class for the PVC.
+                          The Installation storage classes will be used by default if no value is provided.
+                        type: string
+                    type: object
+                  export-aimanager-ibm-minio:
+                    description: Override export-aimanager-ibm-minio PVC properties.
+                    properties:
+                      size:
+                        description: Specify the size of the PVC for each replica
+                          with units.
+                        type: string
+                      storageClass:
+                        description: |-
+                          Specify the storage class for the PVC.
+                          The Installation storage classes will be used by default if no value is provided.
+                        type: string
+                    type: object
+                  export-zen-minio:
+                    description: Override export-zen-minio PVC properties.
+                    properties:
+                      size:
+                        description: Specify the size of the PVC for each replica
+                          with units.
+                        type: string
+                      storageClass:
+                        description: |-
+                          Specify the storage class for the PVC.
+                          The Installation storage classes will be used by default if no value is provided.
+                        type: string
+                    type: object
+                  ibm-cp-aiops-edb-postgres:
+                    description: |-
+                      Override ibm-cp-aiops-edb-postgres PVC properties.
+                      Based on installation name used, the prefix `ibm-cp-aiops` in the PVC name will match the installation name.
+                    properties:
+                      size:
+                        description: Specify the size of the PVC for each replica
+                          with units.
+                        type: string
+                      storageClass:
+                        description: |-
+                          Specify the storage class for the PVC.
+                          The Installation storage classes will be used by default if no value is provided.
+                        type: string
+                    type: object
+                  zen-metastore-edb:
+                    description: Override zen-metastore-edb PVC properties.
+                    properties:
+                      size:
+                        description: Specify the size of the PVC for each replica
+                          with units.
+                        type: string
+                      storageClass:
+                        description: |-
+                          Specify the storage class for the PVC.
+                          The Installation storage classes will be used by default if no value is provided.
+                        type: string
+                    type: object
+                type: object
+              storageClass:
+                description: Select a file storage class that supports ReadWriteMany
+                  access mode.
+                type: string
+              storageClassLargeBlock:
+                description: Select a storage class with a large block size (for example,
+                  64k).
+                type: string
+              topologyModel:
+                description: Specify the terminology to use when defining collections
+                  of resource groups. You can select application or service.
+                type: string
+              zones:
+                description: Define the names of zones for a multi-zone cluster.
+                items:
+                  properties:
+                    name:
+                      description: Name of the zone as defined by the corresponding
+                        node label
+                      type: string
+                  type: object
+                maxItems: 3
+                type: array
+            required:
+            - license
+            - storageClass
+            - storageClassLargeBlock
+            type: object
+          status:
+            description: InstallationStatus defines the observed state of Installation
+            properties:
+              componentnamespace:
+                type: string
+              componentstatus:
+                additionalProperties:
+                  description: ComponentPhase describes the phase of each component
+                  type: string
+                type: object
+              conditions:
+                items:
+                  properties:
+                    lastTransitionTime:
+                      description: |-
+                        lastTransitionTime is the last time the condition transitioned from one status to another.
+                        This should be when the underlying condition changed.  If that is not known, then using the time when the API field changed is acceptable.
+                      format: date-time
+                      type: string
+                    message:
+                      type: string
+                    observedGeneration:
+                      description: |-
+                        observedGeneration represents the .metadata.generation that the condition was set based upon.
+                        For instance, if .metadata.generation is currently 12, but the .status.conditions[x].observedGeneration is 9, the condition is out of date
+                        with respect to the current state of the instance.
+                      format: int64
+                      type: integer
+                    reason:
+                      type: string
+                    status:
+                      type: string
+                    type:
+                      type: string
+                  required:
+                  - status
+                  - type
+                  type: object
+                type: array
+              customProfileConfigmap:
+                type: string
+              customProfileValidationStatus:
+                type: string
+              failureMessage:
+                type: string
+              failureReason:
+                type: string
+              flags:
+                additionalProperties:
+                  type: string
+                type: object
+              imagePullSecret:
+                type: string
+              licenseacceptance:
+                description: LicenseAcceptanceStatus describes the status of the license
+                  acceptance
+                type: string
+              locations:
+                properties:
+                  cloudPakUiUrl:
+                    description: Launch the Cloud Pak
+                    type: string
+                  csAdminHubUrl:
+                    description: Manage services and processes
+                    type: string
+                type: object
+              phase:
+                description: InstallationPhase describes the phase of the overall
+                  Installation
+                type: string
+              size:
+                type: string
+              storageclass:
+                type: string
+              storageclasslargeblock:
+                type: string
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}
