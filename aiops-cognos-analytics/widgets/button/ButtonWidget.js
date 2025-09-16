@@ -29,6 +29,9 @@ class Renderer extends BaseRenderer {
     super.initialize().then(() => {
       this.filterViewAPI = new FilterViewAPI({options: ['filter'], type: 'alert', proxyHost: this.proxyHost});
       this.alertSummaryAPI = new AlertSummaryAPI({groupBy: ['severity'], proxyHost: this.proxyHost});
+      const filterId = this.content.getPropertyValue('dropdownFilter');
+      const buttonShape = this.content.getPropertyValue('dropdownShape');
+      return this.getAlertSummaryAndUpdateButton({filterId, buttonShape})
     });
   }
 

@@ -57,6 +57,23 @@ const getProxyForDashboard = async (id) => {
   return url.protocol + '//' + url.host;
 };
 
+// Avoid CORS error on initial render
+const prefetchZen = async (proxyHost) => {
+  try {
+    await fetch(proxyHost + '/zen', {
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'Origin': window.location.origin
+      },
+      mode: 'no-cors',
+      credentials: 'include'
+    });
+  } catch (e) {
+    console.warn('[prefetchZen] failed', e);
+  }
+};
+
 class ProxyManager {
   constructor() {
     if (instance) {
@@ -73,6 +90,7 @@ class ProxyManager {
     if (cached) return cached;
 
     globalState[namespace] = await getProxyForDashboard(namespace);
+    await prefetchZen(globalState[namespace]);
     return globalState[namespace];
   }
 }
