@@ -33,7 +33,7 @@ sessionKey=
 function setDefaults() {
   current_context=$(kubectl config view -n ${aiopsNamespace} -o jsonpath={.current-context} | awk -F/ '{ print $2 }')
   default=${current_context#api-}
-  default=${default%%-*}
+  default=${default%%-cp*}
   default=${default:-aiops-2-cognos}
   if [ -z $client ]; then
     client=$default
