@@ -1,0 +1,25 @@
+# Default values for clusterbackup.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+image:
+  repository: "icr.io/cpopen/cp4waiops/cp4waiops-bcdr@sha256:bd3cfa5faa20d86fc7c07bc93de0703d76f60156bccbbb1efb4db2b05bab6337"
+  pullPolicy: Always
+schedule: ""
+backupStorageLocation: ""
+rwxStorageClass: ""
+backupNameSuffix: ""
+aiopsNamespace: ""
+csNamespace: ""
+oadpNamespace: ""
+redisBackupPod: ""
+redisPVC: ""
+redisSecret: ""
+esBackupPVC: "aiops-opensearch-snapshot-repo"
+ttl: 72h0m0s
+enabledNamespaces:
+  - '"ibm-common-services"'
+  - '"cp4aiops"'
+enabledComponents:
+  - '"AIOPS"'
+  - '"IA"'
