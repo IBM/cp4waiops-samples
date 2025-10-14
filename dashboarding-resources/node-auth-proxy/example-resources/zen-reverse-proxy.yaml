@@ -1,0 +1,28 @@
+apiVersion: zen.cpd.ibm.com/v1
+kind: ZenExtension
+metadata:
+  finalizers:
+    - zenextension.zen.cpd.ibm.com/finalizer
+spec:
+  aiops-impact-reverse-proxy.nginx.conf: |-
+    location ~^/aiops/impact/{
+      access_by_lua_file /nginx_data/checkjwt.lua;
+      access_log /dev/stdout aiops_custom_format;
+      proxy_http_version 1.1;
+      proxy_set_header Upgrade $http_upgrade;
+      proxy_set_header Connection "upgrade";
+      proxy_set_header X-Forwarded-Proto $scheme;
+      proxy_set_header Host $host;
+      proxy_read_timeout 10m;
+      rewrite ^/aiops/impact/(.*) /api/$1 break;
+      proxy_pass http://myimpact.com:3000;
+  extensions: |-
+    [
+      {
+        "details": {
+          "location_conf": "aiops-impact-reverse-proxy.nginx.conf",
+        },
+        "extension_name": "aiops-impact-reverse-proxy",
+        "extension_point_id": "zen_front_door"
+      }
+    ]
