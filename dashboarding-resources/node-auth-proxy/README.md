@@ -54,8 +54,8 @@ The suggestion is to run the proxy alongside Impact on the same VM. The proxy ca
    # LTPA keys file path
    LTPA_KEYS_PATH='/opt/IBM/tivoli/impact/wlp/usr/servers/ImpactUI/myltpa.keys'
 
-   # LDAP user template to be added in LTPA token
-   LTPA_USER_TEMPLATE='user\:customRealm/uid=${impactUser},ou=People,dc=ibm,dc=com'
+   # LDAP user template to be added in LTPA token. This is effectively a translation from the `aiopsUser` to
+   LTPA_USER_TEMPLATE='user\:customRealm/uid=${aiopsUser},ou=People,dc=ibm,dc=com'
 
    # Enable SSL
    SSL_ENABLED=true
@@ -89,11 +89,11 @@ TRUST_CERTS_DIR=trusted-certs
 
 For the `certs`, replace the certificates with proper certificates from a trusted Certificate Authority.
 
-For the `trusted-certs`, you will need to add your AIOps cluster certificate and your Impact GUI server certificate.
+For the `trusted-certs`, you will either need to add your AIOps cluster certificate and your Impact GUI server certificate to the folder OR a CA certificate which has signed them.
 
 AIOps:
 If you are using the default certifcate, it can be found via:
-`oc get secret router-certs-default -n openshift-ingress` (Copy the entire `tls.crt` block).
+`oc get secret router-certs-default -n openshift-ingress -o jsonpath='{.data.tls\.crt}' | base64 -d`
 
 If you are using a [custom certifificate](https://www.ibm.com/docs/en/cloud-paks/cloud-pak-aiops/4.11.0?topic=certificates-using-custom-certificate) then you will need to add that instead.
 
