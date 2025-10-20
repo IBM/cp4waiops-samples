@@ -14,8 +14,8 @@ const PORT = process.env.PORT || 3000;
 const SSL_ENABLED = process.env.SSL_ENABLED === 'true';
 const SSL_KEY_PATH = process.env.SSL_KEY_PATH || path.join(__dirname, 'certs/key.pem');
 const SSL_CERT_PATH = process.env.SSL_CERT_PATH || path.join(__dirname, 'certs/cert.pem');
-const TARGET_URL = process.env.TARGET_URL || 'https://api.example.com';
-const JWKS_URI = process.env.JWKS_URI || 'https://your-auth-server.com/.well-known/jwks.json';
+const TARGET_URL = process.env.TARGET_URL;
+const JWKS_URI = process.env.JWKS_URI;
 const JWKS_CACHE_TTL = parseInt(process.env.JWKS_CACHE_TTL || '3600000', 10);
 const TRUST_CERTS_DIR = process.env.TRUST_CERTS_DIR || '';
 const {
@@ -191,9 +191,6 @@ app.use('/api', validateJwt, async (req, res) => {
       delete req.headers.authorization;
       console.log('Added LtpaToken2 to outgoing request');
     }
-
-    // Add user ID header
-    req.headers['X-User-ID'] = req.user.sub || '';
 
     // Remove /api prefix from the path
     const targetPath = req.url.replace(/^\/api/, '');
