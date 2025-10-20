@@ -1,17 +1,23 @@
 require('dotenv').config();
 const express = require('express');
 const httpProxy = require('http-proxy');
-const jwt = require('jsonwebtoken');
-const jwksClient = require('jwks-rsa');
 const { ltpa2Factory } = require('oniyi-ltpa');
 const url = require('url');
 const fs = require('fs');
+const https = require('https');
+const path = require('path');
+const tls = require('tls');
+const getCerts = require('./utils/getCerts');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const SSL_ENABLED = process.env.SSL_ENABLED === 'true';
+const SSL_KEY_PATH = process.env.SSL_KEY_PATH || path.join(__dirname, 'certs/key.pem');
+const SSL_CERT_PATH = process.env.SSL_CERT_PATH || path.join(__dirname, 'certs/cert.pem');
 const TARGET_URL = process.env.TARGET_URL || 'https://api.example.com';
 const JWKS_URI = process.env.JWKS_URI || 'https://your-auth-server.com/.well-known/jwks.json';
 const JWKS_CACHE_TTL = parseInt(process.env.JWKS_CACHE_TTL || '3600000', 10);
+const TRUST_CERTS_DIR = process.env.TRUST_CERTS_DIR || '';
 const {
   LTPA_PASSWORD,
   LTPA_EXPIRY,
@@ -19,9 +25,42 @@ const {
   LTPA_USER_TEMPLATE
 } = process.env;
 
-// Disable certificate validation for Node.js
-process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
-console.warn('WARNING: SSL certificate validation is disabled. This should only be used in development environments.');
+// Load trusted certificates if a directory is specified
+let trustCerts = null;
+if (TRUST_CERTS_DIR) {
+  console.log(`Using trusted certificate path ${TRUST_CERTS_DIR}`);
+  trustCerts = getCerts(TRUST_CERTS_DIR);
+
+  if (trustCerts && trustCerts.length > 0) {
+    console.log(`Loaded ${trustCerts.length} trusted certificates`);
+
+    // Override the default TLS secure context creation to include our trusted certs
+    const _createSecureContext = tls.createSecureContext;
+    tls.createSecureContext = options => {
+      const context = _createSecureContext({
+        ...options,
+        ca: [
+          ...(options.ca || []),
+          ...trustCerts
+        ]
+      });
+      return context;
+    };
+  } else {
+    console.warn('No trusted certificates found in the specified directory');
+    // Fallback to disabling certificate validation if no certs are found
+    process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+    console.warn('WARNING: SSL certificate validation is disabled. This should only be used in development environments.');
+  }
+} else {
+  // Disable certificate validation for Node.js if no trust directory is specified
+  process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+  console.warn('WARNING: SSL certificate validation is disabled. This should only be used in development environments.');
+}
+
+const jwt = require('jsonwebtoken');
+const jwksClient = require('jwks-rsa');
+
 
 // Initialize JWKS client for JWT verification
 const client = jwksClient({
@@ -29,7 +68,10 @@ const client = jwksClient({
   cache: true,
   cacheMaxAge: JWKS_CACHE_TTL, // Cache for 1 hour by default
   rateLimit: true,
-  jwksRequestsPerMinute: 10
+  jwksRequestsPerMinute: 10,
+  requestAgent: new https.Agent({
+    ca: [fs.readFileSync('trusted-certs/aiopscert.pem')] // Will break if not in SSL mode
+  })
 });
 
 // Function to get the signing key
@@ -91,23 +133,11 @@ async function createLtpa2Token(ltpaContent) {
   }
 }
 
-async function decodeLtpa2Token(token) {
-  try {
-    const ltpa2Tools = await getLtpa2Tools();
-    const decodedToken = ltpa2Tools.decode(token);
-
-    return decodedToken;
-  } catch (error) {
-    console.error('Error decoding LTPA token:', error);
-    throw error;
-  }
-}
-
 // Create a proxy server instance
 const proxy = httpProxy.createProxyServer({
   target: TARGET_URL,
   changeOrigin: true,
-  secure: false // Disable certificate validation for proxy requests
+  secure: trustCerts ? true : false // Enable certificate validation if we have trusted certs
 });
 
 // Handle proxy errors
@@ -115,6 +145,12 @@ proxy.on('error', (err, req, res) => {
   console.error('Proxy error:', err);
   res.writeHead(500, { 'Content-Type': 'text/plain' });
   res.end('Proxy error occurred');
+});
+
+proxy.on('proxyRes', function (proxyRes, req, res) {
+  // Delete the www-authenticate header. This is to prevent a login dialog appearing when a user does not have
+  // permission.
+  delete proxyRes.headers['www-authenticate'];
 });
 
 // API route with JWT validation and LTPA token creation
@@ -151,6 +187,8 @@ app.use('/api', validateJwt, async (req, res) => {
 
       // Set the cookie in the request headers
       req.headers.cookie = cookieValue;
+
+      delete req.headers.authorization;
       console.log('Added LtpaToken2 to outgoing request');
     }
 
@@ -181,7 +219,30 @@ app.get('/health', (req, res) => {
 });
 
 // Start the server
-app.listen(PORT, async () => {
-  console.log(`Auth Proxy Server running on port ${PORT}`);
-  console.log(`Proxying requests to ${TARGET_URL}`);
-});
+if (SSL_ENABLED) {
+  try {
+    // Check if SSL certificate and key files exist
+    if (!fs.existsSync(SSL_KEY_PATH) || !fs.existsSync(SSL_CERT_PATH)) {
+      console.error('SSL certificate or key file not found. Please run "node generate-cert.js" first.');
+      process.exit(1);
+    }
+
+    const httpsOptions = {
+      key: fs.readFileSync(SSL_KEY_PATH),
+      cert: fs.readFileSync(SSL_CERT_PATH)
+    };
+
+    https.createServer(httpsOptions, app).listen(PORT, async () => {
+      console.log(`Auth Proxy Server running with SSL on port ${PORT}`);
+      console.log(`Proxying requests to ${TARGET_URL}`);
+    });
+  } catch (error) {
+    console.error('Error starting HTTPS server:', error);
+    process.exit(1);
+  }
+} else {
+  app.listen(PORT, async () => {
+    console.log(`Auth Proxy Server running on port ${PORT} (without SSL)`);
+    console.log(`Proxying requests to ${TARGET_URL}`);
+  });
+}

@@ -7,6 +7,7 @@ A Node.js proxy server that validates JWT tokens, generates an Ltpa token, and f
 - JWT token validation using JWKS (JSON Web Key Set)
 - JWKS key caching for improved performance
 - Ltpa token creation with shared keys file
+- SSL/HTTPS support for secure communication
 - SSL certificate validation disabled for development environments
 
 ## Prerequisites
@@ -50,10 +51,53 @@ The suggestion is to run the proxy alongside Impact on the same VM. The proxy ca
    # LTPA keys file path
    LTPA_KEYS_PATH='/opt/IBM/tivoli/impact/wlp/usr/servers/ImpactUI/myltpa.keys'
 
-   # LTPA user template
-   LTPA_USER_TEMPLATE='user\\:customRealm/uid=${impactUser},ou=People,dc=ibm,dc=com'
-   ```
+   # LDAP user template to be added in LTPA token
+   LTPA_USER_TEMPLATE='user\:customRealm/uid=${impactUser},ou=People,dc=ibm,dc=com'
 
+   # Enable SSL
+   SSL_ENABLED=true
+
+   # SSL Key path for this node auth proxy cerfificate
+   SSL_KEY_PATH=certs/key.pem
+
+   # SSL Cert path for this node auth proxy cerfificate
+   SSL_CERT_PATH=certs/cert.pem
+
+   # Directory to store trusted certificates for JWKS endpoint and Impact
+   TRUST_CERTS_DIR=trusted-certs
+
+## SSL Configuration
+
+To enable SSL for secure HTTPS communication:
+
+0. (If testing) Generate SSL certificates by running:
+```
+node generate-cert.js
+```
+This will create self-signed certificates in the `certs` directory.
+
+1. Set the following environment variables in your `.env` file:
+```
+SSL_ENABLED=true
+SSL_KEY_PATH=certs/key.pem
+SSL_CERT_PATH=certs/cert.pem
+TRUST_CERTS_DIR=trusted-certs
+```
+
+For the `certs`, replace the certificates with proper certificates from a trusted Certificate Authority.
+
+For the `trusted-certs`, you will need to add your AIOps cluster certificate and your Impact GUI server certificate.
+
+AIOps:
+If you are using the default certifcate, it can be found via:
+`oc get secret router-certs-default -n openshift-ingress` (Copy the entire `tls.crt` block).
+
+If you are using a [custom certifificate](https://www.ibm.com/docs/en/cloud-paks/cloud-pak-aiops/4.11.0?topic=certificates-using-custom-certificate) then you will need to add that instead.
+
+Impact GUI:
+`openssl s_client -showcerts -servername noi-impact.mycluster.com -connect noi-impact.mycluster.com:16311 </dev/null`
+
+Simply create `.pem` files for each of the above and store in the `trusted-certs` directory.
 
 ## Usage
 
@@ -63,20 +107,33 @@ Start the server:
 npm start
 ```
 
+The proxy is now ready for use.
+
 ## API Endpoints
 
 - `/api/*` - Proxied endpoints (requires JWT authentication)
 - `/health` - Health check endpoint
 
+## Testing SSL Implementation
+
+To test if SSL is properly configured:
+
+1. First, generate the SSL certificates if you haven't already:
+   ```
+   npm run generate-cert
+   ```
+
+2. Start the server with SSL enabled:
+   ```
+   npm start
+   ```
+
+3. Run the SSL test script:
+   ```
+   npm run test-ssl
+   ```
+
+The test script will attempt to connect to the server using HTTPS and verify that the SSL configuration is working correctly.
+
 ## Ldap configuration
 The proxy will take the LTPA user template and replace `${impactUser}` with the value of the username coming from AIOps. Impact will then use the resulting user when validating against the LDAP server. The template is defined in the `LTPA_USER_TEMPLATE` environment variable and should be configured to match your LDAP server configuration.
-
-## SSL Certificate Validation
-
-SSL certificate validation is disabled for outgoing requests from the proxy. This is useful for development environments where self-signed certificates or internal certificate authorities might be used.
-
-**Security Warning**: Disabling certificate validation reduces security and should only be used in development or controlled environments. For production deployments, consider enabling certificate validation and properly configuring trusted certificates.
-
-The certificate validation is disabled in two ways:
-1. Setting `NODE_TLS_REJECT_UNAUTHORIZED=0` for Node.js HTTP requests
-2. Setting `secure: false` in the proxy middleware options

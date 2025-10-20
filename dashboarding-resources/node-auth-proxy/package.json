@@ -5,7 +5,9 @@
   "scripts": {
     "start": "node --max-http-header-size=32768 index.js",
     "dev": "nodemon index.js",
-    "test": "node test.js"
+    "test": "node test.js",
+    "generate-cert": "node generate-cert.js",
+    "test-ssl": "node test-ssl.js"
   },
   "keywords": [],
   "author": "",
