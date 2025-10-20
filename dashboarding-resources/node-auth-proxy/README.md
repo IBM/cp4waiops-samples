@@ -12,14 +12,17 @@ A Node.js proxy server that validates JWT tokens, generates an Ltpa token, and f
 
 ## Prerequisites
 1) LDAP server setup and both AIOps and Impact connected to it
-Follow the guidance in https://www.ibm.com/docs/en/cloud-paks/cloud-pak-aiops/4.11.0?topic=users-configuring-ldap-connection for AIOps configuration.
-Follow the guidance in https://www.ibm.com/docs/en/tivoli-netcoolimpact/7.1.0?topic=ldap-configuring for Impact configuration.
+
+Follow the guidance [for AIOps configuration](https://www.ibm.com/docs/en/cloud-paks/cloud-pak-aiops/4.11.0?topic=users-configuring-ldap-connection).
+Follow the guidance [for Impact configuration](https://www.ibm.com/docs/en/tivoli-netcoolimpact/7.1.0?topic=ldap-configuring).
 
 2) Ltpa configured on Impact
-Follow the guidance in https://www.ibm.com/docs/en/was-liberty/nd?topic=liberty-configuring-ltpa-in. In a typical Impact installation, you will edit the Impact GUI server's server.xml file found at: `/opt/IBM/tivoli/impact/wlp/usr/servers/ImpactUI/server.xml`. The resulting keys file will be pointed to in the proxy env file.
+
+Follow the guidance [here](https://www.ibm.com/docs/en/was-liberty/nd?topic=liberty-configuring-ltpa-in). In a typical Impact installation, you will edit the Impact GUI server's server.xml file found at: `/opt/IBM/tivoli/impact/wlp/usr/servers/ImpactUI/server.xml`. The resulting keys file will be pointed to in the proxy env file.
 
 3) A host for the node-proxy
-The suggestion is to run the proxy alongside Impact on the same VM. The proxy can then easily access the Impact Ltpa keys file and proxy requests directly to Impact. The Impact VM will need NodeJS (currently this has been tested using V22, the current active LTS version). You can start by using nvm (https://github.com/nvm-sh/nvm) and then `nvm install 22`.
+
+The suggestion is to run the proxy alongside Impact on the same VM. The proxy can then easily access the Impact Ltpa keys file and proxy requests directly to Impact. The Impact VM will need NodeJS (currently this has been tested using V22, the current active LTS version). You can start by using [nvm](https://github.com/nvm-sh/nvm) and then `nvm install 22`.
 
 ## Setup
 
