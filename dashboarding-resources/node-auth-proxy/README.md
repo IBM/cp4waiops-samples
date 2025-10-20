@@ -54,7 +54,8 @@ The suggestion is to run the proxy alongside Impact on the same VM. The proxy ca
    # LTPA keys file path
    LTPA_KEYS_PATH='/opt/IBM/tivoli/impact/wlp/usr/servers/ImpactUI/myltpa.keys'
 
-   # LDAP user template to be added in LTPA token. This is effectively a translation from the `aiopsUser` to
+   # LDAP user template to be added in LTPA token. This is effectively a translation from the `aiopsUser` to the LDAP user as AIOps does not pass this
+   # back during the JWT validation. You will need to configure this depending on your own LDAP configuration.
    LTPA_USER_TEMPLATE='user\:customRealm/uid=${aiopsUser},ou=People,dc=ibm,dc=com'
 
    # Enable SSL

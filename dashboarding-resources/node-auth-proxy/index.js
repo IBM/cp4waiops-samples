@@ -159,12 +159,12 @@ app.use('/api', validateJwt, async (req, res) => {
     // Create LTPA token if configured
     if (LTPA_PASSWORD) {
       const expiryTime = Date.now() + parseInt(LTPA_EXPIRY || '3600000', 10);
-      let impactUser = req.user.username;
+      let aiopsUser = req.user.username;
 
-      // Use the template from environment variable and substitute impactUser
+      // Use the template from environment variable and substitute aiopsUser
       const userValue = LTPA_USER_TEMPLATE
-        ? LTPA_USER_TEMPLATE.replace('${impactUser}', impactUser)
-        : `user\\:customRealm/uid=${impactUser},ou=People,dc=ibm,dc=com`;
+        ? LTPA_USER_TEMPLATE.replace('${aiopsUser}', aiopsUser)
+        : `user\\:customRealm/uid=${aiopsUser},ou=People,dc=ibm,dc=com`;
 
       const ltpaContent = {
         body: {
