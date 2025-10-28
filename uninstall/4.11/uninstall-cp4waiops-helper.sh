@@ -861,3 +861,31 @@ removingLeftoverOS_workaround() {
     oc delete servicemonitor -n $CP4WAIOPS_PROJECT ibm-opensearch-operator-controller-manager-metrics-monitor
     oc delete lease -n $CP4WAIOPS_PROJECT 5336b8a1.opensearch.cloudpakopen.ibm.com 
 }
+
+cleanup_bundle_unpack_jobs() {
+  echo "Searching for completed bundle-unpack jobs across all namespaces..."
+  
+  # Get all jobs with the bundle-unpack-ref label that are complete
+  job_data=$(oc get jobs --all-namespaces -o json | \
+    jq -r '.items[] | 
+      select(.metadata.labels."operatorframework.io/bundle-unpack-ref" != null and 
+             .metadata.labels."operatorframework.io/bundle-unpack-ref" != "") | 
+      select(.status.conditions[] | select(.type == "Complete" and .status == "True")) | 
+      "\(.metadata.namespace) \(.metadata.name)"')
+  
+  if [ -z "$job_data" ]; then
+    echo "No completed bundle-unpack jobs found."
+    return 0
+  fi
+  
+  count=0
+  # Delete the jobs and configmaps
+  echo "$job_data" | while read -r namespace name; do
+    echo "Deleting job and configmap: $namespace/$name"
+    oc delete job -n "$namespace" "$name"
+    oc delete configmap -n "$namespace" "$name"
+    count=$((count + 1))
+  done
+  
+  echo "Cleanup completed. Deleted $count job(s) and configmap(s)."
+}

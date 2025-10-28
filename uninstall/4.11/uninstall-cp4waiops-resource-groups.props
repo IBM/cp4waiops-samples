@@ -18,22 +18,16 @@ CP4AIOPS_PVC_LABEL=("app.kubernetes.io/instance=aimanager"
                     "app.kubernetes.io/managed-by=ibm-opensearch-operator")
 
 # These secrets are linked with PVC, hence deleting them if those PVC's are deleted.
-CP4AIOPS_LINKED_SECRETS=( "secret/aimanager-ca-certificate-secret"
-                           "secret/aimanager-certificate-secret"
+CP4AIOPS_LINKED_SECRETS=(  "secret/aimanager-certificate-secret"
                            "secret/aiops-ir-core-model-secret"
                            "secret/aiops-ir-core-omni-secret"
                            "secret/kafka-truststore"
-                           "secret/aiops-topology-asm-iafelastic-ca"
-                           "secret/aiops-topology-asm-iafkafka-ca"
-                           "secret/aiops-metrics-processor"
                            "secret/iaf-system-cluster-ca"
                            "secret/iaf-system-cluster-ca-cert")
 
 # All the dependent CRDS related to below operators:
-# Elasticsearch, RedisDB, CouchDB, Events, Postgres, SecureTunnel, Vault, Camel-k , Kong
+# Elasticsearch, RedisDB, CouchDB, Events, Postgres, SecureTunnel
 CP4AIOPS_DEPENDENT_CRDS=(#elasticsearch
-                          "elasticsearchdetails.elasticsearch.cloudpackopen.ibm.com"
-                          "elasticsearches.elasticsearch.cloudpackopen.ibm.com"
                           "clusters.opensearch.cloudpackopen.ibm.com"
                           "nodepools.opensearch.cloudpackopen.ibm.com"
                           #SecureTunnel
@@ -62,30 +56,20 @@ CP4AIOPS_INTERNAL_SECRETS=(
                            "secret/connector-bridge-cert-secret"
                            "secret/sre-tunnel-tunnel-ui-secret"
                            "secret/sre-tunnel-tunnel-api-cert"
-                           "secret/aiops-appconnect-ir-secret"
-                           "secret/cp4waiops-cartridge-es-auth")
+                           "secret/aiops-appconnect-ir-secret")
 
 CP4AIOPS_CONFIGMAPS_INTERNAL=("configmap/aiops-topology-cassandra-bootstrap-config"
             "configmap/cloud-native-postgresql-image-list")
 
 CP4AIOPS_KAFKATOPICS_LABELS=("ibmevents.ibm.com/cluster=iaf-system")
 
-CP4AIOPS_INTERNAL_SERVICEACCOUNTS=("serviceaccount/cp4waiops-eventprocessor-eve-29ee-ep"
-                "serviceaccount/flink")
+CP4AIOPS_INTERNAL_SERVICEACCOUNTS=("serviceaccount/flink")
+
 CP4AIOPS_SHARED_SERVICEACCOUNTS=("serviceaccount/postgresql-operator-manager")
 
-CP4AIOPS_MISC=("rolebinding.authorization.openshift.io/example-redis"
-                "role.authorization.openshift.io/example-redis"
-                "role/cp4waiops-eventprocessor-eve-29ee-ep-role"
-                "rolebinding/cp4waiops-eventprocessor-eve-29ee-ep-role"
-                "rolebinding.rbac.authorization.k8s.io/cp4waiops-eventprocessor-eve-29ee-ep-rb"
-                "rolebinding.authorization.openshift.io/cp4waiops-eventprocessor-eve-29ee-ep-rb"
-                "networkpolicy.networking.k8s.io/c-example-redis-default-deny"
-                "secret/aiopsedge-client-cert"
+CP4AIOPS_MISC=( "secret/aiopsedge-client-cert"
                 "priorityclass.scheduling.k8s.io/high-priority"
                 "priorityclass.scheduling.k8s.io/aiops-topology-cassandra-priority"
-                "issuers.cert-manager.io/aiops-flink-issuer"
-                "issuers.cert-manager.io/aiops-flink-ss-issuer"
                 "issuers.cert-manager.io/automationbase-sample-automationbase-ab-ss-issuer"
                 "priorityclass.scheduling.k8s.io/aimanager-aio-luigi-priority"
                 "rolebinding/flink-role-binding"
@@ -130,20 +114,6 @@ CP4AIOPS_CRDS=("aimanagermainprods.ai-manager.watson-aiops.ibm.com"
 ASM_CRDS=("asmformations.asm.ibm.com"
           "asms.asm.ibm.com")
 
-
-#### Cert Manager ####
-CERTMANAGER=(
-        # eventproccesor
-        "certificates.cert-manager.io/cp4waiops-eventprocessor-eve-29ee-ep-client-cert"
-        "certificates.cert-manager.io/cp4waiops-eventprocessor-eve-29ee-ep-internal-cert"
-        "certificates.cert-manager.io/cp4waiops-eventprocessor-eve-29ee-ep-ss-ca"
-
-        # EDB
-        "certificates.cert-manager.io/ibm-cp-aiops-edb-postgres-client-cert"
-        "certificates.cert-manager.io/ibm-cp-aiops-edb-postgres-server-cert"
-        "certificates.cert-manager.io/ibm-cp-aiops-edb-postgres-ss-ca"
-)
-
 BEDROCK_LEASES=("lease.coordination.k8s.io/ibmevents-cluster-operator"
             "lease.coordination.k8s.io/db9c8771.k8s.enterprisedb.io")
                         
@@ -170,7 +140,7 @@ BEDROCK_CRDS=("authentications.operator.ibm.com"
                 "switcheritems.operators.ibm.com"
                 "zenservices.zen.cpd.ibm.com"
                 "strimzipodsets.core.ibmevents.ibm.com"
-                "zenextensions.zen.cpd.ibm.com ")
+                "zenextensions.zen.cpd.ibm.com")
 
 BEDROCK_SECRETS=("platform-identity-management"
                  "internal-tls-pkcs12"
