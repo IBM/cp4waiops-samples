@@ -121,12 +121,6 @@ if [[ ! -z "$CP4WAIOPS_PROJECT"  ]]; then
 	   unsubscribe "ibm-aiops-orchestrator" $OPERATORS_PROJECT ""
    fi
 
-   log $INFO "Deleting MISC certs in $CP4WAIOPS_PROJECT"
-   for CERT in ${CERTMANAGER[@]}; do
-      log $INFO "Deleting cert $CERT.."
-      oc delete $CERT -n $CP4WAIOPS_PROJECT --ignore-not-found
-   done
-
    # Start cleaning up remaining resources in the project that CP4AIOps created 
    # and are not automatically deleted when CR is deleted
    log $INFO "Deleting kafkatopics in $CP4WAIOPS_PROJECT"
@@ -222,6 +216,9 @@ if [[ ! -z "$CP4WAIOPS_PROJECT"  ]]; then
 
    # Remove this once official workaround is delivered from OpenSearch side
    removingLeftoverOS_workaround
+
+   # Clean up OLM unbundling jobs/configmaps
+   cleanup_bundle_unpack_jobs
 
    # If user configured to delete crds, then delete the dependent CRDs.
    if [[ $DELETE_CRDS == "true" ]]; then
