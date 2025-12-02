@@ -1116,7 +1116,7 @@ then
         getCSVStatus "$INSTALLATION_NAMESPACE" "ibm-automation-elastic"
     fi
     
-    if [[ "${VERSION_AIOPSORCHESTRATOR}" != "4.7" && "${VERSION_AIOPSORCHESTRATOR}" != "4.8" && "${VERSION_AIOPSORCHESTRATOR}" != "4.9" && "${VERSION_AIOPSORCHESTRATOR}" != "4.10" && "${VERSION_AIOPSORCHESTRATOR}" != "4.11" ]];
+    if [[ "${VERSION_AIOPSORCHESTRATOR}" != "4.7" && "${VERSION_AIOPSORCHESTRATOR}" != "4.8" && "${VERSION_AIOPSORCHESTRATOR}" != "4.9" && "${VERSION_AIOPSORCHESTRATOR}" != "4.10" && "${VERSION_AIOPSORCHESTRATOR}" != "4.11"  && "${VERSION_AIOPSORCHESTRATOR}" != "4.12" ]];
     then
         getCSVStatus "$INSTALLATION_NAMESPACE" "ibm-automation-flink"
     else
@@ -1261,7 +1261,7 @@ then
             getSubscriptionStatusGrep "ibm-automation-eventprocessing" "$INSTALLATION_NAMESPACE" 
         fi
 
-        if [[ "${VERSION_AIOPSORCHESTRATOR}" == "4.10" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "4.11" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "0.1" ]] ; then
+        if [[ "${VERSION_AIOPSORCHESTRATOR}" == "4.10" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "4.11" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "4.12" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "0.1" ]] ; then
             getSubscriptionStatusGrep "ibm-opensearch-operator" "$INSTALLATION_NAMESPACE"
         elif [[ "${VERSION_AIOPSORCHESTRATOR}" == "4.8" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "4.9" ]]; then
             getSubscriptionStatusGrep "ibm-elasticsearch-operator" "$INSTALLATION_NAMESPACE"
@@ -1269,7 +1269,7 @@ then
             getSubscriptionStatusGrep "ibm-automation-elastic" "$INSTALLATION_NAMESPACE"
         fi
         
-        if [[ "${VERSION_AIOPSORCHESTRATOR}" == "4.9" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "4.10" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "4.11" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "0.1" ]];
+        if [[ "${VERSION_AIOPSORCHESTRATOR}" == "4.9" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "4.10" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "4.11" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "4.12" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "0.1" ]];
         then
             getSubscriptionStatusGrep "ibm-opencontent-flink" "$INSTALLATION_NAMESPACE"
         else
@@ -1777,6 +1777,15 @@ then
         MAJORVERSION_ASM="2.31"
     }
 
+    component-versions-412() {
+        MAJORVERSION_AIOPSUI="4.12"
+        MAJORVERSION_AIMANAGER="4.12"
+        MAJORVERSION_IRCORE="4.12"
+        MAJORVERSION_LIFECYCLESERVICE="4.12"
+        MAJORVERSION_AIOPSANALYTICSORCHESTRATOR="4.12"
+        MAJORVERSION_ASM="2.33"
+    }
+
     aiopsEdgeBaseUpgradeStatus() {    
         UPGRADED=$(oc get aiopsedge aiopsedge -o jsonpath='{.status.conditions[?(@.type=="UpgradeReady")].status}')
         CONFIGURED=$(oc get aiopsedge aiopsedge -o jsonpath='{.status.phase}')
@@ -2001,7 +2010,10 @@ then
     }
 
     # Check current instance version and component status checks for that version of CP4AIOps
-    if [[ "${VERSION_AIOPSORCHESTRATOR}" == "4.11" ]]; 
+    if [[ "${VERSION_AIOPSORCHESTRATOR}" == "4.12" ]]; 
+    then
+        component-versions-412
+    elif [[ "${VERSION_AIOPSORCHESTRATOR}" == "4.11" ]]; 
     then
         component-versions-411
     elif [[ "${VERSION_AIOPSORCHESTRATOR}" == "4.10" ]]; 
@@ -2051,17 +2063,17 @@ then
         component-versions-33
     elif [ "${VERSION_AIOPSORCHESTRATOR}" == "0.1" ];
     then
-        # for developer builds (v0.1), we will check against release-4.11 versions
-        component-versions-411
+        # for developer builds (v0.1), we will check against release-4.12 versions
+        component-versions-412
         echo ""
         echo "${red}${bold}NOTE: ${normal}Your Cloud Pak for AIOps install appears to be an internal dev version (v${VERSION_AIOPSORCHESTRATOR})."
-        echo "      The status-upgrade command checks the status of upgrades to v3.3 - v3.7 and v4.1 - v4.11 only." 
-        echo "      Therefore, the upgrade checks below will be against v4.11 component versions."
-        echo "      This may influence your results below if your dev build is not based on release-4.11.${normal}"
+        echo "      The status-upgrade command checks the status of upgrades to v3.3 - v3.7 and v4.1 - v4.12 only." 
+        echo "      Therefore, the upgrade checks below will be against v4.12 component versions."
+        echo "      This may influence your results below if your dev build is not based on release-4.12.${normal}"
     else
         echo ""
         echo "${red}${bold}ERROR: ${normal}Your Cloud Pak for AIOps install appears to be v${VERSION_AIOPSORCHESTRATOR}."
-        echo "       The status-upgrade command checks the status of upgrades to v3.3 - v3.7 and v4.1 - v4.11 only." 
+        echo "       The status-upgrade command checks the status of upgrades to v3.3 - v3.7 and v4.1 - v4.12 only." 
         echo "       The version you are using is not supported for use with the status-upgrade command. Exiting."
         echo ""
         exit 0
@@ -2090,7 +2102,7 @@ then
     postgresUpgradeStatus
     secureTunnelUpgradeStatus
     asmUpgradeStatus
-    if [[ "${VERSION_AIOPSORCHESTRATOR}" != "4.7" && "${VERSION_AIOPSORCHESTRATOR}" != "4.8" && "${VERSION_AIOPSORCHESTRATOR}" != "4.9" && "${VERSION_AIOPSORCHESTRATOR}" != "4.10" && "${VERSION_AIOPSORCHESTRATOR}" != "4.11" ]];
+    if [[ "${VERSION_AIOPSORCHESTRATOR}" != "4.7" && "${VERSION_AIOPSORCHESTRATOR}" != "4.8" && "${VERSION_AIOPSORCHESTRATOR}" != "4.9" && "${VERSION_AIOPSORCHESTRATOR}" != "4.10" && "${VERSION_AIOPSORCHESTRATOR}" != "4.11" && "${VERSION_AIOPSORCHESTRATOR}" != "4.12"  ]];
     then
         FlinkEventProcessorUpgradeStatus
     fi
