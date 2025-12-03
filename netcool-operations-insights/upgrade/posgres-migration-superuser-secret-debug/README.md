@@ -8,6 +8,9 @@
 ### Root Cause
 Older PostgreSQL versions lack certain parameters required for migration. Systems progressively upgraded from these versions retain outdated secrets without the necessary parameters, causing migration failures.
 
+### Users impacted 
+Any user who's initial install of the product was version 1.6.11 or earlier.
+
 To resolve this we need to update the secret with the missing parameters and restart the migration.
 
 ## Update the postgres superuser secret with the missing values
@@ -54,3 +57,7 @@ These steps will vary slightly depending on the type of install, replace anythin
     oc patch deployment noi-operator \
         -n <NOI_OPERATOR_NAMESPACE> -p '{"spec":{"replicas":1}}'
     ```
+
+
+## Conclusion
+At this point the migration should be running. You can tail the noi-operator logs to see the progress of the migration. Grepping for the `postgresMigrationStatusKeyV17` key will highlight the migration progress.
