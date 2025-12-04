@@ -1,0 +1,3 @@
+# Grafana dashboards
+
+This folder contains Grafana dashboards for monitoring various components and applications within your IBM Cloud Pak for AIOps deployment. You will need Grafana deployed and metrics enabled/configured in your OCP cluster to be able to set up these dashboards, see more at [Monitoring and alerting with Prometheus, Grafana, and Cloud Pak for AIOps](https://www.ibm.com/docs/en/cloud-paks/cloud-pak-aiops/4.11.0?topic=monitoring-alerting-prometheus-grafana). Once the prerequisites are met, select the folder that corresponds to your AIOps release (ie: 4.11.0) and import the dashboards by copy and pasting the json or by uploading the file into Grafana.
