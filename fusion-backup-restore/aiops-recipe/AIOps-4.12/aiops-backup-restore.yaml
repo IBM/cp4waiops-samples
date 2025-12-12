@@ -215,6 +215,19 @@ spec:
       includedResourceTypes:
         - secrets
       labelSelector: app.kubernetes.io/managed-by=ibm-aiops-orchestrator
+    - name: kafka-crd
+      type: resource
+      includedResourceTypes:
+        - customresourcedefinitions.apiextensions.k8s.io
+      includeClusterResources: true
+      labelSelector: app.kubernetes.io/instance=ibm-events-operator
+    - name: iaf-system
+      type: resource
+      includedResourceTypes:
+        - kafkas.ibmevents.ibm.com
+      restoreStatus:
+        includedResources:
+        - kafkas.ibmevents.ibm.com
   hooks:
   - name: ibm-aiops-catalogsource-check
     type: check
@@ -425,6 +438,8 @@ spec:
     - group: aiops-topology-cassandra-auth-secret
     - group: omni-secret
     - group: model-secret
+    - group: kafka-crd
+    - group: iaf-system
     - group: aiops-installation
     - group: aimanager-aimanager
     - group: connectorconfiguration
@@ -492,6 +507,8 @@ spec:
     - group: ibm-secure-tunnel-operator-secret
     - group: platform-auth-ldaps-ca-cert-secret
     - group: aiops-volumes
+    - group: kafka-crd
+    - group: iaf-system
     - group: aiops-installation
     - hook: ibm-common-service-operator-check/replicasReady
     - hook: ibm-cloud-databases-redis-operator-check/replicasReady
