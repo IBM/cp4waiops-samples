@@ -1,7 +1,7 @@
 # Examples
 This folder contains dashboard examples.  <br />
 
-This requires IBM Cognos Analytics **version 12.0.x**.
+This requires IBM Cognos Analytics **version 12.x**.
 
 ## Files
 
