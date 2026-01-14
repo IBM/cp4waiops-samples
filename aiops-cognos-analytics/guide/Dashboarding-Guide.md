@@ -38,7 +38,41 @@ Aside from just building custom panels with the toolkit, it can also be used to 
 
 ## Cognos Analytics with AIOps
 
+### Deployment architecture
+In short, Cognos Analytics will run separately to AIOps and not on the same Openshift cluster. We had explored this 'in-cluster' deployment method previously (in tech preview), but decided to abandon as Cognos were looking at their own architecture changes. As such, we currently only support working with separately installed on-premise Cognos instances.
+
+Cognos can be linked in a few ways to create a more seamless experience between the two. The key parts are:
+1) An SSO configuration, allowing you to leverage the same identity provider in both AIOps and Cognos. This is also a critical requirement when using the AIOps widgets within Cognos.
+2) A Db2 database and connector that provides a data flow from AIOps to Cognos.
+3) AIOps widgets in Cognos, allowing you to use the Alert list, Incident list and Topology viewer from within Cognos dashboads.
+
+![Deployment overview](./images/deployment.png)
+
+In theory, you could leverage the same VM for your Cognos and Db2 deployments, but it is recommended to use separate VMs for each purpose. Db2 is available on various platforms including on Cloud, but refer to the compatibility and part entitlements below to ensure you use a supported version.
+
+Two key questions that come up relating to the architecture are:
+1) Will the data in Cognos be lagging behind that of AIOps?
+The short answer is no, not really! The longer answer is that the data in Cognos will be updated in near real-time from AIOps but it will depend on a few factors, including the transfer rate through the Db2 connector, the schema, and then the refresh/cache settings on the Cognos side. As well a the speed, the throughput must also be considered and for the Db2 connector it currently supports 700/s for inserts and 300-400/s for updates of alerts, using the default schema.
+When working at high load, the connector will also batch inserts/updates to Db2 so you may see a minor delay (in terms of seconds) before the data arrives in Db2.
+In typical ops environments, clients will have their Alert viewer set to a refresh time of 60 or 30 seconds at most, so this provides ample time for the alert insertion/processing to take place across the two systems.
+See [Data caching and refresh intervals](#data-caching-and-refresh-intervals) for more information.
+
+2) Is the data in the AIOps Alert list widget in Cognos the same?
+Essentially the Alert list widget in Cognos is an iframed version of the AIOps Alert list widget. As such, the widget will be pulling data directly from the AIOps APIs rather than from the Db2 database, so if there is a mismatch in refresh timings between the Alert list and the Cognos visualisations then you may temporarily see a mismatch of the data displayed. This is the same for the Incident List widget, but not for the Topology Viewer as we currently do not allow data to be exported to Db2 so this does not apply.
+The diagram below shows this data flow:
+
+![Deployment data flow](./images/deployment-data.png)
+
 ### Prerequisites
+
+#### Licensing
+By default, AIOps entitles 25 users of Cognos Analytics, 1 of which can be an administrator. For NOI, it is 5 users, 1 of which can be an administrator. There are specific parts associated to these licenses and care should be taken as Cognos Analytics and Db2 come in various deployment forms.
+
+The top level AIOps and NOI entitlements are documented here:
+AIOps: https://www.ibm.com/support/customer/csol/terms/?id=L-LCKC-79KSJP&lc=en
+NOI: https://www.ibm.com/support/customer/csol/terms/?id=L-QVLE-KVZBSX&lc=en
+
+For Db2, it is included as part of the supporting programs.
 
 #### Infrastructure
 Both Cognos Analytics and Db2 will run on separate (one, or multiple) VMs. Db2 is available on RHOS, K8s, and on Cloud even, but it has not been officially tested for the integration for AIOps. Db2's role is straightforward so many versions/variants may well work beyond those specified by the part number supplied. Cognos Analytics is also available in different deployment methods and flavours but is more likely to have problems with the AIOps integration script if not the officially supported version.
@@ -51,10 +85,18 @@ Both Cognos Analytics and Db2 will run on separate (one, or multiple) VMs. Db2 i
   Supported environments lists all the other options for Db2.
 
 #### Sizing
+There are two main parts to sizing the deployment:
+1) Sizing the deployment for the software itself to run, e.g CPU/Memory/Storage requirements regardless of data
+2) Sizing the database for the data it will contain.
+
+For the software sizing, refer to the respective guidance:
+
 - **For Cognos Analytics:** See the reference IBM Cognos Analytics High Level sizing presentation provided along with this guide.
 - **For Db2:** Review the basic hardware requirements [here](https://www.ibm.com/software/reports/compatibility/clarity-reports/report/html/softwareReqsForProduct?deliverableId=7F28FF90669E11E982882C5D069DA07A&osPlatforms=Linux&duComponentIds=S009|S006|S002|S007|S005|A003|A008|A004&mandatoryCapIds=spcrAllValues&optionalCapIds=spcrAllValues), but additionally the Db2 setup wizard will provide guidance on disk sizing required. Additional notes on memory requirements can be found [here](https://www.ibm.com/docs/en/db2/11.5.x?topic=servers-disk-memory-requirements#r0008877__title__3).
 
-In general for disk sizing, the key will be estimating the usage based on the data you intend to store.
+For the storage sizing, the key will be estimating the usage based on the data you intend to store.
+
+For Alert data,
 
 #### Parts
 The relevant parts can be found by looking at the [Passport Advantage part numbers document](https://www.ibm.com/docs/en/cloud-paks/cloud-pak-aiops/latest?topic=planning-passport-advantage-part-numbers) for Cloud Pak for AIOps, per release.
@@ -129,6 +171,72 @@ For the mappings, a default mapping is provided and this matches the example sch
 Use the 'Select template' drop down in the mapping editor to switch between the table columns template and the default mapping template but be cautious to save any changes as your changes will be removed by doing so.
 
 > **Note:** As of AIOps version 4.7, there is no feedback mechanism for an incorrect policy mapping and therefore it is crucial to ensure the fields match up to your target database schema, particularly if you have customised it.
+
+### Customising the schema and mapping
+As hinted, you can customise both the schema and mapping to suit your own needs. There are a few steps required to do this which are outlined below, and the order should be followed to prevent any errors.
+
+The steps are based around a working example of adding some new properties to Alerts that you will use in AIOps and subsequently in Cognos dashboards. The properties will be coordinates of the resource that the alert is for: `resource.latitude` and `resource.longitude`.
+
+#### Update the Db2 schema
+First we will add three new columns to represent these values, so will need to modify the ALERTS_REPORTER_STATUS table in Db2. We provide a ready-made SQL file to achieve this, that you will need to copy to your Db2 VM:
+[alerts_severity_resource_breakdown.sql](../schemas/db2/alerts_severity_resource_breakdown.sql)
+
+On the Db2 VM, connect to your Db2 database (as db2 user):
+```
+db2 connect to aiopsdb
+```
+and replace `aiopsdb` with the name of your database.
+
+Next, using the additonal [alerts_severity_resource_breakdown.sql file](../schemas/db2/alerts_severity_resource_breakdown.sql) provided run the following and enure to tweak the path:
+```
+db2 -td@ -vf <path to the file>\alerts_severity_resource_breakdown.sql
+```
+
+This will add some new columns to the main ALERTS_REPORTER_STATUS table, along with a couple of views that can be used for visualisations.
+If you have any additional audit processes in place including tables and triggers, you will need to modify those as well. By default, the AIOps schema only provides additional auditing for severity, acknowledgement, owner or team changes.
+
+#### Add the new property definition into AIOps
+Follow steps 1-4 in the AIOps documenation here: https://www.ibm.com/docs/en/cloud-paks/cloud-pak-aiops/4.12.0?topic=alerts-configuring-custom-properties-incidents
+
+NOTE - You can simultaneously make the additons of the resource and custom properties. The resulting yaml will look like this:
+```
+alert:
+  resource:
+  - name: latitude
+    description: Latitude of the location
+    type: string
+  - name: longitude
+    description: Longitude of the location
+    type: string
+story: {}
+```
+
+If you are making subsequent ammendments to the yaml, ensure you follow the steps defined in https://www.ibm.com/docs/en/cloud-paks/cloud-pak-aiops/4.12.0?topic=alerts-configuring-custom-properties-incidents#2-update-or-correct-custom-property-definitions onwards.
+
+#### Update the AIOps policy
+Navigate back to your policy in AIOps and edit. In the parameter mapping, you will now need to add the new properties:
+```
+"LATITUDE": alert.resource.latitude,
+"LONGITUDE": alert.resource.longitude
+```
+
+Save this. From this point on, you should now see those fields populated in your ALERTS_REPORTER_STATUS table in Db2, assuming the data coming into AIOps will populate these. If not, they will just be null.
+
+If you need to empty the tables in Db2 you can use the following:
+```
+db2 connect to <your db2 database>
+db2 delete from ALERTS_REPORTER_STATUS
+```
+
+Repeat the `delete from` command for any of the audit tables or additional tables you have based on ALERTS_REPORTER_STATUS.
+
+#### Refresh the Data module in Cognos
+NOTE - The following steps assume you have already configured Cognos to work with your Db2 instance and data. If you have not, refer to [Connecting to your Db2 instance](#connecting-to-your-db2-instance) first and setup the connection and Data module.
+Navigate your way to your data module. Under 'Sources' (left hand menu) find your connection (again, defaults to 'DB2INST1'). Click the 3 dot menu and select 'Reload metadata'.
+
+#### Use the changes
+You will now be able to use these fields in your dashboards.
+
 
 ## Working with Cognos Analytics
 
@@ -243,15 +351,27 @@ Now repeat the steps to create a Bar chart, but this time for the 'Bars' field s
 ### General notes
 The key to a good dashboard or report is preparation of the data. The scenario above highlights a couple of useful tips around preparation and relationships, but there are many more available. Cognos Analytics provides a series of [in-depth guidebooks](https://www.ibm.com/docs/en/cognos-analytics/12.1.x?topic=manuals) for various topics, and these should be consulted for advanced information beyond the core documentation pages referenced above.
 
+### Data caching and refresh intervals
+For Cognos caching information see https://www.ibm.com/docs/en/cognos-analytics/12.1.x?topic=sources-setting-up-data-caching
+For Cognos refresh information, it is configured on a chart by chart basis. On a typical bar chart, for example, the default is actually to not refresh. You can edit this by selecting the chart, opening 'Properties', then 'Chart' and then adjusting the 'Refresh automatically' settings:
+![Refresh automatically](./images/refresh-chart.png)
+
 ## Troubleshooting
 
-- **After being logged out, re-selecting the AIOps namespace in the login screen redirects the user back to the login screen.**
+- **After being logged out of Cognos, re-selecting the AIOps namespace in the login screen redirects the user back to the login screen.**
   - **Solution:** Navigate back to the home URL (e.g. `https://cogdash1.fyre.ibm.com:9300/bi`) and restart the login chain
 
 - **No data appearing in Db2**
-  - **Solution:** First validate the connection details
-  - Second validate the mapping
-  - Check the logs of the connector
+  - **Solution:**
+1) Validate the connection is running. If not, check the connection details are correct.
+2) Check the logs of the connector. You may see connection related errors in here, or otherwise errors relating to the inserts/updates. If it is the former and you have already validated your connection details, see 3). If it is the latter, see 4).
+To get the logs, run the following commands (NOTE the 'db2 integration name' is the name of the integration you defined in AIOps):
+```
+export DB2_INTEGRATION_NAME=<your db2 integration name>
+oc logs $(oc get po | grep -i cp4aiops-db2-integration-$(oc get connectorconfiguration ${DB2_INTEGRATION_NAME} -o=jsonpath='{.metadata.uid}' | awk '{print substr($1, 1, length($1)-3)}') | awk '{print $1}')
+```
 
+3) Validate Db2 is running.
+4) Validate the mapping, and schema. Errors are typically caused by mismatches in the policy mapping and the Db2 schema. For example, you may be trying to insert a value into a column that is not defined in the schema, or may be using the wrong data type for a column. Refer back to the [customisation guidance](#customising-the-schema-and-mapping).
 
 
