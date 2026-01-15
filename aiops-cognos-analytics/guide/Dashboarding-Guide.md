@@ -96,7 +96,30 @@ For the software sizing, refer to the respective guidance:
 
 For the storage sizing, the key will be estimating the usage based on the data you intend to store.
 
-For Alert data,
+For the AIOps data, you can use the following calculation as a starting point:
+**Alerts:**
+```
+(<alert inserts per day> * (<bytes per alert> + <bytes per alert audit entries>) * <x weeks> * <y days>) / (1024 ^ 3)
+```
+Using the default schema:
+`<bytes per alert> = 5168`
+`<bytes per alert audit entries> = 3777`
+
+**Incidents:**
+```
+(<incident inserts per day> * (<bytes per incident> + <bytes per incident audit entries>) * <x weeks> * <y days>) / (1024 ^ 3)
+```
+Using the default schema:
+`<bytes per incident> = 3082`
+`<bytes per incident audit entries> = 3745`
+
+A working example would be as follows: For an environment using the standard schema, but no audit tables and with 10,000 alerts per day, the space required for 1 years worth of alert data would be:
+```
+(10000 * (5168 + 0) * 52 * 7) / (1024 ^ 3) = 17.5 GB
+```
+The calculation refers to alert inserts rather than just alerts, as this will happen after deduplication in AIOps. The calculation also assumes that every alert insert is triggering an update on every audit table, which is highly unlikely. As such, you an reduce the values to suit your own processing and crucially your own schema - if you update the schema and add new properties etc, you will need to accomodate the sizing for this. Refer to the Db2 guidance on sizing for columns here: https://www.ibm.com/docs/en/db2/11.5.x?topic=statements-create-table#r0000927__title__56 and ammend as necessary.
+
+It will be important to clarify your own rates and sizes fairly accurately before using this calculation, but either way you will want to add some additional space as a buffer and in case of any unexpected surges in activity. Db2 will also require its own storage, so refer to the guidance provided in their install instructions.
 
 #### Parts
 The relevant parts can be found by looking at the [Passport Advantage part numbers document](https://www.ibm.com/docs/en/cloud-paks/cloud-pak-aiops/latest?topic=planning-passport-advantage-part-numbers) for Cloud Pak for AIOps, per release.
@@ -168,74 +191,12 @@ For the table, if you are using the provided schema then use the respective `_RE
 
 For the mappings, a default mapping is provided and this matches the example schema we provide in our [samples repository](https://github.com/IBM/cp4waiops-samples/blob/main/aiops-cognos-analytics/schemas/README.md#reporting-schemas). Alternatively, you can select the 'Customise' option and control the mapping yourself, using the provided editor. By default, the mapping will present the columns available in the database along with their respective data types (note – the data types are high level categories rather than data types as defined by Db2. For example, a Db2 'VARCHAR' column is simply labelled as a string column).
 
+
 Use the 'Select template' drop down in the mapping editor to switch between the table columns template and the default mapping template but be cautious to save any changes as your changes will be removed by doing so.
 
+> **Note:** If you want to customise the mapping (and Db2 schema...this will be a prerequisite) then refer to the [Customising the schema and mapping](#customising-the-schema-and-mapping) section.
+
 > **Note:** As of AIOps version 4.7, there is no feedback mechanism for an incorrect policy mapping and therefore it is crucial to ensure the fields match up to your target database schema, particularly if you have customised it.
-
-### Customising the schema and mapping
-As hinted, you can customise both the schema and mapping to suit your own needs. There are a few steps required to do this which are outlined below, and the order should be followed to prevent any errors.
-
-The steps are based around a working example of adding some new properties to Alerts that you will use in AIOps and subsequently in Cognos dashboards. The properties will be coordinates of the resource that the alert is for: `resource.latitude` and `resource.longitude`.
-
-#### Update the Db2 schema
-First we will add three new columns to represent these values, so will need to modify the ALERTS_REPORTER_STATUS table in Db2. We provide a ready-made SQL file to achieve this, that you will need to copy to your Db2 VM:
-[alerts_severity_resource_breakdown.sql](../schemas/db2/alerts_severity_resource_breakdown.sql)
-
-On the Db2 VM, connect to your Db2 database (as db2 user):
-```
-db2 connect to aiopsdb
-```
-and replace `aiopsdb` with the name of your database.
-
-Next, using the additonal [alerts_severity_resource_breakdown.sql file](../schemas/db2/alerts_severity_resource_breakdown.sql) provided run the following and enure to tweak the path:
-```
-db2 -td@ -vf <path to the file>\alerts_severity_resource_breakdown.sql
-```
-
-This will add some new columns to the main ALERTS_REPORTER_STATUS table, along with a couple of views that can be used for visualisations.
-If you have any additional audit processes in place including tables and triggers, you will need to modify those as well. By default, the AIOps schema only provides additional auditing for severity, acknowledgement, owner or team changes.
-
-#### Add the new property definition into AIOps
-Follow steps 1-4 in the AIOps documenation here: https://www.ibm.com/docs/en/cloud-paks/cloud-pak-aiops/4.12.0?topic=alerts-configuring-custom-properties-incidents
-
-NOTE - You can simultaneously make the additons of the resource and custom properties. The resulting yaml will look like this:
-```
-alert:
-  resource:
-  - name: latitude
-    description: Latitude of the location
-    type: string
-  - name: longitude
-    description: Longitude of the location
-    type: string
-story: {}
-```
-
-If you are making subsequent ammendments to the yaml, ensure you follow the steps defined in https://www.ibm.com/docs/en/cloud-paks/cloud-pak-aiops/4.12.0?topic=alerts-configuring-custom-properties-incidents#2-update-or-correct-custom-property-definitions onwards.
-
-#### Update the AIOps policy
-Navigate back to your policy in AIOps and edit. In the parameter mapping, you will now need to add the new properties:
-```
-"LATITUDE": alert.resource.latitude,
-"LONGITUDE": alert.resource.longitude
-```
-
-Save this. From this point on, you should now see those fields populated in your ALERTS_REPORTER_STATUS table in Db2, assuming the data coming into AIOps will populate these. If not, they will just be null.
-
-If you need to empty the tables in Db2 you can use the following:
-```
-db2 connect to <your db2 database>
-db2 delete from ALERTS_REPORTER_STATUS
-```
-
-Repeat the `delete from` command for any of the audit tables or additional tables you have based on ALERTS_REPORTER_STATUS.
-
-#### Refresh the Data module in Cognos
-NOTE - The following steps assume you have already configured Cognos to work with your Db2 instance and data. If you have not, refer to [Connecting to your Db2 instance](#connecting-to-your-db2-instance) first and setup the connection and Data module.
-Navigate your way to your data module. Under 'Sources' (left hand menu) find your connection (again, defaults to 'DB2INST1'). Click the 3 dot menu and select 'Reload metadata'.
-
-#### Use the changes
-You will now be able to use these fields in your dashboards.
 
 
 ## Working with Cognos Analytics
@@ -356,6 +317,71 @@ For Cognos caching information see https://www.ibm.com/docs/en/cognos-analytics/
 For Cognos refresh information, it is configured on a chart by chart basis. On a typical bar chart, for example, the default is actually to not refresh. You can edit this by selecting the chart, opening 'Properties', then 'Chart' and then adjusting the 'Refresh automatically' settings:
 ![Refresh automatically](./images/refresh-chart.png)
 
+### Customising the schema and mapping
+As hinted, you can customise both the schema and mapping to suit your own needs. There are a few steps required to do this which are outlined below, and the order should be followed to prevent any errors.
+
+The steps are based around a working example of adding some new properties to Alerts that you will use in AIOps and subsequently in Cognos dashboards. The properties will be coordinates of the resource that the alert is for: `resource.latitude` and `resource.longitude`.
+
+#### Update the Db2 schema
+First we will add three new columns to represent these values, so will need to modify the ALERTS_REPORTER_STATUS table in Db2. We provide a ready-made SQL file to achieve this, that you will need to copy to your Db2 VM:
+[alerts_severity_resource_breakdown.sql](../schemas/db2/alerts_severity_resource_breakdown.sql)
+
+On the Db2 VM, connect to your Db2 database (as db2 user):
+```
+db2 connect to aiopsdb
+```
+and replace `aiopsdb` with the name of your database.
+
+Next, using the additonal [alerts_severity_resource_breakdown.sql file](../schemas/db2/alerts_severity_resource_breakdown.sql) provided run the following and enure to tweak the path:
+```
+db2 -td@ -vf <path to the file>\alerts_severity_resource_breakdown.sql
+```
+
+This will add some new columns to the main ALERTS_REPORTER_STATUS table, along with a couple of views that can be used for visualisations.
+If you have any additional audit processes in place including tables and triggers, you will need to modify those as well. By default, the AIOps schema only provides additional auditing for severity, acknowledgement, owner or team changes.
+
+#### Add the new property definition into AIOps
+Follow steps 1-4 in the AIOps documenation here: https://www.ibm.com/docs/en/cloud-paks/cloud-pak-aiops/4.12.0?topic=alerts-configuring-custom-properties-incidents
+
+NOTE - You can simultaneously make the additons of the resource and custom properties. The resulting yaml will look like this:
+```
+alert:
+  resource:
+  - name: latitude
+    description: Latitude of the location
+    type: string
+  - name: longitude
+    description: Longitude of the location
+    type: string
+story: {}
+```
+
+If you are making subsequent ammendments to the yaml, ensure you follow the steps defined in https://www.ibm.com/docs/en/cloud-paks/cloud-pak-aiops/4.12.0?topic=alerts-configuring-custom-properties-incidents#2-update-or-correct-custom-property-definitions onwards.
+
+#### Update the AIOps policy
+Navigate back to your policy in AIOps and edit. In the parameter mapping, you will now need to add the new properties:
+```
+"LATITUDE": alert.resource.latitude,
+"LONGITUDE": alert.resource.longitude
+```
+
+Save this. From this point on, you should now see those fields populated in your ALERTS_REPORTER_STATUS table in Db2, assuming the data coming into AIOps will populate these. If not, they will just be null.
+
+If you need to empty the tables in Db2 you can use the following:
+```
+db2 connect to <your db2 database>
+db2 delete from ALERTS_REPORTER_STATUS
+```
+
+Repeat the `delete from` command for any of the audit tables or additional tables you have based on ALERTS_REPORTER_STATUS.
+
+#### Refresh the Data module in Cognos
+NOTE - The following steps assume you have already configured Cognos to work with your Db2 instance and data. If you have not, refer to [Connecting to your Db2 instance](#connecting-to-your-db2-instance) first and setup the connection and Data module.
+Navigate your way to your data module. Under 'Sources' (left hand menu) find your connection (again, defaults to 'DB2INST1'). Click the 3 dot menu and select 'Reload metadata'.
+
+#### Use the changes
+You will now be able to use these fields in your dashboards.
+
 ## Troubleshooting
 
 - **After being logged out of Cognos, re-selecting the AIOps namespace in the login screen redirects the user back to the login screen.**
@@ -373,5 +399,13 @@ oc logs $(oc get po | grep -i cp4aiops-db2-integration-$(oc get connectorconfigu
 
 3) Validate Db2 is running.
 4) Validate the mapping, and schema. Errors are typically caused by mismatches in the policy mapping and the Db2 schema. For example, you may be trying to insert a value into a column that is not defined in the schema, or may be using the wrong data type for a column. Refer back to the [customisation guidance](#customising-the-schema-and-mapping).
+
+- **MSR-SMT-2190 error in Cognos when loading metadata**
+ - **Solution:**
+When loading the metadata, you need to specify that sample data is not loaded. To do this
+1) Navigate and click on your data server: **Menu → Manage → Data server connections → Your data server**
+2) In Data server connections, find your connection and click the 3 dot menu, then **Assets**.
+3) Find your asset/schema (DB2INST1 by default) and click the 3 dot menu, then **Load options**.
+4) Deslect **Retrieve sample data** and then click load.
 
 
