@@ -22,12 +22,15 @@ Aside from just building custom panels with the toolkit, it can also be used to 
 **Recommendation:** Cognos Analytics
 
 **Use case 4:** I need dashboards that can show live data but provide an interactive experience to drill down into more AIOps or other context (e.g. like monitor boxes)
-**Recommendation:** Dashboarding toolkit
+**Recommendation:** Cognos Analytics OR Dashboarding toolkit
 
 **Use case 5:** I need to surface my existing Impact operator view within AIOps
 **Recommendation:** Dashboarding toolkit
 
 **Use case 6:** I need to surface my existing Grafana dashboard within AIOps
+**Recommendation:** Dashboarding toolkit
+
+**Use case 7:** I need a highly bespoke dashboard with a precise look and feel, and complex interactions
 **Recommendation:** Dashboarding toolkit
 
 ### Key notes about the capabilities/differences
@@ -382,7 +385,7 @@ Navigate your way to your data module. Under 'Sources' (left hand menu) find you
 #### Use the changes
 You will now be able to use these fields in your dashboards.
 
-## Troubleshooting
+### Troubleshooting
 
 - **After being logged out of Cognos, re-selecting the AIOps namespace in the login screen redirects the user back to the login screen.**
   - **Solution:** Navigate back to the home URL (e.g. `https://cogdash1.fyre.ibm.com:9300/bi`) and restart the login chain
@@ -409,3 +412,17 @@ When loading the metadata, you need to specify that sample data is not loaded. T
 4) Deslect **Retrieve sample data** and then click load.
 
 
+
+## Dashboarding toolkit
+The toolkit is available here: https://github.com/IBM/aiops-ui-extension-toolkit
+
+Review the readme and getting started documentation provided on the repo, along with the additional doc files where appropriate (e.g for a 'Grafana' example review https://github.com/IBM/aiops-ui-extension-toolkit/blob/main/doc/grafana-guide.md).
+
+Additionally, review the AIOps explained videos on Youtube that provide some end-to-end guidance on using the toolkit:
+1) https://www.youtube.com/watch?v=0_aQJ0UsNRY&list=PL_4RxtD-BL5uuXsmuneBWS1oCo65Xe1On&index=3
+2) https://www.youtube.com/watch?v=SwxqBO8c84U&list=PL_4RxtD-BL5uuXsmuneBWS1oCo65Xe1On&index=4
+3) https://www.youtube.com/watch?v=6bZ4WjY0LJI&list=PL_4RxtD-BL5uuXsmuneBWS1oCo65Xe1On&index=5
+
+![AIOps explained youtube](./images/aiops-explained-youtube.png)
+
+As the name suggests, the toolkit is more a set of tools to facilitate extending the AIOps UI, rather than a dedicated dashboard building tool. Whilst you can build dashboards using the framework and examples provided, you can also use it to embed other pages and provide synergy between custom code and existing AIOps widgets. The use-case recommendations should help guide you to using this vs Cognos, but if there are very particular use-cases that you want to explore then then likelihood is that the toolkit will be the answer, as long as there is no requirement for a GUI based builder.
