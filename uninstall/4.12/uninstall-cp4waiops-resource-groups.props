@@ -10,12 +10,14 @@
 # 2. app.kubernetes.io/instance=example-couchdbcluster: This PVC contains AI training schedules and history
 # 3. app.kubernetes.io/managed-by=ir-core-operator : This PVC contains information about current and recent events and stories 
 # 4. app.kubernetes.io/managed-by=ibm-elasticsearch/ibm-opensearch-operator : This PVC is used for storing log training data, AI models and training information, the Insights Dashboard, and as a policy registry
+# 5. app.kubernetes.io/name=zookeeper : This PVC contains zookeeper ensemble state (e.g who's the leader, etc) and Flink HA metadata for both IR core and LAD
 CP4AIOPS_PVC_LABEL=("app.kubernetes.io/instance=aimanager"
                     "app.kubernetes.io/instance=example-couchdbcluster"
                     "app.kubernetes.io/managed-by=ir-core-operator"
                     "app.kubernetes.io/managed-by=ibm-elastic-operator"
                     "app.kubernetes.io/managed-by=ibm-elasticsearch"
-                    "app.kubernetes.io/managed-by=ibm-opensearch-operator")
+                    "app.kubernetes.io/managed-by=ibm-opensearch-operator"
+                    "app.kubernetes.io/name=zookeeper")
 
 # These secrets are linked with PVC, hence deleting them if those PVC's are deleted.
 CP4AIOPS_LINKED_SECRETS=(  "secret/aimanager-certificate-secret"
