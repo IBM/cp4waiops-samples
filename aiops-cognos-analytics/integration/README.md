@@ -38,7 +38,7 @@ kubectl get -n openshift-ingress-operator secrets router-ca -o jsonpath={.data."
 
 <a id="notes-section"></a>
 ## Additional notes
-- **IMPORTANT**: If you are running IBM Cloud Pak for AIOps 4.12 or later, apply the workaround in this [known issue](https://www.ibm.com/mysupport/s/defect/aCIgJ0000009ZOL/dt460797?language=en_US) after running the script.
+- **IMPORTANT**: If you had previously run setupCognos.sh and later upgraded to Cloud Pak for AIOps 4.12, you may see an error "redirect URI was not valid" when authenticating with Cognos. Download the latest setupCognos.sh script and re-run it to fix the problem.
 
 - SSO with OpenShift is currently not supported.
 
