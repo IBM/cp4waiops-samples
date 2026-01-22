@@ -38,6 +38,8 @@ kubectl get -n openshift-ingress-operator secrets router-ca -o jsonpath={.data."
 
 <a id="notes-section"></a>
 ## Additional notes
+- **IMPORTANT**: If you are running IBM Cloud Pak for AIOPs 4.12 or later, apply the workaround in this [known issue](https://www.ibm.com/mysupport/s/defect/aCIgJ0000009ZOL/dt460797?language=en_US) after running the script.
+
 - SSO with OpenShift is currently not supported.
 
 - If the Cloud Pak for AIOps cluster uses self-signed certificates, you need add a browser security exception prior to using these widgets in Cognos. See browser documentation for details.
