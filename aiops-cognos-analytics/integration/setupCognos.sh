@@ -223,7 +223,7 @@ function fixClient() {
         "path": "/metadata/ownerReferences",
         "value": [
           {
-            "apiVersion": "operator.ibm.com/v1alpha1",
+            "apiVersion": "zen.cpd.ibm.com/v1",
             "kind": "ZenService",
             "name": "iaf-zen-cpdservice",
             "uid": "$uid",
