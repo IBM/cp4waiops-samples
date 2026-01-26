@@ -213,6 +213,29 @@ EOF
   echo
 }
 
+# apply workaround from https://www.ibm.com/mysupport/s/defect/aCIgJ0000009ZOL/dt460797?language=en_US
+function fixClient() {
+  uid=$(kubectl get zenservice -o jsonpath={.items[].metadata.uid} -n $aiopsNamespace)
+  kubectl patch client $client --type=json -n $aiopsNamespace --patch-file=/dev/stdin <<-EOF 
+    [
+      {
+        "op": "add",
+        "path": "/metadata/ownerReferences",
+        "value": [
+          {
+            "apiVersion": "zen.cpd.ibm.com/v1",
+            "kind": "ZenService",
+            "name": "iaf-zen-cpdservice",
+            "uid": "$uid",
+            "controller": false,
+            "blockOwnerDeletion": false
+          }
+        ]
+      }
+    ]
+EOF
+}
+
 function removeClient() {
   echo "Removing OIDC client $client ..."
   kubectl delete client $client -n $aiopsNamespace
@@ -382,6 +405,7 @@ function main() {
   loginCognos
   if [ -z $remove ]; then
     createClient
+    fixClient
     addToAllowList
     createNamespace
   else
