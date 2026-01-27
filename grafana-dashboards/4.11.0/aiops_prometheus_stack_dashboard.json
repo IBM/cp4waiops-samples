@@ -109,7 +109,7 @@
               "showLineNumbers": false,
               "showMiniMap": false
             },
-            "content": "# Prometheus Overiew\n\nThe Prometheus monitoring stack can be monitored with its own components.\nThis dashboard tracks the health and stability of the Prometheus server pods which scrape and store metrics, as well as the PVCs\nwhere they store metrics.\n\n#### OCP:\n- **prometheus-k8s** pods scrape metrics from all OpenShift resources including: nodes, pods, containers, PVC, etc.\n- **prometheus-user-workload** pods scrape custom metrics from AIOps component pods\n\nTo learn more about configuring your Prometheus monitoring stack on OCP see: https://www.ibm.com/docs/en/cloud-paks/cloud-pak-aiops/4.11.0?topic=grafana-configuring-enabling-openshift-container-platform-monitoring\n\n#### Linux:\n- **prometheus-prometheus** pod scrapes metrics from Kubernetes resources including: nodes, pods, containers, PVC, as well as custom metrics from AIOps component pods.\n\nTo learn more about configuring your Prometheus monitoring stack on OCP see: TODO: LINK TO NEW LINUX PAGE",
+            "content": "# Prometheus Overiew\n\nThe Prometheus monitoring stack can be monitored with its own components.\nThis dashboard tracks the health and stability of the Prometheus server pods which scrape and store metrics, as well as the PVCs\nwhere they store metrics.\n\n#### OCP:\n- **prometheus-k8s** pods scrape metrics from all OpenShift resources including: nodes, pods, containers, PVC, etc.\n- **prometheus-user-workload** pods scrape custom metrics from AIOps component pods\n\nTo learn more about configuring your Prometheus monitoring stack on OCP see: https://www.ibm.com/docs/en/cloud-paks/cloud-pak-aiops/4.11.0?topic=grafana-configuring-enabling-openshift-container-platform-monitoring\n\n#### Linux:\n- **prometheus-prometheus** pod scrapes metrics from Kubernetes resources including: nodes, pods, containers, PVC, as well as custom metrics from AIOps component pods.",
             "mode": "markdown"
           },
           "pluginVersion": "12.3.0",
@@ -282,7 +282,7 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "description": "Current pod phase of the prometheus server pods. If monitoring is enabled and configured, there should be a total of 4 pods running: 2 prometheus-k8s pods & 2 prometheus-user-workload pods",
+          "description": "Current pod phase of the prometheus server pods.\n\nOCP: If monitoring is enabled and configured, there should be a total of 4 pods running: 2 prometheus-k8s pods & 2 prometheus-user-workload pods\n\nLinux: If monitoring is enabled and configured, there should be a single prometheus server pod running: prometheus-prometheus",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -561,7 +561,7 @@
             "h": 1,
             "w": 12,
             "x": 0,
-            "y": 2
+            "y": 57
           },
           "id": 2082,
           "options": {
@@ -672,7 +672,7 @@
             "h": 1,
             "w": 12,
             "x": 12,
-            "y": 2
+            "y": 57
           },
           "id": 2084,
           "options": {
@@ -783,7 +783,7 @@
             "h": 1,
             "w": 12,
             "x": 0,
-            "y": 3
+            "y": 81
           },
           "id": 2083,
           "options": {
@@ -893,7 +893,7 @@
             "h": 1,
             "w": 12,
             "x": 12,
-            "y": 3
+            "y": 81
           },
           "id": 2085,
           "options": {
@@ -1042,7 +1042,7 @@
             "h": 8,
             "w": 12,
             "x": 0,
-            "y": 4
+            "y": 82
           },
           "id": 2072,
           "options": {
@@ -1215,7 +1215,7 @@
             "h": 8,
             "w": 12,
             "x": 12,
-            "y": 4
+            "y": 82
           },
           "id": 2079,
           "options": {
@@ -1389,7 +1389,7 @@
             "h": 8,
             "w": 12,
             "x": 0,
-            "y": 12
+            "y": 90
           },
           "id": 2080,
           "options": {
@@ -1562,7 +1562,7 @@
             "h": 8,
             "w": 12,
             "x": 12,
-            "y": 12
+            "y": 90
           },
           "id": 2081,
           "options": {
@@ -1669,7 +1669,7 @@
             "h": 5,
             "w": 4,
             "x": 0,
-            "y": 3
+            "y": 58
           },
           "id": 2067,
           "options": {
@@ -1742,7 +1742,7 @@
             "h": 10,
             "w": 20,
             "x": 4,
-            "y": 3
+            "y": 58
           },
           "id": 2071,
           "options": {
@@ -1806,7 +1806,7 @@
             "h": 5,
             "w": 4,
             "x": 0,
-            "y": 8
+            "y": 63
           },
           "id": 2070,
           "options": {
@@ -1909,7 +1909,7 @@
             "h": 13,
             "w": 24,
             "x": 0,
-            "y": 13
+            "y": 68
           },
           "id": 56,
           "options": {
@@ -1967,7 +1967,7 @@
   "timezone": "",
   "title": "IBM Cloud Pak for AIOps - Prometheus Monitoring Stack",
   "uid": "80acb6b1-edee-48e7-b9f6-92daf1dc4ded",
-  "version": 2,
+  "version": 4,
   "weekStart": "",
   "id": null
 }
