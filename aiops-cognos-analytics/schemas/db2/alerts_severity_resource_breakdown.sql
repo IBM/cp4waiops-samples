@@ -59,36 +59,150 @@ group by
   slc.Severity,
   slc.Name @
 
--- Create or replace view for maximum severity by resource location
--- This view shows only the highest severity alert for each location
+-- Drop existing objects if they exist
+DROP TRIGGER TRG_MAX_SEVERITY_AFTER_INSERT @
+DROP TRIGGER TRG_MAX_SEVERITY_AFTER_UPDATE @
+DROP TRIGGER TRG_MAX_SEVERITY_AFTER_DELETE @
+
+DROP TABLE ALERTS_MAX_SEVERITY_BY_LOCATION @
+
+-- Create table for maximum severity by resource location
+-- This table shows only the highest severity alert for each location
+-- Sorted by MaxSeverity (highest severity first)
 -- Useful for map visualizations where you want to show the worst-case scenario per location
-CREATE OR REPLACE VIEW ALERTS_MAX_SEVERITY_BY_LOCATION (
-  MaxSeverity,
-  SeverityName,
-  Resourcelocation,
-  AlertCount,
-  Latitude,
-  Longitude
-) AS
-select
+CREATE TABLE ALERTS_MAX_SEVERITY_BY_LOCATION (
+  MaxSeverity INTEGER NOT NULL,
+  SeverityName VARCHAR(255),
+  Resourcelocation VARCHAR(255) NOT NULL,
+  AlertCount INTEGER NOT NULL,
+  Latitude VARCHAR(255),
+  Longitude VARCHAR(255),
+  last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) @
+
+-- Create triggers to auto-refresh on ALERTS_REPORTER_STATUS changes
+CREATE TRIGGER TRG_MAX_SEVERITY_AFTER_INSERT
+AFTER INSERT ON ALERTS_REPORTER_STATUS
+FOR EACH STATEMENT
+MODE DB2SQL
+BEGIN ATOMIC
+    -- Clear and refresh the table
+    DELETE FROM ALERTS_MAX_SEVERITY_BY_LOCATION;
+
+    INSERT INTO ALERTS_MAX_SEVERITY_BY_LOCATION (MaxSeverity, SeverityName, Resourcelocation, AlertCount, Latitude, Longitude, last_updated)
+    SELECT
+      ms.MaxSeverity,
+      st.Name as SeverityName,
+      ms.Resourcelocation,
+      ms.AlertCount,
+      ms.Latitude,
+      ms.Longitude,
+      CURRENT_TIMESTAMP
+    FROM (
+      SELECT
+        MAX(ars.Severity) as MaxSeverity,
+        ars.Resourcelocation,
+        COUNT(ars.Id) as AlertCount,
+        MAX(ars.ResourceLatitude) as Latitude,
+        MAX(ars.ResourceLongitude) as Longitude
+      FROM alerts_reporter_status ars
+      WHERE ars.Severity IS NOT NULL
+      GROUP BY ars.Resourcelocation
+    ) ms
+    INNER JOIN alerts_severity_types st
+      ON ms.MaxSeverity = st.Severity
+    ORDER BY ms.MaxSeverity DESC;
+END @
+
+CREATE TRIGGER TRG_MAX_SEVERITY_AFTER_UPDATE
+AFTER UPDATE ON ALERTS_REPORTER_STATUS
+FOR EACH STATEMENT
+MODE DB2SQL
+BEGIN ATOMIC
+    -- Clear and refresh the table
+    DELETE FROM ALERTS_MAX_SEVERITY_BY_LOCATION;
+
+    INSERT INTO ALERTS_MAX_SEVERITY_BY_LOCATION (MaxSeverity, SeverityName, Resourcelocation, AlertCount, Latitude, Longitude, last_updated)
+    SELECT
+      ms.MaxSeverity,
+      st.Name as SeverityName,
+      ms.Resourcelocation,
+      ms.AlertCount,
+      ms.Latitude,
+      ms.Longitude,
+      CURRENT_TIMESTAMP
+    FROM (
+      SELECT
+        MAX(ars.Severity) as MaxSeverity,
+        ars.Resourcelocation,
+        COUNT(ars.Id) as AlertCount,
+        MAX(ars.ResourceLatitude) as Latitude,
+        MAX(ars.ResourceLongitude) as Longitude
+      FROM alerts_reporter_status ars
+      WHERE ars.Severity IS NOT NULL
+      GROUP BY ars.Resourcelocation
+    ) ms
+    INNER JOIN alerts_severity_types st
+      ON ms.MaxSeverity = st.Severity
+    ORDER BY ms.MaxSeverity DESC;
+END @
+
+CREATE TRIGGER TRG_MAX_SEVERITY_AFTER_DELETE
+AFTER DELETE ON ALERTS_REPORTER_STATUS
+FOR EACH STATEMENT
+MODE DB2SQL
+BEGIN ATOMIC
+    -- Clear and refresh the table
+    DELETE FROM ALERTS_MAX_SEVERITY_BY_LOCATION;
+
+    INSERT INTO ALERTS_MAX_SEVERITY_BY_LOCATION (MaxSeverity, SeverityName, Resourcelocation, AlertCount, Latitude, Longitude, last_updated)
+    SELECT
+      ms.MaxSeverity,
+      st.Name as SeverityName,
+      ms.Resourcelocation,
+      ms.AlertCount,
+      ms.Latitude,
+      ms.Longitude,
+      CURRENT_TIMESTAMP
+    FROM (
+      SELECT
+        MAX(ars.Severity) as MaxSeverity,
+        ars.Resourcelocation,
+        COUNT(ars.Id) as AlertCount,
+        MAX(ars.ResourceLatitude) as Latitude,
+        MAX(ars.ResourceLongitude) as Longitude
+      FROM alerts_reporter_status ars
+      WHERE ars.Severity IS NOT NULL
+      GROUP BY ars.Resourcelocation
+    ) ms
+    INNER JOIN alerts_severity_types st
+      ON ms.MaxSeverity = st.Severity
+    ORDER BY ms.MaxSeverity DESC;
+END @
+
+-- Initial population of the table
+INSERT INTO ALERTS_MAX_SEVERITY_BY_LOCATION (MaxSeverity, SeverityName, Resourcelocation, AlertCount, Latitude, Longitude, last_updated)
+SELECT
   ms.MaxSeverity,
   st.Name as SeverityName,
   ms.Resourcelocation,
   ms.AlertCount,
   ms.Latitude,
-  ms.Longitude
-from (
-  select
-    max(ars.Severity) as MaxSeverity,
+  ms.Longitude,
+  CURRENT_TIMESTAMP
+FROM (
+  SELECT
+    MAX(ars.Severity) as MaxSeverity,
     ars.Resourcelocation,
-    count(ars.Id) as AlertCount,
-    max(ars.ResourceLatitude) as Latitude,
-    max(ars.ResourceLongitude) as Longitude
-  from alerts_reporter_status ars
-  where ars.Severity is not null
-  group by ars.Resourcelocation
+    COUNT(ars.Id) as AlertCount,
+    MAX(ars.ResourceLatitude) as Latitude,
+    MAX(ars.ResourceLongitude) as Longitude
+  FROM alerts_reporter_status ars
+  WHERE ars.Severity IS NOT NULL
+  GROUP BY ars.Resourcelocation
 ) ms
-inner join alerts_severity_types st
-  on ms.MaxSeverity = st.Severity @
+INNER JOIN alerts_severity_types st
+  ON ms.MaxSeverity = st.Severity
+ORDER BY ms.MaxSeverity DESC @
 
 COMMIT WORK @
