@@ -133,7 +133,7 @@ For example, for Cloud Pak for AIOps version 4.11.1, you would find the followin
 - **G0GBZML** - IBM Db2 Server Standard 11.5 VPC Option for IBM Cognos Analytics Cartridge 12.1.0 for IBM Cloud Pak for AIOps 4.11.1 eAssembly
 
 ### Installation planning for Cognos and Db2
-For both, you will need a VNC or X setup on the VMs to allow usage of the installation and configuration GUIs. [This guide](https://www.ibm.com/support/pages/how-install-cognos-analytics-red-hat-enterprise-linux) from Cognos Analytics support can help if needed.
+For both, you will need a VNC or X setup on the VMs to allow usage of the installation and configuration GUIs. [This guide](https://www.ibm.com/support/pages/how-install-cognos-analytics-red-hat-enterprise-linux) from Cognos Analytics support is very useful and at the very least provides details on the **additional packages needed for Cognos Analytics on RHEL - you must install these**.
 
 For Db2 planning you will want to refer to:
 - [Preparing to install Db2 database](https://www.ibm.com/docs/en/db2/11.5.x?topic=servers-preparing-install-db2-database)

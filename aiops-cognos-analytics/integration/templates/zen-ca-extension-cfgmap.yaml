@@ -1,0 +1,65 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  labels:
+    icpdata_addon: "true"
+    icpdata_addon_version: "4.5"
+  name: aiops-ca-cognos-extension
+  namespace: aiops
+data:
+  extensions: |-
+    [{
+      "details": {
+        "actions": [{
+          "description": "{{ .global_waiops_perm_manage_ca_dashboards_action_0 }}",
+          "tooltip": ""
+        }, {
+          "description": "{{ .global_waiops_perm_manage_ca_dashboards_action_1 }}",
+          "tooltip": ""
+        }],
+        "category": "{{ .global_waiops_perm_view_report_dashboards_category }}",
+        "description": [
+          "{{ .global_waiops_perm_manage_ca_dashboards_description }}"
+        ],
+        "key": "aiops_manage_ca_dashboards"
+      },
+      "display_name": "{{ .global_waiops_perm_manage_ca_dashboards_display_name }}",
+      "extension_name": "aiops_manage_ca_dashboards_perm",
+      "extension_point_id": "zen_permissions"
+    }, {
+        "details": {
+          "icon": "nav/icons/carbon10/Scan32"
+        },
+        "display_name": "{{ .global_katamari_nav_visualize }}",
+        "extension_name": "aiops_visualizations_folder",
+        "extension_point_id": "left_menu_folder",
+        "match_permissions": "aiops_manage_ca_dashboards",
+        "order_hint": 190
+      }, {
+        "details": {
+          "window_open_target":"_blank",
+          "target":"_blank",
+          "href": "COGNOS_URL_PLACEHOLDER",
+          "parent_folder": "aiops_visualizations_folder"
+        },
+        "display_name": "{{ .global_waiops_nav_menuitem_cognos }}",
+        "extension_name": "aiops-nav-menuitem-cognos",
+        "extension_point_id": "left_menu_item",
+        "match_permissions": "aiops_manage_ca_dashboards",
+        "order_hint": 1
+      }, {
+        "details": {
+          "label": "{{ .global_waiops_nav_menuitem_cognos }}",
+          "nav_link": "COGNOS_URL_PLACEHOLDER"
+        },
+        "display_name": "{{ .global_waiops_nav_menuitem_cognos }}",
+        "extension_name": "homepage_quick_navigation_cognos",
+        "extension_point_id": "homepage_quick_navigation",
+        "match_permissions": "aiops_manage_ca_dashboards",
+        "meta": {
+          "reference": {
+            "nav_item": "aiops-nav-menuitem-cognos"
+          }
+        },
+        "order_hint": 1
+      }]
