@@ -1,0 +1,1973 @@
+{
+  "__inputs": [
+    {
+      "name": "DS_PROMETHEUS",
+      "label": "prometheus",
+      "description": "",
+      "type": "datasource",
+      "pluginId": "prometheus",
+      "pluginName": "Prometheus"
+    }
+  ],
+  "__elements": {},
+  "__requires": [
+    {
+      "type": "panel",
+      "id": "gauge",
+      "name": "Gauge",
+      "version": ""
+    },
+    {
+      "type": "grafana",
+      "id": "grafana",
+      "name": "Grafana",
+      "version": "12.3.0"
+    },
+    {
+      "type": "datasource",
+      "id": "prometheus",
+      "name": "Prometheus",
+      "version": "1.0.0"
+    },
+    {
+      "type": "panel",
+      "id": "stat",
+      "name": "Stat",
+      "version": ""
+    },
+    {
+      "type": "panel",
+      "id": "table",
+      "name": "Table",
+      "version": ""
+    },
+    {
+      "type": "panel",
+      "id": "text",
+      "name": "Text",
+      "version": ""
+    },
+    {
+      "type": "panel",
+      "id": "timeseries",
+      "name": "Time series",
+      "version": ""
+    }
+  ],
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "target": {
+          "limit": 100,
+          "matchAny": false,
+          "tags": [],
+          "type": "dashboard"
+        },
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "links": [],
+  "panels": [
+    {
+      "collapsed": true,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "id": 2077,
+      "panels": [
+        {
+          "fieldConfig": {
+            "defaults": {},
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 5,
+            "w": 24,
+            "x": 0,
+            "y": 1
+          },
+          "id": 2076,
+          "options": {
+            "code": {
+              "language": "plaintext",
+              "showLineNumbers": false,
+              "showMiniMap": false
+            },
+            "content": "# Prometheus Overiew\n\nThe Prometheus monitoring stack can be monitored with its own components.\nThis dashboard tracks the health and stability of the Prometheus server pods which scrape and store metrics, as well as the PVCs\nwhere they store metrics.\n\n#### OCP:\n- **prometheus-k8s** pods scrape metrics from all OpenShift resources including: nodes, pods, containers, PVC, etc.\n- **prometheus-user-workload** pods scrape custom metrics from AIOps component pods\n\nTo learn more about configuring your Prometheus monitoring stack on OCP see: https://www.ibm.com/docs/en/cloud-paks/cloud-pak-aiops/4.12.0?topic=grafana-configuring-enabling-openshift-container-platform-monitoring\n\n#### Linux:\n- **prometheus-prometheus** pod scrapes metrics from Kubernetes resources including: nodes, pods, containers, PVC, as well as custom metrics from AIOps component pods.",
+            "mode": "markdown"
+          },
+          "pluginVersion": "12.3.0",
+          "title": "",
+          "type": "text"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "description": "Count that tracks the number of pods that were newly created within the time range.\n\nNew pods indicate restarts may have occurred which could result in loss of functionality. Review the component pod uptime time series to see if any gaps in uptime occurred.\n\nNew pods don't always indicate a problem and in some cases are part of routine processing and scaling. ",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "mappings": [
+                {
+                  "options": {
+                    "0": {
+                      "color": "dark-green",
+                      "index": 0,
+                      "text": "pods are stable - no new pods within time range"
+                    },
+                    "1": {
+                      "color": "semi-dark-green",
+                      "index": 1,
+                      "text": "1 new pod within time range - review uptime graph for gaps"
+                    },
+                    "2": {
+                      "color": "green",
+                      "index": 2,
+                      "text": "2 new pods within time range - review uptime graph for gaps"
+                    },
+                    "3": {
+                      "color": "light-green",
+                      "index": 3,
+                      "text": "3 new pods within time range - review uptime graph for gaps"
+                    },
+                    "4": {
+                      "color": "super-light-green",
+                      "index": 4,
+                      "text": "4 new pods within time range - review uptime graph for gaps"
+                    },
+                    "5": {
+                      "color": "super-light-green",
+                      "index": 5,
+                      "text": "5 new pods within time range - review uptime graph for gaps"
+                    },
+                    "6": {
+                      "color": "super-light-yellow",
+                      "index": 6,
+                      "text": "6 new pods within time range - review uptime graph for gaps"
+                    },
+                    "7": {
+                      "color": "super-light-yellow",
+                      "index": 7,
+                      "text": "7 new pods within time range - review uptime graph for gaps"
+                    },
+                    "8": {
+                      "color": "light-yellow",
+                      "index": 8,
+                      "text": "8 new pods within time range - review uptime graph for gaps"
+                    },
+                    "9": {
+                      "color": "light-yellow",
+                      "index": 9,
+                      "text": "9 new pods within time range - review uptime graph for gaps"
+                    }
+                  },
+                  "type": "value"
+                },
+                {
+                  "options": {
+                    "from": 10,
+                    "result": {
+                      "color": "yellow",
+                      "index": 10,
+                      "text": "10-20 new pods within time range - review uptime graph for gaps"
+                    },
+                    "to": 20
+                  },
+                  "type": "range"
+                },
+                {
+                  "options": {
+                    "from": 21,
+                    "result": {
+                      "color": "light-red",
+                      "index": 11,
+                      "text": "21-40 new pods within time range - review uptime graph for gaps"
+                    },
+                    "to": 40
+                  },
+                  "type": "range"
+                },
+                {
+                  "options": {
+                    "from": 41,
+                    "result": {
+                      "color": "red",
+                      "index": 12,
+                      "text": "41+ new pods within time range - review uptime graph for gaps"
+                    },
+                    "to": 10000
+                  },
+                  "type": "range"
+                }
+              ],
+              "noValue": "pods are stable - no new pods within time range",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "dark-green",
+                    "value": 0
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0,
+            "y": 6
+          },
+          "id": 2075,
+          "options": {
+            "colorMode": "background_solid",
+            "graphMode": "none",
+            "justifyMode": "center",
+            "orientation": "auto",
+            "percentChangeColorMode": "standard",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "showPercentChange": false,
+            "text": {
+              "valueSize": 20
+            },
+            "textMode": "value",
+            "wideLayout": true
+          },
+          "pluginVersion": "12.3.0",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "${DS_PROMETHEUS}"
+              },
+              "editorMode": "code",
+              "expr": "sum(((sum((time() - kube_pod_start_time{pod=~\".*prometheus-k8s.*|.*prometheus-user.*|.*prometheus-prometheus.*\"}) - $__range_s) by (pod)) < 60) <= bool 0)",
+              "legendFormat": "__auto",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "",
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "description": "Current pod phase of the prometheus server pods.\n\nOCP: If monitoring is enabled and configured, there should be a total of 4 pods running: 2 prometheus-k8s pods & 2 prometheus-user-workload pods\n\nLinux: If monitoring is enabled and configured, there should be a single prometheus server pod running: prometheus-prometheus",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "custom": {
+                "align": "auto",
+                "cellOptions": {
+                  "type": "auto"
+                },
+                "footer": {
+                  "reducers": []
+                },
+                "inspect": false,
+                "wrapText": true
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": 0
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 0,
+            "y": 7
+          },
+          "id": 2073,
+          "options": {
+            "cellHeight": "sm",
+            "showHeader": true
+          },
+          "pluginVersion": "12.3.0",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "${DS_PROMETHEUS}"
+              },
+              "editorMode": "code",
+              "expr": "kube_pod_status_phase{pod=~\".*prometheus-k8s.*|.*prometheus-user.*|.*prometheus-prometheus.*\", phase=~\"Running|Pending|Unknown\"} == 1",
+              "legendFormat": "__auto",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "Prometheus Server Pods",
+          "transformations": [
+            {
+              "id": "limit",
+              "options": {
+                "limitField": "1"
+              }
+            },
+            {
+              "id": "labelsToFields",
+              "options": {
+                "keepLabels": [
+                  "phase",
+                  "pod"
+                ],
+                "mode": "columns"
+              }
+            },
+            {
+              "id": "merge",
+              "options": {}
+            },
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {
+                  "Time": true,
+                  "Value": true,
+                  "kube_pod_status_phase": true
+                },
+                "includeByName": {},
+                "indexByName": {
+                  "Time": 0,
+                  "kube_pod_status_phase": 1,
+                  "phase": 3,
+                  "pod": 2
+                },
+                "renameByName": {}
+              }
+            }
+          ],
+          "type": "table"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "description": "",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "barWidthFactor": 0.6,
+                "drawStyle": "line",
+                "fillOpacity": 0,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "linear",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "auto",
+                "showValues": false,
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": 0
+                  }
+                ]
+              },
+              "unit": "s"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 12,
+            "y": 7
+          },
+          "id": 2074,
+          "options": {
+            "legend": {
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "right",
+              "showLegend": true
+            },
+            "tooltip": {
+              "hideZeros": false,
+              "mode": "multi",
+              "sort": "desc"
+            }
+          },
+          "pluginVersion": "12.3.0",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "${DS_PROMETHEUS}"
+              },
+              "editorMode": "code",
+              "expr": "time() -sum(kube_pod_start_time{pod=~\".*prometheus-k8s.*|.*prometheus-user.*|.*prometheus-prometheus.*\"}) by (pod)",
+              "legendFormat": "__auto",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "Prometheus Server Pods Uptime",
+          "type": "timeseries"
+        }
+      ],
+      "title": "Prometheus Overview",
+      "type": "row"
+    },
+    {
+      "collapsed": true,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 1
+      },
+      "id": 2078,
+      "panels": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "description": "Count of pods that have exceeded 80% of their CPU limits within the time range. This will result in CPU throttling and potentially temporary loss of functionality\n\nThis will only compare against the ***current*** CPU limit of each pod. If the limits were updated within the time range, the count may be inaccurate.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "mappings": [
+                {
+                  "options": {
+                    "0": {
+                      "color": "dark-green",
+                      "index": 0,
+                      "text": "pod-level CPU usage is stable - all usage has stayed under 80% of current limits"
+                    },
+                    "1": {
+                      "color": "super-light-green",
+                      "index": 1,
+                      "text": "1 pod has exceeded 80% of their CPU limits - review CPU graphs for spikes"
+                    },
+                    "2": {
+                      "color": "super-light-green",
+                      "index": 2,
+                      "text": "2 pods have exceeded 80% of their CPU limits - review CPU graphs for spikes"
+                    },
+                    "3": {
+                      "color": "super-light-yellow",
+                      "index": 3,
+                      "text": "3 pods have exceeded 80% of their CPU limits - review CPU graphs for spikes"
+                    },
+                    "4": {
+                      "color": "yellow",
+                      "index": 4,
+                      "text": "4 pods have exceeded 80% of their CPU limits - review CPU graphs for spikes"
+                    }
+                  },
+                  "type": "value"
+                },
+                {
+                  "options": {
+                    "from": 5,
+                    "result": {
+                      "color": "yellow",
+                      "index": 5,
+                      "text": "5+ pods have exceeded 80% of their CPU limits - review CPU graphs for spikes"
+                    },
+                    "to": 10000
+                  },
+                  "type": "range"
+                }
+              ],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": 0
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 1,
+            "w": 12,
+            "x": 0,
+            "y": 57
+          },
+          "id": 2082,
+          "options": {
+            "colorMode": "background_solid",
+            "graphMode": "none",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "percentChangeColorMode": "standard",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "showPercentChange": false,
+            "text": {
+              "valueSize": 18
+            },
+            "textMode": "value",
+            "wideLayout": true
+          },
+          "pluginVersion": "12.3.0",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "${DS_PROMETHEUS}"
+              },
+              "editorMode": "code",
+              "expr": "sum((((max(kube_pod_container_resource_limits{pod=~\".*prometheus-k8s.*|.*prometheus-user.*|.*prometheus-prometheus.*\", container!=\"\", container!=\"POD\", container!=\"config-reloader\", resource=\"cpu\"}) by (pod)) * 0.8 <= max(max_over_time(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{pod=~\".*prometheus-k8s.*|.*prometheus-user.*|.*prometheus-prometheus.*\", container!=\"\", container!=\"config-reloader\", container!=\"POD\"}[$__range])) by (pod)) or vector(0)) > bool 0)",
+              "legendFormat": "__auto",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "",
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "description": "Count of pods that have exceeded 80% of their memory limits within the time range.\n\nThis will only compare against the ***current*** memory limit of each pod. If the limits were updated within the time range, the count may be inaccurate.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "mappings": [
+                {
+                  "options": {
+                    "0": {
+                      "color": "dark-green",
+                      "index": 0,
+                      "text": "pod-level memory usage is stable - all usage has stayed under 80% of current limits"
+                    },
+                    "1": {
+                      "color": "yellow",
+                      "index": 1,
+                      "text": "1 pod has exceeded 80% of their memory limits - review memory graphs for spikes"
+                    },
+                    "2": {
+                      "color": "yellow",
+                      "index": 2,
+                      "text": "2 pods have exceeded 80% of their memory limits - review memory graphs for spikes"
+                    },
+                    "3": {
+                      "color": "yellow",
+                      "index": 3,
+                      "text": "3 pods have exceeded 80% of their memory limits - review memory graphs for spikes"
+                    },
+                    "4": {
+                      "color": "yellow",
+                      "index": 4,
+                      "text": "4 pods have exceeded 80% of their memory limits - review memory graphs for spikes"
+                    }
+                  },
+                  "type": "value"
+                },
+                {
+                  "options": {
+                    "from": 5,
+                    "result": {
+                      "color": "red",
+                      "index": 5,
+                      "text": "5+ pods have exceeded 80% of their memory limits - review memory graphs for spikes"
+                    },
+                    "to": 10000
+                  },
+                  "type": "range"
+                }
+              ],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": 0
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 1,
+            "w": 12,
+            "x": 12,
+            "y": 57
+          },
+          "id": 2084,
+          "options": {
+            "colorMode": "background_solid",
+            "graphMode": "none",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "percentChangeColorMode": "standard",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "showPercentChange": false,
+            "text": {
+              "valueSize": 18
+            },
+            "textMode": "value",
+            "wideLayout": true
+          },
+          "pluginVersion": "12.3.0",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "${DS_PROMETHEUS}"
+              },
+              "editorMode": "code",
+              "expr": "sum((((max(kube_pod_container_resource_limits{pod=~\".*prometheus-k8s.*|.*prometheus-user.*|.*prometheus-prometheus.*\", container!=\"\", container!=\"POD\", container!=\"config-reloader\", resource=\"memory\"}) by (pod)) * 0.8 <= max(max_over_time(container_memory_working_set_bytes{pod=~\".*prometheus-k8s.*|.*prometheus-user.*|.*prometheus-prometheus.*\", container!=\"\", container!=\"POD\", container!=\"config-reloader\"}[$__range])) by (pod)) or vector(0)) > bool 0)",
+              "legendFormat": "__auto",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "",
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "description": "Count of pods that have exceeded their CPU limits within the time range. This will result in CPU throttling and potentially temporary loss of functionality.\n\nThis will only compare against the ***current*** CPU limit of each pod. If the limits were updated within the time range, the count may be inaccurate.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "mappings": [
+                {
+                  "options": {
+                    "0": {
+                      "color": "dark-green",
+                      "index": 0,
+                      "text": "all pod-level CPU usage has stayed under current limits"
+                    },
+                    "1": {
+                      "color": "super-light-yellow",
+                      "index": 1,
+                      "text": "1 pod has exceeded their CPU limits - review CPU graphs for spikes"
+                    },
+                    "2": {
+                      "color": "yellow",
+                      "index": 2,
+                      "text": "2 pods have exceeded their CPU limits - review CPU graphs for spikes"
+                    },
+                    "3": {
+                      "color": "super-light-red",
+                      "index": 3,
+                      "text": "3 pods have exceeded their CPU limits - review CPU graphs for spikes"
+                    },
+                    "4": {
+                      "color": "red",
+                      "index": 4,
+                      "text": "4 pods have exceeded their CPU limits - review CPU graphs for spikes"
+                    }
+                  },
+                  "type": "value"
+                },
+                {
+                  "options": {
+                    "from": 5,
+                    "result": {
+                      "color": "dark-red",
+                      "index": 5,
+                      "text": "5+ pods have exceeded their CPU limits - review CPU graphs for spikes"
+                    },
+                    "to": 10000
+                  },
+                  "type": "range"
+                }
+              ],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": 0
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 1,
+            "w": 12,
+            "x": 0,
+            "y": 81
+          },
+          "id": 2083,
+          "options": {
+            "colorMode": "background_solid",
+            "graphMode": "none",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "percentChangeColorMode": "standard",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "showPercentChange": false,
+            "text": {
+              "valueSize": 18
+            },
+            "textMode": "value",
+            "wideLayout": true
+          },
+          "pluginVersion": "12.3.0",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "${DS_PROMETHEUS}"
+              },
+              "editorMode": "code",
+              "expr": "sum((((max(kube_pod_container_resource_limits{pod=~\".*prometheus-k8s.*|.*prometheus-user.*|.*prometheus-prometheus.*\", container!=\"\", container!=\"POD\", container!=\"config-reloader\", resource=\"cpu\"}) by (pod)) <= max(max_over_time(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{pod=~\".*prometheus-k8s.*|.*prometheus-user.*|.*prometheus-prometheus.*\", container!=\"\", container!=\"POD\", container!=\"config-reloader\"}[$__range])) by (pod)) or vector(0)) > bool 0)",
+              "legendFormat": "__auto",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "",
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "description": "Count of component pods that have exceeded their memory limits within the time range.\n\nThis will only compare against the ***current*** memory limit of each pod. If the limits were updated within the time range, the count may be inaccurate.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "mappings": [
+                {
+                  "options": {
+                    "0": {
+                      "index": 0,
+                      "text": "all pod-level memory usage has stayed under current limits"
+                    },
+                    "1": {
+                      "color": "red",
+                      "index": 1,
+                      "text": "1 pod has exceeded their memory limits - review memory graphs for spikes"
+                    },
+                    "2": {
+                      "color": "red",
+                      "index": 2,
+                      "text": "2 pods have exceeded their memory limits - review memory graphs for spikes"
+                    },
+                    "3": {
+                      "color": "red",
+                      "index": 3,
+                      "text": "3 pods have exceeded their memory limits - review memory graphs for spikes"
+                    },
+                    "4": {
+                      "color": "red",
+                      "index": 4,
+                      "text": "4 pods have exceeded their memory limits - review memory graphs for spikes"
+                    }
+                  },
+                  "type": "value"
+                },
+                {
+                  "options": {
+                    "from": 5,
+                    "result": {
+                      "color": "red",
+                      "index": 5,
+                      "text": "5+ pods have exceeded their memory limits - review memory graphs for spikes"
+                    },
+                    "to": 10000
+                  },
+                  "type": "range"
+                }
+              ],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "dark-green",
+                    "value": 0
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 1,
+            "w": 12,
+            "x": 12,
+            "y": 81
+          },
+          "id": 2085,
+          "options": {
+            "colorMode": "background_solid",
+            "graphMode": "none",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "percentChangeColorMode": "standard",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "showPercentChange": false,
+            "text": {
+              "valueSize": 18
+            },
+            "textMode": "value",
+            "wideLayout": true
+          },
+          "pluginVersion": "12.3.0",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "${DS_PROMETHEUS}"
+              },
+              "editorMode": "code",
+              "expr": "sum((((max(kube_pod_container_resource_limits{pod=~\".*prometheus-k8s.*|.*prometheus-user.*|.*prometheus-prometheus.*\", container!=\"\", container!=\"POD\", container!=\"config-reloader\", resource=\"memory\"}) by (pod)) <= max(max_over_time(container_memory_working_set_bytes{pod=~\".*prometheus-k8s.*|.*prometheus-user.*|.*prometheus-prometheus.*\", container!=\"\", container!=\"POD\", container!=\"config-reloader\"}[$__range])) by (pod)) or vector(0)) > bool 0)",
+              "legendFormat": "__auto",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "",
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "description": "Prometheus CPU Usage",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "axisSoftMin": 0,
+                "barAlignment": 0,
+                "barWidthFactor": 0.6,
+                "drawStyle": "line",
+                "fillOpacity": 0,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "linear",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "auto",
+                "showValues": false,
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": 0
+                  }
+                ]
+              }
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byFrameRefID",
+                  "options": "A"
+                },
+                "properties": [
+                  {
+                    "id": "color",
+                    "value": {
+                      "fixedColor": "green",
+                      "mode": "fixed"
+                    }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byFrameRefID",
+                  "options": "B"
+                },
+                "properties": [
+                  {
+                    "id": "color",
+                    "value": {
+                      "fixedColor": "yellow",
+                      "mode": "fixed"
+                    }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byFrameRefID",
+                  "options": "C"
+                },
+                "properties": [
+                  {
+                    "id": "color",
+                    "value": {
+                      "fixedColor": "red",
+                      "mode": "fixed"
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 0,
+            "y": 82
+          },
+          "id": 2072,
+          "options": {
+            "legend": {
+              "calcs": [
+                "lastNotNull",
+                "max",
+                "mean"
+              ],
+              "displayMode": "table",
+              "placement": "right",
+              "showLegend": true
+            },
+            "tooltip": {
+              "hideZeros": false,
+              "mode": "multi",
+              "sort": "desc"
+            }
+          },
+          "pluginVersion": "12.3.0",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "${DS_PROMETHEUS}"
+              },
+              "editorMode": "code",
+              "expr": "max(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{pod=~\".*prometheus-k8s.*|.*prometheus-prometheus.*\"}) by (pod)",
+              "legendFormat": "usage - {{pod}}",
+              "range": true,
+              "refId": "A"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "${DS_PROMETHEUS}"
+              },
+              "editorMode": "code",
+              "expr": "max(kube_pod_container_resource_requests{pod=~\".*prometheus-k8s.*|.*prometheus-prometheus.*\", container!=\"config-reloader\", resource=\"cpu\"})",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "requests",
+              "range": true,
+              "refId": "B"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "${DS_PROMETHEUS}"
+              },
+              "editorMode": "code",
+              "expr": "max(kube_pod_container_resource_limits{pod=~\".*prometheus-k8s.*|.*prometheus-prometheus.*\", container!=\"config-reloader\", resource=\"cpu\"})",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "limits",
+              "range": true,
+              "refId": "C"
+            }
+          ],
+          "title": "Prometheus CPU Usage",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "description": "Prometheus Memory Usage",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "axisSoftMin": 0,
+                "barAlignment": 0,
+                "barWidthFactor": 0.6,
+                "drawStyle": "line",
+                "fillOpacity": 0,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "linear",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "auto",
+                "showValues": false,
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": 0
+                  }
+                ]
+              },
+              "unit": "bytes"
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byFrameRefID",
+                  "options": "A"
+                },
+                "properties": [
+                  {
+                    "id": "color",
+                    "value": {
+                      "fixedColor": "green",
+                      "mode": "fixed"
+                    }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byFrameRefID",
+                  "options": "B"
+                },
+                "properties": [
+                  {
+                    "id": "color",
+                    "value": {
+                      "fixedColor": "yellow",
+                      "mode": "fixed"
+                    }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byFrameRefID",
+                  "options": "C"
+                },
+                "properties": [
+                  {
+                    "id": "color",
+                    "value": {
+                      "fixedColor": "red",
+                      "mode": "fixed"
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 12,
+            "y": 82
+          },
+          "id": 2079,
+          "options": {
+            "legend": {
+              "calcs": [
+                "lastNotNull",
+                "max",
+                "mean"
+              ],
+              "displayMode": "table",
+              "placement": "right",
+              "showLegend": true,
+              "sortBy": "Name",
+              "sortDesc": true
+            },
+            "tooltip": {
+              "hideZeros": false,
+              "mode": "multi",
+              "sort": "desc"
+            }
+          },
+          "pluginVersion": "12.3.0",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "${DS_PROMETHEUS}"
+              },
+              "editorMode": "code",
+              "expr": "max(container_memory_working_set_bytes{pod=~\"prometheus-k8s.*|.*prometheus-prometheus.*\", container!=\"\", container!=\"POD\"}) by(pod)",
+              "legendFormat": "usage - {{pod}}",
+              "range": true,
+              "refId": "A"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "${DS_PROMETHEUS}"
+              },
+              "editorMode": "code",
+              "expr": "max(kube_pod_container_resource_requests{pod=~\"prometheus-k8s.*|.*prometheus-prometheus.*\", container!=\"config-reloader\", resource=\"memory\"})",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "requests",
+              "range": true,
+              "refId": "B"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "${DS_PROMETHEUS}"
+              },
+              "editorMode": "code",
+              "expr": "max(kube_pod_container_resource_limits{pod=~\"prometheus-k8s.*|.*prometheus-prometheus.*\", container!=\"config-reloader\", resource=\"memory\"})",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "limits",
+              "range": true,
+              "refId": "C"
+            }
+          ],
+          "title": "Prometheus Memory Usage",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "description": "Prometheus user workload CPU Usage. OCP only, no metrics will appear for linux-based installations.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "axisSoftMin": 0,
+                "barAlignment": 0,
+                "barWidthFactor": 0.6,
+                "drawStyle": "line",
+                "fillOpacity": 0,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "linear",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "auto",
+                "showValues": false,
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": 0
+                  }
+                ]
+              }
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byFrameRefID",
+                  "options": "A"
+                },
+                "properties": [
+                  {
+                    "id": "color",
+                    "value": {
+                      "fixedColor": "green",
+                      "mode": "fixed"
+                    }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byFrameRefID",
+                  "options": "B"
+                },
+                "properties": [
+                  {
+                    "id": "color",
+                    "value": {
+                      "fixedColor": "yellow",
+                      "mode": "fixed"
+                    }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byFrameRefID",
+                  "options": "C"
+                },
+                "properties": [
+                  {
+                    "id": "color",
+                    "value": {
+                      "fixedColor": "red",
+                      "mode": "fixed"
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 0,
+            "y": 90
+          },
+          "id": 2080,
+          "options": {
+            "legend": {
+              "calcs": [
+                "lastNotNull",
+                "max",
+                "mean"
+              ],
+              "displayMode": "table",
+              "placement": "right",
+              "showLegend": true
+            },
+            "tooltip": {
+              "hideZeros": false,
+              "mode": "multi",
+              "sort": "desc"
+            }
+          },
+          "pluginVersion": "12.3.0",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "${DS_PROMETHEUS}"
+              },
+              "editorMode": "code",
+              "expr": "max(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{pod=~\".*prometheus-user-workload.*\"}) by (pod)",
+              "legendFormat": "usage - {{pod}}",
+              "range": true,
+              "refId": "A"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "${DS_PROMETHEUS}"
+              },
+              "editorMode": "code",
+              "expr": "max(kube_pod_container_resource_requests{pod=~\".*prometheus-user-workload.*\", resource=\"cpu\"})",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "requests",
+              "range": true,
+              "refId": "B"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "${DS_PROMETHEUS}"
+              },
+              "editorMode": "code",
+              "expr": "max(kube_pod_container_resource_limits{pod=~\".*prometheus-user-workload.*\", resource=\"cpu\"})",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "limits",
+              "range": true,
+              "refId": "C"
+            }
+          ],
+          "title": "Prometheus user workload CPU Usage (OCP only)",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "description": "Prometheus User Workload Memory Usage. OCP only, no metrics will appear for linux-based installations.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "axisSoftMin": 0,
+                "barAlignment": 0,
+                "barWidthFactor": 0.6,
+                "drawStyle": "line",
+                "fillOpacity": 0,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "linear",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "auto",
+                "showValues": false,
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": 0
+                  }
+                ]
+              },
+              "unit": "bytes"
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byFrameRefID",
+                  "options": "A"
+                },
+                "properties": [
+                  {
+                    "id": "color",
+                    "value": {
+                      "fixedColor": "green",
+                      "mode": "fixed"
+                    }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byFrameRefID",
+                  "options": "B"
+                },
+                "properties": [
+                  {
+                    "id": "color",
+                    "value": {
+                      "fixedColor": "yellow",
+                      "mode": "fixed"
+                    }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byFrameRefID",
+                  "options": "C"
+                },
+                "properties": [
+                  {
+                    "id": "color",
+                    "value": {
+                      "fixedColor": "red",
+                      "mode": "fixed"
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 12,
+            "y": 90
+          },
+          "id": 2081,
+          "options": {
+            "legend": {
+              "calcs": [
+                "lastNotNull",
+                "max",
+                "mean"
+              ],
+              "displayMode": "table",
+              "placement": "right",
+              "showLegend": true,
+              "sortBy": "Name",
+              "sortDesc": true
+            },
+            "tooltip": {
+              "hideZeros": false,
+              "mode": "multi",
+              "sort": "desc"
+            }
+          },
+          "pluginVersion": "12.3.0",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "${DS_PROMETHEUS}"
+              },
+              "editorMode": "code",
+              "expr": "max(container_memory_working_set_bytes{pod=~\".*prometheus-user-workload.*\", container!=\"\", container!=\"POD\"}) by(pod)",
+              "legendFormat": "usage - {{pod}}",
+              "range": true,
+              "refId": "A"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "${DS_PROMETHEUS}"
+              },
+              "editorMode": "code",
+              "expr": "max(kube_pod_container_resource_requests{pod=~\".*prometheus-user-workload.*\", resource=\"memory\"})",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "requests",
+              "range": true,
+              "refId": "B"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "${DS_PROMETHEUS}"
+              },
+              "editorMode": "code",
+              "expr": "max(kube_pod_container_resource_limits{pod=~\".*prometheus-user-workload.*\",resource=\"memory\"})",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "limits",
+              "range": true,
+              "refId": "C"
+            }
+          ],
+          "title": "Prometheus User Workload Memory Usage (OCP only)",
+          "type": "timeseries"
+        }
+      ],
+      "title": "Resource Utilization",
+      "type": "row"
+    },
+    {
+      "collapsed": true,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 2
+      },
+      "id": 2065,
+      "panels": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "description": "Count of monitoring PVCs in a \"bound\" state",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "percentage",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": 0
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 5,
+            "w": 4,
+            "x": 0,
+            "y": 58
+          },
+          "id": 2067,
+          "options": {
+            "minVizHeight": 75,
+            "minVizWidth": 75,
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [],
+              "fields": "",
+              "values": false
+            },
+            "showThresholdLabels": false,
+            "showThresholdMarkers": true,
+            "sizing": "auto"
+          },
+          "pluginVersion": "12.3.0",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "${DS_PROMETHEUS}"
+              },
+              "editorMode": "code",
+              "expr": "count(kube_persistentvolumeclaim_status_phase{namespace=~\"openshift-monitoring|openshift-user-workload-monitoring|prometheus-operator\",phase=\"Bound\"})",
+              "legendFormat": "__auto",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "Bound monitoring PVCs",
+          "type": "gauge"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "description": "PVC usage percentage for each PVC in the monitoring namespaces, thresholds of 85% & 95% usage.\n\nPrometheus PVC usage should stabilize after reaching its retention period. If it appears that the PVC is filling up too fast, expand PVC or shorten the retention period to ensure the PVC doesn't run out.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "decimals": 2,
+              "displayName": "${__field.labels.persistentvolumeclaim}",
+              "mappings": [],
+              "max": 100,
+              "thresholds": {
+                "mode": "percentage",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": 0
+                  },
+                  {
+                    "color": "#EAB839",
+                    "value": 85
+                  },
+                  {
+                    "color": "red",
+                    "value": 95
+                  }
+                ]
+              },
+              "unit": "percent"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 10,
+            "w": 20,
+            "x": 4,
+            "y": 58
+          },
+          "id": 2071,
+          "options": {
+            "minVizHeight": 75,
+            "minVizWidth": 75,
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [],
+              "fields": "",
+              "values": false
+            },
+            "showThresholdLabels": false,
+            "showThresholdMarkers": true,
+            "sizing": "auto",
+            "text": {
+              "titleSize": 14
+            }
+          },
+          "pluginVersion": "12.3.0",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "${DS_PROMETHEUS}"
+              },
+              "editorMode": "code",
+              "expr": "sort_desc(kubelet_volume_stats_used_bytes{namespace=~\"openshift-monitoring|openshift-user-workload-monitoring\"}/kubelet_volume_stats_capacity_bytes{namespace=~\"openshift-monitoring|openshift-user-workload-monitoring\"} * 100) or sort_desc(kubelet_volume_stats_used_bytes{exported_namespace=~\"prometheus-operator\"}/kubelet_volume_stats_capacity_bytes{exported_namespace=~\"prometheus-operator\"} * 100)",
+              "legendFormat": "__auto",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "PVC Usage",
+          "type": "gauge"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "description": "Count of \"lost\" or \"pending\" PVCs in the monitoring namespaces.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "percentage",
+                "steps": [
+                  {
+                    "color": "red",
+                    "value": 0
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 5,
+            "w": 4,
+            "x": 0,
+            "y": 63
+          },
+          "id": 2070,
+          "options": {
+            "minVizHeight": 75,
+            "minVizWidth": 75,
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "showThresholdLabels": false,
+            "showThresholdMarkers": true,
+            "sizing": "auto"
+          },
+          "pluginVersion": "12.3.0",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "${DS_PROMETHEUS}"
+              },
+              "editorMode": "code",
+              "expr": "sum by (phase)(kube_persistentvolumeclaim_status_phase{namespace=~\"openshift-monitoring|openshift-user-workload-monitoring|prometheus-operator\",phase!~\"Bound\"}) ",
+              "legendFormat": "__auto",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "Unbound PVC",
+          "type": "gauge"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "description": "Max and current PVC usage. Prometheus PVC usage should stabilize after reaching its retention period. If it appears that the PVC is filling up too fast, expand PVC or shorten the retention period to ensure the PVC doesn't run out.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "axisSoftMin": 0,
+                "barAlignment": 0,
+                "barWidthFactor": 0.6,
+                "drawStyle": "line",
+                "fillOpacity": 10,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "linear",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "never",
+                "showValues": false,
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": 0
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              },
+              "unit": "percent"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 13,
+            "w": 24,
+            "x": 0,
+            "y": 68
+          },
+          "id": 56,
+          "options": {
+            "alertThreshold": true,
+            "legend": {
+              "calcs": [
+                "lastNotNull",
+                "max"
+              ],
+              "displayMode": "table",
+              "placement": "right",
+              "showLegend": true
+            },
+            "tooltip": {
+              "hideZeros": false,
+              "mode": "multi",
+              "sort": "desc"
+            }
+          },
+          "pluginVersion": "12.3.0",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "${DS_PROMETHEUS}"
+              },
+              "editorMode": "code",
+              "expr": "sum by (persistentvolumeclaim) (kubelet_volume_stats_used_bytes{namespace=~\"openshift-monitoring|openshift-user-workload-monitoring\"}/kubelet_volume_stats_capacity_bytes{namespace=~\"openshift-monitoring|openshift-user-workload-monitoring\"} * 100) or sum by (persistentvolumeclaim) (kubelet_volume_stats_used_bytes{exported_namespace=~\"prometheus-operator\"}/kubelet_volume_stats_capacity_bytes{exported_namespace=~\"prometheus-operator\"} * 100)",
+              "interval": "",
+              "legendFormat": "{{ persistentvolumeclaim }}",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "PVC Usage (max & current)",
+          "type": "timeseries"
+        }
+      ],
+      "title": "Storage Health",
+      "type": "row"
+    }
+  ],
+  "preload": false,
+  "refresh": "",
+  "schemaVersion": 42,
+  "tags": [],
+  "templating": {
+    "list": []
+  },
+  "time": {
+    "from": "now-12h",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "",
+  "title": "IBM Cloud Pak for AIOps - Prometheus Monitoring Stack",
+  "uid": "80acb6b1-edee-48e7-b9f6-92daf1dc4ded",
+  "version": 4,
+  "weekStart": "",
+  "id": null
+}
