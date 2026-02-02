@@ -148,26 +148,28 @@ The integration with AIOps is currently only tested with a single server install
 ### Installation
 Install Db2 and Cognos Analytics per the documentation. There are no unique requirements for the AIOps integration during these phases.
 
-### Post install
+### Post install / Integration
 
 1. **Add the Db2 driver to Cognos**
-   Simply copy it across (as cognos user) from your Db2 install to your Cognos install, e.g:
-   ```bash
-   sudo cp /opt/ibm/db2/V11.5/java/db2jcc4.jar /opt/ibm/cognos/analytics/drivers/
-   ```
+Simply copy it across (as cognos user) from your Db2 install to your Cognos install, e.g:
+```bash
+sudo cp /opt/ibm/db2/V11.5/java/db2jcc4.jar /opt/ibm/cognos/analytics/drivers/
+```
 
 2. **Configure the content store**
-   Cognos requires a database instance to act as a store for all the 'content' you produce within Cognos, such as dashboards, data models and reports. The recommendation here is to just use another Db2 database (on the same instance), but Cognos does also support a variety of other database technologies. If you intend to use a Db2 as the Cognos Content Store, refer to [this guide](https://www.ibm.com/docs/en/cognos-analytics/12.0.x?topic=sudcdcs-generating-script-file-create-database-db2-content-store) for setting up a Db2 database for this purpose. Note that you must already have installed both Db2 and Cognos before performing this step.
+Cognos requires a database instance to act as a store for all the 'content' you produce within Cognos, such as dashboards, data models and reports. The recommendation here is to just use another Db2 database (on the same instance), but Cognos does also support a variety of other database technologies. If you intend to use a Db2 as the Cognos Content Store, refer to [this guide](https://www.ibm.com/docs/en/cognos-analytics/12.0.x?topic=sudcdcs-generating-script-file-create-database-db2-content-store) for setting up a Db2 database for this purpose. Note that you must already have installed both Db2 and Cognos before performing this step.
 
 3. **Configure SSL**
-   SSL must be configured prior to setting up the integration with AIOps. Guidance is provided [here](https://www.ibm.com/docs/en/cognos-analytics/12.0.0?topic=components-configuring-ssl-cognos-analytics). For a very basic configuration, simply switch the following Group Properties in the Cognos Configurator to https:
-   - Gateway URI
-   - Dispatcher URIs for gateway
-   - Controller URI for gateway
-   - External dispatcher URI
-   - Internal dispatcher URI
-   - Dispatcher URI for external applications
-   - Content Manager URIs
+SSL must be configured prior to setting up the integration with AIOps. Guidance is provided [here](https://www.ibm.com/docs/en/cognos-analytics/12.0.0?topic=components-configuring-ssl-cognos-analytics). For a very basic configuration, simply switch the following Group Properties in the Cognos Configurator to https:
+- Gateway URI
+- Dispatcher URIs for gateway
+- Controller URI for gateway
+- External dispatcher URI
+- Internal dispatcher URI
+- Dispatcher URI for external applications
+- Content Manager URIs
+
+**At this point you will want to start your Cognos instance. You can do so by pressing the Green play icon on the Cognos Configurator.**
 
 ### Link Cognos and AIOps
 The steps, scripts, and examples/assets for linking the two can be found in our [public GitHub Repository](https://github.ibm.com/hdm/aiops-custom-widget-cognos-integration/tree/main/) split into different sections. The key sections you will need, in order:
@@ -411,7 +413,16 @@ When loading the metadata, you need to specify that sample data is not loaded. T
 3) Find your asset/schema (DB2INST1 by default) and click the 3 dot menu, then **Load options**.
 4) Deslect **Retrieve sample data** and then click load.
 
+- **Error starting Cognos Service**
+In some cases during the first time startup, the UI dialog will indicate there was an error during the startup. Typically this is a false positive and it is simply because the startup has taken a little longer than expected. However, to validate this and to check if there are genuine errors, refer to the Cognos server log files. They can be found on the Cognos vm at:
+```
+<cognos-install-path>/logs/cognosserver.log
+```
 
+E.g
+```
+/opt/ibm/cognos/analytics/logs/cognosserver.log
+```
 
 ## Dashboarding toolkit
 The toolkit is available here: https://github.com/IBM/aiops-ui-extension-toolkit

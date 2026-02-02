@@ -216,7 +216,7 @@ EOF
 # apply workaround from https://www.ibm.com/mysupport/s/defect/aCIgJ0000009ZOL/dt460797?language=en_US
 function fixClient() {
   uid=$(kubectl get zenservice -o jsonpath={.items[].metadata.uid} -n $aiopsNamespace)
-  kubectl patch client $client --type=json -n $aiopsNamespace --patch-file=/dev/stdin <<-EOF 
+  kubectl patch client $client --type=json -n $aiopsNamespace --patch-file=/dev/stdin <<-EOF
     [
       {
         "op": "add",
@@ -447,10 +447,10 @@ function main() {
     createNamespace
     createUIExtension
   else
-    removeClient
-    removeFromAllowList
+    # removeClient
+    # removeFromAllowList
     removeNamespace
-    removeUIExtension
+    # removeUIExtension
   fi
   echo "Done"
 }
