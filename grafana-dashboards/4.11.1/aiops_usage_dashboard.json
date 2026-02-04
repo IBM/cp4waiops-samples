@@ -21,7 +21,7 @@
       "type": "grafana",
       "id": "grafana",
       "name": "Grafana",
-      "version": "11.3.0"
+      "version": "12.3.0"
     },
     {
       "type": "datasource",
@@ -73,7 +73,6 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": null,
   "links": [],
   "panels": [
     {
@@ -107,7 +106,7 @@
             "content": "# Objective\nThe goal of this dashboard is to provide visibility\n on the level of traffic flowing through the \n environment and make sure that Cloud Pak for\n  AIOps is properly configured to handle it\n  as described in the [sizing documentation](https://www.ibm.com/docs/en/cloud-paks/cloud-pak-aiops/4.6.1?topic=planning-hardware-requirements#aimgr_custom). ",
             "mode": "markdown"
           },
-          "pluginVersion": "11.3.0",
+          "pluginVersion": "12.3.0",
           "title": "",
           "type": "text"
         }
@@ -160,6 +159,7 @@
                   "type": "linear"
                 },
                 "showPoints": "auto",
+                "showValues": false,
                 "spanNulls": false,
                 "stacking": {
                   "group": "A",
@@ -174,7 +174,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": 0
                   }
                 ]
               },
@@ -186,7 +187,7 @@
             "h": 5,
             "w": 17,
             "x": 0,
-            "y": 2
+            "y": 6
           },
           "id": 2,
           "options": {
@@ -197,11 +198,12 @@
               "showLegend": true
             },
             "tooltip": {
+              "hideZeros": false,
               "mode": "single",
               "sort": "none"
             }
           },
-          "pluginVersion": "11.3.0",
+          "pluginVersion": "12.3.0",
           "targets": [
             {
               "datasource": {
@@ -235,7 +237,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": 0
                   }
                 ]
               },
@@ -247,7 +250,7 @@
             "h": 5,
             "w": 7,
             "x": 17,
-            "y": 2
+            "y": 6
           },
           "id": 288,
           "options": {
@@ -265,7 +268,7 @@
             "textMode": "auto",
             "wideLayout": true
           },
-          "pluginVersion": "11.3.0",
+          "pluginVersion": "12.3.0",
           "targets": [
             {
               "datasource": {
@@ -331,6 +334,7 @@
                   "type": "linear"
                 },
                 "showPoints": "auto",
+                "showValues": false,
                 "spanNulls": false,
                 "stacking": {
                   "group": "A",
@@ -345,7 +349,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": 0
                   }
                 ]
               },
@@ -357,7 +362,7 @@
             "h": 5,
             "w": 17,
             "x": 0,
-            "y": 3
+            "y": 12
           },
           "id": 5,
           "options": {
@@ -368,11 +373,12 @@
               "showLegend": true
             },
             "tooltip": {
+              "hideZeros": false,
               "mode": "single",
               "sort": "none"
             }
           },
-          "pluginVersion": "11.3.0",
+          "pluginVersion": "12.3.0",
           "targets": [
             {
               "datasource": {
@@ -407,7 +413,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": 0
                   }
                 ]
               },
@@ -419,7 +426,7 @@
             "h": 5,
             "w": 7,
             "x": 17,
-            "y": 3
+            "y": 12
           },
           "id": 289,
           "options": {
@@ -437,7 +444,7 @@
             "textMode": "auto",
             "wideLayout": true
           },
-          "pluginVersion": "11.3.0",
+          "pluginVersion": "12.3.0",
           "targets": [
             {
               "datasource": {
@@ -503,6 +510,7 @@
                   "type": "linear"
                 },
                 "showPoints": "auto",
+                "showValues": false,
                 "spanNulls": false,
                 "stacking": {
                   "group": "A",
@@ -517,7 +525,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": 0
                   }
                 ]
               },
@@ -529,7 +538,7 @@
             "h": 5,
             "w": 17,
             "x": 0,
-            "y": 4
+            "y": 18
           },
           "id": 6,
           "options": {
@@ -540,11 +549,12 @@
               "showLegend": true
             },
             "tooltip": {
+              "hideZeros": false,
               "mode": "single",
               "sort": "none"
             }
           },
-          "pluginVersion": "11.3.0",
+          "pluginVersion": "12.3.0",
           "targets": [
             {
               "datasource": {
@@ -579,7 +589,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": 0
                   }
                 ]
               },
@@ -591,7 +602,7 @@
             "h": 5,
             "w": 7,
             "x": 17,
-            "y": 4
+            "y": 18
           },
           "id": 331,
           "options": {
@@ -609,7 +620,7 @@
             "textMode": "auto",
             "wideLayout": true
           },
-          "pluginVersion": "11.3.0",
+          "pluginVersion": "12.3.0",
           "targets": [
             {
               "datasource": {
@@ -675,6 +686,7 @@
                   "type": "linear"
                 },
                 "showPoints": "auto",
+                "showValues": false,
                 "spanNulls": false,
                 "stacking": {
                   "group": "A",
@@ -691,7 +703,7 @@
                 "steps": [
                   {
                     "color": "green",
-                    "value": null
+                    "value": 0
                   }
                 ]
               },
@@ -703,7 +715,7 @@
             "h": 5,
             "w": 17,
             "x": 0,
-            "y": 5
+            "y": 24
           },
           "id": 293,
           "options": {
@@ -714,11 +726,12 @@
               "showLegend": true
             },
             "tooltip": {
+              "hideZeros": false,
               "mode": "single",
               "sort": "none"
             }
           },
-          "pluginVersion": "11.3.0",
+          "pluginVersion": "12.3.0",
           "targets": [
             {
               "datasource": {
@@ -754,7 +767,7 @@
                 "steps": [
                   {
                     "color": "green",
-                    "value": null
+                    "value": 0
                   }
                 ]
               },
@@ -766,7 +779,7 @@
             "h": 5,
             "w": 7,
             "x": 17,
-            "y": 5
+            "y": 24
           },
           "id": 294,
           "options": {
@@ -784,7 +797,7 @@
             "textMode": "auto",
             "wideLayout": true
           },
-          "pluginVersion": "11.3.0",
+          "pluginVersion": "12.3.0",
           "targets": [
             {
               "datasource": {
@@ -850,6 +863,7 @@
                   "type": "linear"
                 },
                 "showPoints": "auto",
+                "showValues": false,
                 "spanNulls": false,
                 "stacking": {
                   "group": "A",
@@ -866,7 +880,7 @@
                 "steps": [
                   {
                     "color": "green",
-                    "value": null
+                    "value": 0
                   }
                 ]
               },
@@ -878,7 +892,7 @@
             "h": 5,
             "w": 17,
             "x": 0,
-            "y": 6
+            "y": 30
           },
           "id": 332,
           "options": {
@@ -889,11 +903,12 @@
               "showLegend": true
             },
             "tooltip": {
+              "hideZeros": false,
               "mode": "single",
               "sort": "none"
             }
           },
-          "pluginVersion": "11.3.0",
+          "pluginVersion": "12.3.0",
           "targets": [
             {
               "datasource": {
@@ -929,7 +944,7 @@
                 "steps": [
                   {
                     "color": "green",
-                    "value": null
+                    "value": 0
                   }
                 ]
               },
@@ -941,7 +956,7 @@
             "h": 5,
             "w": 7,
             "x": 17,
-            "y": 6
+            "y": 30
           },
           "id": 333,
           "options": {
@@ -959,7 +974,7 @@
             "textMode": "auto",
             "wideLayout": true
           },
-          "pluginVersion": "11.3.0",
+          "pluginVersion": "12.3.0",
           "targets": [
             {
               "datasource": {
@@ -1025,6 +1040,7 @@
                   "type": "linear"
                 },
                 "showPoints": "auto",
+                "showValues": false,
                 "spanNulls": false,
                 "stacking": {
                   "group": "A",
@@ -1041,7 +1057,7 @@
                 "steps": [
                   {
                     "color": "green",
-                    "value": null
+                    "value": 0
                   }
                 ]
               },
@@ -1053,7 +1069,7 @@
             "h": 5,
             "w": 17,
             "x": 0,
-            "y": 22
+            "y": 36
           },
           "id": 301,
           "options": {
@@ -1064,11 +1080,12 @@
               "showLegend": true
             },
             "tooltip": {
+              "hideZeros": false,
               "mode": "single",
               "sort": "none"
             }
           },
-          "pluginVersion": "11.3.0",
+          "pluginVersion": "12.3.0",
           "targets": [
             {
               "datasource": {
@@ -1104,7 +1121,7 @@
                 "steps": [
                   {
                     "color": "green",
-                    "value": null
+                    "value": 0
                   }
                 ]
               },
@@ -1116,7 +1133,7 @@
             "h": 5,
             "w": 7,
             "x": 17,
-            "y": 22
+            "y": 36
           },
           "id": 302,
           "options": {
@@ -1134,7 +1151,7 @@
             "textMode": "auto",
             "wideLayout": true
           },
-          "pluginVersion": "11.3.0",
+          "pluginVersion": "12.3.0",
           "targets": [
             {
               "datasource": {
@@ -1200,6 +1217,7 @@
                   "type": "linear"
                 },
                 "showPoints": "auto",
+                "showValues": false,
                 "spanNulls": false,
                 "stacking": {
                   "group": "A",
@@ -1214,7 +1232,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": 0
                   },
                   {
                     "color": "red",
@@ -1230,7 +1249,7 @@
             "h": 8,
             "w": 18,
             "x": 0,
-            "y": 186
+            "y": 42
           },
           "id": 334,
           "options": {
@@ -1241,11 +1260,12 @@
               "showLegend": true
             },
             "tooltip": {
+              "hideZeros": false,
               "mode": "multi",
               "sort": "desc"
             }
           },
-          "pluginVersion": "11.3.0",
+          "pluginVersion": "12.3.0",
           "targets": [
             {
               "datasource": {
@@ -1344,7 +1364,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": 0
                   }
                 ]
               }
@@ -1355,7 +1376,7 @@
             "h": 4,
             "w": 6,
             "x": 18,
-            "y": 186
+            "y": 42
           },
           "id": 335,
           "options": {
@@ -1373,7 +1394,7 @@
             "textMode": "auto",
             "wideLayout": true
           },
-          "pluginVersion": "11.3.0",
+          "pluginVersion": "12.3.0",
           "targets": [
             {
               "datasource": {
@@ -1407,7 +1428,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": 0
                   },
                   {
                     "color": "red",
@@ -1422,7 +1444,7 @@
             "h": 4,
             "w": 6,
             "x": 18,
-            "y": 278
+            "y": 46
           },
           "id": 336,
           "options": {
@@ -1440,7 +1462,7 @@
             "textMode": "auto",
             "wideLayout": true
           },
-          "pluginVersion": "11.3.0",
+          "pluginVersion": "12.3.0",
           "targets": [
             {
               "datasource": {
@@ -1506,6 +1528,7 @@
                   "type": "linear"
                 },
                 "showPoints": "auto",
+                "showValues": false,
                 "spanNulls": false,
                 "stacking": {
                   "group": "A",
@@ -1520,7 +1543,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": 0
                   },
                   {
                     "color": "red",
@@ -1536,7 +1560,7 @@
             "h": 8,
             "w": 18,
             "x": 0,
-            "y": 187
+            "y": 51
           },
           "id": 343,
           "options": {
@@ -1547,11 +1571,12 @@
               "showLegend": true
             },
             "tooltip": {
+              "hideZeros": false,
               "mode": "multi",
               "sort": "desc"
             }
           },
-          "pluginVersion": "11.3.0",
+          "pluginVersion": "12.3.0",
           "targets": [
             {
               "datasource": {
@@ -1689,7 +1714,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": 0
                   }
                 ]
               }
@@ -1700,7 +1726,7 @@
             "h": 4,
             "w": 3,
             "x": 18,
-            "y": 187
+            "y": 51
           },
           "id": 344,
           "options": {
@@ -1718,7 +1744,7 @@
             "textMode": "auto",
             "wideLayout": true
           },
-          "pluginVersion": "11.3.0",
+          "pluginVersion": "12.3.0",
           "targets": [
             {
               "datasource": {
@@ -1752,7 +1778,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": 0
                   }
                 ]
               }
@@ -1763,7 +1790,7 @@
             "h": 4,
             "w": 3,
             "x": 21,
-            "y": 187
+            "y": 51
           },
           "id": 345,
           "options": {
@@ -1781,7 +1808,7 @@
             "textMode": "auto",
             "wideLayout": true
           },
-          "pluginVersion": "11.3.0",
+          "pluginVersion": "12.3.0",
           "targets": [
             {
               "datasource": {
@@ -1815,7 +1842,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": 0
                   }
                 ]
               }
@@ -1826,7 +1854,7 @@
             "h": 4,
             "w": 3,
             "x": 18,
-            "y": 207
+            "y": 55
           },
           "id": 346,
           "options": {
@@ -1844,7 +1872,7 @@
             "textMode": "auto",
             "wideLayout": true
           },
-          "pluginVersion": "11.3.0",
+          "pluginVersion": "12.3.0",
           "targets": [
             {
               "datasource": {
@@ -1866,7 +1894,7 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "description": "Count that tracks the number of Github issues that could not be updated due to errors within the time range.\n\nIt is expected for this number to be greater than 0 when an incident is initially created. Incident creation is usually immediately followed by a few updates. The Github integration cannot process these updates until after the Github issue has been created, thus the updates will fail. Subsequent updates should succeed as normal.\n\nFor failures that occur after initial incident creation, please review that the Github credentials and instance details are valid. For more information on configuring the Github integration see: https://www.ibm.com/docs/en/cloud-paks/cloud-pak-aiops/latest?topic=integrations-github",
+          "description": "Count that tracks the number of Github issues that could not be updated due to errors within the time range.\n\nIt is expected for a few update failures to occur when an incident is initially created. Incident creation is usually immediately followed by a few updates. The Github integration cannot process these updates until after the Github issue has been created, thus the updates will fail. Subsequent updates should succeed as normal.\n\nFor failures that occur after initial incident creation, please review that the Github credentials and instance details are valid. For more information on configuring the Github integration see: https://www.ibm.com/docs/en/cloud-paks/cloud-pak-aiops/latest?topic=integrations-github",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -1878,7 +1906,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": 0
                   }
                 ]
               }
@@ -1889,7 +1918,7 @@
             "h": 4,
             "w": 3,
             "x": 21,
-            "y": 207
+            "y": 55
           },
           "id": 347,
           "options": {
@@ -1907,7 +1936,7 @@
             "textMode": "auto",
             "wideLayout": true
           },
-          "pluginVersion": "11.3.0",
+          "pluginVersion": "12.3.0",
           "targets": [
             {
               "datasource": {
@@ -1973,6 +2002,7 @@
                   "type": "linear"
                 },
                 "showPoints": "auto",
+                "showValues": false,
                 "spanNulls": false,
                 "stacking": {
                   "group": "A",
@@ -1987,7 +2017,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": 0
                   },
                   {
                     "color": "red",
@@ -2003,7 +2034,7 @@
             "h": 8,
             "w": 18,
             "x": 0,
-            "y": 188
+            "y": 60
           },
           "id": 337,
           "options": {
@@ -2014,11 +2045,12 @@
               "showLegend": true
             },
             "tooltip": {
+              "hideZeros": false,
               "mode": "multi",
               "sort": "desc"
             }
           },
-          "pluginVersion": "11.3.0",
+          "pluginVersion": "12.3.0",
           "targets": [
             {
               "datasource": {
@@ -2156,7 +2188,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": 0
                   }
                 ]
               }
@@ -2167,7 +2200,7 @@
             "h": 4,
             "w": 3,
             "x": 18,
-            "y": 188
+            "y": 60
           },
           "id": 338,
           "options": {
@@ -2185,7 +2218,7 @@
             "textMode": "auto",
             "wideLayout": true
           },
-          "pluginVersion": "11.3.0",
+          "pluginVersion": "12.3.0",
           "targets": [
             {
               "datasource": {
@@ -2219,7 +2252,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": 0
                   }
                 ]
               }
@@ -2230,7 +2264,7 @@
             "h": 4,
             "w": 3,
             "x": 21,
-            "y": 188
+            "y": 60
           },
           "id": 339,
           "options": {
@@ -2248,7 +2282,7 @@
             "textMode": "auto",
             "wideLayout": true
           },
-          "pluginVersion": "11.3.0",
+          "pluginVersion": "12.3.0",
           "targets": [
             {
               "datasource": {
@@ -2270,7 +2304,7 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "description": "Count that tracks the number of Jira issues created successfully within the time range.",
+          "description": "Count that tracks the number of Jira issues updated successfully within the time range.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -2282,7 +2316,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": 0
                   }
                 ]
               }
@@ -2293,7 +2328,7 @@
             "h": 4,
             "w": 3,
             "x": 18,
-            "y": 192
+            "y": 64
           },
           "id": 340,
           "options": {
@@ -2311,7 +2346,7 @@
             "textMode": "auto",
             "wideLayout": true
           },
-          "pluginVersion": "11.3.0",
+          "pluginVersion": "12.3.0",
           "targets": [
             {
               "datasource": {
@@ -2333,7 +2368,7 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "description": "Count that tracks the number of Jira issues that could not be updated due to errors within the time range.\n\nIt is expected for this number to be around 1/3 the value of the updates successes. When an incident is initially created, it is immediately followed by a few updates. The Jira integration cannot process these updates until after the Jira issue has been created, thus the updates will fail. Subsequent updates should succeed as normal.\n\nFor failures that occur after initial incident creation, please review that the Jira credentials and instance details are valid. For more information on configuring the Jira integration see: https://www.ibm.com/docs/en/cloud-paks/cloud-pak-aiops/latest?topic=integrations-jira",
+          "description": "Count that tracks the number of Jira issues that could not be updated due to errors within the time range.\n\nIt is expected for a few update failures to occur when an incident is initially created. Incident creation is usually immediately followed by a few updates. The Jira integration cannot process these updates until after the Jira ticket has been created, thus the updates will fail. Subsequent updates should succeed as normal.\n\nFor failures that occur after initial incident creation, please review that the Jira credentials and instance details are valid. For more information on configuring the Jira integration see: https://www.ibm.com/docs/en/cloud-paks/cloud-pak-aiops/latest?topic=integrations-jira",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -2345,7 +2380,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": 0
                   }
                 ]
               }
@@ -2356,7 +2392,7 @@
             "h": 4,
             "w": 3,
             "x": 21,
-            "y": 192
+            "y": 64
           },
           "id": 341,
           "options": {
@@ -2374,7 +2410,7 @@
             "textMode": "auto",
             "wideLayout": true
           },
-          "pluginVersion": "11.3.0",
+          "pluginVersion": "12.3.0",
           "targets": [
             {
               "datasource": {
@@ -2410,7 +2446,7 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "description": "Time series that tracks the ChatOps request rates for:\n* Notification requests received (by internal ChatOps component)\n* notifications sent successfully\n* notification failures",
+          "description": "Time series that tracks the ChatOps request rates per minute for:\n* Notification requests received (by internal ChatOps component)\n* notifications sent successfully\n* notification failures",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -2440,6 +2476,7 @@
                   "type": "linear"
                 },
                 "showPoints": "auto",
+                "showValues": false,
                 "spanNulls": false,
                 "stacking": {
                   "group": "A",
@@ -2454,7 +2491,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": 0
                   },
                   {
                     "color": "red",
@@ -2470,7 +2508,7 @@
             "h": 8,
             "w": 16,
             "x": 0,
-            "y": 237
+            "y": 106
           },
           "id": 350,
           "options": {
@@ -2481,11 +2519,12 @@
               "showLegend": true
             },
             "tooltip": {
+              "hideZeros": false,
               "mode": "multi",
               "sort": "desc"
             }
           },
-          "pluginVersion": "11.3.0",
+          "pluginVersion": "12.3.0",
           "targets": [
             {
               "datasource": {
@@ -2533,7 +2572,7 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "description": "Count that tracks the number of notification successfully sent to the external Chat Platform (Slack/Teams) within the time range.",
+          "description": "Count that tracks the number of notifications successfully sent to the external Chat Platform (Slack/Teams) within the time range.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -2545,7 +2584,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": 0
                   }
                 ]
               }
@@ -2556,7 +2596,7 @@
             "h": 3,
             "w": 4,
             "x": 16,
-            "y": 237
+            "y": 106
           },
           "id": 351,
           "options": {
@@ -2574,7 +2614,7 @@
             "textMode": "auto",
             "wideLayout": true
           },
-          "pluginVersion": "11.3.0",
+          "pluginVersion": "12.3.0",
           "targets": [
             {
               "datasource": {
@@ -2614,7 +2654,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": 0
                   },
                   {
                     "color": "red",
@@ -2629,7 +2670,7 @@
             "h": 3,
             "w": 4,
             "x": 20,
-            "y": 237
+            "y": 106
           },
           "id": 352,
           "options": {
@@ -2647,7 +2688,7 @@
             "textMode": "auto",
             "wideLayout": true
           },
-          "pluginVersion": "11.3.0",
+          "pluginVersion": "12.3.0",
           "targets": [
             {
               "datasource": {
@@ -2675,7 +2716,7 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "description": "A histogram showing incident counts along with the amount of time elapsed between incident creation and Slack notification.\n\nHistogram displaying the ChatOps notification times. This shows the time elapsed from incident creation to ChatOps notification. \n\nThis gives insight into the speed at which users are being notified of incidents via ChatOps.\n\nValues on the bottom are ranges of time in seconds. Values on the bottom are the number of notifications that were sent in that time range.\n",
+          "description": "Histogram displaying the ChatOps notification times. This shows the time elapsed from incident creation to ChatOps notification. \n\nThis gives insight into the speed at which users are being notified of incidents via ChatOps.\n\nValues on the bottom are ranges of time in seconds. Values on the top are the number of notifications that were sent in that time range.\n",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -2687,7 +2728,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": 0
                   }
                 ]
               }
@@ -2698,7 +2740,7 @@
             "h": 5,
             "w": 8,
             "x": 16,
-            "y": 240
+            "y": 109
           },
           "id": 349,
           "options": {
@@ -2723,7 +2765,7 @@
             "sizing": "auto",
             "valueMode": "color"
           },
-          "pluginVersion": "11.3.0",
+          "pluginVersion": "12.3.0",
           "targets": [
             {
               "datasource": {
@@ -2851,8 +2893,9 @@
       "type": "row"
     }
   ],
+  "preload": false,
   "refresh": "",
-  "schemaVersion": 40,
+  "schemaVersion": 42,
   "tags": [],
   "templating": {
     "list": []
@@ -2864,7 +2907,8 @@
   "timepicker": {},
   "timezone": "",
   "title": "IBM Cloud Pak for AIOps - Usage",
-  "uid": "26d422b9-3167-43e2-915c-6dd2393fe13d",
-  "version": 4,
-  "weekStart": ""
+  "uid": "26d422b9-3167-43e2-915c-6dd2393fe13e",
+  "version": 3,
+  "weekStart": "",
+  "id": null
 }
