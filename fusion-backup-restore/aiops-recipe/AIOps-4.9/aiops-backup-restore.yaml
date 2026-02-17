@@ -201,7 +201,7 @@ spec:
     essential: false
     namespace: ${GROUP.aiops-volumes.namespace}
     selectResource: operators.coreos.com/v1alpha1/catalogsources
-    nameSelector: aiops-catalog
+    nameSelector: ibm-aiops-catalog
     timeout: 600
     onError: fail
     chks:
