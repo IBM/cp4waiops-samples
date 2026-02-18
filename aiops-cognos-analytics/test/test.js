@@ -389,6 +389,7 @@ describe('Schema test', () => {
         'newvalue',
         'oldvalue',
         'parentid',
+        'parenttype',
         'policyid',
         'runbookid',
         'runbookinstanceid',
@@ -443,6 +444,7 @@ describe('Schema test', () => {
         tenantid: 'cfd95b7e-3bc7-4006-a4a8-a73a79c71255',
         id: 'activity-001',
         parentid: 'ea6cf743-7a3a-4d1a-8d6f-faaa1df573d5',
+        parenttype: 'alert',
         createdtime: new Date('2024-09-10T23:21:46.000Z'),
         type: 'comment',
         userid: 'testuser@example.com',
@@ -470,10 +472,11 @@ describe('Schema test', () => {
     });
 
     it('should query activity by parent ID using index', async () => {
-      const res = await client.query(`SELECT id, parentId FROM ACTIVITY_ENTRY WHERE parentId = 'ea6cf743-7a3a-4d1a-8d6f-faaa1df573d5' ORDER BY createdTime DESC`);
+      const res = await client.query(`SELECT id, parentId, parentType FROM ACTIVITY_ENTRY WHERE parentId = 'ea6cf743-7a3a-4d1a-8d6f-faaa1df573d5' ORDER BY createdTime DESC`);
       expect(res.rows.length).to.equal(1);
       expect(res.rows[0].id).to.equal('activity-001');
       expect(res.rows[0].parentid).to.equal('ea6cf743-7a3a-4d1a-8d6f-faaa1df573d5');
+      expect(res.rows[0].parenttype).to.equal('alert');
     });
 
     it('should query activity by user ID using index', async () => {
@@ -492,6 +495,7 @@ describe('Schema test', () => {
       expect(activity.type).to.equal('Comment');
       expect(activity.comment).to.equal('This is a test comment on the alert');
       expect(activity.parentid).to.equal('ea6cf743-7a3a-4d1a-8d6f-faaa1df573d5');
+      expect(activity.parenttype).to.equal('alert');
     });
 
     it('should insert automation activity with runbook details', async () => {
@@ -499,6 +503,7 @@ describe('Schema test', () => {
         tenantid: 'cfd95b7e-3bc7-4006-a4a8-a73a79c71255',
         id: 'activity-002',
         parentid: 'ea6cf743-7a3a-4d1a-8d6f-faaa1df573d5',
+        parenttype: 'alert',
         createdtime: new Date('2024-09-10T23:21:46.000Z'),
         type: 'automation',
         userid: 'system',
@@ -520,12 +525,12 @@ describe('Schema test', () => {
       const mockDate = client.formatTimestamp('2024-09-10T18:21:46.000Z');
       await client.query(`
         INSERT INTO ACTIVITY_ENTRY (
-          tenantid, id, parentId, createdTime, type, userId, comment,
+          tenantid, id, parentId, parentType, createdTime, type, userId, comment,
           runbookId, runbookName, runbookVersion, runbookInstanceId,
           runbookStatus, runbookType, actionInstanceId, timeAdded, uuid
         ) VALUES (
           'cfd95b7e-3bc7-4006-a4a8-a73a79c71255', 'activity-002',
-          'ea6cf743-7a3a-4d1a-8d6f-faaa1df573d5', '${mockDate}', 'automation',
+          'ea6cf743-7a3a-4d1a-8d6f-faaa1df573d5', 'alert', '${mockDate}', 'automation',
           'system', 'Runbook executed successfully', 'runbook-123',
           'Restart Service', 1, 'instance-456', 'completed', 'automated',
           'action-789', '${mockDate}',
@@ -541,11 +546,11 @@ describe('Schema test', () => {
       const mockDate = client.formatTimestamp('2024-09-10T18:21:46.000Z');
       await client.query(`
         INSERT INTO ACTIVITY_ENTRY (
-          tenantid, id, parentId, createdTime, type, userId, comment,
+          tenantid, id, parentId, parentType, createdTime, type, userId, comment,
           oldValue, newValue, timeAdded, uuid
         ) VALUES (
           'cfd95b7e-3bc7-4006-a4a8-a73a79c71255', 'activity-003',
-          'ea6cf743-7a3a-4d1a-8d6f-faaa1df573d5', '${mockDate}', 'statechange',
+          'ea6cf743-7a3a-4d1a-8d6f-faaa1df573d5', 'alert', '${mockDate}', 'statechange',
           'admin@example.com', 'State changed from open to acknowledged',
           'open', 'acknowledged', '${mockDate}',
           'cfd95b7e-3bc7-4006-a4a8-a73a79c71255_activity-003'
@@ -554,8 +559,50 @@ describe('Schema test', () => {
 
       const res = await client.query(`SELECT * FROM ACTIVITY_ENTRY WHERE id = 'activity-003'`);
       expect(res.rows[0].type).to.equal('statechange');
+      expect(res.rows[0].parenttype).to.equal('alert');
       expect(res.rows[0].oldvalue).to.equal('open');
       expect(res.rows[0].newvalue).to.equal('acknowledged');
+    });
+
+    it('should query activity by parentType using index', async () => {
+      const res = await client.query(`SELECT id, parentType FROM ACTIVITY_ENTRY WHERE parentType = 'alert' ORDER BY createdTime DESC`);
+      expect(res.rows.length).to.equal(3);
+      res.rows.forEach(row => {
+        expect(row.parenttype).to.equal('alert');
+      });
+    });
+
+    it('should insert incident activity with parentType incident', async () => {
+      const mockDate = client.formatTimestamp('2024-09-10T18:21:46.000Z');
+      await client.query(`
+        INSERT INTO ACTIVITY_ENTRY (
+          tenantid, id, parentId, parentType, createdTime, type, userId, comment,
+          timeAdded, uuid
+        ) VALUES (
+          'cfd95b7e-3bc7-4006-a4a8-a73a79c71255', 'activity-004',
+          '24fba2e3-0000-4000-8000-000000000002', 'incident', '${mockDate}', 'comment',
+          'testuser@example.com', 'This is a comment on the incident',
+          '${mockDate}',
+          'cfd95b7e-3bc7-4006-a4a8-a73a79c71255_activity-004'
+        )
+      `);
+
+      const res = await client.query(`SELECT * FROM ACTIVITY_ENTRY WHERE id = 'activity-004'`);
+      expect(res.rows[0].parenttype).to.equal('incident');
+      expect(res.rows[0].parentid).to.equal('24fba2e3-0000-4000-8000-000000000002');
+      expect(res.rows[0].comment).to.equal('This is a comment on the incident');
+    });
+
+    it('should filter activities by parentType', async () => {
+      const alertActivities = await client.query(`SELECT id FROM ACTIVITY_ENTRY WHERE parentType = 'alert' ORDER BY id`);
+      expect(alertActivities.rows.length).to.equal(3);
+      expect(alertActivities.rows[0].id).to.equal('activity-001');
+      expect(alertActivities.rows[1].id).to.equal('activity-002');
+      expect(alertActivities.rows[2].id).to.equal('activity-003');
+
+      const incidentActivities = await client.query(`SELECT id FROM ACTIVITY_ENTRY WHERE parentType = 'incident' ORDER BY id`);
+      expect(incidentActivities.rows.length).to.equal(1);
+      expect(incidentActivities.rows[0].id).to.equal('activity-004');
     });
   });
 
