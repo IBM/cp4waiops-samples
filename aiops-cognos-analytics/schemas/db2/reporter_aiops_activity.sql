@@ -36,6 +36,7 @@ CREATE TABLE ACTIVITY_ENTRY (
     tenantid            VARCHAR(64) NOT NULL,
     id                  VARCHAR(255) NOT NULL,
     parentId            VARCHAR(255),
+    parentType          VARCHAR(32),
     createdTime         TIMESTAMP NOT NULL,
     type                VARCHAR(32),
     userId              VARCHAR(255),
@@ -62,6 +63,7 @@ CREATE TABLE ACTIVITY_ENTRY (
 CREATE INDEX ACTIVITY_PARENT_IDX
        ON ACTIVITY_ENTRY (
                parentId,
+               parentType,
                createdTime DESC )@
 
 CREATE INDEX ACTIVITY_USER_IDX
@@ -109,6 +111,7 @@ CREATE VIEW ACTIVITY_VW (
         oldValue,
         newValue,
         parentId,
+        parentType,
         policyId,
         runbookInstanceId,
         actionInstanceId
@@ -120,10 +123,11 @@ CREATE VIEW ACTIVITY_VW (
         oldValue,
         newValue,
         parentId,
+        parentType,
         policyId,
         runbookInstanceId,
         actionInstanceId
-FROM 
+FROM
         ACTIVITY_ENTRY, ACTIVITY_ENTRY_TYPES
 WHERE
         ACTIVITY_ENTRY.type = ACTIVITY_ENTRY_TYPES.type @
