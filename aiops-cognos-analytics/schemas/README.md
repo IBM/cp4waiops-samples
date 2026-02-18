@@ -41,6 +41,9 @@ db2 -td@ -vf db2/reporter_aiops_alerts.sql
 db2 -td@ -vf db2/reporter_aiops_incidents.sql
 ```
 ```
+db2 -td@ -vf db2/reporter_aiops_activity.sql
+```
+```
 db2 -td@ -vf db2/reporter_aiops_noise_reduction.sql
 ```
 
@@ -151,6 +154,9 @@ db2 -td@ -vf db2/reporter_aiops_alerts_remove.sql
 db2 -td@ -vf db2/reporter_aiops_incidents_remove.sql
 ```
 ```
+db2 -td@ -vf db2/reporter_aiops_activity_remove.sql
+```
+```
 db2 -td@ -vf db2/reporter_aiops_noise_reduction_remove.sql
 ```
 
@@ -186,6 +192,10 @@ INCIDENTS_AUDIT_PRIORITY - Audit of incident priority changes
 
 INCIDENTS_AUDIT_STATE - Audit of incident status changes
 
+ACTIVITY_ENTRY - Log entry of alert or incident activity
+
+ACTIVITY_ENTRY_TYPES - Activity type definitions
+
 ### Views
 ALERTS_STATUS_VW - View similar to alerts list in the UI
 
@@ -196,6 +206,8 @@ INCIDENTS_STATUS_VW - View similar to incidents list in the UI
 INCIDENTS_AUDIT - View of audited incident state changes
 
 INCIDENT_DASHBOARD - Example view of incident health
+
+ACTIVITY_VW - Example of activity on alerts and incidents
 
 ### Indexes
 ALERTS_AUDIT_OWNER_IDX - Index for alert owner audit
@@ -213,6 +225,10 @@ INCIDENTS_AUDIT_TEAM_IDX - Index for incident team audit
 INCIDENTS_AUDIT_PRIORITY_IDX - Index for incident priority audit
 
 INCIDENTS_AUDIT_STATE_IDX - Index for incident status audit
+
+ACTIVITY_PARENT_IDX - Index by alert/incident (parent) over time
+
+ACTIVITY_USER_IDX - Index by user over time
 
 ### Triggers
 ALERTS_AUDIT_INSERT - Inserts an audit record when alert state changes

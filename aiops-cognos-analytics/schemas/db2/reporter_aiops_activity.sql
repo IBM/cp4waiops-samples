@@ -35,8 +35,7 @@
 CREATE TABLE ACTIVITY_ENTRY (
     tenantid            VARCHAR(64) NOT NULL,
     id                  VARCHAR(255) NOT NULL,
-    alertId             VARCHAR(255),
-    incidentId          VARCHAR(255),
+    parentId            VARCHAR(255),
     createdTime         TIMESTAMP NOT NULL,
     type                VARCHAR(32),
     userId              VARCHAR(255),
@@ -50,24 +49,19 @@ CREATE TABLE ACTIVITY_ENTRY (
     runbookType         VARCHAR(32),
     actionInstanceId    VARCHAR(255),
     timeAdded           TIMESTAMP,
-    oldValue            VARCHAR(4096),
-    newValue            VARCHAR(4096),
+    oldValue            CLOB,
+    newValue            CLOB,
     uuid                VARCHAR(255) NOT NULL,
     PRIMARY KEY (uuid) )@
 --DATA CAPTURE NONE@
 
 
 --+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
--- Indexes to query by alert and incident ID
+-- Indexes to query by parent and user ID
 --+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-CREATE INDEX ACTIVITY_ALERT_IDX
+CREATE INDEX ACTIVITY_PARENT_IDX
        ON ACTIVITY_ENTRY (
-               alertId,
-               createdTime DESC )@
-
-CREATE INDEX ACTIVITY_INCIDENT_IDX
-       ON ACTIVITY_ENTRY (
-               incidentId,
+               parentId,
                createdTime DESC )@
 
 CREATE INDEX ACTIVITY_USER_IDX
@@ -114,8 +108,7 @@ CREATE VIEW ACTIVITY_VW (
         comment,
         oldValue,
         newValue,
-        alertId,
-        incidentId,
+        parentId,
         policyId,
         runbookInstanceId,
         actionInstanceId
@@ -126,8 +119,7 @@ CREATE VIEW ACTIVITY_VW (
         comment,
         oldValue,
         newValue,
-        alertId,
-        incidentId,
+        parentId,
         policyId,
         runbookInstanceId,
         actionInstanceId
