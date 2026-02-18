@@ -14,15 +14,13 @@
 
 --   (2) At the command window prompt, run this script.
 
---       EXAMPLE:    db2 -td@ -vf c:\temp\db2\reporter_aiops_activity_remove.sql
+--       EXAMPLE:    db2 -td@ -vf /tmp/db2/reporter_aiops_activity_remove.sql
 ------------------------------------------------------------------------------
 
 ------------------------------------------------------------------------------
 -- Drop indexes on required tables.
 ------------------------------------------------------------------------------
-DROP INDEX ACTIVITY_ALERT_IDX @
-
-DROP INDEX ACTIVITY_INCIDENT_IDX @
+DROP INDEX ACTIVITY_PARENT_IDX @
 
 DROP INDEX ACTIVITY_USER_IDX @
 

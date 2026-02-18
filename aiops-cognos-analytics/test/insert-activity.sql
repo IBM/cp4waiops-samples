@@ -1,0 +1,43 @@
+INSERT INTO ACTIVITY_ENTRY (
+    tenantid,
+    id,
+    parentId,
+    createdTime,
+    type,
+    userId,
+    comment,
+    policyId,
+    runbookId,
+    runbookName,
+    runbookVersion,
+    runbookInstanceId,
+    runbookStatus,
+    runbookType,
+    actionInstanceId,
+    timeAdded,
+    oldValue,
+    newValue,
+    uuid
+) VALUES (
+    'cfd95b7e-3bc7-4006-a4a8-a73a79c71255',
+    'activity-001',
+    'ea6cf743-7a3a-4d1a-8d6f-faaa1df573d5',
+    $1,
+    'comment',
+    'testuser@example.com',
+    'This is a test comment on the alert',
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    $2,
+    NULL,
+    NULL,
+    'cfd95b7e-3bc7-4006-a4a8-a73a79c71255_activity-001'
+);
+
+-- Made with Bob
