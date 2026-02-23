@@ -73,7 +73,6 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": null,
   "links": [],
   "panels": [
     {
@@ -232,7 +231,7 @@
             "h": 1,
             "w": 24,
             "x": 0,
-            "y": 137
+            "y": 147
           },
           "id": 94,
           "options": {
@@ -309,7 +308,7 @@
             "h": 10,
             "w": 10,
             "x": 0,
-            "y": 138
+            "y": 148
           },
           "id": 93,
           "options": {
@@ -450,7 +449,7 @@
             "h": 10,
             "w": 14,
             "x": 10,
-            "y": 138
+            "y": 148
           },
           "id": 95,
           "options": {
@@ -1045,7 +1044,7 @@
             "h": 7,
             "w": 12,
             "x": 0,
-            "y": 4
+            "y": 14
           },
           "id": 312,
           "options": {
@@ -1213,7 +1212,7 @@
             "h": 7,
             "w": 12,
             "x": 12,
-            "y": 4
+            "y": 14
           },
           "id": 313,
           "options": {
@@ -1380,7 +1379,7 @@
             "h": 7,
             "w": 12,
             "x": 0,
-            "y": 11
+            "y": 21
           },
           "id": 316,
           "options": {
@@ -1548,7 +1547,7 @@
             "h": 7,
             "w": 12,
             "x": 12,
-            "y": 11
+            "y": 21
           },
           "id": 318,
           "options": {
@@ -1715,7 +1714,7 @@
             "h": 7,
             "w": 12,
             "x": 0,
-            "y": 18
+            "y": 28
           },
           "id": 314,
           "options": {
@@ -1883,7 +1882,7 @@
             "h": 7,
             "w": 12,
             "x": 12,
-            "y": 18
+            "y": 28
           },
           "id": 317,
           "options": {
@@ -2050,7 +2049,7 @@
             "h": 7,
             "w": 12,
             "x": 0,
-            "y": 25
+            "y": 35
           },
           "id": 315,
           "options": {
@@ -2218,7 +2217,7 @@
             "h": 7,
             "w": 12,
             "x": 12,
-            "y": 25
+            "y": 35
           },
           "id": 319,
           "options": {
@@ -2385,7 +2384,7 @@
             "h": 7,
             "w": 12,
             "x": 0,
-            "y": 32
+            "y": 42
           },
           "id": 326,
           "options": {
@@ -2553,7 +2552,7 @@
             "h": 7,
             "w": 12,
             "x": 12,
-            "y": 32
+            "y": 42
           },
           "id": 320,
           "options": {
@@ -2659,7 +2658,7 @@
             "h": 9,
             "w": 4,
             "x": 0,
-            "y": 56
+            "y": 66
           },
           "id": 227,
           "options": {
@@ -2724,7 +2723,7 @@
             "h": 9,
             "w": 20,
             "x": 4,
-            "y": 56
+            "y": 66
           },
           "id": 228,
           "options": {
@@ -2887,7 +2886,7 @@
             "h": 7,
             "w": 24,
             "x": 0,
-            "y": 65
+            "y": 75
           },
           "id": 224,
           "options": {
@@ -2987,569 +2986,6 @@
         "x": 0,
         "y": 3
       },
-      "id": 328,
-      "panels": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
-          },
-          "description": "Total number of logs received by the LAD pipeline and normalized with the field mapping set in the log integration UI(s).",
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "thresholds"
-              },
-              "mappings": [],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": 0
-                  }
-                ]
-              },
-              "unit": "short"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 5,
-            "w": 5,
-            "x": 0,
-            "y": 126
-          },
-          "id": 327,
-          "options": {
-            "colorMode": "value",
-            "graphMode": "none",
-            "justifyMode": "auto",
-            "orientation": "auto",
-            "percentChangeColorMode": "standard",
-            "reduceOptions": {
-              "calcs": [
-                "lastNotNull"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "showPercentChange": false,
-            "textMode": "auto",
-            "wideLayout": true
-          },
-          "pluginVersion": "12.3.0",
-          "targets": [
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
-              },
-              "editorMode": "code",
-              "expr": "sum(increase(ibm_aiops_ladgs_inference_splunkmaplc_normalized_logs[$__range]) or vector(0)) +\nsum(increase(ibm_aiops_ladgs_inference_elkmaplc_normalized_logs[$__range]) or vector(0)) +\nsum(increase(ibm_aiops_ladgs_inference_humiomaplc_normalized_logs[$__range]) or vector(0)) +\nsum(increase(ibm_aiops_ladgs_inference_kafkamaplc_normalized_logs[$__range]) or vector(0)) +\nsum(increase(ibm_aiops_ladgs_inference_logdnamaplc_normalized_logs[$__range]) or vector(0)) +\nsum(increase(ibm_aiops_ladgs_inference_custommaplc_normalized_logs[$__range]) or vector(0))",
-              "legendFormat": "{{pod}}",
-              "range": true,
-              "refId": "A"
-            }
-          ],
-          "title": "Total logs normalized ",
-          "type": "stat"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
-          },
-          "description": "Total number of logs received by the LAD pipeline and normalized with the field mapping set in the Splunk integration UI.",
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "thresholds"
-              },
-              "mappings": [],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": 0
-                  }
-                ]
-              },
-              "unit": "short"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 5,
-            "w": 5,
-            "x": 5,
-            "y": 126
-          },
-          "id": 329,
-          "options": {
-            "colorMode": "value",
-            "graphMode": "none",
-            "justifyMode": "auto",
-            "orientation": "auto",
-            "percentChangeColorMode": "standard",
-            "reduceOptions": {
-              "calcs": [
-                "lastNotNull"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "showPercentChange": false,
-            "textMode": "auto",
-            "wideLayout": true
-          },
-          "pluginVersion": "12.3.0",
-          "targets": [
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
-              },
-              "editorMode": "code",
-              "expr": "sum(increase(ibm_aiops_ladgs_inference_splunkmaplc_normalized_logs[$__range]) or vector(0))",
-              "legendFormat": "{{pod}}",
-              "range": true,
-              "refId": "A"
-            }
-          ],
-          "title": "Splunk logs normalized",
-          "type": "stat"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
-          },
-          "description": "Total number of logs received by the LAD pipeline and normalized with the field mapping set in the Elk integration UI.",
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "thresholds"
-              },
-              "mappings": [],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": 0
-                  }
-                ]
-              },
-              "unit": "short"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 5,
-            "w": 5,
-            "x": 10,
-            "y": 126
-          },
-          "id": 330,
-          "options": {
-            "colorMode": "value",
-            "graphMode": "none",
-            "justifyMode": "auto",
-            "orientation": "auto",
-            "percentChangeColorMode": "standard",
-            "reduceOptions": {
-              "calcs": [
-                "lastNotNull"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "showPercentChange": false,
-            "textMode": "auto",
-            "wideLayout": true
-          },
-          "pluginVersion": "12.3.0",
-          "targets": [
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
-              },
-              "editorMode": "code",
-              "expr": "sum(increase(ibm_aiops_ladgs_inference_elkmaplc_normalized_logs[$__range]) or vector(0))",
-              "legendFormat": "{{pod}}",
-              "range": true,
-              "refId": "A"
-            }
-          ],
-          "title": "Elk logs normalized",
-          "type": "stat"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
-          },
-          "description": "Total number of logs received by the LAD pipeline and normalized with the field mapping set in the Falcon LogScale integration UI.",
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "thresholds"
-              },
-              "mappings": [],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": 0
-                  }
-                ]
-              },
-              "unit": "short"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 5,
-            "w": 5,
-            "x": 15,
-            "y": 126
-          },
-          "id": 331,
-          "options": {
-            "colorMode": "value",
-            "graphMode": "none",
-            "justifyMode": "auto",
-            "orientation": "auto",
-            "percentChangeColorMode": "standard",
-            "reduceOptions": {
-              "calcs": [
-                "lastNotNull"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "showPercentChange": false,
-            "textMode": "auto",
-            "wideLayout": true
-          },
-          "pluginVersion": "12.3.0",
-          "targets": [
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
-              },
-              "editorMode": "code",
-              "expr": "sum(increase(ibm_aiops_ladgs_inference_humiomaplc_normalized_logs[$__range]) or vector(0))",
-              "legendFormat": "{{pod}}",
-              "range": true,
-              "refId": "A"
-            }
-          ],
-          "title": "Falcon LogScale logs normalized",
-          "type": "stat"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
-          },
-          "description": "Percentage of logs filtered out by the LAD pipeline due to: empty messages, json parsing exceptions, template matching exceptions. \n\nIf this percentage is higher than expected, double check your log source is formatting messages properly. ",
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "thresholds"
-              },
-              "decimals": 2,
-              "mappings": [
-                {
-                  "options": {
-                    "NaN": {
-                      "index": 0,
-                      "text": "0.00%"
-                    }
-                  },
-                  "type": "value"
-                }
-              ],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": 0
-                  },
-                  {
-                    "color": "super-light-yellow",
-                    "value": 1
-                  },
-                  {
-                    "color": "yellow",
-                    "value": 5
-                  },
-                  {
-                    "color": "red",
-                    "value": 10
-                  }
-                ]
-              },
-              "unit": "percent"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 5,
-            "w": 5,
-            "x": 0,
-            "y": 131
-          },
-          "id": 335,
-          "options": {
-            "colorMode": "value",
-            "graphMode": "none",
-            "justifyMode": "auto",
-            "orientation": "auto",
-            "percentChangeColorMode": "standard",
-            "reduceOptions": {
-              "calcs": [],
-              "fields": "",
-              "values": false
-            },
-            "showPercentChange": false,
-            "textMode": "auto",
-            "wideLayout": true
-          },
-          "pluginVersion": "12.3.0",
-          "targets": [
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
-              },
-              "editorMode": "code",
-              "expr": "((sum(increase(ibm_aiops_ladgs_inference_emptymessagefilter_logs_with_empty_messages[$__range]) or vector(0)) +\nsum(increase(ibm_aiops_ladgs_inference_jsonoptionparser_option_parsing_exception_logs[$__range]) or vector(0)) +\nsum(increase(ibm_aiops_ladgs_inference_loganomalygoldensignaltemplatematching_gs_template_matching_exception_logs[$__range]) or vector(0)))\n/\nsum(increase(ibm_aiops_ladgs_inference_splunkmaplc_normalized_logs[$__range]) or vector(0)) +\nsum(increase(ibm_aiops_ladgs_inference_elkmaplc_normalized_logs[$__range]) or vector(0)) +\nsum(increase(ibm_aiops_ladgs_inference_humiomaplc_normalized_logs[$__range]) or vector(0)) +\nsum(increase(ibm_aiops_ladgs_inference_kafkamaplc_normalized_logs[$__range]) or vector(0)) +\nsum(increase(ibm_aiops_ladgs_inference_logdnamaplc_normalized_logs[$__range]) or vector(0)) +\nsum(increase(ibm_aiops_ladgs_inference_custommaplc_normalized_logs[$__range]) or vector(0)))\n* 100",
-              "legendFormat": "{{pod}}",
-              "range": true,
-              "refId": "A"
-            }
-          ],
-          "title": "Bad logs",
-          "type": "stat"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
-          },
-          "description": "Total number of logs received by the LAD pipeline and normalized with the field mapping set in the Kafka integration UI.",
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "thresholds"
-              },
-              "mappings": [],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": 0
-                  }
-                ]
-              },
-              "unit": "short"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 5,
-            "w": 5,
-            "x": 5,
-            "y": 131
-          },
-          "id": 332,
-          "options": {
-            "colorMode": "value",
-            "graphMode": "none",
-            "justifyMode": "auto",
-            "orientation": "auto",
-            "percentChangeColorMode": "standard",
-            "reduceOptions": {
-              "calcs": [
-                "lastNotNull"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "showPercentChange": false,
-            "textMode": "auto",
-            "wideLayout": true
-          },
-          "pluginVersion": "12.3.0",
-          "targets": [
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
-              },
-              "editorMode": "code",
-              "expr": "sum(increase(ibm_aiops_ladgs_inference_kafkamaplc_normalized_logs[$__range]) or vector(0))",
-              "legendFormat": "{{pod}}",
-              "range": true,
-              "refId": "A"
-            }
-          ],
-          "title": "Kafka logs normalized",
-          "type": "stat"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
-          },
-          "description": "Total number of logs received by the LAD pipeline and normalized with the field mapping set in the Mezmo integration UI.",
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "thresholds"
-              },
-              "mappings": [],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": 0
-                  }
-                ]
-              },
-              "unit": "short"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 5,
-            "w": 5,
-            "x": 10,
-            "y": 131
-          },
-          "id": 333,
-          "options": {
-            "colorMode": "value",
-            "graphMode": "none",
-            "justifyMode": "auto",
-            "orientation": "auto",
-            "percentChangeColorMode": "standard",
-            "reduceOptions": {
-              "calcs": [
-                "lastNotNull"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "showPercentChange": false,
-            "textMode": "auto",
-            "wideLayout": true
-          },
-          "pluginVersion": "12.3.0",
-          "targets": [
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
-              },
-              "editorMode": "code",
-              "expr": "sum(increase(ibm_aiops_ladgs_inference_logdnamaplc_normalized_logs[$__range]) or vector(0))",
-              "legendFormat": "{{pod}}",
-              "range": true,
-              "refId": "A"
-            }
-          ],
-          "title": "Mezmo logs normalized",
-          "type": "stat"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
-          },
-          "description": "Total number of logs received by the LAD pipeline and normalized with the field mapping set in the custom connector integration UI.",
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "thresholds"
-              },
-              "mappings": [],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": 0
-                  }
-                ]
-              },
-              "unit": "short"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 5,
-            "w": 5,
-            "x": 15,
-            "y": 131
-          },
-          "id": 334,
-          "options": {
-            "colorMode": "value",
-            "graphMode": "none",
-            "justifyMode": "auto",
-            "orientation": "auto",
-            "percentChangeColorMode": "standard",
-            "reduceOptions": {
-              "calcs": [
-                "lastNotNull"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "showPercentChange": false,
-            "textMode": "auto",
-            "wideLayout": true
-          },
-          "pluginVersion": "12.3.0",
-          "targets": [
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
-              },
-              "editorMode": "code",
-              "expr": "sum(increase(ibm_aiops_ladgs_inference_custommaplc_normalized_logs[$__range]) or vector(0))",
-              "legendFormat": "{{pod}}",
-              "range": true,
-              "refId": "A"
-            }
-          ],
-          "title": "Custom connector logs normalized",
-          "type": "stat"
-        }
-      ],
-      "title": "Log Anomaly Detection",
-      "type": "row"
-    },
-    {
-      "collapsed": true,
-      "gridPos": {
-        "h": 1,
-        "w": 24,
-        "x": 0,
-        "y": 4
-      },
       "id": 206,
       "panels": [
         {
@@ -3581,7 +3017,7 @@
             "h": 3,
             "w": 2,
             "x": 0,
-            "y": 560
+            "y": 570
           },
           "id": 273,
           "options": {
@@ -3649,7 +3085,7 @@
             "h": 3,
             "w": 2,
             "x": 2,
-            "y": 560
+            "y": 570
           },
           "id": 274,
           "options": {
@@ -3717,7 +3153,7 @@
             "h": 3,
             "w": 2,
             "x": 4,
-            "y": 560
+            "y": 570
           },
           "id": 226,
           "options": {
@@ -3779,7 +3215,7 @@
             "h": 9,
             "w": 9,
             "x": 6,
-            "y": 560
+            "y": 570
           },
           "id": 295,
           "options": {
@@ -3885,7 +3321,7 @@
             "h": 9,
             "w": 9,
             "x": 15,
-            "y": 560
+            "y": 570
           },
           "id": 298,
           "options": {
@@ -3947,7 +3383,7 @@
             "h": 6,
             "w": 6,
             "x": 0,
-            "y": 563
+            "y": 573
           },
           "id": 225,
           "options": {
@@ -3994,7 +3430,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 5
+        "y": 4
       },
       "id": 207,
       "panels": [
@@ -4027,7 +3463,7 @@
             "h": 3,
             "w": 2,
             "x": 0,
-            "y": 588
+            "y": 598
           },
           "id": 279,
           "options": {
@@ -4095,7 +3531,7 @@
             "h": 3,
             "w": 2,
             "x": 2,
-            "y": 588
+            "y": 598
           },
           "id": 280,
           "options": {
@@ -4163,7 +3599,7 @@
             "h": 3,
             "w": 2,
             "x": 4,
-            "y": 588
+            "y": 598
           },
           "id": 281,
           "options": {
@@ -4225,7 +3661,7 @@
             "h": 9,
             "w": 9,
             "x": 6,
-            "y": 588
+            "y": 598
           },
           "id": 306,
           "options": {
@@ -4331,7 +3767,7 @@
             "h": 9,
             "w": 9,
             "x": 15,
-            "y": 588
+            "y": 598
           },
           "id": 307,
           "options": {
@@ -4393,7 +3829,7 @@
             "h": 6,
             "w": 6,
             "x": 0,
-            "y": 591
+            "y": 601
           },
           "id": 282,
           "options": {
@@ -4440,7 +3876,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 6
+        "y": 5
       },
       "id": 208,
       "panels": [
@@ -4473,7 +3909,7 @@
             "h": 3,
             "w": 2,
             "x": 0,
-            "y": 562
+            "y": 572
           },
           "id": 285,
           "options": {
@@ -4541,7 +3977,7 @@
             "h": 3,
             "w": 2,
             "x": 2,
-            "y": 562
+            "y": 572
           },
           "id": 286,
           "options": {
@@ -4609,7 +4045,7 @@
             "h": 3,
             "w": 2,
             "x": 4,
-            "y": 562
+            "y": 572
           },
           "id": 287,
           "options": {
@@ -4671,7 +4107,7 @@
             "h": 9,
             "w": 9,
             "x": 6,
-            "y": 562
+            "y": 572
           },
           "id": 304,
           "options": {
@@ -4777,7 +4213,7 @@
             "h": 9,
             "w": 9,
             "x": 15,
-            "y": 562
+            "y": 572
           },
           "id": 305,
           "options": {
@@ -4839,7 +4275,7 @@
             "h": 6,
             "w": 6,
             "x": 0,
-            "y": 565
+            "y": 575
           },
           "id": 288,
           "options": {
@@ -4886,7 +4322,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 7
+        "y": 6
       },
       "id": 209,
       "panels": [
@@ -4919,7 +4355,7 @@
             "h": 3,
             "w": 2,
             "x": 0,
-            "y": 635
+            "y": 645
           },
           "id": 291,
           "options": {
@@ -4987,7 +4423,7 @@
             "h": 3,
             "w": 2,
             "x": 2,
-            "y": 635
+            "y": 645
           },
           "id": 292,
           "options": {
@@ -5055,7 +4491,7 @@
             "h": 3,
             "w": 2,
             "x": 4,
-            "y": 635
+            "y": 645
           },
           "id": 293,
           "options": {
@@ -5117,7 +4553,7 @@
             "h": 9,
             "w": 9,
             "x": 6,
-            "y": 635
+            "y": 645
           },
           "id": 302,
           "options": {
@@ -5223,7 +4659,7 @@
             "h": 9,
             "w": 9,
             "x": 15,
-            "y": 635
+            "y": 645
           },
           "id": 303,
           "options": {
@@ -5285,7 +4721,7 @@
             "h": 6,
             "w": 6,
             "x": 0,
-            "y": 638
+            "y": 648
           },
           "id": 294,
           "options": {
@@ -5332,7 +4768,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 8
+        "y": 7
       },
       "id": 210,
       "panels": [
@@ -5365,7 +4801,7 @@
             "h": 3,
             "w": 2,
             "x": 0,
-            "y": 645
+            "y": 655
           },
           "id": 230,
           "options": {
@@ -5433,7 +4869,7 @@
             "h": 3,
             "w": 2,
             "x": 2,
-            "y": 645
+            "y": 655
           },
           "id": 220,
           "options": {
@@ -5501,7 +4937,7 @@
             "h": 3,
             "w": 2,
             "x": 4,
-            "y": 645
+            "y": 655
           },
           "id": 275,
           "options": {
@@ -5563,7 +4999,7 @@
             "h": 9,
             "w": 9,
             "x": 6,
-            "y": 645
+            "y": 655
           },
           "id": 300,
           "options": {
@@ -5669,7 +5105,7 @@
             "h": 9,
             "w": 9,
             "x": 15,
-            "y": 645
+            "y": 655
           },
           "id": 301,
           "options": {
@@ -5731,7 +5167,7 @@
             "h": 6,
             "w": 6,
             "x": 0,
-            "y": 648
+            "y": 658
           },
           "id": 276,
           "options": {
@@ -5787,6 +5223,7 @@
   "timezone": "browser",
   "title": "IBM Cloud Pak for AIOps Component - Log Integrations",
   "uid": "712d9a40-d89a-4546-8060-cfc58c293733",
-  "version": 13,
-  "weekStart": ""
+  "version": 14,
+  "weekStart": "",
+  "id": null
 }
