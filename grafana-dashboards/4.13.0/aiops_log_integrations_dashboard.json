@@ -15,7 +15,7 @@
       "type": "grafana",
       "id": "grafana",
       "name": "Grafana",
-      "version": "11.3.0"
+      "version": "12.3.0"
     },
     {
       "type": "panel",
@@ -107,7 +107,7 @@
             "content": "# Log Integrations Overview\n\nIBM Cloud Pak for AIOps is capable of ingesting logs from a variety of sources.\nThis dashboard will provide insight into the health & performance of the following integrations:\nCustom, ELK, Falcon LogScale, Mezmo, Splunk\n\nOnly integrations that have been created in the IBM Cloud Pak for AIOps Integrations page will have metrics visible here.",
             "mode": "markdown"
           },
-          "pluginVersion": "11.3.0",
+          "pluginVersion": "12.3.0",
           "title": "",
           "type": "text"
         },
@@ -221,7 +221,7 @@
                 "steps": [
                   {
                     "color": "dark-green",
-                    "value": null
+                    "value": 0
                   }
                 ]
               }
@@ -232,7 +232,7 @@
             "h": 1,
             "w": 24,
             "x": 0,
-            "y": 360
+            "y": 137
           },
           "id": 94,
           "options": {
@@ -242,9 +242,7 @@
             "orientation": "auto",
             "percentChangeColorMode": "standard",
             "reduceOptions": {
-              "calcs": [
-                "lastNotNull"
-              ],
+              "calcs": [],
               "fields": "",
               "values": false
             },
@@ -252,10 +250,10 @@
             "text": {
               "valueSize": 20
             },
-            "textMode": "auto",
+            "textMode": "value",
             "wideLayout": true
           },
-          "pluginVersion": "11.3.0",
+          "pluginVersion": "12.3.0",
           "targets": [
             {
               "datasource": {
@@ -263,7 +261,7 @@
                 "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
-              "expr": "sum(((sum((time() - kube_pod_start_time{pod=~\"ibm-falcon-logs-conn-.*|ibm-custom-logs-conn-.*|ibm-elk-logs-conn-.*|splunk-conn-.*|ibm-mezmo-logs-conn-.*\"}) - $__range_s) by (pod)) < 60) <= bool 0)",
+              "expr": "sum(((sum((time() - kube_pod_start_time{pod=~\".*falcon-conn.*|.*custom-conn.*|.*elk-conn-.*|.*splunk-conn.*|.*mezmo-conn.*\"}) - $__range_s) by (pod)) < 60) <= bool 0)",
               "legendFormat": "__auto",
               "range": true,
               "refId": "A"
@@ -286,10 +284,13 @@
               "custom": {
                 "align": "auto",
                 "cellOptions": {
-                  "type": "auto",
-                  "wrapText": true
+                  "type": "auto"
                 },
-                "inspect": false
+                "footer": {
+                  "reducers": []
+                },
+                "inspect": false,
+                "wrapText": true
               },
               "mappings": [],
               "thresholds": {
@@ -297,7 +298,7 @@
                 "steps": [
                   {
                     "color": "green",
-                    "value": null
+                    "value": 0
                   }
                 ]
               }
@@ -308,24 +309,16 @@
             "h": 10,
             "w": 10,
             "x": 0,
-            "y": 361
+            "y": 138
           },
           "id": 93,
           "options": {
             "cellHeight": "sm",
-            "footer": {
-              "countRows": false,
-              "enablePagination": false,
-              "fields": "",
-              "reducer": [
-                "sum"
-              ],
-              "show": false
-            },
+            "enablePagination": false,
             "showHeader": true,
             "sortBy": []
           },
-          "pluginVersion": "11.3.0",
+          "pluginVersion": "12.3.0",
           "targets": [
             {
               "datasource": {
@@ -335,7 +328,7 @@
               "disableTextWrap": false,
               "editorMode": "code",
               "exemplar": false,
-              "expr": "kube_pod_status_phase{pod=~\"ibm-falcon-logs-conn-.*|ibm-custom-logs-conn-.*|ibm-elk-logs-conn-.*|splunk-conn-.*|ibm-mezmo-logs-conn-.*\", phase=~\"Running|Pending|Unknown\"} == 1",
+              "expr": "kube_pod_status_phase{pod=~\".*falcon-conn.*|.*custom-conn.*|.*elk-conn-.*|.*splunk-conn.*|.*mezmo-conn.*\", phase=~\"Running|Pending|Unknown\"} == 1",
               "fullMetaSearch": false,
               "includeNullMetadata": true,
               "instant": true,
@@ -429,6 +422,7 @@
                   "type": "linear"
                 },
                 "showPoints": "auto",
+                "showValues": false,
                 "spanNulls": false,
                 "stacking": {
                   "group": "A",
@@ -444,7 +438,7 @@
                 "steps": [
                   {
                     "color": "green",
-                    "value": null
+                    "value": 0
                   }
                 ]
               },
@@ -456,7 +450,7 @@
             "h": 10,
             "w": 14,
             "x": 10,
-            "y": 361
+            "y": 138
           },
           "id": 95,
           "options": {
@@ -467,11 +461,12 @@
               "showLegend": true
             },
             "tooltip": {
+              "hideZeros": false,
               "mode": "multi",
               "sort": "desc"
             }
           },
-          "pluginVersion": "11.3.0",
+          "pluginVersion": "12.3.0",
           "targets": [
             {
               "datasource": {
@@ -479,7 +474,7 @@
                 "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
-              "expr": "time() -sum(kube_pod_start_time{pod=~\"ibm-falcon-logs-conn-.*|ibm-custom-logs-conn-.*|ibm-elk-logs-conn-.*|splunk-conn-.*|ibm-mezmo-logs-conn-.*\"}) by (pod)",
+              "expr": "time() -sum(kube_pod_start_time{pod=~\".*falcon-conn.*|.*custom-conn.*|.*elk-conn-.*|.*splunk-conn.*|.*mezmo-conn.*\"}) by (pod)",
               "legendFormat": "__auto",
               "range": true,
               "refId": "A"
@@ -562,7 +557,7 @@
                 "steps": [
                   {
                     "color": "green",
-                    "value": null
+                    "value": 0
                   }
                 ]
               }
@@ -596,7 +591,7 @@
             "textMode": "value",
             "wideLayout": true
           },
-          "pluginVersion": "11.3.0",
+          "pluginVersion": "12.3.0",
           "targets": [
             {
               "datasource": {
@@ -604,7 +599,7 @@
                 "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
-              "expr": "sum((((max(kube_pod_container_resource_limits{pod=~\"ibm-falcon-logs-conn-.*|ibm-custom-logs-conn-.*|ibm-elk-logs-conn-.*|splunk-conn-.*|ibm-mezmo-logs-conn-.*\", container!=\"\", container!=\"POD\", resource=\"cpu\"}) by (pod)) * 0.8 <= max(max_over_time(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{pod=~\"ibm-falcon-logs-conn-.*|ibm-custom-logs-conn-.*|ibm-elk-logs-conn-.*|splunk-conn-.*|ibm-mezmo-logs-conn-.*\", container!=\"\", container!=\"POD\"}[$__range])) by (pod)) or vector(0)) > bool 0)",
+              "expr": "sum((((max(kube_pod_container_resource_limits{pod=~\".*falcon-conn.*|.*custom-conn.*|.*elk-conn-.*|.*splunk-conn.*|.*mezmo-conn.*\", container!=\"\", container!=\"POD\", resource=\"cpu\"}) by (pod)) * 0.8 <= max(max_over_time(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{pod=~\".*falcon-conn.*|.*custom-conn.*|.*elk-conn-.*|.*splunk-conn.*|.*mezmo-conn.*\", container!=\"\", container!=\"POD\"}[$__range])) by (pod)) or vector(0)) > bool 0)",
               "legendFormat": "__auto",
               "range": true,
               "refId": "A"
@@ -672,7 +667,7 @@
                 "steps": [
                   {
                     "color": "dark-green",
-                    "value": null
+                    "value": 0
                   }
                 ]
               }
@@ -706,7 +701,7 @@
             "textMode": "value",
             "wideLayout": true
           },
-          "pluginVersion": "11.3.0",
+          "pluginVersion": "12.3.0",
           "targets": [
             {
               "datasource": {
@@ -714,7 +709,7 @@
                 "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
-              "expr": "sum((((max(kube_pod_container_resource_limits{pod=~\"ibm-falcon-logs-conn-.*|ibm-custom-logs-conn-.*|ibm-elk-logs-conn-.*|splunk-conn-.*|ibm-mezmo-logs-conn-.*\", container!=\"\", container!=\"POD\", resource=\"memory\"}) by (pod)) <= max(max_over_time(container_memory_working_set_bytes{pod=~\"ibm-falcon-logs-conn-.*|ibm-custom-logs-conn-.*|ibm-elk-logs-conn-.*|splunk-conn-.*|ibm-mezmo-logs-conn-.*\", container!=\"\", container!=\"POD\"}[$__range])) by (pod)) or vector(0)) > bool 0)",
+              "expr": "sum((((max(kube_pod_container_resource_limits{pod=~\".*falcon-conn.*|.*custom-conn.*|.*elk-conn-.*|.*splunk-conn.*|.*mezmo-conn.*\", container!=\"\", container!=\"POD\", resource=\"memory\"}) by (pod)) <= max(max_over_time(container_memory_working_set_bytes{pod=~\".*falcon-conn.*|.*custom-conn.*|.*elk-conn-.*|.*splunk-conn.*|.*mezmo-conn.*\", container!=\"\", container!=\"POD\"}[$__range])) by (pod)) or vector(0)) > bool 0)",
               "legendFormat": "__auto",
               "range": true,
               "refId": "A"
@@ -783,7 +778,7 @@
                 "steps": [
                   {
                     "color": "green",
-                    "value": null
+                    "value": 0
                   }
                 ]
               }
@@ -794,7 +789,7 @@
             "h": 1,
             "w": 12,
             "x": 0,
-            "y": 37
+            "y": 3
           },
           "id": 190,
           "options": {
@@ -817,7 +812,7 @@
             "textMode": "value",
             "wideLayout": true
           },
-          "pluginVersion": "11.3.0",
+          "pluginVersion": "12.3.0",
           "targets": [
             {
               "datasource": {
@@ -825,7 +820,7 @@
                 "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
-              "expr": "sum((((max(kube_pod_container_resource_limits{pod=~\"ibm-falcon-logs-conn-.*|ibm-custom-logs-conn-.*|ibm-elk-logs-conn-.*|splunk-conn-.*|ibm-mezmo-logs-conn-.*\", container!=\"\", container!=\"POD\", resource=\"cpu\"}) by (pod)) <= max(max_over_time(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{pod=~\"ibm-falcon-logs-conn-.*|ibm-custom-logs-conn-.*|ibm-elk-logs-conn-.*|splunk-conn-.*|ibm-mezmo-logs-conn-.*\", container!=\"\", container!=\"POD\"}[$__range])) by (pod)) or vector(0)) > bool 0)",
+              "expr": "sum((((max(kube_pod_container_resource_limits{pod=~\".*falcon-conn.*|.*custom-conn.*|.*elk-conn-.*|.*splunk-conn.*|.*mezmo-conn.*\", container!=\"\", container!=\"POD\", resource=\"cpu\"}) by (pod)) <= max(max_over_time(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{pod=~\".*falcon-conn.*|.*custom-conn.*|.*elk-conn-.*|.*splunk-conn.*|.*mezmo-conn.*\", container!=\"\", container!=\"POD\"}[$__range])) by (pod)) or vector(0)) > bool 0)",
               "legendFormat": "__auto",
               "range": true,
               "refId": "A"
@@ -894,7 +889,7 @@
                 "steps": [
                   {
                     "color": "green",
-                    "value": null
+                    "value": 0
                   }
                 ]
               }
@@ -905,7 +900,7 @@
             "h": 1,
             "w": 12,
             "x": 12,
-            "y": 37
+            "y": 3
           },
           "id": 205,
           "options": {
@@ -928,7 +923,7 @@
             "textMode": "value",
             "wideLayout": true
           },
-          "pluginVersion": "11.3.0",
+          "pluginVersion": "12.3.0",
           "targets": [
             {
               "datasource": {
@@ -936,7 +931,7 @@
                 "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
-              "expr": "sum((((max(kube_pod_container_resource_limits{pod=~\"ibm-falcon-logs-conn-.*|ibm-custom-logs-conn-.*|ibm-elk-logs-conn-.*|splunk-conn-.*|ibm-mezmo-logs-conn-.*\", container!=\"\", container!=\"POD\", resource=\"memory\"}) by (pod)) * 0.8 <= max(max_over_time(container_memory_working_set_bytes{pod=~\"ibm-falcon-logs-conn-.*|ibm-custom-logs-conn-.*|ibm-elk-logs-conn-.*|splunk-conn-.*|ibm-mezmo-logs-conn-.*\", container!=\"\", container!=\"POD\"}[$__range])) by (pod)) or vector(0)) > bool 0)",
+              "expr": "sum((((max(kube_pod_container_resource_limits{pod=~\".*falcon-conn.*|.*custom-conn.*|.*elk-conn-.*|.*splunk-conn.*|.*mezmo-conn.*\", container!=\"\", container!=\"POD\", resource=\"memory\"}) by (pod)) * 0.8 <= max(max_over_time(container_memory_working_set_bytes{pod=~\".*falcon-conn.*|.*custom-conn.*|.*elk-conn-.*|.*splunk-conn.*|.*mezmo-conn.*\", container!=\"\", container!=\"POD\"}[$__range])) by (pod)) or vector(0)) > bool 0)",
               "legendFormat": "__auto",
               "range": true,
               "refId": "A"
@@ -980,6 +975,7 @@
                   "type": "linear"
                 },
                 "showPoints": "auto",
+                "showValues": false,
                 "spanNulls": false,
                 "stacking": {
                   "group": "A",
@@ -995,7 +991,7 @@
                 "steps": [
                   {
                     "color": "green",
-                    "value": null
+                    "value": 0
                   }
                 ]
               }
@@ -1049,7 +1045,7 @@
             "h": 7,
             "w": 12,
             "x": 0,
-            "y": 38
+            "y": 4
           },
           "id": 312,
           "options": {
@@ -1063,11 +1059,12 @@
               "showLegend": true
             },
             "tooltip": {
+              "hideZeros": false,
               "mode": "multi",
               "sort": "desc"
             }
           },
-          "pluginVersion": "11.3.0",
+          "pluginVersion": "12.3.0",
           "targets": [
             {
               "datasource": {
@@ -1075,7 +1072,7 @@
                 "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
-              "expr": "max(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{pod=~\"ibm-custom-logs-conn-.*\"}) by (pod)",
+              "expr": "max(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{pod=~\".*custom-conn.*\"}) by (pod)",
               "legendFormat": "usage - {{pod}}",
               "range": true,
               "refId": "A"
@@ -1086,7 +1083,7 @@
                 "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
-              "expr": "max(kube_pod_container_resource_requests{pod=~\"ibm-custom-logs-conn-.*\", resource=\"cpu\"})",
+              "expr": "max(kube_pod_container_resource_requests{pod=~\".*custom-conn.*\", resource=\"cpu\"})",
               "hide": false,
               "instant": false,
               "legendFormat": "requests ",
@@ -1099,7 +1096,7 @@
                 "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
-              "expr": "max(kube_pod_container_resource_limits{pod=~\"ibm-custom-logs-conn-.*\", resource=\"cpu\"}) ",
+              "expr": "max(kube_pod_container_resource_limits{pod=~\".*custom-conn.*\", resource=\"cpu\"}) ",
               "hide": false,
               "instant": false,
               "legendFormat": "limits",
@@ -1145,6 +1142,7 @@
                   "type": "linear"
                 },
                 "showPoints": "auto",
+                "showValues": false,
                 "spanNulls": false,
                 "stacking": {
                   "group": "A",
@@ -1160,7 +1158,7 @@
                 "steps": [
                   {
                     "color": "green",
-                    "value": null
+                    "value": 0
                   }
                 ]
               },
@@ -1215,7 +1213,7 @@
             "h": 7,
             "w": 12,
             "x": 12,
-            "y": 38
+            "y": 4
           },
           "id": 313,
           "options": {
@@ -1229,11 +1227,12 @@
               "showLegend": true
             },
             "tooltip": {
+              "hideZeros": false,
               "mode": "multi",
               "sort": "desc"
             }
           },
-          "pluginVersion": "11.3.0",
+          "pluginVersion": "12.3.0",
           "targets": [
             {
               "datasource": {
@@ -1241,7 +1240,7 @@
                 "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
-              "expr": "max(container_memory_working_set_bytes{pod=~\"ibm-custom-logs-conn-.*\", container!=\"\", container!=\"POD\"}) by (pod)",
+              "expr": "max(container_memory_working_set_bytes{pod=~\".*custom-conn.*\", container!=\"\", container!=\"POD\"}) by (pod)",
               "legendFormat": "usage - {{pod}}",
               "range": true,
               "refId": "A"
@@ -1252,7 +1251,7 @@
                 "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
-              "expr": "max(kube_pod_container_resource_requests{pod=~\"ibm-custom-logs-conn-.*\", resource=\"memory\"}) ",
+              "expr": "max(kube_pod_container_resource_requests{pod=~\".*custom-conn.*\", resource=\"memory\"}) ",
               "hide": false,
               "instant": false,
               "legendFormat": "requests ",
@@ -1265,7 +1264,7 @@
                 "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
-              "expr": "max(kube_pod_container_resource_limits{pod=~\"ibm-custom-logs-conn-.*\", resource=\"memory\"}) ",
+              "expr": "max(kube_pod_container_resource_limits{pod=~\".*custom-conn.*\", resource=\"memory\"}) ",
               "hide": false,
               "instant": false,
               "legendFormat": "limits ",
@@ -1311,6 +1310,7 @@
                   "type": "linear"
                 },
                 "showPoints": "auto",
+                "showValues": false,
                 "spanNulls": false,
                 "stacking": {
                   "group": "A",
@@ -1326,7 +1326,7 @@
                 "steps": [
                   {
                     "color": "green",
-                    "value": null
+                    "value": 0
                   }
                 ]
               }
@@ -1380,7 +1380,7 @@
             "h": 7,
             "w": 12,
             "x": 0,
-            "y": 63
+            "y": 11
           },
           "id": 316,
           "options": {
@@ -1394,11 +1394,12 @@
               "showLegend": true
             },
             "tooltip": {
+              "hideZeros": false,
               "mode": "multi",
               "sort": "desc"
             }
           },
-          "pluginVersion": "11.3.0",
+          "pluginVersion": "12.3.0",
           "targets": [
             {
               "datasource": {
@@ -1406,7 +1407,7 @@
                 "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
-              "expr": "max(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{pod=~\"ibm-elk-logs-conn-.*\"}) by (pod)",
+              "expr": "max(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{pod=~\".*elk-conn.*\"}) by (pod)",
               "legendFormat": "usage - {{pod}}",
               "range": true,
               "refId": "A"
@@ -1417,7 +1418,7 @@
                 "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
-              "expr": "max(kube_pod_container_resource_requests{pod=~\"ibm-elk-logs-conn-.*\", resource=\"cpu\"})",
+              "expr": "max(kube_pod_container_resource_requests{pod=~\".*elk-conn.*\", resource=\"cpu\"})",
               "hide": false,
               "instant": false,
               "legendFormat": "requests ",
@@ -1430,7 +1431,7 @@
                 "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
-              "expr": "max(kube_pod_container_resource_limits{pod=~\"ibm-elk-logs-conn-.*\", resource=\"cpu\"}) ",
+              "expr": "max(kube_pod_container_resource_limits{pod=~\".*elk-conn.*\", resource=\"cpu\"}) ",
               "hide": false,
               "instant": false,
               "legendFormat": "limits",
@@ -1476,6 +1477,7 @@
                   "type": "linear"
                 },
                 "showPoints": "auto",
+                "showValues": false,
                 "spanNulls": false,
                 "stacking": {
                   "group": "A",
@@ -1491,7 +1493,7 @@
                 "steps": [
                   {
                     "color": "green",
-                    "value": null
+                    "value": 0
                   }
                 ]
               },
@@ -1546,7 +1548,7 @@
             "h": 7,
             "w": 12,
             "x": 12,
-            "y": 63
+            "y": 11
           },
           "id": 318,
           "options": {
@@ -1560,11 +1562,12 @@
               "showLegend": true
             },
             "tooltip": {
+              "hideZeros": false,
               "mode": "multi",
               "sort": "desc"
             }
           },
-          "pluginVersion": "11.3.0",
+          "pluginVersion": "12.3.0",
           "targets": [
             {
               "datasource": {
@@ -1572,7 +1575,7 @@
                 "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
-              "expr": "max(container_memory_working_set_bytes{pod=~\"ibm-elk-logs-conn-.*\", container!=\"\", container!=\"POD\"}) by (pod)",
+              "expr": "max(container_memory_working_set_bytes{pod=~\".*elk-conn.*\", container!=\"\", container!=\"POD\"}) by (pod)",
               "legendFormat": "usage - {{pod}}",
               "range": true,
               "refId": "A"
@@ -1583,7 +1586,7 @@
                 "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
-              "expr": "max(kube_pod_container_resource_requests{pod=~\"ibm-elk-logs-conn-.*\", resource=\"memory\"}) ",
+              "expr": "max(kube_pod_container_resource_requests{pod=~\".*elk-conn.*\", resource=\"memory\"}) ",
               "hide": false,
               "instant": false,
               "legendFormat": "requests ",
@@ -1596,7 +1599,7 @@
                 "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
-              "expr": "max(kube_pod_container_resource_limits{pod=~\"ibm-elk-logs-conn-.*\", resource=\"memory\"}) ",
+              "expr": "max(kube_pod_container_resource_limits{pod=~\".*elk-conn.*\", resource=\"memory\"}) ",
               "hide": false,
               "instant": false,
               "legendFormat": "limits ",
@@ -1642,6 +1645,7 @@
                   "type": "linear"
                 },
                 "showPoints": "auto",
+                "showValues": false,
                 "spanNulls": false,
                 "stacking": {
                   "group": "A",
@@ -1657,7 +1661,7 @@
                 "steps": [
                   {
                     "color": "green",
-                    "value": null
+                    "value": 0
                   }
                 ]
               }
@@ -1711,7 +1715,7 @@
             "h": 7,
             "w": 12,
             "x": 0,
-            "y": 97
+            "y": 18
           },
           "id": 314,
           "options": {
@@ -1725,11 +1729,12 @@
               "showLegend": true
             },
             "tooltip": {
+              "hideZeros": false,
               "mode": "multi",
               "sort": "desc"
             }
           },
-          "pluginVersion": "11.3.0",
+          "pluginVersion": "12.3.0",
           "targets": [
             {
               "datasource": {
@@ -1737,7 +1742,7 @@
                 "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
-              "expr": "max(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{pod=~\"ibm-falcon-logs-conn-.*\"}) by (pod)",
+              "expr": "max(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{pod=~\".*falcon-conn.*\"}) by (pod)",
               "legendFormat": "usage - {{pod}}",
               "range": true,
               "refId": "A"
@@ -1748,7 +1753,7 @@
                 "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
-              "expr": "max(kube_pod_container_resource_requests{pod=~\"ibm-falcon-logs-conn-.*\", resource=\"cpu\"})",
+              "expr": "max(kube_pod_container_resource_requests{pod=~\".*falcon-conn.*\", resource=\"cpu\"})",
               "hide": false,
               "instant": false,
               "legendFormat": "requests ",
@@ -1761,7 +1766,7 @@
                 "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
-              "expr": "max(kube_pod_container_resource_limits{pod=~\"ibm-falcon-logs-conn-.*\", resource=\"cpu\"}) ",
+              "expr": "max(kube_pod_container_resource_limits{pod=~\".*falcon-conn.*\", resource=\"cpu\"}) ",
               "hide": false,
               "instant": false,
               "legendFormat": "limits",
@@ -1807,6 +1812,7 @@
                   "type": "linear"
                 },
                 "showPoints": "auto",
+                "showValues": false,
                 "spanNulls": false,
                 "stacking": {
                   "group": "A",
@@ -1822,7 +1828,7 @@
                 "steps": [
                   {
                     "color": "green",
-                    "value": null
+                    "value": 0
                   }
                 ]
               },
@@ -1877,7 +1883,7 @@
             "h": 7,
             "w": 12,
             "x": 12,
-            "y": 97
+            "y": 18
           },
           "id": 317,
           "options": {
@@ -1891,11 +1897,12 @@
               "showLegend": true
             },
             "tooltip": {
+              "hideZeros": false,
               "mode": "multi",
               "sort": "desc"
             }
           },
-          "pluginVersion": "11.3.0",
+          "pluginVersion": "12.3.0",
           "targets": [
             {
               "datasource": {
@@ -1903,7 +1910,7 @@
                 "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
-              "expr": "max(container_memory_working_set_bytes{pod=~\"ibm-falcon-logs-conn-.*\", container!=\"\", container!=\"POD\"}) by (pod)",
+              "expr": "max(container_memory_working_set_bytes{pod=~\".*falcon-conn.*\", container!=\"\", container!=\"POD\"}) by (pod)",
               "legendFormat": "usage - {{pod}}",
               "range": true,
               "refId": "A"
@@ -1914,7 +1921,7 @@
                 "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
-              "expr": "max(kube_pod_container_resource_requests{pod=~\"ibm-falcon-logs-conn-.*\", resource=\"memory\"}) ",
+              "expr": "max(kube_pod_container_resource_requests{pod=~\".*falcon-conn.*\", resource=\"memory\"}) ",
               "hide": false,
               "instant": false,
               "legendFormat": "requests ",
@@ -1927,7 +1934,7 @@
                 "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
-              "expr": "max(kube_pod_container_resource_limits{pod=~\"ibm-falcon-logs-conn-.*\", resource=\"memory\"}) ",
+              "expr": "max(kube_pod_container_resource_limits{pod=~\".*falcon-conn.*\", resource=\"memory\"}) ",
               "hide": false,
               "instant": false,
               "legendFormat": "limits ",
@@ -1973,6 +1980,7 @@
                   "type": "linear"
                 },
                 "showPoints": "auto",
+                "showValues": false,
                 "spanNulls": false,
                 "stacking": {
                   "group": "A",
@@ -1988,7 +1996,7 @@
                 "steps": [
                   {
                     "color": "green",
-                    "value": null
+                    "value": 0
                   }
                 ]
               }
@@ -2042,7 +2050,7 @@
             "h": 7,
             "w": 12,
             "x": 0,
-            "y": 104
+            "y": 25
           },
           "id": 315,
           "options": {
@@ -2056,11 +2064,12 @@
               "showLegend": true
             },
             "tooltip": {
+              "hideZeros": false,
               "mode": "multi",
               "sort": "desc"
             }
           },
-          "pluginVersion": "11.3.0",
+          "pluginVersion": "12.3.0",
           "targets": [
             {
               "datasource": {
@@ -2068,7 +2077,7 @@
                 "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
-              "expr": "max(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{pod=~\"ibm-mezmo-logs-conn-.*\"}) by (pod)",
+              "expr": "max(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{pod=~\".*mezmo-conn.*\"}) by (pod)",
               "legendFormat": "usage - {{pod}}",
               "range": true,
               "refId": "A"
@@ -2079,7 +2088,7 @@
                 "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
-              "expr": "max(kube_pod_container_resource_requests{pod=~\"ibm-mezmo-logs-conn-.*\", resource=\"cpu\"})",
+              "expr": "max(kube_pod_container_resource_requests{pod=~\".*mezmo-conn.*\", resource=\"cpu\"})",
               "hide": false,
               "instant": false,
               "legendFormat": "requests ",
@@ -2092,7 +2101,7 @@
                 "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
-              "expr": "max(kube_pod_container_resource_limits{pod=~\"ibm-mezmo-logs-conn-.*\", resource=\"cpu\"}) ",
+              "expr": "max(kube_pod_container_resource_limits{pod=~\".*mezmo-conn.*\", resource=\"cpu\"}) ",
               "hide": false,
               "instant": false,
               "legendFormat": "limits",
@@ -2138,6 +2147,7 @@
                   "type": "linear"
                 },
                 "showPoints": "auto",
+                "showValues": false,
                 "spanNulls": false,
                 "stacking": {
                   "group": "A",
@@ -2153,7 +2163,7 @@
                 "steps": [
                   {
                     "color": "green",
-                    "value": null
+                    "value": 0
                   }
                 ]
               },
@@ -2208,7 +2218,7 @@
             "h": 7,
             "w": 12,
             "x": 12,
-            "y": 104
+            "y": 25
           },
           "id": 319,
           "options": {
@@ -2222,11 +2232,12 @@
               "showLegend": true
             },
             "tooltip": {
+              "hideZeros": false,
               "mode": "multi",
               "sort": "desc"
             }
           },
-          "pluginVersion": "11.3.0",
+          "pluginVersion": "12.3.0",
           "targets": [
             {
               "datasource": {
@@ -2234,7 +2245,7 @@
                 "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
-              "expr": "max(container_memory_working_set_bytes{pod=~\"ibm-mezmo-logs-conn-.*\", container!=\"\", container!=\"POD\"}) by (pod)",
+              "expr": "max(container_memory_working_set_bytes{pod=~\".*mezmo-conn.*\", container!=\"\", container!=\"POD\"}) by (pod)",
               "legendFormat": "usage - {{pod}}",
               "range": true,
               "refId": "A"
@@ -2245,7 +2256,7 @@
                 "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
-              "expr": "max(kube_pod_container_resource_requests{pod=~\"ibm-mezmo-logs-conn-.*\", resource=\"memory\"}) ",
+              "expr": "max(kube_pod_container_resource_requests{pod=~\".*mezmo-conn.*\", resource=\"memory\"}) ",
               "hide": false,
               "instant": false,
               "legendFormat": "requests ",
@@ -2258,7 +2269,7 @@
                 "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
-              "expr": "max(kube_pod_container_resource_limits{pod=~\"ibm-mezmo-logs-conn-.*\", resource=\"memory\"}) ",
+              "expr": "max(kube_pod_container_resource_limits{pod=~\".*mezmo-conn.*\", resource=\"memory\"}) ",
               "hide": false,
               "instant": false,
               "legendFormat": "limits ",
@@ -2304,6 +2315,7 @@
                   "type": "linear"
                 },
                 "showPoints": "auto",
+                "showValues": false,
                 "spanNulls": false,
                 "stacking": {
                   "group": "A",
@@ -2319,7 +2331,7 @@
                 "steps": [
                   {
                     "color": "green",
-                    "value": null
+                    "value": 0
                   }
                 ]
               }
@@ -2373,7 +2385,7 @@
             "h": 7,
             "w": 12,
             "x": 0,
-            "y": 111
+            "y": 32
           },
           "id": 326,
           "options": {
@@ -2387,11 +2399,12 @@
               "showLegend": true
             },
             "tooltip": {
+              "hideZeros": false,
               "mode": "multi",
               "sort": "desc"
             }
           },
-          "pluginVersion": "11.3.0",
+          "pluginVersion": "12.3.0",
           "targets": [
             {
               "datasource": {
@@ -2399,7 +2412,7 @@
                 "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
-              "expr": "max(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{pod=~\"splunk-conn-.*\"}) by (pod)",
+              "expr": "max(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{pod=~\".*splunk-conn.*\"}) by (pod)",
               "legendFormat": "usage - {{pod}}",
               "range": true,
               "refId": "A"
@@ -2410,7 +2423,7 @@
                 "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
-              "expr": "max(kube_pod_container_resource_requests{pod=~\"splunk-conn-.*\", resource=\"cpu\"})",
+              "expr": "max(kube_pod_container_resource_requests{pod=~\".*splunk-conn.*\", resource=\"cpu\"})",
               "hide": false,
               "instant": false,
               "legendFormat": "requests ",
@@ -2423,7 +2436,7 @@
                 "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
-              "expr": "max(kube_pod_container_resource_limits{pod=~\"splunk-conn-.*\", resource=\"cpu\"}) ",
+              "expr": "max(kube_pod_container_resource_limits{pod=~\".*splunk-conn.*\", resource=\"cpu\"}) ",
               "hide": false,
               "instant": false,
               "legendFormat": "limits",
@@ -2469,6 +2482,7 @@
                   "type": "linear"
                 },
                 "showPoints": "auto",
+                "showValues": false,
                 "spanNulls": false,
                 "stacking": {
                   "group": "A",
@@ -2484,7 +2498,7 @@
                 "steps": [
                   {
                     "color": "green",
-                    "value": null
+                    "value": 0
                   }
                 ]
               },
@@ -2539,7 +2553,7 @@
             "h": 7,
             "w": 12,
             "x": 12,
-            "y": 111
+            "y": 32
           },
           "id": 320,
           "options": {
@@ -2553,11 +2567,12 @@
               "showLegend": true
             },
             "tooltip": {
+              "hideZeros": false,
               "mode": "multi",
               "sort": "desc"
             }
           },
-          "pluginVersion": "11.3.0",
+          "pluginVersion": "12.3.0",
           "targets": [
             {
               "datasource": {
@@ -2565,7 +2580,7 @@
                 "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
-              "expr": "max(container_memory_working_set_bytes{pod=~\"splunk-conn-.*\", container!=\"\", container!=\"POD\"}) by (pod)",
+              "expr": "max(container_memory_working_set_bytes{pod=~\".*splunk-conn.*\", container!=\"\", container!=\"POD\"}) by (pod)",
               "legendFormat": "usage - {{pod}}",
               "range": true,
               "refId": "A"
@@ -2576,7 +2591,7 @@
                 "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
-              "expr": "max(kube_pod_container_resource_requests{pod=~\"splunk-conn-.*\", resource=\"memory\"}) ",
+              "expr": "max(kube_pod_container_resource_requests{pod=~\".*splunk-conn.*\", resource=\"memory\"}) ",
               "hide": false,
               "instant": false,
               "legendFormat": "requests ",
@@ -2589,7 +2604,7 @@
                 "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
-              "expr": "max(kube_pod_container_resource_limits{pod=~\"splunk-conn-.*\", resource=\"memory\"}) ",
+              "expr": "max(kube_pod_container_resource_limits{pod=~\".*splunk-conn.*\", resource=\"memory\"}) ",
               "hide": false,
               "instant": false,
               "legendFormat": "limits ",
@@ -2605,7 +2620,7 @@
       "type": "row"
     },
     {
-      "collapsed": false,
+      "collapsed": true,
       "gridPos": {
         "h": 1,
         "w": 24,
@@ -2613,351 +2628,356 @@
         "y": 2
       },
       "id": 308,
-      "panels": [],
+      "panels": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "description": "Total number of logs collected within the time range across all logs integrations.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "mappings": [],
+              "noValue": "No logs collected within time range",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": 0
+                  }
+                ]
+              },
+              "unit": "short"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 9,
+            "w": 4,
+            "x": 0,
+            "y": 56
+          },
+          "id": 227,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "none",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "percentChangeColorMode": "standard",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "showPercentChange": false,
+            "textMode": "auto",
+            "wideLayout": true
+          },
+          "pluginVersion": "12.3.0",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "${DS_PROMETHEUS}"
+              },
+              "editorMode": "code",
+              "expr": "sum(increase(ibm_aiops_logconnector_custom_live_logs_data_size_objects_sum[$__range]) or vector(0)) +\nsum(increase(ibm_aiops_logconnector_custom_historical_logs_data_size_objects_sum[$__range]) or vector(0)) +\nsum(increase(ibm_aiops_logconnector_elk_live_logs_data_size_objects_sum[$__range]) or vector(0)) +\nsum(increase(ibm_aiops_logconnector_elk_historical_logs_data_size_objects_sum[$__range]) or vector(0)) +\nsum(increase(ibm_aiops_logconnector_logscale_live_logs_data_size_objects_sum[$__range]) or vector(0)) +\nsum(increase(ibm_aiops_logconnector_logscale_historical_logs_data_size_objects_sum[$__range]) or vector(0)) +\nsum(increase(ibm_aiops_logconnector_mezmo_live_logs_data_size_objects_sum[$__range]) or vector(0)) +\nsum(increase(ibm_aiops_logconnector_mezmo_historical_logs_data_size_objects_sum[$__range]) or vector(0)) +\nsum(increase(ibm_aiops_logconnector_splunk_live_logs_data_size_objects_sum[$__range]) or vector(0)) +\nsum(increase(ibm_aiops_logconnector_splunk_historical_logs_data_size_objects_sum[$__range]) or vector(0))",
+              "legendFormat": "{{pod}}",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "Logs collected ",
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "description": "Total number of logs collected by each integration within the time range.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                }
+              },
+              "mappings": [],
+              "noValue": "No logs collected within time range",
+              "unit": "short"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 9,
+            "w": 20,
+            "x": 4,
+            "y": 56
+          },
+          "id": 228,
+          "options": {
+            "displayLabels": [
+              "value"
+            ],
+            "legend": {
+              "displayMode": "table",
+              "placement": "right",
+              "showLegend": true,
+              "values": [
+                "value"
+              ]
+            },
+            "pieType": "pie",
+            "reduceOptions": {
+              "calcs": [],
+              "fields": "",
+              "values": false
+            },
+            "sort": "desc",
+            "tooltip": {
+              "hideZeros": false,
+              "mode": "multi",
+              "sort": "desc"
+            }
+          },
+          "pluginVersion": "12.3.0",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "${DS_PROMETHEUS}"
+              },
+              "editorMode": "code",
+              "expr": "sum by (pod) (\n  (\n    increase(ibm_aiops_logconnector_custom_live_logs_data_size_objects_sum[$__range]) or 0 * increase(ibm_aiops_logconnector_custom_historical_logs_data_size_objects_sum[$__range])\n  )\n  + on(pod) group_left() (\n    increase(ibm_aiops_logconnector_custom_historical_logs_data_size_objects_sum[$__range]) or 0 * increase(ibm_aiops_logconnector_custom_live_logs_data_size_objects_sum[$__range])\n  )\n)",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "{{pod}}",
+              "range": true,
+              "refId": "B"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "${DS_PROMETHEUS}"
+              },
+              "editorMode": "code",
+              "expr": "sum by (pod) (\n  (\n    increase(ibm_aiops_logconnector_elk_live_logs_data_size_objects_sum[$__range]) or 0 * increase(ibm_aiops_logconnector_elk_historical_logs_data_size_objects_sum[$__range])\n  )\n  + on(pod) group_left() (\n    increase(ibm_aiops_logconnector_elk_historical_logs_data_size_objects_sum[$__range]) or 0 * increase(ibm_aiops_logconnector_elk_live_logs_data_size_objects_sum[$__range])\n  )\n)",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "{{pod}}",
+              "range": true,
+              "refId": "D"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "${DS_PROMETHEUS}"
+              },
+              "editorMode": "code",
+              "expr": "sum by (pod) (\n  (\n    increase(ibm_aiops_logconnector_logscale_live_logs_data_size_objects_sum[$__range]) or 0 * increase(ibm_aiops_logconnector_logscale_historical_logs_data_size_objects_sum[$__range])\n  )\n  + on(pod) group_left() (\n    increase(ibm_aiops_logconnector_logscale_historical_logs_data_size_objects_sum[$__range]) or 0 * increase(ibm_aiops_logconnector_logscale_live_logs_data_size_objects_sum[$__range])\n  )\n)",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "{{pod}}",
+              "range": true,
+              "refId": "G"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "${DS_PROMETHEUS}"
+              },
+              "editorMode": "code",
+              "expr": "sum by (pod) (\n  (\n    increase(ibm_aiops_logconnector_mezmo_live_logs_data_size_objects_sum[$__range]) or 0 * increase(ibm_aiops_logconnector_mezmo_historical_logs_data_size_objects_sum[$__range])\n  )\n  + on(pod) group_left() (\n    increase(ibm_aiops_logconnector_mezmo_historical_logs_data_size_objects_sum[$__range]) or 0 * increase(ibm_aiops_logconnector_mezmo_live_logs_data_size_objects_sum[$__range])\n  )\n)",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "{{pod}}",
+              "range": true,
+              "refId": "I"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "${DS_PROMETHEUS}"
+              },
+              "editorMode": "code",
+              "expr": "sum by (pod) (\n  (\n    increase(ibm_aiops_logconnector_splunk_live_logs_data_size_objects_sum[$__range]) or 0 * increase(ibm_aiops_logconnector_splunk_historical_logs_data_size_objects_sum[$__range])\n  )\n  + on(pod) group_left() (\n    increase(ibm_aiops_logconnector_splunk_historical_logs_data_size_objects_sum[$__range]) or 0 * increase(ibm_aiops_logconnector_splunk_live_logs_data_size_objects_sum[$__range])\n  )\n)",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "{{pod}}",
+              "range": true,
+              "refId": "K"
+            }
+          ],
+          "title": "Logs collected per integration ",
+          "type": "piechart"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "description": "Per-second rates of logs collected by each integration..",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "barWidthFactor": 0.6,
+                "drawStyle": "line",
+                "fillOpacity": 0,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "linear",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "auto",
+                "showValues": false,
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "decimals": 0,
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": 0
+                  }
+                ]
+              },
+              "unit": "logs/s"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 7,
+            "w": 24,
+            "x": 0,
+            "y": 65
+          },
+          "id": 224,
+          "options": {
+            "legend": {
+              "calcs": [
+                "mean",
+                "max"
+              ],
+              "displayMode": "table",
+              "placement": "right",
+              "showLegend": true
+            },
+            "tooltip": {
+              "hideZeros": false,
+              "mode": "multi",
+              "sort": "desc"
+            }
+          },
+          "pluginVersion": "12.3.0",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "${DS_PROMETHEUS}"
+              },
+              "editorMode": "code",
+              "expr": "sum by (pod) (\n  (\n    rate(ibm_aiops_logconnector_custom_live_logs_data_size_objects_sum[3m]) or 0 * rate(ibm_aiops_logconnector_custom_historical_logs_data_size_objects_sum[3m])\n  )\n  + on(pod) group_left() (\n    rate(ibm_aiops_logconnector_custom_historical_logs_data_size_objects_sum[3m]) or 0 * rate(ibm_aiops_logconnector_custom_live_logs_data_size_objects_sum[3m])\n  )\n)",
+              "legendFormat": "{{pod}}",
+              "range": true,
+              "refId": "A"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "${DS_PROMETHEUS}"
+              },
+              "editorMode": "code",
+              "expr": "sum by (pod) (\n  (\n    rate(ibm_aiops_logconnector_elk_live_logs_data_size_objects_sum[3m]) or 0 * rate(ibm_aiops_logconnector_elk_historical_logs_data_size_objects_sum[3m])\n  )\n  + on(pod) group_left() (\n    rate(ibm_aiops_logconnector_elk_historical_logs_data_size_objects_sum[3m]) or 0 * rate(ibm_aiops_logconnector_elk_live_logs_data_size_objects_sum[3m])\n  )\n)",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "{{pod}}",
+              "range": true,
+              "refId": "C"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "${DS_PROMETHEUS}"
+              },
+              "editorMode": "code",
+              "expr": "sum by (pod) (\n  (\n    rate(ibm_aiops_logconnector_logscale_live_logs_data_size_objects_sum[3m]) or 0 * rate(ibm_aiops_logconnector_logscale_historical_logs_data_size_objects_sum[3m])\n  )\n  + on(pod) group_left() (\n    rate(ibm_aiops_logconnector_logscale_historical_logs_data_size_objects_sum[3m]) or 0 * rate(ibm_aiops_logconnector_logscale_live_logs_data_size_objects_sum[3m])\n  )\n)",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "{{pod}}",
+              "range": true,
+              "refId": "F"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "${DS_PROMETHEUS}"
+              },
+              "editorMode": "code",
+              "expr": "sum by (pod) (\n  (\n    rate(ibm_aiops_logconnector_mezmo_live_logs_data_size_objects_sum[3m]) or 0 * rate(ibm_aiops_logconnector_mezmo_historical_logs_data_size_objects_sum[3m])\n  )\n  + on(pod) group_left() (\n    rate(ibm_aiops_logconnector_mezmo_historical_logs_data_size_objects_sum[3m]) or 0 * rate(ibm_aiops_logconnector_mezmo_live_logs_data_size_objects_sum[3m])\n  )\n)",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "{{pod}}",
+              "range": true,
+              "refId": "H"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "${DS_PROMETHEUS}"
+              },
+              "editorMode": "code",
+              "expr": "sum by (pod) (\n  (\n    rate(ibm_aiops_logconnector_splunk_live_logs_data_size_objects_sum[3m]) or 0 * rate(ibm_aiops_logconnector_splunk_historical_logs_data_size_objects_sum[3m])\n  )\n  + on(pod) group_left() (\n    rate(ibm_aiops_logconnector_splunk_historical_logs_data_size_objects_sum[3m]) or 0 * rate(ibm_aiops_logconnector_splunk_live_logs_data_size_objects_sum[3m])\n  )\n)",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "{{pod}}",
+              "range": true,
+              "refId": "J"
+            }
+          ],
+          "title": "Log collection rate ",
+          "type": "timeseries"
+        }
+      ],
       "title": "Total Logs collected",
       "type": "row"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
-      },
-      "description": "Total number of logs collected within the time range across all logs integrations.",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "mappings": [],
-          "noValue": "No logs collected within time range",
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              }
-            ]
-          },
-          "unit": "short"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 9,
-        "w": 4,
-        "x": 0,
-        "y": 3
-      },
-      "id": 227,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "none",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "percentChangeColorMode": "standard",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "showPercentChange": false,
-        "textMode": "auto",
-        "wideLayout": true
-      },
-      "pluginVersion": "11.3.0",
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
-          },
-          "editorMode": "code",
-          "expr": "sum(increase(ibm_aiops_logconnector_custom_live_logs_data_size_objects_sum[$__range]) or vector(0)) +\nsum(increase(ibm_aiops_logconnector_custom_historical_logs_data_size_objects_sum[$__range]) or vector(0)) +\nsum(increase(ibm_aiops_logconnector_elk_live_logs_data_size_objects_sum[$__range]) or vector(0)) +\nsum(increase(ibm_aiops_logconnector_elk_historical_logs_data_size_objects_sum[$__range]) or vector(0)) +\nsum(increase(ibm_aiops_logconnector_logscale_live_logs_data_size_objects_sum[$__range]) or vector(0)) +\nsum(increase(ibm_aiops_logconnector_logscale_historical_logs_data_size_objects_sum[$__range]) or vector(0)) +\nsum(increase(ibm_aiops_logconnector_mezmo_live_logs_data_size_objects_sum[$__range]) or vector(0)) +\nsum(increase(ibm_aiops_logconnector_mezmo_historical_logs_data_size_objects_sum[$__range]) or vector(0)) +\nsum(increase(ibm_aiops_logconnector_splunk_live_logs_data_size_objects_sum[$__range]) or vector(0)) +\nsum(increase(ibm_aiops_logconnector_splunk_historical_logs_data_size_objects_sum[$__range]) or vector(0))",
-          "legendFormat": "{{pod}}",
-          "range": true,
-          "refId": "A"
-        }
-      ],
-      "title": "Logs collected ",
-      "type": "stat"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
-      },
-      "description": "Total number of logs collected by each integration within the time range.",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            }
-          },
-          "mappings": [],
-          "noValue": "No logs collected within time range",
-          "unit": "short"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 9,
-        "w": 20,
-        "x": 4,
-        "y": 3
-      },
-      "id": 228,
-      "options": {
-        "displayLabels": [
-          "value"
-        ],
-        "legend": {
-          "displayMode": "table",
-          "placement": "right",
-          "showLegend": true,
-          "values": [
-            "value"
-          ]
-        },
-        "pieType": "pie",
-        "reduceOptions": {
-          "calcs": [],
-          "fields": "",
-          "values": false
-        },
-        "tooltip": {
-          "mode": "multi",
-          "sort": "desc"
-        }
-      },
-      "pluginVersion": "11.3.0",
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
-          },
-          "editorMode": "code",
-          "expr": "sum by (pod) (\n  (\n    increase(ibm_aiops_logconnector_custom_live_logs_data_size_objects_sum[$__range]) or 0 * increase(ibm_aiops_logconnector_custom_historical_logs_data_size_objects_sum[$__range])\n  )\n  + on(pod) group_left() (\n    increase(ibm_aiops_logconnector_custom_historical_logs_data_size_objects_sum[$__range]) or 0 * increase(ibm_aiops_logconnector_custom_live_logs_data_size_objects_sum[$__range])\n  )\n)",
-          "hide": false,
-          "instant": false,
-          "legendFormat": "{{pod}}",
-          "range": true,
-          "refId": "B"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
-          },
-          "editorMode": "code",
-          "expr": "sum by (pod) (\n  (\n    increase(ibm_aiops_logconnector_elk_live_logs_data_size_objects_sum[$__range]) or 0 * increase(ibm_aiops_logconnector_elk_historical_logs_data_size_objects_sum[$__range])\n  )\n  + on(pod) group_left() (\n    increase(ibm_aiops_logconnector_elk_historical_logs_data_size_objects_sum[$__range]) or 0 * increase(ibm_aiops_logconnector_elk_live_logs_data_size_objects_sum[$__range])\n  )\n)",
-          "hide": false,
-          "instant": false,
-          "legendFormat": "{{pod}}",
-          "range": true,
-          "refId": "D"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
-          },
-          "editorMode": "code",
-          "expr": "sum by (pod) (\n  (\n    increase(ibm_aiops_logconnector_logscale_live_logs_data_size_objects_sum[$__range]) or 0 * increase(ibm_aiops_logconnector_logscale_historical_logs_data_size_objects_sum[$__range])\n  )\n  + on(pod) group_left() (\n    increase(ibm_aiops_logconnector_logscale_historical_logs_data_size_objects_sum[$__range]) or 0 * increase(ibm_aiops_logconnector_logscale_live_logs_data_size_objects_sum[$__range])\n  )\n)",
-          "hide": false,
-          "instant": false,
-          "legendFormat": "{{pod}}",
-          "range": true,
-          "refId": "G"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
-          },
-          "editorMode": "code",
-          "expr": "sum by (pod) (\n  (\n    increase(ibm_aiops_logconnector_mezmo_live_logs_data_size_objects_sum[$__range]) or 0 * increase(ibm_aiops_logconnector_mezmo_historical_logs_data_size_objects_sum[$__range])\n  )\n  + on(pod) group_left() (\n    increase(ibm_aiops_logconnector_mezmo_historical_logs_data_size_objects_sum[$__range]) or 0 * increase(ibm_aiops_logconnector_mezmo_live_logs_data_size_objects_sum[$__range])\n  )\n)",
-          "hide": false,
-          "instant": false,
-          "legendFormat": "{{pod}}",
-          "range": true,
-          "refId": "I"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
-          },
-          "editorMode": "code",
-          "expr": "sum by (pod) (\n  (\n    increase(ibm_aiops_logconnector_splunk_live_logs_data_size_objects_sum[$__range]) or 0 * increase(ibm_aiops_logconnector_splunk_historical_logs_data_size_objects_sum[$__range])\n  )\n  + on(pod) group_left() (\n    increase(ibm_aiops_logconnector_splunk_historical_logs_data_size_objects_sum[$__range]) or 0 * increase(ibm_aiops_logconnector_splunk_live_logs_data_size_objects_sum[$__range])\n  )\n)",
-          "hide": false,
-          "instant": false,
-          "legendFormat": "{{pod}}",
-          "range": true,
-          "refId": "K"
-        }
-      ],
-      "title": "Logs collected per integration ",
-      "type": "piechart"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
-      },
-      "description": "Per-second rates of logs collected by each integration..",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisBorderShow": false,
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "barWidthFactor": 0.6,
-            "drawStyle": "line",
-            "fillOpacity": 0,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "insertNulls": false,
-            "lineInterpolation": "linear",
-            "lineWidth": 1,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "auto",
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "decimals": 0,
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              }
-            ]
-          },
-          "unit": "logs/s"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 7,
-        "w": 24,
-        "x": 0,
-        "y": 12
-      },
-      "id": 224,
-      "options": {
-        "legend": {
-          "calcs": [
-            "mean",
-            "max"
-          ],
-          "displayMode": "table",
-          "placement": "right",
-          "showLegend": true
-        },
-        "tooltip": {
-          "mode": "multi",
-          "sort": "desc"
-        }
-      },
-      "pluginVersion": "11.3.0",
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
-          },
-          "editorMode": "code",
-          "expr": "sum by (pod) (\n  (\n    rate(ibm_aiops_logconnector_custom_live_logs_data_size_objects_sum[3m]) or 0 * rate(ibm_aiops_logconnector_custom_historical_logs_data_size_objects_sum[3m])\n  )\n  + on(pod) group_left() (\n    rate(ibm_aiops_logconnector_custom_historical_logs_data_size_objects_sum[3m]) or 0 * rate(ibm_aiops_logconnector_custom_live_logs_data_size_objects_sum[3m])\n  )\n)",
-          "legendFormat": "{{pod}}",
-          "range": true,
-          "refId": "A"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
-          },
-          "editorMode": "code",
-          "expr": "sum by (pod) (\n  (\n    rate(ibm_aiops_logconnector_elk_live_logs_data_size_objects_sum[3m]) or 0 * rate(ibm_aiops_logconnector_elk_historical_logs_data_size_objects_sum[3m])\n  )\n  + on(pod) group_left() (\n    rate(ibm_aiops_logconnector_elk_historical_logs_data_size_objects_sum[3m]) or 0 * rate(ibm_aiops_logconnector_elk_live_logs_data_size_objects_sum[3m])\n  )\n)",
-          "hide": false,
-          "instant": false,
-          "legendFormat": "{{pod}}",
-          "range": true,
-          "refId": "C"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
-          },
-          "editorMode": "code",
-          "expr": "sum by (pod) (\n  (\n    rate(ibm_aiops_logconnector_logscale_live_logs_data_size_objects_sum[3m]) or 0 * rate(ibm_aiops_logconnector_logscale_historical_logs_data_size_objects_sum[3m])\n  )\n  + on(pod) group_left() (\n    rate(ibm_aiops_logconnector_logscale_historical_logs_data_size_objects_sum[3m]) or 0 * rate(ibm_aiops_logconnector_logscale_live_logs_data_size_objects_sum[3m])\n  )\n)",
-          "hide": false,
-          "instant": false,
-          "legendFormat": "{{pod}}",
-          "range": true,
-          "refId": "F"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
-          },
-          "editorMode": "code",
-          "expr": "sum by (pod) (\n  (\n    rate(ibm_aiops_logconnector_mezmo_live_logs_data_size_objects_sum[3m]) or 0 * rate(ibm_aiops_logconnector_mezmo_historical_logs_data_size_objects_sum[3m])\n  )\n  + on(pod) group_left() (\n    rate(ibm_aiops_logconnector_mezmo_historical_logs_data_size_objects_sum[3m]) or 0 * rate(ibm_aiops_logconnector_mezmo_live_logs_data_size_objects_sum[3m])\n  )\n)",
-          "hide": false,
-          "instant": false,
-          "legendFormat": "{{pod}}",
-          "range": true,
-          "refId": "H"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
-          },
-          "editorMode": "code",
-          "expr": "sum by (pod) (\n  (\n    rate(ibm_aiops_logconnector_splunk_live_logs_data_size_objects_sum[3m]) or 0 * rate(ibm_aiops_logconnector_splunk_historical_logs_data_size_objects_sum[3m])\n  )\n  + on(pod) group_left() (\n    rate(ibm_aiops_logconnector_splunk_historical_logs_data_size_objects_sum[3m]) or 0 * rate(ibm_aiops_logconnector_splunk_live_logs_data_size_objects_sum[3m])\n  )\n)",
-          "hide": false,
-          "instant": false,
-          "legendFormat": "{{pod}}",
-          "range": true,
-          "refId": "J"
-        }
-      ],
-      "title": "Log collection rate ",
-      "type": "timeseries"
     },
     {
       "collapsed": true,
@@ -2965,7 +2985,570 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 19
+        "y": 3
+      },
+      "id": 328,
+      "panels": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "description": "Total number of logs received by the LAD pipeline and normalized with the field mapping set in the log integration UI(s).",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": 0
+                  }
+                ]
+              },
+              "unit": "short"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 5,
+            "w": 5,
+            "x": 0,
+            "y": 126
+          },
+          "id": 327,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "none",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "percentChangeColorMode": "standard",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "showPercentChange": false,
+            "textMode": "auto",
+            "wideLayout": true
+          },
+          "pluginVersion": "12.3.0",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "${DS_PROMETHEUS}"
+              },
+              "editorMode": "code",
+              "expr": "sum(increase(ibm_aiops_ladgs_inference_splunkmaplc_normalized_logs[$__range]) or vector(0)) +\nsum(increase(ibm_aiops_ladgs_inference_elkmaplc_normalized_logs[$__range]) or vector(0)) +\nsum(increase(ibm_aiops_ladgs_inference_humiomaplc_normalized_logs[$__range]) or vector(0)) +\nsum(increase(ibm_aiops_ladgs_inference_kafkamaplc_normalized_logs[$__range]) or vector(0)) +\nsum(increase(ibm_aiops_ladgs_inference_logdnamaplc_normalized_logs[$__range]) or vector(0)) +\nsum(increase(ibm_aiops_ladgs_inference_custommaplc_normalized_logs[$__range]) or vector(0))",
+              "legendFormat": "{{pod}}",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "Total logs normalized ",
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "description": "Total number of logs received by the LAD pipeline and normalized with the field mapping set in the Splunk integration UI.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": 0
+                  }
+                ]
+              },
+              "unit": "short"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 5,
+            "w": 5,
+            "x": 5,
+            "y": 126
+          },
+          "id": 329,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "none",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "percentChangeColorMode": "standard",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "showPercentChange": false,
+            "textMode": "auto",
+            "wideLayout": true
+          },
+          "pluginVersion": "12.3.0",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "${DS_PROMETHEUS}"
+              },
+              "editorMode": "code",
+              "expr": "sum(increase(ibm_aiops_ladgs_inference_splunkmaplc_normalized_logs[$__range]) or vector(0))",
+              "legendFormat": "{{pod}}",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "Splunk logs normalized",
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "description": "Total number of logs received by the LAD pipeline and normalized with the field mapping set in the Elk integration UI.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": 0
+                  }
+                ]
+              },
+              "unit": "short"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 5,
+            "w": 5,
+            "x": 10,
+            "y": 126
+          },
+          "id": 330,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "none",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "percentChangeColorMode": "standard",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "showPercentChange": false,
+            "textMode": "auto",
+            "wideLayout": true
+          },
+          "pluginVersion": "12.3.0",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "${DS_PROMETHEUS}"
+              },
+              "editorMode": "code",
+              "expr": "sum(increase(ibm_aiops_ladgs_inference_elkmaplc_normalized_logs[$__range]) or vector(0))",
+              "legendFormat": "{{pod}}",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "Elk logs normalized",
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "description": "Total number of logs received by the LAD pipeline and normalized with the field mapping set in the Falcon LogScale integration UI.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": 0
+                  }
+                ]
+              },
+              "unit": "short"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 5,
+            "w": 5,
+            "x": 15,
+            "y": 126
+          },
+          "id": 331,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "none",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "percentChangeColorMode": "standard",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "showPercentChange": false,
+            "textMode": "auto",
+            "wideLayout": true
+          },
+          "pluginVersion": "12.3.0",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "${DS_PROMETHEUS}"
+              },
+              "editorMode": "code",
+              "expr": "sum(increase(ibm_aiops_ladgs_inference_humiomaplc_normalized_logs[$__range]) or vector(0))",
+              "legendFormat": "{{pod}}",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "Falcon LogScale logs normalized",
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "description": "Percentage of logs filtered out by the LAD pipeline due to: empty messages, json parsing exceptions, template matching exceptions. \n\nIf this percentage is higher than expected, double check your log source is formatting messages properly. ",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "decimals": 2,
+              "mappings": [
+                {
+                  "options": {
+                    "NaN": {
+                      "index": 0,
+                      "text": "0.00%"
+                    }
+                  },
+                  "type": "value"
+                }
+              ],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": 0
+                  },
+                  {
+                    "color": "super-light-yellow",
+                    "value": 1
+                  },
+                  {
+                    "color": "yellow",
+                    "value": 5
+                  },
+                  {
+                    "color": "red",
+                    "value": 10
+                  }
+                ]
+              },
+              "unit": "percent"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 5,
+            "w": 5,
+            "x": 0,
+            "y": 131
+          },
+          "id": 335,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "none",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "percentChangeColorMode": "standard",
+            "reduceOptions": {
+              "calcs": [],
+              "fields": "",
+              "values": false
+            },
+            "showPercentChange": false,
+            "textMode": "auto",
+            "wideLayout": true
+          },
+          "pluginVersion": "12.3.0",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "${DS_PROMETHEUS}"
+              },
+              "editorMode": "code",
+              "expr": "((sum(increase(ibm_aiops_ladgs_inference_emptymessagefilter_logs_with_empty_messages[$__range]) or vector(0)) +\nsum(increase(ibm_aiops_ladgs_inference_jsonoptionparser_option_parsing_exception_logs[$__range]) or vector(0)) +\nsum(increase(ibm_aiops_ladgs_inference_loganomalygoldensignaltemplatematching_gs_template_matching_exception_logs[$__range]) or vector(0)))\n/\nsum(increase(ibm_aiops_ladgs_inference_splunkmaplc_normalized_logs[$__range]) or vector(0)) +\nsum(increase(ibm_aiops_ladgs_inference_elkmaplc_normalized_logs[$__range]) or vector(0)) +\nsum(increase(ibm_aiops_ladgs_inference_humiomaplc_normalized_logs[$__range]) or vector(0)) +\nsum(increase(ibm_aiops_ladgs_inference_kafkamaplc_normalized_logs[$__range]) or vector(0)) +\nsum(increase(ibm_aiops_ladgs_inference_logdnamaplc_normalized_logs[$__range]) or vector(0)) +\nsum(increase(ibm_aiops_ladgs_inference_custommaplc_normalized_logs[$__range]) or vector(0)))\n* 100",
+              "legendFormat": "{{pod}}",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "Bad logs",
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "description": "Total number of logs received by the LAD pipeline and normalized with the field mapping set in the Kafka integration UI.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": 0
+                  }
+                ]
+              },
+              "unit": "short"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 5,
+            "w": 5,
+            "x": 5,
+            "y": 131
+          },
+          "id": 332,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "none",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "percentChangeColorMode": "standard",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "showPercentChange": false,
+            "textMode": "auto",
+            "wideLayout": true
+          },
+          "pluginVersion": "12.3.0",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "${DS_PROMETHEUS}"
+              },
+              "editorMode": "code",
+              "expr": "sum(increase(ibm_aiops_ladgs_inference_kafkamaplc_normalized_logs[$__range]) or vector(0))",
+              "legendFormat": "{{pod}}",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "Kafka logs normalized",
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "description": "Total number of logs received by the LAD pipeline and normalized with the field mapping set in the Mezmo integration UI.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": 0
+                  }
+                ]
+              },
+              "unit": "short"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 5,
+            "w": 5,
+            "x": 10,
+            "y": 131
+          },
+          "id": 333,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "none",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "percentChangeColorMode": "standard",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "showPercentChange": false,
+            "textMode": "auto",
+            "wideLayout": true
+          },
+          "pluginVersion": "12.3.0",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "${DS_PROMETHEUS}"
+              },
+              "editorMode": "code",
+              "expr": "sum(increase(ibm_aiops_ladgs_inference_logdnamaplc_normalized_logs[$__range]) or vector(0))",
+              "legendFormat": "{{pod}}",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "Mezmo logs normalized",
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "description": "Total number of logs received by the LAD pipeline and normalized with the field mapping set in the custom connector integration UI.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": 0
+                  }
+                ]
+              },
+              "unit": "short"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 5,
+            "w": 5,
+            "x": 15,
+            "y": 131
+          },
+          "id": 334,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "none",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "percentChangeColorMode": "standard",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "showPercentChange": false,
+            "textMode": "auto",
+            "wideLayout": true
+          },
+          "pluginVersion": "12.3.0",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "${DS_PROMETHEUS}"
+              },
+              "editorMode": "code",
+              "expr": "sum(increase(ibm_aiops_ladgs_inference_custommaplc_normalized_logs[$__range]) or vector(0))",
+              "legendFormat": "{{pod}}",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "Custom connector logs normalized",
+          "type": "stat"
+        }
+      ],
+      "title": "Log Anomaly Detection",
+      "type": "row"
+    },
+    {
+      "collapsed": true,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 4
       },
       "id": 206,
       "panels": [
@@ -2987,7 +3570,7 @@
                 "steps": [
                   {
                     "color": "green",
-                    "value": null
+                    "value": 0
                   }
                 ]
               }
@@ -2998,7 +3581,7 @@
             "h": 3,
             "w": 2,
             "x": 0,
-            "y": 38
+            "y": 560
           },
           "id": 273,
           "options": {
@@ -3016,7 +3599,7 @@
             "textMode": "auto",
             "wideLayout": true
           },
-          "pluginVersion": "11.3.0",
+          "pluginVersion": "12.3.0",
           "targets": [
             {
               "datasource": {
@@ -3051,7 +3634,7 @@
                 "steps": [
                   {
                     "color": "green",
-                    "value": null
+                    "value": 0
                   },
                   {
                     "color": "yellow",
@@ -3066,7 +3649,7 @@
             "h": 3,
             "w": 2,
             "x": 2,
-            "y": 38
+            "y": 560
           },
           "id": 274,
           "options": {
@@ -3084,7 +3667,7 @@
             "textMode": "auto",
             "wideLayout": true
           },
-          "pluginVersion": "11.3.0",
+          "pluginVersion": "12.3.0",
           "targets": [
             {
               "datasource": {
@@ -3119,7 +3702,7 @@
                 "steps": [
                   {
                     "color": "green",
-                    "value": null
+                    "value": 0
                   },
                   {
                     "color": "red",
@@ -3134,7 +3717,7 @@
             "h": 3,
             "w": 2,
             "x": 4,
-            "y": 38
+            "y": 560
           },
           "id": 226,
           "options": {
@@ -3152,7 +3735,7 @@
             "textMode": "auto",
             "wideLayout": true
           },
-          "pluginVersion": "11.3.0",
+          "pluginVersion": "12.3.0",
           "targets": [
             {
               "datasource": {
@@ -3196,7 +3779,7 @@
             "h": 9,
             "w": 9,
             "x": 6,
-            "y": 38
+            "y": 560
           },
           "id": 295,
           "options": {
@@ -3214,12 +3797,14 @@
               "fields": "",
               "values": false
             },
+            "sort": "desc",
             "tooltip": {
+              "hideZeros": false,
               "mode": "multi",
               "sort": "desc"
             }
           },
-          "pluginVersion": "11.3.0",
+          "pluginVersion": "12.3.0",
           "targets": [
             {
               "datasource": {
@@ -3271,6 +3856,7 @@
                   "type": "linear"
                 },
                 "showPoints": "auto",
+                "showValues": false,
                 "spanNulls": false,
                 "stacking": {
                   "group": "A",
@@ -3287,7 +3873,7 @@
                 "steps": [
                   {
                     "color": "green",
-                    "value": null
+                    "value": 0
                   }
                 ]
               },
@@ -3299,7 +3885,7 @@
             "h": 9,
             "w": 9,
             "x": 15,
-            "y": 38
+            "y": 560
           },
           "id": 298,
           "options": {
@@ -3310,11 +3896,12 @@
               "showLegend": true
             },
             "tooltip": {
+              "hideZeros": false,
               "mode": "multi",
               "sort": "desc"
             }
           },
-          "pluginVersion": "11.3.0",
+          "pluginVersion": "12.3.0",
           "targets": [
             {
               "datasource": {
@@ -3348,7 +3935,7 @@
                 "steps": [
                   {
                     "color": "green",
-                    "value": null
+                    "value": 0
                   }
                 ]
               },
@@ -3360,7 +3947,7 @@
             "h": 6,
             "w": 6,
             "x": 0,
-            "y": 59
+            "y": 563
           },
           "id": 225,
           "options": {
@@ -3380,7 +3967,7 @@
             "textMode": "auto",
             "wideLayout": true
           },
-          "pluginVersion": "11.3.0",
+          "pluginVersion": "12.3.0",
           "targets": [
             {
               "datasource": {
@@ -3407,7 +3994,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 20
+        "y": 5
       },
       "id": 207,
       "panels": [
@@ -3429,7 +4016,7 @@
                 "steps": [
                   {
                     "color": "green",
-                    "value": null
+                    "value": 0
                   }
                 ]
               }
@@ -3440,7 +4027,7 @@
             "h": 3,
             "w": 2,
             "x": 0,
-            "y": 39
+            "y": 588
           },
           "id": 279,
           "options": {
@@ -3458,7 +4045,7 @@
             "textMode": "auto",
             "wideLayout": true
           },
-          "pluginVersion": "11.3.0",
+          "pluginVersion": "12.3.0",
           "targets": [
             {
               "datasource": {
@@ -3493,7 +4080,7 @@
                 "steps": [
                   {
                     "color": "green",
-                    "value": null
+                    "value": 0
                   },
                   {
                     "color": "yellow",
@@ -3508,7 +4095,7 @@
             "h": 3,
             "w": 2,
             "x": 2,
-            "y": 39
+            "y": 588
           },
           "id": 280,
           "options": {
@@ -3526,7 +4113,7 @@
             "textMode": "auto",
             "wideLayout": true
           },
-          "pluginVersion": "11.3.0",
+          "pluginVersion": "12.3.0",
           "targets": [
             {
               "datasource": {
@@ -3561,7 +4148,7 @@
                 "steps": [
                   {
                     "color": "green",
-                    "value": null
+                    "value": 0
                   },
                   {
                     "color": "red",
@@ -3576,7 +4163,7 @@
             "h": 3,
             "w": 2,
             "x": 4,
-            "y": 39
+            "y": 588
           },
           "id": 281,
           "options": {
@@ -3594,7 +4181,7 @@
             "textMode": "auto",
             "wideLayout": true
           },
-          "pluginVersion": "11.3.0",
+          "pluginVersion": "12.3.0",
           "targets": [
             {
               "datasource": {
@@ -3638,7 +4225,7 @@
             "h": 9,
             "w": 9,
             "x": 6,
-            "y": 39
+            "y": 588
           },
           "id": 306,
           "options": {
@@ -3656,12 +4243,14 @@
               "fields": "",
               "values": false
             },
+            "sort": "desc",
             "tooltip": {
+              "hideZeros": false,
               "mode": "multi",
               "sort": "desc"
             }
           },
-          "pluginVersion": "11.3.0",
+          "pluginVersion": "12.3.0",
           "targets": [
             {
               "datasource": {
@@ -3713,6 +4302,7 @@
                   "type": "linear"
                 },
                 "showPoints": "auto",
+                "showValues": false,
                 "spanNulls": false,
                 "stacking": {
                   "group": "A",
@@ -3729,7 +4319,7 @@
                 "steps": [
                   {
                     "color": "green",
-                    "value": null
+                    "value": 0
                   }
                 ]
               },
@@ -3741,7 +4331,7 @@
             "h": 9,
             "w": 9,
             "x": 15,
-            "y": 39
+            "y": 588
           },
           "id": 307,
           "options": {
@@ -3752,11 +4342,12 @@
               "showLegend": true
             },
             "tooltip": {
+              "hideZeros": false,
               "mode": "multi",
               "sort": "desc"
             }
           },
-          "pluginVersion": "11.3.0",
+          "pluginVersion": "12.3.0",
           "targets": [
             {
               "datasource": {
@@ -3790,7 +4381,7 @@
                 "steps": [
                   {
                     "color": "green",
-                    "value": null
+                    "value": 0
                   }
                 ]
               },
@@ -3802,7 +4393,7 @@
             "h": 6,
             "w": 6,
             "x": 0,
-            "y": 42
+            "y": 591
           },
           "id": 282,
           "options": {
@@ -3822,7 +4413,7 @@
             "textMode": "auto",
             "wideLayout": true
           },
-          "pluginVersion": "11.3.0",
+          "pluginVersion": "12.3.0",
           "targets": [
             {
               "datasource": {
@@ -3849,7 +4440,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 21
+        "y": 6
       },
       "id": 208,
       "panels": [
@@ -3871,7 +4462,7 @@
                 "steps": [
                   {
                     "color": "green",
-                    "value": null
+                    "value": 0
                   }
                 ]
               }
@@ -3882,7 +4473,7 @@
             "h": 3,
             "w": 2,
             "x": 0,
-            "y": 58
+            "y": 562
           },
           "id": 285,
           "options": {
@@ -3900,7 +4491,7 @@
             "textMode": "auto",
             "wideLayout": true
           },
-          "pluginVersion": "11.3.0",
+          "pluginVersion": "12.3.0",
           "targets": [
             {
               "datasource": {
@@ -3935,7 +4526,7 @@
                 "steps": [
                   {
                     "color": "green",
-                    "value": null
+                    "value": 0
                   },
                   {
                     "color": "yellow",
@@ -3950,7 +4541,7 @@
             "h": 3,
             "w": 2,
             "x": 2,
-            "y": 58
+            "y": 562
           },
           "id": 286,
           "options": {
@@ -3968,7 +4559,7 @@
             "textMode": "auto",
             "wideLayout": true
           },
-          "pluginVersion": "11.3.0",
+          "pluginVersion": "12.3.0",
           "targets": [
             {
               "datasource": {
@@ -4003,7 +4594,7 @@
                 "steps": [
                   {
                     "color": "green",
-                    "value": null
+                    "value": 0
                   },
                   {
                     "color": "red",
@@ -4018,7 +4609,7 @@
             "h": 3,
             "w": 2,
             "x": 4,
-            "y": 58
+            "y": 562
           },
           "id": 287,
           "options": {
@@ -4036,7 +4627,7 @@
             "textMode": "auto",
             "wideLayout": true
           },
-          "pluginVersion": "11.3.0",
+          "pluginVersion": "12.3.0",
           "targets": [
             {
               "datasource": {
@@ -4080,7 +4671,7 @@
             "h": 9,
             "w": 9,
             "x": 6,
-            "y": 58
+            "y": 562
           },
           "id": 304,
           "options": {
@@ -4098,12 +4689,14 @@
               "fields": "",
               "values": false
             },
+            "sort": "desc",
             "tooltip": {
+              "hideZeros": false,
               "mode": "multi",
               "sort": "desc"
             }
           },
-          "pluginVersion": "11.3.0",
+          "pluginVersion": "12.3.0",
           "targets": [
             {
               "datasource": {
@@ -4155,6 +4748,7 @@
                   "type": "linear"
                 },
                 "showPoints": "auto",
+                "showValues": false,
                 "spanNulls": false,
                 "stacking": {
                   "group": "A",
@@ -4171,7 +4765,7 @@
                 "steps": [
                   {
                     "color": "green",
-                    "value": null
+                    "value": 0
                   }
                 ]
               },
@@ -4183,7 +4777,7 @@
             "h": 9,
             "w": 9,
             "x": 15,
-            "y": 58
+            "y": 562
           },
           "id": 305,
           "options": {
@@ -4194,11 +4788,12 @@
               "showLegend": true
             },
             "tooltip": {
+              "hideZeros": false,
               "mode": "multi",
               "sort": "desc"
             }
           },
-          "pluginVersion": "11.3.0",
+          "pluginVersion": "12.3.0",
           "targets": [
             {
               "datasource": {
@@ -4232,7 +4827,7 @@
                 "steps": [
                   {
                     "color": "green",
-                    "value": null
+                    "value": 0
                   }
                 ]
               },
@@ -4244,7 +4839,7 @@
             "h": 6,
             "w": 6,
             "x": 0,
-            "y": 61
+            "y": 565
           },
           "id": 288,
           "options": {
@@ -4264,7 +4859,7 @@
             "textMode": "auto",
             "wideLayout": true
           },
-          "pluginVersion": "11.3.0",
+          "pluginVersion": "12.3.0",
           "targets": [
             {
               "datasource": {
@@ -4291,7 +4886,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 22
+        "y": 7
       },
       "id": 209,
       "panels": [
@@ -4313,7 +4908,7 @@
                 "steps": [
                   {
                     "color": "green",
-                    "value": null
+                    "value": 0
                   }
                 ]
               }
@@ -4324,7 +4919,7 @@
             "h": 3,
             "w": 2,
             "x": 0,
-            "y": 68
+            "y": 635
           },
           "id": 291,
           "options": {
@@ -4342,7 +4937,7 @@
             "textMode": "auto",
             "wideLayout": true
           },
-          "pluginVersion": "11.3.0",
+          "pluginVersion": "12.3.0",
           "targets": [
             {
               "datasource": {
@@ -4377,7 +4972,7 @@
                 "steps": [
                   {
                     "color": "green",
-                    "value": null
+                    "value": 0
                   },
                   {
                     "color": "yellow",
@@ -4392,7 +4987,7 @@
             "h": 3,
             "w": 2,
             "x": 2,
-            "y": 68
+            "y": 635
           },
           "id": 292,
           "options": {
@@ -4410,7 +5005,7 @@
             "textMode": "auto",
             "wideLayout": true
           },
-          "pluginVersion": "11.3.0",
+          "pluginVersion": "12.3.0",
           "targets": [
             {
               "datasource": {
@@ -4445,7 +5040,7 @@
                 "steps": [
                   {
                     "color": "green",
-                    "value": null
+                    "value": 0
                   },
                   {
                     "color": "red",
@@ -4460,7 +5055,7 @@
             "h": 3,
             "w": 2,
             "x": 4,
-            "y": 68
+            "y": 635
           },
           "id": 293,
           "options": {
@@ -4478,7 +5073,7 @@
             "textMode": "auto",
             "wideLayout": true
           },
-          "pluginVersion": "11.3.0",
+          "pluginVersion": "12.3.0",
           "targets": [
             {
               "datasource": {
@@ -4522,7 +5117,7 @@
             "h": 9,
             "w": 9,
             "x": 6,
-            "y": 68
+            "y": 635
           },
           "id": 302,
           "options": {
@@ -4540,12 +5135,14 @@
               "fields": "",
               "values": false
             },
+            "sort": "desc",
             "tooltip": {
+              "hideZeros": false,
               "mode": "multi",
               "sort": "desc"
             }
           },
-          "pluginVersion": "11.3.0",
+          "pluginVersion": "12.3.0",
           "targets": [
             {
               "datasource": {
@@ -4597,6 +5194,7 @@
                   "type": "linear"
                 },
                 "showPoints": "auto",
+                "showValues": false,
                 "spanNulls": false,
                 "stacking": {
                   "group": "A",
@@ -4613,7 +5211,7 @@
                 "steps": [
                   {
                     "color": "green",
-                    "value": null
+                    "value": 0
                   }
                 ]
               },
@@ -4625,7 +5223,7 @@
             "h": 9,
             "w": 9,
             "x": 15,
-            "y": 68
+            "y": 635
           },
           "id": 303,
           "options": {
@@ -4636,11 +5234,12 @@
               "showLegend": true
             },
             "tooltip": {
+              "hideZeros": false,
               "mode": "multi",
               "sort": "desc"
             }
           },
-          "pluginVersion": "11.3.0",
+          "pluginVersion": "12.3.0",
           "targets": [
             {
               "datasource": {
@@ -4674,7 +5273,7 @@
                 "steps": [
                   {
                     "color": "green",
-                    "value": null
+                    "value": 0
                   }
                 ]
               },
@@ -4686,7 +5285,7 @@
             "h": 6,
             "w": 6,
             "x": 0,
-            "y": 71
+            "y": 638
           },
           "id": 294,
           "options": {
@@ -4706,7 +5305,7 @@
             "textMode": "auto",
             "wideLayout": true
           },
-          "pluginVersion": "11.3.0",
+          "pluginVersion": "12.3.0",
           "targets": [
             {
               "datasource": {
@@ -4733,7 +5332,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 23
+        "y": 8
       },
       "id": 210,
       "panels": [
@@ -4755,7 +5354,7 @@
                 "steps": [
                   {
                     "color": "green",
-                    "value": null
+                    "value": 0
                   }
                 ]
               }
@@ -4766,7 +5365,7 @@
             "h": 3,
             "w": 2,
             "x": 0,
-            "y": 87
+            "y": 645
           },
           "id": 230,
           "options": {
@@ -4784,7 +5383,7 @@
             "textMode": "auto",
             "wideLayout": true
           },
-          "pluginVersion": "11.3.0",
+          "pluginVersion": "12.3.0",
           "targets": [
             {
               "datasource": {
@@ -4819,7 +5418,7 @@
                 "steps": [
                   {
                     "color": "green",
-                    "value": null
+                    "value": 0
                   },
                   {
                     "color": "yellow",
@@ -4834,7 +5433,7 @@
             "h": 3,
             "w": 2,
             "x": 2,
-            "y": 87
+            "y": 645
           },
           "id": 220,
           "options": {
@@ -4852,7 +5451,7 @@
             "textMode": "auto",
             "wideLayout": true
           },
-          "pluginVersion": "11.3.0",
+          "pluginVersion": "12.3.0",
           "targets": [
             {
               "datasource": {
@@ -4887,7 +5486,7 @@
                 "steps": [
                   {
                     "color": "green",
-                    "value": null
+                    "value": 0
                   },
                   {
                     "color": "red",
@@ -4902,7 +5501,7 @@
             "h": 3,
             "w": 2,
             "x": 4,
-            "y": 87
+            "y": 645
           },
           "id": 275,
           "options": {
@@ -4920,7 +5519,7 @@
             "textMode": "auto",
             "wideLayout": true
           },
-          "pluginVersion": "11.3.0",
+          "pluginVersion": "12.3.0",
           "targets": [
             {
               "datasource": {
@@ -4956,7 +5555,7 @@
                 }
               },
               "mappings": [],
-              "unit": "logs/s"
+              "unit": "short"
             },
             "overrides": []
           },
@@ -4964,7 +5563,7 @@
             "h": 9,
             "w": 9,
             "x": 6,
-            "y": 87
+            "y": 645
           },
           "id": 300,
           "options": {
@@ -4982,12 +5581,14 @@
               "fields": "",
               "values": false
             },
+            "sort": "desc",
             "tooltip": {
+              "hideZeros": false,
               "mode": "multi",
               "sort": "desc"
             }
           },
-          "pluginVersion": "11.3.0",
+          "pluginVersion": "12.3.0",
           "targets": [
             {
               "datasource": {
@@ -5039,6 +5640,7 @@
                   "type": "linear"
                 },
                 "showPoints": "auto",
+                "showValues": false,
                 "spanNulls": false,
                 "stacking": {
                   "group": "A",
@@ -5055,7 +5657,7 @@
                 "steps": [
                   {
                     "color": "green",
-                    "value": null
+                    "value": 0
                   }
                 ]
               },
@@ -5067,7 +5669,7 @@
             "h": 9,
             "w": 9,
             "x": 15,
-            "y": 87
+            "y": 645
           },
           "id": 301,
           "options": {
@@ -5078,11 +5680,12 @@
               "showLegend": true
             },
             "tooltip": {
+              "hideZeros": false,
               "mode": "multi",
               "sort": "desc"
             }
           },
-          "pluginVersion": "11.3.0",
+          "pluginVersion": "12.3.0",
           "targets": [
             {
               "datasource": {
@@ -5116,7 +5719,7 @@
                 "steps": [
                   {
                     "color": "green",
-                    "value": null
+                    "value": 0
                   }
                 ]
               },
@@ -5128,7 +5731,7 @@
             "h": 6,
             "w": 6,
             "x": 0,
-            "y": 90
+            "y": 648
           },
           "id": 276,
           "options": {
@@ -5148,7 +5751,7 @@
             "textMode": "auto",
             "wideLayout": true
           },
-          "pluginVersion": "11.3.0",
+          "pluginVersion": "12.3.0",
           "targets": [
             {
               "datasource": {
@@ -5170,19 +5773,20 @@
       "type": "row"
     }
   ],
-  "schemaVersion": 40,
+  "preload": false,
+  "schemaVersion": 42,
   "tags": [],
   "templating": {
     "list": []
   },
   "time": {
-    "from": "now-1h",
+    "from": "now-30m",
     "to": "now"
   },
   "timepicker": {},
   "timezone": "browser",
   "title": "IBM Cloud Pak for AIOps Component - Log Integrations",
   "uid": "712d9a40-d89a-4546-8060-cfc58c293733",
-  "version": 1,
+  "version": 13,
   "weekStart": ""
 }
