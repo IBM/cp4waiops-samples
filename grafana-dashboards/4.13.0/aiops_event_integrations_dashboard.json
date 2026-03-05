@@ -12,22 +12,10 @@
   "__elements": {},
   "__requires": [
     {
-      "type": "panel",
-      "id": "bargauge",
-      "name": "Bar gauge",
-      "version": ""
-    },
-    {
-      "type": "panel",
-      "id": "gauge",
-      "name": "Gauge",
-      "version": ""
-    },
-    {
       "type": "grafana",
       "id": "grafana",
       "name": "Grafana",
-      "version": "11.3.0"
+      "version": "12.3.0"
     },
     {
       "type": "datasource",
@@ -79,7 +67,6 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 53,
   "links": [],
   "panels": [
     {
@@ -113,7 +100,7 @@
             "content": "## Event Connectors Overview\nThe Event Integrations are critical components of the AIOps platform, responsible for ingesting, normalizing, and forwarding event data from various sources into the system for analysis and correlation. These integrations serve as the primary entry points for operational events that drive incident detection and resolution.\n\n- Netcool Integration: Synchronizes event data from IBM Netcool Operations Insight ObjectServer with Cloud Pak for AIOps. Each ObjectServer pair requires a separate Netcool integration to ensure complete event coverage across the monitoring infrastructure.\n- Instana Integration: Provides event data from Instana's application performance monitoring platform, enabling the analysis and processing of different types of alerts and events. This integration is crucial for incorporating application-level incidents into the broader operational context.\n- Generic WebHook Integration: Is used when you want to connect to a data source and a dedicated integration is not available for that source in the IBM Cloud Pak for AIOps Integrations UI, you can use the generic webhook integration. There exists an internal wehbook connection for self monitoring. \n\nIntegrations perform several key functions:\n- Event normalization and transformation to a common format\n- Filtering and enrichment of event data\n- Secure transmission of events to the AIOps platform\n- Maintaining state and ensuring delivery reliability\n\nThe health and performance of these integrations directly impact the platform's ability to detect, analyze, and respond to incidents across the monitored environment. Monitoring their operational status is essential for ensuring complete visibility into the event landscape.",
             "mode": "markdown"
           },
-          "pluginVersion": "11.3.0",
+          "pluginVersion": "12.3.0",
           "title": "Event Integrations Overview",
           "type": "text"
         },
@@ -122,144 +109,67 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "description": "Count that tracks the number of pods that were newly created within the time range.\n\nNew pods indicate restarts may have occurred which could result in loss of functionality. Review the pod uptime graph to see if any gaps in uptime occurred.\n\nNew pods don't always indicate a problem and in some cases are part of routine processing and scaling. ",
+          "description": "The 5 lowest uptimes within the component pods. Pod restarts can impact functionality, review the pod table and uptime graph for more details.",
           "fieldConfig": {
             "defaults": {
               "color": {
                 "mode": "thresholds"
               },
-              "mappings": [
-                {
-                  "options": {
-                    "0": {
-                      "color": "dark-green",
-                      "index": 0,
-                      "text": "pods are stable - no new pods within time range"
-                    },
-                    "1": {
-                      "color": "semi-dark-green",
-                      "index": 1,
-                      "text": "1 new pod within time range - review uptime graph for gaps"
-                    },
-                    "2": {
-                      "color": "green",
-                      "index": 2,
-                      "text": "2 new pods within time range - review uptime graph for gaps"
-                    },
-                    "3": {
-                      "color": "light-green",
-                      "index": 3,
-                      "text": "3 new pods within time range - review uptime graph for gaps"
-                    },
-                    "4": {
-                      "color": "super-light-green",
-                      "index": 4,
-                      "text": "4 new pods within time range - review uptime graph for gaps"
-                    },
-                    "5": {
-                      "color": "super-light-green",
-                      "index": 5,
-                      "text": "5 new pods within time range - review uptime graph for gaps"
-                    },
-                    "6": {
-                      "color": "super-light-yellow",
-                      "index": 6,
-                      "text": "6 new pods within time range - review uptime graph for gaps"
-                    },
-                    "7": {
-                      "color": "super-light-yellow",
-                      "index": 7,
-                      "text": "7 new pods within time range - review uptime graph for gaps"
-                    },
-                    "8": {
-                      "color": "light-yellow",
-                      "index": 8,
-                      "text": "8 new pods within time range - review uptime graph for gaps"
-                    },
-                    "9": {
-                      "color": "light-yellow",
-                      "index": 9,
-                      "text": "9 new pods within time range - review uptime graph for gaps"
-                    }
-                  },
-                  "type": "value"
-                },
-                {
-                  "options": {
-                    "from": 10,
-                    "result": {
-                      "color": "yellow",
-                      "index": 10,
-                      "text": "10-20 new pods within time range - review uptime graph for gaps"
-                    },
-                    "to": 20
-                  },
-                  "type": "range"
-                },
-                {
-                  "options": {
-                    "from": 21,
-                    "result": {
-                      "color": "light-red",
-                      "index": 11,
-                      "text": "21-40 new pods within time range - review uptime graph for gaps"
-                    },
-                    "to": 40
-                  },
-                  "type": "range"
-                },
-                {
-                  "options": {
-                    "from": 41,
-                    "result": {
-                      "color": "red",
-                      "index": 12,
-                      "text": "41+ new pods within time range - review uptime graph for gaps"
-                    },
-                    "to": 10000
-                  },
-                  "type": "range"
-                }
-              ],
-              "noValue": "pods are stable - no new pods within time range",
+              "mappings": [],
               "thresholds": {
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "dark-green",
-                    "value": null
+                    "color": "red",
+                    "value": 0
+                  },
+                  {
+                    "color": "#EAB839",
+                    "value": 3600
+                  },
+                  {
+                    "color": "super-light-yellow",
+                    "value": 43200
+                  },
+                  {
+                    "color": "green",
+                    "value": 86400
                   }
                 ]
-              }
+              },
+              "unit": "s"
             },
             "overrides": []
           },
           "gridPos": {
-            "h": 1,
+            "h": 3,
             "w": 24,
             "x": 0,
             "y": 9
           },
-          "id": 214,
+          "id": 251,
           "options": {
             "colorMode": "background_solid",
             "graphMode": "none",
-            "justifyMode": "center",
+            "justifyMode": "auto",
             "orientation": "auto",
             "percentChangeColorMode": "standard",
             "reduceOptions": {
-              "calcs": [],
+              "calcs": [
+                "lastNotNull"
+              ],
               "fields": "",
               "values": false
             },
             "showPercentChange": false,
             "text": {
+              "titleSize": 16,
               "valueSize": 20
             },
-            "textMode": "value",
+            "textMode": "auto",
             "wideLayout": true
           },
-          "pluginVersion": "11.3.0",
+          "pluginVersion": "12.3.0",
           "targets": [
             {
               "datasource": {
@@ -267,13 +177,13 @@
                 "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
-              "expr": "sum(((sum((time() - kube_pod_start_time{pod=~\"netcool-conn-.*|ibm-grpc-instana-connector-.*|.*-webhook-connector-.*\"}) - $__range_s) by (pod)) < 60) <= bool 0)",
+              "expr": "time() -topk(5, sum(kube_pod_start_time{pod=~\"netcool-conn-.*|ibm-grpc-instana-connector-.*|.*-webhook-connector-.*\"}) by (pod))",
               "legendFormat": "__auto",
               "range": true,
               "refId": "A"
             }
           ],
-          "title": "",
+          "title": "Lowest Pod Uptimes",
           "type": "stat"
         },
         {
@@ -290,10 +200,13 @@
               "custom": {
                 "align": "auto",
                 "cellOptions": {
-                  "type": "auto",
-                  "wrapText": true
+                  "type": "auto"
                 },
-                "inspect": false
+                "footer": {
+                  "reducers": []
+                },
+                "inspect": false,
+                "wrapText": true
               },
               "mappings": [],
               "thresholds": {
@@ -301,7 +214,7 @@
                 "steps": [
                   {
                     "color": "green",
-                    "value": null
+                    "value": 0
                   }
                 ]
               }
@@ -312,24 +225,16 @@
             "h": 8,
             "w": 11,
             "x": 0,
-            "y": 10
+            "y": 12
           },
           "id": 93,
           "options": {
             "cellHeight": "sm",
-            "footer": {
-              "countRows": false,
-              "enablePagination": false,
-              "fields": "",
-              "reducer": [
-                "sum"
-              ],
-              "show": false
-            },
+            "enablePagination": false,
             "showHeader": true,
             "sortBy": []
           },
-          "pluginVersion": "11.3.0",
+          "pluginVersion": "12.3.0",
           "targets": [
             {
               "datasource": {
@@ -433,6 +338,7 @@
                   "type": "linear"
                 },
                 "showPoints": "auto",
+                "showValues": false,
                 "spanNulls": false,
                 "stacking": {
                   "group": "A",
@@ -448,7 +354,7 @@
                 "steps": [
                   {
                     "color": "green",
-                    "value": null
+                    "value": 0
                   }
                 ]
               },
@@ -460,7 +366,7 @@
             "h": 8,
             "w": 13,
             "x": 11,
-            "y": 10
+            "y": 12
           },
           "id": 215,
           "options": {
@@ -471,11 +377,12 @@
               "showLegend": true
             },
             "tooltip": {
+              "hideZeros": false,
               "mode": "multi",
               "sort": "desc"
             }
           },
-          "pluginVersion": "11.3.0",
+          "pluginVersion": "12.3.0",
           "targets": [
             {
               "datasource": {
@@ -533,8 +440,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   }
                 ]
               },
@@ -546,7 +452,7 @@
             "h": 4,
             "w": 8,
             "x": 0,
-            "y": 19
+            "y": 128
           },
           "id": 15,
           "options": {
@@ -615,8 +521,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "light-yellow",
@@ -639,7 +544,7 @@
             "h": 4,
             "w": 8,
             "x": 8,
-            "y": 19
+            "y": 128
           },
           "id": 235,
           "options": {
@@ -708,8 +613,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "light-yellow",
@@ -732,7 +636,7 @@
             "h": 4,
             "w": 8,
             "x": 16,
-            "y": 19
+            "y": 128
           },
           "id": 234,
           "options": {
@@ -823,8 +727,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   }
                 ]
               },
@@ -836,7 +739,7 @@
             "h": 5,
             "w": 16,
             "x": 0,
-            "y": 49
+            "y": 158
           },
           "id": 239,
           "options": {
@@ -884,8 +787,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   }
                 ]
               },
@@ -897,7 +799,7 @@
             "h": 5,
             "w": 8,
             "x": 16,
-            "y": 49
+            "y": 158
           },
           "id": 1,
           "options": {
@@ -987,8 +889,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "red",
@@ -1004,7 +905,7 @@
             "h": 5,
             "w": 16,
             "x": 0,
-            "y": 54
+            "y": 163
           },
           "id": 240,
           "options": {
@@ -1064,8 +965,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   }
                 ]
               },
@@ -1077,7 +977,7 @@
             "h": 5,
             "w": 8,
             "x": 16,
-            "y": 54
+            "y": 163
           },
           "id": 17,
           "options": {
@@ -1163,8 +1063,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "red",
@@ -1180,7 +1079,7 @@
             "h": 5,
             "w": 16,
             "x": 0,
-            "y": 59
+            "y": 168
           },
           "id": 241,
           "options": {
@@ -1228,8 +1127,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   }
                 ]
               },
@@ -1241,7 +1139,7 @@
             "h": 5,
             "w": 8,
             "x": 16,
-            "y": 59
+            "y": 168
           },
           "id": 226,
           "options": {
@@ -1321,7 +1219,7 @@
                 "steps": [
                   {
                     "color": "green",
-                    "value": null
+                    "value": 0
                   }
                 ]
               },
@@ -1333,7 +1231,7 @@
             "h": 4,
             "w": 8,
             "x": 0,
-            "y": 137
+            "y": 3
           },
           "id": 238,
           "options": {
@@ -1350,14 +1248,11 @@
               "values": false
             },
             "showPercentChange": false,
-            "text": {
-              "titleSize": 15,
-              "valueSize": 23
-            },
+            "text": {},
             "textMode": "value_and_name",
             "wideLayout": false
           },
-          "pluginVersion": "11.3.0",
+          "pluginVersion": "12.3.0",
           "targets": [
             {
               "datasource": {
@@ -1365,7 +1260,7 @@
                 "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
-              "expr": "sum(increase(connector_sdk_kafka_consumer_dropped_total{pod=~\".*-instana-.*\"}[$__range])) by (pod)",
+              "expr": "sum(increase(connector_sdk_kafka_consumer_dropped_total{pod=~\".*-instana-.*\"}[$__range]))",
               "hide": false,
               "legendFormat": "{{pod}}",
               "range": true,
@@ -1403,7 +1298,7 @@
                 "steps": [
                   {
                     "color": "green",
-                    "value": null
+                    "value": 0
                   },
                   {
                     "color": "super-light-yellow",
@@ -1426,7 +1321,7 @@
             "h": 4,
             "w": 8,
             "x": 8,
-            "y": 137
+            "y": 3
           },
           "id": 236,
           "options": {
@@ -1443,14 +1338,11 @@
               "values": false
             },
             "showPercentChange": false,
-            "text": {
-              "titleSize": 15,
-              "valueSize": 23
-            },
-            "textMode": "value_and_name",
+            "text": {},
+            "textMode": "value",
             "wideLayout": false
           },
-          "pluginVersion": "11.3.0",
+          "pluginVersion": "12.3.0",
           "targets": [
             {
               "datasource": {
@@ -1458,7 +1350,7 @@
                 "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
-              "expr": "sum(increase(connectors_sdk_connectorexceptions_thrown_total{pod=~\".*-instana-.*\"}[$__range])) by (pod)",
+              "expr": "sum(increase(connectors_sdk_connectorexceptions_thrown_total{pod=~\".*-instana-.*\"}[$__range]))",
               "hide": false,
               "legendFormat": "{{pod}}",
               "range": true,
@@ -1497,7 +1389,7 @@
                 "steps": [
                   {
                     "color": "green",
-                    "value": null
+                    "value": 0
                   },
                   {
                     "color": "yellow",
@@ -1516,7 +1408,7 @@
             "h": 4,
             "w": 8,
             "x": 16,
-            "y": 137
+            "y": 3
           },
           "id": 233,
           "options": {
@@ -1531,14 +1423,11 @@
               "values": false
             },
             "showPercentChange": false,
-            "text": {
-              "titleSize": 15,
-              "valueSize": 23
-            },
-            "textMode": "value_and_name",
+            "text": {},
+            "textMode": "value",
             "wideLayout": false
           },
-          "pluginVersion": "11.3.0",
+          "pluginVersion": "12.3.0",
           "targets": [
             {
               "datasource": {
@@ -1546,7 +1435,7 @@
                 "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
-              "expr": "sum(increase(connector_sdk_status_failed_total{pod=~\".*-instana-.*\"}[$__range])) by (pod)",
+              "expr": "sum(increase(connector_sdk_status_failed_total{pod=~\".*-instana-.*\"}[$__range]))",
               "hide": false,
               "legendFormat": "{{pod}}",
               "range": true,
@@ -1591,6 +1480,7 @@
                   "type": "linear"
                 },
                 "showPoints": "auto",
+                "showValues": false,
                 "spanNulls": false,
                 "stacking": {
                   "group": "A",
@@ -1606,7 +1496,7 @@
                 "steps": [
                   {
                     "color": "green",
-                    "value": null
+                    "value": 0
                   },
                   {
                     "color": "red",
@@ -1622,7 +1512,7 @@
             "h": 5,
             "w": 16,
             "x": 0,
-            "y": 141
+            "y": 70
           },
           "id": 246,
           "options": {
@@ -1633,11 +1523,12 @@
               "showLegend": true
             },
             "tooltip": {
+              "hideZeros": false,
               "mode": "multi",
               "sort": "desc"
             }
           },
-          "pluginVersion": "11.3.0",
+          "pluginVersion": "12.3.0",
           "targets": [
             {
               "datasource": {
@@ -1653,7 +1544,7 @@
               "refId": "B"
             }
           ],
-          "title": "Instana Event/Alert Ingestion Rates",
+          "title": "Instana Event/Alert Ingestion Rates by Pod",
           "type": "timeseries"
         },
         {
@@ -1674,7 +1565,7 @@
                 "steps": [
                   {
                     "color": "green",
-                    "value": null
+                    "value": 0
                   }
                 ]
               },
@@ -1686,7 +1577,7 @@
             "h": 5,
             "w": 8,
             "x": 16,
-            "y": 141
+            "y": 70
           },
           "id": 12,
           "options": {
@@ -1701,13 +1592,11 @@
               "values": false
             },
             "showPercentChange": false,
-            "text": {
-              "titleSize": 15
-            },
-            "textMode": "value_and_name",
+            "text": {},
+            "textMode": "value",
             "wideLayout": false
           },
-          "pluginVersion": "11.3.0",
+          "pluginVersion": "12.3.0",
           "targets": [
             {
               "datasource": {
@@ -1715,7 +1604,7 @@
                 "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
-              "expr": "sum(increase(connector_cloudevents_emitted_total{channel_name=\"cp4waiops-cartridge.lifecycle.input.events\", component_name=\"instana\"}[$__range])) by (pod)",
+              "expr": "sum(increase(connector_cloudevents_emitted_total{channel_name=\"cp4waiops-cartridge.lifecycle.input.events\", component_name=\"instana\"}[$__range]))",
               "hide": false,
               "instant": false,
               "legendFormat": "{{pod}}",
@@ -1761,6 +1650,7 @@
                   "type": "linear"
                 },
                 "showPoints": "auto",
+                "showValues": false,
                 "spanNulls": false,
                 "stacking": {
                   "group": "A",
@@ -1776,11 +1666,11 @@
                 "steps": [
                   {
                     "color": "green",
-                    "value": null
+                    "value": 0
                   }
                 ]
               },
-              "unit": "deckbytes"
+              "unit": "KBs"
             },
             "overrides": []
           },
@@ -1788,7 +1678,7 @@
             "h": 5,
             "w": 16,
             "x": 0,
-            "y": 146
+            "y": 75
           },
           "id": 250,
           "options": {
@@ -1799,11 +1689,12 @@
               "showLegend": true
             },
             "tooltip": {
+              "hideZeros": false,
               "mode": "multi",
               "sort": "desc"
             }
           },
-          "pluginVersion": "11.3.0",
+          "pluginVersion": "12.3.0",
           "targets": [
             {
               "datasource": {
@@ -1827,7 +1718,7 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "description": "This panel shows aggregate data transferred through integration APIs by pod.\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n",
+          "description": "This panel shows aggregate data transferred through integration APIs.\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -1839,7 +1730,7 @@
                 "steps": [
                   {
                     "color": "green",
-                    "value": null
+                    "value": 0
                   }
                 ]
               },
@@ -1851,7 +1742,7 @@
             "h": 5,
             "w": 8,
             "x": 16,
-            "y": 146
+            "y": 75
           },
           "id": 26,
           "options": {
@@ -1868,14 +1759,11 @@
               "values": false
             },
             "showPercentChange": false,
-            "text": {
-              "titleSize": 15,
-              "valueSize": 23
-            },
-            "textMode": "value_and_name",
+            "text": {},
+            "textMode": "value",
             "wideLayout": false
           },
-          "pluginVersion": "11.3.0",
+          "pluginVersion": "12.3.0",
           "targets": [
             {
               "datasource": {
@@ -1891,7 +1779,7 @@
               "refId": "A"
             }
           ],
-          "title": "Instana API Data Transfer Volume by Pod",
+          "title": "Instana API Data Transfer Volume",
           "type": "stat"
         }
       ],
@@ -1936,7 +1824,7 @@
                 "steps": [
                   {
                     "color": "green",
-                    "value": null
+                    "value": 0
                   },
                   {
                     "color": "super-light-yellow",
@@ -1959,7 +1847,7 @@
             "h": 6,
             "w": 12,
             "x": 0,
-            "y": 158
+            "y": 81
           },
           "id": 237,
           "options": {
@@ -1969,21 +1857,16 @@
             "orientation": "auto",
             "percentChangeColorMode": "standard",
             "reduceOptions": {
-              "calcs": [
-                "lastNotNull"
-              ],
+              "calcs": [],
               "fields": "",
               "values": false
             },
             "showPercentChange": false,
-            "text": {
-              "titleSize": 15,
-              "valueSize": 23
-            },
-            "textMode": "value_and_name",
+            "text": {},
+            "textMode": "value",
             "wideLayout": false
           },
-          "pluginVersion": "11.3.0",
+          "pluginVersion": "12.3.0",
           "targets": [
             {
               "datasource": {
@@ -1991,7 +1874,7 @@
                 "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
-              "expr": "sum(increase(connectors_sdk_connectorexceptions_thrown_total{pod=~\".*-webhook-.*\"}[$__range])) by (pod)",
+              "expr": "sum(increase(connectors_sdk_connectorexceptions_thrown_total{pod=~\".*-webhook-.*\"}[$__range]))",
               "hide": false,
               "legendFormat": "{{pod}}",
               "range": true,
@@ -2029,7 +1912,7 @@
                 "steps": [
                   {
                     "color": "green",
-                    "value": null
+                    "value": 0
                   },
                   {
                     "color": "super-light-yellow",
@@ -2052,7 +1935,7 @@
             "h": 6,
             "w": 12,
             "x": 12,
-            "y": 158
+            "y": 81
           },
           "id": 5,
           "options": {
@@ -2062,21 +1945,16 @@
             "orientation": "auto",
             "percentChangeColorMode": "standard",
             "reduceOptions": {
-              "calcs": [
-                "lastNotNull"
-              ],
+              "calcs": [],
               "fields": "",
               "values": false
             },
             "showPercentChange": false,
-            "text": {
-              "titleSize": 15,
-              "valueSize": 23
-            },
-            "textMode": "value_and_name",
+            "text": {},
+            "textMode": "value",
             "wideLayout": false
           },
-          "pluginVersion": "11.3.0",
+          "pluginVersion": "12.3.0",
           "targets": [
             {
               "datasource": {
@@ -2084,7 +1962,7 @@
                 "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
-              "expr": "increase(connector_sdk_status_failed_total{pod=~\".*-webhook-.*\"}[$__range])",
+              "expr": "sum(increase(connector_sdk_status_failed_total{pod=~\".*-webhook-.*\"}[$__range]))",
               "hide": false,
               "legendFormat": "{{pod}}",
               "range": true,
@@ -2168,7 +2046,7 @@
                 "steps": [
                   {
                     "color": "green",
-                    "value": null
+                    "value": 0
                   }
                 ]
               }
@@ -2179,7 +2057,7 @@
             "h": 1,
             "w": 12,
             "x": 0,
-            "y": 22
+            "y": 82
           },
           "id": 203,
           "options": {
@@ -2202,7 +2080,7 @@
             "textMode": "value",
             "wideLayout": true
           },
-          "pluginVersion": "11.3.0",
+          "pluginVersion": "12.3.0",
           "targets": [
             {
               "datasource": {
@@ -2279,7 +2157,7 @@
                 "steps": [
                   {
                     "color": "green",
-                    "value": null
+                    "value": 0
                   }
                 ]
               }
@@ -2290,7 +2168,7 @@
             "h": 1,
             "w": 12,
             "x": 12,
-            "y": 22
+            "y": 82
           },
           "id": 205,
           "options": {
@@ -2313,7 +2191,7 @@
             "textMode": "value",
             "wideLayout": true
           },
-          "pluginVersion": "11.3.0",
+          "pluginVersion": "12.3.0",
           "targets": [
             {
               "datasource": {
@@ -2390,7 +2268,7 @@
                 "steps": [
                   {
                     "color": "green",
-                    "value": null
+                    "value": 0
                   }
                 ]
               }
@@ -2401,7 +2279,7 @@
             "h": 1,
             "w": 12,
             "x": 0,
-            "y": 23
+            "y": 83
           },
           "id": 190,
           "options": {
@@ -2424,7 +2302,7 @@
             "textMode": "value",
             "wideLayout": true
           },
-          "pluginVersion": "11.3.0",
+          "pluginVersion": "12.3.0",
           "targets": [
             {
               "datasource": {
@@ -2500,7 +2378,7 @@
                 "steps": [
                   {
                     "color": "dark-green",
-                    "value": null
+                    "value": 0
                   }
                 ]
               }
@@ -2511,7 +2389,7 @@
             "h": 1,
             "w": 12,
             "x": 12,
-            "y": 23
+            "y": 83
           },
           "id": 201,
           "options": {
@@ -2534,7 +2412,7 @@
             "textMode": "value",
             "wideLayout": true
           },
-          "pluginVersion": "11.3.0",
+          "pluginVersion": "12.3.0",
           "targets": [
             {
               "datasource": {
@@ -2586,6 +2464,7 @@
                   "type": "linear"
                 },
                 "showPoints": "auto",
+                "showValues": false,
                 "spanNulls": false,
                 "stacking": {
                   "group": "A",
@@ -2601,7 +2480,7 @@
                 "steps": [
                   {
                     "color": "green",
-                    "value": null
+                    "value": 0
                   }
                 ]
               }
@@ -2655,7 +2534,7 @@
             "h": 8,
             "w": 12,
             "x": 0,
-            "y": 24
+            "y": 84
           },
           "id": 219,
           "options": {
@@ -2669,11 +2548,12 @@
               "showLegend": true
             },
             "tooltip": {
+              "hideZeros": false,
               "mode": "multi",
               "sort": "desc"
             }
           },
-          "pluginVersion": "11.3.0",
+          "pluginVersion": "12.3.0",
           "targets": [
             {
               "datasource": {
@@ -2751,6 +2631,7 @@
                   "type": "linear"
                 },
                 "showPoints": "auto",
+                "showValues": false,
                 "spanNulls": false,
                 "stacking": {
                   "group": "A",
@@ -2766,7 +2647,7 @@
                 "steps": [
                   {
                     "color": "green",
-                    "value": null
+                    "value": 0
                   }
                 ]
               },
@@ -2821,7 +2702,7 @@
             "h": 8,
             "w": 12,
             "x": 12,
-            "y": 24
+            "y": 84
           },
           "id": 221,
           "options": {
@@ -2835,11 +2716,12 @@
               "showLegend": true
             },
             "tooltip": {
+              "hideZeros": false,
               "mode": "multi",
               "sort": "desc"
             }
           },
-          "pluginVersion": "11.3.0",
+          "pluginVersion": "12.3.0",
           "targets": [
             {
               "datasource": {
@@ -2917,6 +2799,7 @@
                   "type": "linear"
                 },
                 "showPoints": "auto",
+                "showValues": false,
                 "spanNulls": false,
                 "stacking": {
                   "group": "A",
@@ -2932,7 +2815,7 @@
                 "steps": [
                   {
                     "color": "green",
-                    "value": null
+                    "value": 0
                   }
                 ]
               }
@@ -2986,7 +2869,7 @@
             "h": 8,
             "w": 12,
             "x": 0,
-            "y": 32
+            "y": 92
           },
           "id": 220,
           "options": {
@@ -3000,11 +2883,12 @@
               "showLegend": true
             },
             "tooltip": {
+              "hideZeros": false,
               "mode": "multi",
               "sort": "desc"
             }
           },
-          "pluginVersion": "11.3.0",
+          "pluginVersion": "12.3.0",
           "targets": [
             {
               "datasource": {
@@ -3082,6 +2966,7 @@
                   "type": "linear"
                 },
                 "showPoints": "auto",
+                "showValues": false,
                 "spanNulls": false,
                 "stacking": {
                   "group": "A",
@@ -3097,7 +2982,7 @@
                 "steps": [
                   {
                     "color": "green",
-                    "value": null
+                    "value": 0
                   }
                 ]
               },
@@ -3152,7 +3037,7 @@
             "h": 8,
             "w": 12,
             "x": 12,
-            "y": 32
+            "y": 92
           },
           "id": 222,
           "options": {
@@ -3166,11 +3051,12 @@
               "showLegend": true
             },
             "tooltip": {
+              "hideZeros": false,
               "mode": "multi",
               "sort": "desc"
             }
           },
-          "pluginVersion": "11.3.0",
+          "pluginVersion": "12.3.0",
           "targets": [
             {
               "datasource": {
@@ -3248,6 +3134,7 @@
                   "type": "linear"
                 },
                 "showPoints": "auto",
+                "showValues": false,
                 "spanNulls": false,
                 "stacking": {
                   "group": "A",
@@ -3263,7 +3150,7 @@
                 "steps": [
                   {
                     "color": "green",
-                    "value": null
+                    "value": 0
                   }
                 ]
               }
@@ -3324,7 +3211,7 @@
             "h": 8,
             "w": 12,
             "x": 0,
-            "y": 40
+            "y": 100
           },
           "id": 248,
           "options": {
@@ -3338,11 +3225,12 @@
               "showLegend": true
             },
             "tooltip": {
+              "hideZeros": false,
               "mode": "multi",
               "sort": "desc"
             }
           },
-          "pluginVersion": "11.3.0",
+          "pluginVersion": "12.3.0",
           "targets": [
             {
               "datasource": {
@@ -3420,6 +3308,7 @@
                   "type": "linear"
                 },
                 "showPoints": "auto",
+                "showValues": false,
                 "spanNulls": false,
                 "stacking": {
                   "group": "A",
@@ -3435,7 +3324,7 @@
                 "steps": [
                   {
                     "color": "green",
-                    "value": null
+                    "value": 0
                   }
                 ]
               },
@@ -3497,7 +3386,7 @@
             "h": 8,
             "w": 12,
             "x": 12,
-            "y": 40
+            "y": 100
           },
           "id": 249,
           "options": {
@@ -3511,11 +3400,12 @@
               "showLegend": true
             },
             "tooltip": {
+              "hideZeros": false,
               "mode": "multi",
               "sort": "desc"
             }
           },
-          "pluginVersion": "11.3.0",
+          "pluginVersion": "12.3.0",
           "targets": [
             {
               "datasource": {
@@ -3564,7 +3454,7 @@
     }
   ],
   "preload": false,
-  "schemaVersion": 40,
+  "schemaVersion": 42,
   "tags": [],
   "templating": {
     "list": []
@@ -3577,6 +3467,7 @@
   "timezone": "browser",
   "title": "IBM Cloud Pak for AIOps Component - Event Integrations",
   "uid": "2b82651e-ebed-4524-bf73-1a3f9b184bc0",
-  "version": 36,
-  "weekStart": ""
+  "version": 4,
+  "weekStart": "",
+  "id": null
 }
