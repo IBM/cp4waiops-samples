@@ -115,141 +115,64 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "description": "Count that tracks the number of pods that were newly created within the time range.\n",
+          "description": "The 5 lowest uptimes within the component pods. Pod restarts can impact functionality, review the pod table and uptime graph for more details.",
           "fieldConfig": {
             "defaults": {
               "color": {
                 "mode": "thresholds"
               },
-              "mappings": [
-                {
-                  "options": {
-                    "0": {
-                      "color": "dark-green",
-                      "index": 0,
-                      "text": "pods are stable - review uptime graph for gaps"
-                    },
-                    "1": {
-                      "color": "semi-dark-green",
-                      "index": 1,
-                      "text": "1 new pod within time range - review uptime graph for gaps"
-                    },
-                    "2": {
-                      "color": "green",
-                      "index": 2,
-                      "text": "2 new pod within time range - review uptime graph for gaps"
-                    },
-                    "3": {
-                      "color": "light-green",
-                      "index": 3,
-                      "text": "3 new pod within time range - review uptime graph for gaps"
-                    },
-                    "4": {
-                      "color": "super-light-green",
-                      "index": 4,
-                      "text": "4 new pod within time range - review uptime graph for gaps"
-                    },
-                    "5": {
-                      "color": "super-light-green",
-                      "index": 5,
-                      "text": "5 new pods within time range - review uptime graph for gaps"
-                    },
-                    "6": {
-                      "color": "super-light-yellow",
-                      "index": 6,
-                      "text": "6 new pods within time range - review uptime graph for gaps"
-                    },
-                    "7": {
-                      "color": "super-light-yellow",
-                      "index": 7,
-                      "text": "7 new pods within time range - review uptime graph for gaps"
-                    },
-                    "8": {
-                      "color": "light-yellow",
-                      "index": 8,
-                      "text": "8 new pods within time range - review uptime graph for gaps"
-                    },
-                    "9": {
-                      "color": "yellow",
-                      "index": 9,
-                      "text": "9 new pod within time range - review uptime graph for gaps"
-                    }
-                  },
-                  "type": "value"
-                },
-                {
-                  "options": {
-                    "from": 10,
-                    "result": {
-                      "color": "semi-dark-yellow",
-                      "index": 10,
-                      "text": "10-20 new pods within time range - review uptime graph for gaps"
-                    },
-                    "to": 20
-                  },
-                  "type": "range"
-                },
-                {
-                  "options": {
-                    "from": 21,
-                    "result": {
-                      "color": "light-red",
-                      "index": 11,
-                      "text": "21-40 new pods within time range - review uptime graph for gaps"
-                    },
-                    "to": 40
-                  },
-                  "type": "range"
-                },
-                {
-                  "options": {
-                    "from": 41,
-                    "result": {
-                      "color": "red",
-                      "index": 12,
-                      "text": "21-40 new pods within time range - review uptime graph for gaps"
-                    },
-                    "to": 10000
-                  },
-                  "type": "range"
-                }
-              ],
-              "noValue": "pods are stable - no new pods within time range",
+              "mappings": [],
               "thresholds": {
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "dark-green",
+                    "color": "red",
                     "value": 0
+                  },
+                  {
+                    "color": "#EAB839",
+                    "value": 3600
+                  },
+                  {
+                    "color": "super-light-yellow",
+                    "value": 43200
+                  },
+                  {
+                    "color": "green",
+                    "value": 86400
                   }
                 ]
-              }
+              },
+              "unit": "s"
             },
             "overrides": []
           },
           "gridPos": {
-            "h": 1,
+            "h": 3,
             "w": 24,
             "x": 0,
-            "y": 209
+            "y": 5
           },
-          "id": 94,
+          "id": 333,
           "options": {
             "colorMode": "background_solid",
             "graphMode": "none",
-            "justifyMode": "center",
+            "justifyMode": "auto",
             "orientation": "auto",
             "percentChangeColorMode": "standard",
             "reduceOptions": {
-              "calcs": [],
+              "calcs": [
+                "lastNotNull"
+              ],
               "fields": "",
               "values": false
             },
             "showPercentChange": false,
             "text": {
+              "titleSize": 16,
               "valueSize": 20
             },
-            "textMode": "value",
+            "textMode": "auto",
             "wideLayout": true
           },
           "pluginVersion": "12.3.0",
@@ -260,13 +183,13 @@
                 "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
-              "expr": "sum(((sum((time() - kube_pod_start_time{pod=~\".*nrelic-conn.*|.*instana-conn.*|.*appd-conn.*|.*awscw-conn.*|.*splunk-conn.*|.*zabbix-conn.*\"}) - $__range_s) by (pod)) < 60) <= bool 0)",
+              "expr": "time() -topk(5, sum(kube_pod_start_time{pod=~\".*nrelic-conn.*|.*instana-conn.*|.*appd-conn.*|.*awscw-conn.*|.*splunk-conn.*|.*zabbix-conn.*\"}) by (pod))",
               "legendFormat": "__auto",
               "range": true,
               "refId": "A"
             }
           ],
-          "title": "",
+          "title": "Lowest Pod Uptimes",
           "type": "stat"
         },
         {
@@ -308,7 +231,7 @@
             "h": 10,
             "w": 10,
             "x": 0,
-            "y": 210
+            "y": 8
           },
           "id": 93,
           "options": {
@@ -449,7 +372,7 @@
             "h": 10,
             "w": 14,
             "x": 10,
-            "y": 210
+            "y": 8
           },
           "id": 95,
           "options": {
@@ -567,7 +490,7 @@
             "h": 1,
             "w": 12,
             "x": 0,
-            "y": 2
+            "y": 265
           },
           "id": 203,
           "options": {
@@ -675,7 +598,7 @@
             "h": 1,
             "w": 12,
             "x": 12,
-            "y": 2
+            "y": 265
           },
           "id": 201,
           "options": {
@@ -786,7 +709,7 @@
             "h": 1,
             "w": 12,
             "x": 0,
-            "y": 3
+            "y": 266
           },
           "id": 190,
           "options": {
@@ -895,7 +818,7 @@
             "h": 1,
             "w": 12,
             "x": 12,
-            "y": 3
+            "y": 266
           },
           "id": 205,
           "options": {
@@ -1040,7 +963,7 @@
             "h": 7,
             "w": 12,
             "x": 0,
-            "y": 4
+            "y": 267
           },
           "id": 330,
           "options": {
@@ -1208,7 +1131,7 @@
             "h": 7,
             "w": 12,
             "x": 12,
-            "y": 4
+            "y": 267
           },
           "id": 321,
           "options": {
@@ -1375,7 +1298,7 @@
             "h": 7,
             "w": 12,
             "x": 0,
-            "y": 11
+            "y": 274
           },
           "id": 329,
           "options": {
@@ -1543,7 +1466,7 @@
             "h": 7,
             "w": 12,
             "x": 12,
-            "y": 11
+            "y": 274
           },
           "id": 322,
           "options": {
@@ -1710,7 +1633,7 @@
             "h": 7,
             "w": 12,
             "x": 0,
-            "y": 18
+            "y": 281
           },
           "id": 328,
           "options": {
@@ -1878,7 +1801,7 @@
             "h": 7,
             "w": 12,
             "x": 12,
-            "y": 18
+            "y": 281
           },
           "id": 323,
           "options": {
@@ -2045,7 +1968,7 @@
             "h": 7,
             "w": 12,
             "x": 0,
-            "y": 25
+            "y": 288
           },
           "id": 327,
           "options": {
@@ -2213,7 +2136,7 @@
             "h": 7,
             "w": 12,
             "x": 12,
-            "y": 25
+            "y": 288
           },
           "id": 324,
           "options": {
@@ -2380,7 +2303,7 @@
             "h": 7,
             "w": 12,
             "x": 0,
-            "y": 32
+            "y": 295
           },
           "id": 326,
           "options": {
@@ -2548,7 +2471,7 @@
             "h": 7,
             "w": 12,
             "x": 12,
-            "y": 32
+            "y": 295
           },
           "id": 320,
           "options": {
@@ -2715,7 +2638,7 @@
             "h": 7,
             "w": 12,
             "x": 0,
-            "y": 39
+            "y": 302
           },
           "id": 331,
           "options": {
@@ -2883,7 +2806,7 @@
             "h": 7,
             "w": 12,
             "x": 12,
-            "y": 39
+            "y": 302
           },
           "id": 325,
           "options": {
@@ -2989,7 +2912,7 @@
             "h": 5,
             "w": 5,
             "x": 0,
-            "y": 391
+            "y": 698
           },
           "id": 309,
           "options": {
@@ -3054,7 +2977,7 @@
             "h": 10,
             "w": 19,
             "x": 5,
-            "y": 391
+            "y": 698
           },
           "id": 310,
           "options": {
@@ -3196,7 +3119,7 @@
             "h": 5,
             "w": 5,
             "x": 0,
-            "y": 423
+            "y": 730
           },
           "id": 332,
           "options": {
@@ -3296,7 +3219,7 @@
             "h": 7,
             "w": 24,
             "x": 0,
-            "y": 428
+            "y": 735
           },
           "id": 311,
           "options": {
@@ -3439,7 +3362,7 @@
             "h": 3,
             "w": 2,
             "x": 0,
-            "y": 1394
+            "y": 1701
           },
           "id": 255,
           "options": {
@@ -3506,7 +3429,7 @@
             "h": 3,
             "w": 2,
             "x": 2,
-            "y": 1394
+            "y": 1701
           },
           "id": 238,
           "options": {
@@ -3573,7 +3496,7 @@
             "h": 3,
             "w": 2,
             "x": 4,
-            "y": 1394
+            "y": 1701
           },
           "id": 239,
           "options": {
@@ -3636,7 +3559,7 @@
             "h": 9,
             "w": 9,
             "x": 6,
-            "y": 1394
+            "y": 1701
           },
           "id": 299,
           "options": {
@@ -3737,7 +3660,7 @@
             "h": 9,
             "w": 9,
             "x": 15,
-            "y": 1394
+            "y": 1701
           },
           "id": 296,
           "options": {
@@ -3797,7 +3720,7 @@
             "h": 6,
             "w": 6,
             "x": 0,
-            "y": 1487
+            "y": 1794
           },
           "id": 240,
           "options": {
@@ -3876,7 +3799,7 @@
             "h": 3,
             "w": 2,
             "x": 0,
-            "y": 1395
+            "y": 1702
           },
           "id": 267,
           "options": {
@@ -3943,7 +3866,7 @@
             "h": 3,
             "w": 2,
             "x": 2,
-            "y": 1395
+            "y": 1702
           },
           "id": 268,
           "options": {
@@ -4010,7 +3933,7 @@
             "h": 3,
             "w": 2,
             "x": 4,
-            "y": 1395
+            "y": 1702
           },
           "id": 269,
           "options": {
@@ -4072,7 +3995,7 @@
             "h": 9,
             "w": 9,
             "x": 6,
-            "y": 1395
+            "y": 1702
           },
           "id": 271,
           "options": {
@@ -4174,7 +4097,7 @@
             "h": 9,
             "w": 9,
             "x": 15,
-            "y": 1395
+            "y": 1702
           },
           "id": 272,
           "options": {
@@ -4234,7 +4157,7 @@
             "h": 6,
             "w": 6,
             "x": 0,
-            "y": 1398
+            "y": 1705
           },
           "id": 270,
           "options": {
@@ -4314,7 +4237,7 @@
             "h": 3,
             "w": 2,
             "x": 0,
-            "y": 130
+            "y": 437
           },
           "id": 218,
           "options": {
@@ -4382,7 +4305,7 @@
             "h": 3,
             "w": 2,
             "x": 2,
-            "y": 130
+            "y": 437
           },
           "id": 231,
           "options": {
@@ -4450,7 +4373,7 @@
             "h": 3,
             "w": 2,
             "x": 4,
-            "y": 130
+            "y": 437
           },
           "id": 232,
           "options": {
@@ -4512,7 +4435,7 @@
             "h": 9,
             "w": 9,
             "x": 6,
-            "y": 130
+            "y": 437
           },
           "id": 234,
           "options": {
@@ -4618,7 +4541,7 @@
             "h": 9,
             "w": 9,
             "x": 15,
-            "y": 130
+            "y": 437
           },
           "id": 235,
           "options": {
@@ -4680,7 +4603,7 @@
             "h": 6,
             "w": 6,
             "x": 0,
-            "y": 133
+            "y": 440
           },
           "id": 233,
           "options": {
@@ -4760,7 +4683,7 @@
             "h": 3,
             "w": 2,
             "x": 0,
-            "y": 140
+            "y": 447
           },
           "id": 237,
           "options": {
@@ -4828,7 +4751,7 @@
             "h": 3,
             "w": 2,
             "x": 2,
-            "y": 140
+            "y": 447
           },
           "id": 256,
           "options": {
@@ -4896,7 +4819,7 @@
             "h": 3,
             "w": 2,
             "x": 4,
-            "y": 140
+            "y": 447
           },
           "id": 257,
           "options": {
@@ -4958,7 +4881,7 @@
             "h": 9,
             "w": 9,
             "x": 6,
-            "y": 140
+            "y": 447
           },
           "id": 259,
           "options": {
@@ -5064,7 +4987,7 @@
             "h": 9,
             "w": 9,
             "x": 15,
-            "y": 140
+            "y": 447
           },
           "id": 260,
           "options": {
@@ -5126,7 +5049,7 @@
             "h": 6,
             "w": 6,
             "x": 0,
-            "y": 143
+            "y": 450
           },
           "id": 258,
           "options": {
@@ -5206,7 +5129,7 @@
             "h": 3,
             "w": 2,
             "x": 0,
-            "y": 150
+            "y": 457
           },
           "id": 249,
           "options": {
@@ -5274,7 +5197,7 @@
             "h": 3,
             "w": 2,
             "x": 2,
-            "y": 150
+            "y": 457
           },
           "id": 250,
           "options": {
@@ -5342,7 +5265,7 @@
             "h": 3,
             "w": 2,
             "x": 4,
-            "y": 150
+            "y": 457
           },
           "id": 251,
           "options": {
@@ -5404,7 +5327,7 @@
             "h": 9,
             "w": 9,
             "x": 6,
-            "y": 150
+            "y": 457
           },
           "id": 253,
           "options": {
@@ -5510,7 +5433,7 @@
             "h": 9,
             "w": 9,
             "x": 15,
-            "y": 150
+            "y": 457
           },
           "id": 254,
           "options": {
@@ -5572,7 +5495,7 @@
             "h": 6,
             "w": 6,
             "x": 0,
-            "y": 153
+            "y": 460
           },
           "id": 252,
           "options": {
@@ -5652,7 +5575,7 @@
             "h": 3,
             "w": 2,
             "x": 0,
-            "y": 160
+            "y": 467
           },
           "id": 243,
           "options": {
@@ -5720,7 +5643,7 @@
             "h": 3,
             "w": 2,
             "x": 2,
-            "y": 160
+            "y": 467
           },
           "id": 244,
           "options": {
@@ -5788,7 +5711,7 @@
             "h": 3,
             "w": 2,
             "x": 4,
-            "y": 160
+            "y": 467
           },
           "id": 245,
           "options": {
@@ -5850,7 +5773,7 @@
             "h": 9,
             "w": 9,
             "x": 6,
-            "y": 160
+            "y": 467
           },
           "id": 247,
           "options": {
@@ -5956,7 +5879,7 @@
             "h": 9,
             "w": 9,
             "x": 15,
-            "y": 160
+            "y": 467
           },
           "id": 248,
           "options": {
@@ -6018,7 +5941,7 @@
             "h": 6,
             "w": 6,
             "x": 0,
-            "y": 163
+            "y": 470
           },
           "id": 246,
           "options": {
@@ -6074,7 +5997,7 @@
   "timezone": "browser",
   "title": "IBM Cloud Pak for AIOps Component - Metric Integrations",
   "uid": "712d9a40-d89a-4546-8060-cfc58c293734",
-  "version": 8,
+  "version": 9,
   "weekStart": "",
   "id": null
 }

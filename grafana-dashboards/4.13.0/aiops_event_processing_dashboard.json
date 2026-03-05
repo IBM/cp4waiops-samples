@@ -27,7 +27,7 @@
       "type": "grafana",
       "id": "grafana",
       "name": "Grafana",
-      "version": "12.1.0"
+      "version": "12.3.0"
     },
     {
       "type": "datasource",
@@ -79,7 +79,6 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": null,
   "links": [],
   "panels": [
     {
@@ -101,7 +100,7 @@
             "h": 8,
             "w": 24,
             "x": 0,
-            "y": 1
+            "y": 4
           },
           "id": 59,
           "options": {
@@ -113,7 +112,7 @@
             "content": "# Policy Automation Component Overview\n\nAutomation policies are used to define the steps for processing events into alerts and incidents.\nExamples of these steps include: deduplication, correlation, suppresion, runbook association, and incident creation.\nThe management and execution of these policies is handled by the Policy Automation component which can be broken down further into the following sub-components:\n\n- ***Policy registry***: API for storing and retrieving defined policies\n- ***Policy engine***: Responsible for executing policies in response to incoming events and changes to alerts and incidents\n- ***Datarouting***: Used to persist policy runtime statistics, for example run count, last run time and failure count\n- ***Operator***: Manages the deployment of the policy services and runtime engine\n\n### Policy engine\nThe **policy engine**, which executes policies, is broken down further into the following sub-components:\n- **Task manager(s)**: Policy execution occurs within these pods and will be automatically distributed across them.\n- **Job manager(s)**: Responsible for dispatching and managing work to be done by the task managers. Only one will be active at a time, others will serve as a backup.\n- **Scheduler**: Responsible for associating policies to requests (new events/alerts/incidents, alert/incident updates)\n- **Queue**: Once the scheduler has associated a policy to a request, it is put into a queue. The size of the queue is a performance indicator for how quickly Policy Automation is processing requests.\n\nPolicies are triggered in reaction to new events, alert/incident updates or notifications of persisted changes to alerts/incidents.\n\nWhen a new message is processed, the policy engine first determines if any policies are already executing for that alert/incident. If there are, the message will be added to the request queue to maintain order, until all previous policies for that alert / incident have executed.\n\nDuring policy execution, policies can store information for later retrieval. This information is called policy state; some examples of it's use are:\n\n1. To track open alerts for the purposes of deduplication\n2. To track correlation group windows so that correlation can be scoped to time windows\n3. To track open incidents for the purposes of deduplication\n\nThis state is held in memory, distributed across the task manager pods and periodically persisted to disk in a process called checkpointing. If this state grows too large to fit across the provisioned task managers, the policy engine can fail, so the size of this state is an important metric. \n\n**Dependencies:**\n\n- ***Cassandra***: Policy database. System and user-defined policies are stored here.\n- ***Kafka***: Message Broker system for ingesting requests and outputting results.\n- ***Postgres***: Backup policy database.\n- ***Topology Status Service***: Responsible for correlating new alerts with their corresponding topological resources.",
             "mode": "markdown"
           },
-          "pluginVersion": "11.3.0",
+          "pluginVersion": "12.3.0",
           "title": "",
           "type": "text"
         },
@@ -122,128 +121,49 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "description": "Count that tracks the number of pods that were newly created within the time range.\n\nNew pods indicate restarts may have occurred which could result in loss of functionality. Review the pod uptime graph to see if any gaps in uptime occurred.\n\nNew pods don't always indicate a problem and in some cases are part of routine processing and scaling. ",
+          "description": "The 5 lowest uptimes within the component pods. Pod restarts can impact functionality, review the pod table and uptime graph for more details.",
           "fieldConfig": {
             "defaults": {
               "color": {
                 "mode": "thresholds"
               },
-              "mappings": [
-                {
-                  "options": {
-                    "0": {
-                      "color": "dark-green",
-                      "index": 0,
-                      "text": "pods are stable - no new pods within time range"
-                    },
-                    "1": {
-                      "color": "semi-dark-green",
-                      "index": 1,
-                      "text": "1 new pod within time range - review uptime graph for gaps"
-                    },
-                    "2": {
-                      "color": "green",
-                      "index": 2,
-                      "text": "2 new pods within time range - review uptime graph for gaps"
-                    },
-                    "3": {
-                      "color": "light-green",
-                      "index": 3,
-                      "text": "3 new pods within time range - review uptime graph for gaps"
-                    },
-                    "4": {
-                      "color": "super-light-green",
-                      "index": 4,
-                      "text": "4 new pods within time range - review uptime graph for gaps"
-                    },
-                    "5": {
-                      "color": "super-light-green",
-                      "index": 5,
-                      "text": "5 new pods within time range - review uptime graph for gaps"
-                    },
-                    "6": {
-                      "color": "super-light-yellow",
-                      "index": 6,
-                      "text": "6 new pods within time range - review uptime graph for gaps"
-                    },
-                    "7": {
-                      "color": "super-light-yellow",
-                      "index": 7,
-                      "text": "7 new pods within time range - review uptime graph for gaps"
-                    },
-                    "8": {
-                      "color": "light-yellow",
-                      "index": 8,
-                      "text": "8 new pods within time range - review uptime graph for gaps"
-                    },
-                    "9": {
-                      "color": "light-yellow",
-                      "index": 9,
-                      "text": "9 new pods within time range - review uptime graph for gaps"
-                    }
-                  },
-                  "type": "value"
-                },
-                {
-                  "options": {
-                    "from": 10,
-                    "result": {
-                      "color": "yellow",
-                      "index": 10,
-                      "text": "10-20 new pods within time range - review uptime graph for gaps"
-                    },
-                    "to": 20
-                  },
-                  "type": "range"
-                },
-                {
-                  "options": {
-                    "from": 21,
-                    "result": {
-                      "color": "light-red",
-                      "index": 11,
-                      "text": "21-40 new pods within time range - review uptime graph for gaps"
-                    },
-                    "to": 40
-                  },
-                  "type": "range"
-                },
-                {
-                  "options": {
-                    "from": 41,
-                    "result": {
-                      "color": "red",
-                      "index": 12,
-                      "text": "41+ new pods within time range - review uptime graph for gaps"
-                    },
-                    "to": 10000
-                  },
-                  "type": "range"
-                }
-              ],
-              "noValue": "pods are stable - no new pods within time range",
+              "mappings": [],
               "thresholds": {
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "dark-green"
+                    "color": "red",
+                    "value": 0
+                  },
+                  {
+                    "color": "#EAB839",
+                    "value": 3600
+                  },
+                  {
+                    "color": "super-light-yellow",
+                    "value": 43200
+                  },
+                  {
+                    "color": "green",
+                    "value": 86400
                   }
                 ]
-              }
+              },
+              "unit": "s"
             },
             "overrides": []
           },
           "gridPos": {
-            "h": 1,
+            "h": 3,
             "w": 24,
             "x": 0,
-            "y": 928
+            "y": 486
           },
-          "id": 183,
+          "id": 215,
           "options": {
             "colorMode": "background_solid",
             "graphMode": "none",
-            "justifyMode": "center",
+            "justifyMode": "auto",
             "orientation": "auto",
             "percentChangeColorMode": "standard",
             "reduceOptions": {
@@ -255,12 +175,13 @@
             },
             "showPercentChange": false,
             "text": {
+              "titleSize": 16,
               "valueSize": 20
             },
-            "textMode": "value",
+            "textMode": "auto",
             "wideLayout": true
           },
-          "pluginVersion": "11.3.0",
+          "pluginVersion": "12.3.0",
           "targets": [
             {
               "datasource": {
@@ -268,13 +189,13 @@
                 "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
-              "expr": "sum(((sum((time() - kube_pod_start_time{pod=~\".*-lifecycle-.*\", pod!~\".*validation.*\", pod!~\".*job.*\", pod!~\".*operand-deployment-lifecycle-manager.*\"}) - $__range_s) by (pod)) < 60) <= bool 0)",
+              "expr": "time() -topk(5, sum(kube_pod_start_time{pod=~\".*-lifecycle-.*\", pod!~\".*validation.*\", pod!~\".*job.*\", pod!~\".*operand-deployment-lifecycle-manager.*\"}) by (pod))",
               "legendFormat": "__auto",
               "range": true,
               "refId": "A"
             }
           ],
-          "title": "",
+          "title": "Lowest Pod Uptimes",
           "type": "stat"
         },
         {
@@ -291,17 +212,21 @@
               "custom": {
                 "align": "auto",
                 "cellOptions": {
-                  "type": "auto",
-                  "wrapText": true
+                  "type": "auto"
                 },
-                "inspect": false
+                "footer": {
+                  "reducers": []
+                },
+                "inspect": false,
+                "wrapText": true
               },
               "mappings": [],
               "thresholds": {
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": 0
                   }
                 ]
               }
@@ -312,24 +237,16 @@
             "h": 12,
             "w": 8,
             "x": 0,
-            "y": 929
+            "y": 489
           },
           "id": 93,
           "options": {
             "cellHeight": "sm",
-            "footer": {
-              "countRows": false,
-              "enablePagination": false,
-              "fields": "",
-              "reducer": [
-                "sum"
-              ],
-              "show": false
-            },
+            "enablePagination": false,
             "showHeader": true,
             "sortBy": []
           },
-          "pluginVersion": "11.3.0",
+          "pluginVersion": "12.3.0",
           "targets": [
             {
               "datasource": {
@@ -433,6 +350,7 @@
                   "type": "linear"
                 },
                 "showPoints": "auto",
+                "showValues": false,
                 "spanNulls": false,
                 "stacking": {
                   "group": "A",
@@ -447,7 +365,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": 0
                   }
                 ]
               },
@@ -459,7 +378,7 @@
             "h": 8,
             "w": 16,
             "x": 8,
-            "y": 929
+            "y": 489
           },
           "id": 175,
           "options": {
@@ -470,11 +389,12 @@
               "showLegend": true
             },
             "tooltip": {
+              "hideZeros": false,
               "mode": "multi",
               "sort": "desc"
             }
           },
-          "pluginVersion": "11.3.0",
+          "pluginVersion": "12.3.0",
           "targets": [
             {
               "datasource": {
@@ -526,6 +446,7 @@
                   "type": "linear"
                 },
                 "showPoints": "auto",
+                "showValues": false,
                 "spanNulls": false,
                 "stacking": {
                   "group": "A",
@@ -540,7 +461,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": 0
                   },
                   {
                     "color": "red",
@@ -556,7 +478,7 @@
             "h": 4,
             "w": 16,
             "x": 8,
-            "y": 937
+            "y": 497
           },
           "id": 69,
           "options": {
@@ -568,11 +490,12 @@
               "showLegend": true
             },
             "tooltip": {
+              "hideZeros": false,
               "mode": "single",
               "sort": "none"
             }
           },
-          "pluginVersion": "11.3.0",
+          "pluginVersion": "12.3.0",
           "targets": [
             {
               "datasource": {
@@ -625,6 +548,7 @@
                   "type": "linear"
                 },
                 "showPoints": "auto",
+                "showValues": false,
                 "spanNulls": false,
                 "stacking": {
                   "group": "A",
@@ -639,7 +563,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": 0
                   },
                   {
                     "color": "red",
@@ -655,7 +580,7 @@
             "h": 9,
             "w": 8,
             "x": 0,
-            "y": 941
+            "y": 501
           },
           "id": 27,
           "options": {
@@ -666,11 +591,12 @@
               "showLegend": true
             },
             "tooltip": {
+              "hideZeros": false,
               "mode": "multi",
               "sort": "desc"
             }
           },
-          "pluginVersion": "11.3.0",
+          "pluginVersion": "12.3.0",
           "targets": [
             {
               "datasource": {
@@ -735,6 +661,7 @@
                   "type": "linear"
                 },
                 "showPoints": "auto",
+                "showValues": false,
                 "spanNulls": false,
                 "stacking": {
                   "group": "A",
@@ -749,7 +676,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": 0
                   },
                   {
                     "color": "red",
@@ -765,7 +693,7 @@
             "h": 9,
             "w": 8,
             "x": 8,
-            "y": 941
+            "y": 501
           },
           "id": 28,
           "options": {
@@ -776,11 +704,12 @@
               "showLegend": true
             },
             "tooltip": {
+              "hideZeros": false,
               "mode": "multi",
               "sort": "desc"
             }
           },
-          "pluginVersion": "11.3.0",
+          "pluginVersion": "12.3.0",
           "targets": [
             {
               "datasource": {
@@ -832,6 +761,7 @@
                   "type": "linear"
                 },
                 "showPoints": "never",
+                "showValues": false,
                 "spanNulls": false,
                 "stacking": {
                   "group": "A",
@@ -846,7 +776,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": 0
                   },
                   {
                     "color": "red",
@@ -862,7 +793,7 @@
             "h": 9,
             "w": 8,
             "x": 16,
-            "y": 941
+            "y": 501
           },
           "id": 70,
           "options": {
@@ -873,11 +804,12 @@
               "showLegend": true
             },
             "tooltip": {
+              "hideZeros": false,
               "mode": "multi",
               "sort": "desc"
             }
           },
-          "pluginVersion": "11.3.0",
+          "pluginVersion": "12.3.0",
           "targets": [
             {
               "datasource": {
@@ -979,7 +911,7 @@
             "h": 1,
             "w": 12,
             "x": 0,
-            "y": 1448
+            "y": 2871
           },
           "id": 189,
           "options": {
@@ -1089,7 +1021,7 @@
             "h": 1,
             "w": 12,
             "x": 12,
-            "y": 1448
+            "y": 2871
           },
           "id": 192,
           "options": {
@@ -1199,7 +1131,7 @@
             "h": 1,
             "w": 12,
             "x": 0,
-            "y": 1914
+            "y": 3337
           },
           "id": 195,
           "options": {
@@ -1308,7 +1240,7 @@
             "h": 1,
             "w": 12,
             "x": 12,
-            "y": 1914
+            "y": 3337
           },
           "id": 191,
           "options": {
@@ -1457,7 +1389,7 @@
             "h": 6,
             "w": 12,
             "x": 0,
-            "y": 1915
+            "y": 3338
           },
           "id": 156,
           "options": {
@@ -1631,7 +1563,7 @@
             "h": 6,
             "w": 12,
             "x": 12,
-            "y": 1915
+            "y": 3338
           },
           "id": 157,
           "options": {
@@ -1803,7 +1735,7 @@
             "h": 6,
             "w": 12,
             "x": 0,
-            "y": 1921
+            "y": 3344
           },
           "id": 158,
           "options": {
@@ -1973,7 +1905,7 @@
             "h": 6,
             "w": 12,
             "x": 12,
-            "y": 1921
+            "y": 3344
           },
           "id": 159,
           "options": {
@@ -2145,7 +2077,7 @@
             "h": 6,
             "w": 12,
             "x": 0,
-            "y": 1927
+            "y": 3350
           },
           "id": 160,
           "options": {
@@ -2315,7 +2247,7 @@
             "h": 6,
             "w": 12,
             "x": 12,
-            "y": 1927
+            "y": 3350
           },
           "id": 161,
           "options": {
@@ -2487,7 +2419,7 @@
             "h": 6,
             "w": 12,
             "x": 0,
-            "y": 1933
+            "y": 3356
           },
           "id": 162,
           "options": {
@@ -2657,7 +2589,7 @@
             "h": 6,
             "w": 12,
             "x": 12,
-            "y": 1933
+            "y": 3356
           },
           "id": 163,
           "options": {
@@ -2829,7 +2761,7 @@
             "h": 6,
             "w": 12,
             "x": 0,
-            "y": 1939
+            "y": 3362
           },
           "id": 164,
           "options": {
@@ -2999,7 +2931,7 @@
             "h": 6,
             "w": 12,
             "x": 12,
-            "y": 1939
+            "y": 3362
           },
           "id": 165,
           "options": {
@@ -3273,7 +3205,7 @@
             "h": 10,
             "w": 8,
             "x": 0,
-            "y": 54
+            "y": 1477
           },
           "id": 174,
           "options": {
@@ -3421,7 +3353,7 @@
             "h": 10,
             "w": 16,
             "x": 8,
-            "y": 54
+            "y": 1477
           },
           "id": 94,
           "options": {
@@ -3525,7 +3457,7 @@
             "h": 1,
             "w": 12,
             "x": 0,
-            "y": 136
+            "y": 1559
           },
           "id": 185,
           "options": {
@@ -3636,7 +3568,7 @@
             "h": 1,
             "w": 12,
             "x": 12,
-            "y": 136
+            "y": 1559
           },
           "id": 187,
           "options": {
@@ -3747,7 +3679,7 @@
             "h": 1,
             "w": 12,
             "x": 0,
-            "y": 137
+            "y": 1560
           },
           "id": 186,
           "options": {
@@ -3857,7 +3789,7 @@
             "h": 1,
             "w": 12,
             "x": 12,
-            "y": 137
+            "y": 1560
           },
           "id": 188,
           "options": {
@@ -4007,7 +3939,7 @@
             "h": 6,
             "w": 12,
             "x": 0,
-            "y": 138
+            "y": 1561
           },
           "id": 33,
           "options": {
@@ -4183,7 +4115,7 @@
             "h": 6,
             "w": 12,
             "x": 12,
-            "y": 138
+            "y": 1561
           },
           "id": 37,
           "options": {
@@ -4357,7 +4289,7 @@
             "h": 6,
             "w": 12,
             "x": 0,
-            "y": 144
+            "y": 1567
           },
           "id": 49,
           "options": {
@@ -4529,7 +4461,7 @@
             "h": 6,
             "w": 12,
             "x": 12,
-            "y": 144
+            "y": 1567
           },
           "id": 51,
           "options": {
@@ -4707,7 +4639,7 @@
             "h": 6,
             "w": 12,
             "x": 0,
-            "y": 150
+            "y": 1573
           },
           "id": 6,
           "options": {
@@ -4879,7 +4811,7 @@
             "h": 6,
             "w": 12,
             "x": 12,
-            "y": 150
+            "y": 1573
           },
           "id": 35,
           "options": {
@@ -5053,7 +4985,7 @@
             "h": 6,
             "w": 12,
             "x": 0,
-            "y": 156
+            "y": 1579
           },
           "id": 32,
           "options": {
@@ -5223,7 +5155,7 @@
             "h": 6,
             "w": 12,
             "x": 12,
-            "y": 156
+            "y": 1579
           },
           "id": 36,
           "options": {
@@ -5329,7 +5261,7 @@
             "h": 4,
             "w": 6,
             "x": 0,
-            "y": 4
+            "y": 1427
           },
           "id": 121,
           "options": {
@@ -5393,7 +5325,7 @@
             "h": 4,
             "w": 6,
             "x": 6,
-            "y": 4
+            "y": 1427
           },
           "id": 122,
           "options": {
@@ -5490,7 +5422,7 @@
             "h": 8,
             "w": 12,
             "x": 12,
-            "y": 4
+            "y": 1427
           },
           "id": 39,
           "options": {
@@ -5578,7 +5510,7 @@
             "h": 4,
             "w": 12,
             "x": 0,
-            "y": 8
+            "y": 1431
           },
           "id": 124,
           "options": {
@@ -5675,7 +5607,7 @@
             "h": 8,
             "w": 24,
             "x": 0,
-            "y": 12
+            "y": 1435
           },
           "id": 209,
           "options": {
@@ -5770,7 +5702,7 @@
             "h": 9,
             "w": 24,
             "x": 0,
-            "y": 20
+            "y": 1443
           },
           "id": 83,
           "interval": "5s",
@@ -5828,7 +5760,7 @@
             "h": 9,
             "w": 24,
             "x": 0,
-            "y": 603
+            "y": 5
           },
           "id": 57,
           "options": {
@@ -5840,7 +5772,7 @@
             "content": "# Datalayer component overview\n\nThe Datalayer is the central storage component that works closely with the Policy Automation component to persist and communicate changes made to alerts and incidents.\n\nThe component can be broken down further into the following sub-components:\n\n- ***Standard API***: Instance that connects to active datastore (PostgreSQL). It handles incoming Kafka & HTTP requests for access and manipulation of alert & incident data.\n- ***Datalayer API***: This is a UI facing datalayer service. Performs validation of HTTP requests from the UI and other clients.\n- ***Job Manager***: This datalayer instance performs a range of timed jobs to detect expired alerts.\n- ***User config service***: Service that works with UI to store & fetch user configurations.\n- ***Archiving service***: Service that stores alerts for analysis.\n\n**Dependencies:**\n- ***Postgres***: Main database used for storing alert and incident data.\n- ***Cassandra***: Database for storing archived records.\n- ***Kafka***: Message Broker system for ingesting requests and outputting results.\n- ***ElasticSearch***: Search engine for database query optimization.\n",
             "mode": "markdown"
           },
-          "pluginVersion": "11.3.0",
+          "pluginVersion": "12.3.0",
           "title": "",
           "type": "text"
         },
@@ -5849,128 +5781,49 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "description": "Count that tracks the number of pods that were newly created within the time range.\n\nNew pods indicate restarts may have occurred which could result in loss of functionality. Review the pod uptime graph to see if any gaps in uptime occurred.\n\nNew pods don't always indicate a problem and in some cases are part of routine processing and scaling. ",
+          "description": "The 5 lowest uptimes within the component pods. Pod restarts can impact functionality, review the pod table and uptime graph for more details.",
           "fieldConfig": {
             "defaults": {
               "color": {
                 "mode": "thresholds"
               },
-              "mappings": [
-                {
-                  "options": {
-                    "0": {
-                      "color": "dark-green",
-                      "index": 0,
-                      "text": "pods are stable - no new pods within time range"
-                    },
-                    "1": {
-                      "color": "semi-dark-green",
-                      "index": 1,
-                      "text": "1 new pod within time range - review uptime graph for gaps"
-                    },
-                    "2": {
-                      "color": "green",
-                      "index": 2,
-                      "text": "2 new pods within time range - review uptime graph for gaps"
-                    },
-                    "3": {
-                      "color": "light-green",
-                      "index": 3,
-                      "text": "3 new pods within time range - review uptime graph for gaps"
-                    },
-                    "4": {
-                      "color": "super-light-green",
-                      "index": 4,
-                      "text": "4 new pods within time range - review uptime graph for gaps"
-                    },
-                    "5": {
-                      "color": "super-light-green",
-                      "index": 5,
-                      "text": "5 new pods within time range - review uptime graph for gaps"
-                    },
-                    "6": {
-                      "color": "super-light-yellow",
-                      "index": 6,
-                      "text": "6 new pods within time range - review uptime graph for gaps"
-                    },
-                    "7": {
-                      "color": "super-light-yellow",
-                      "index": 7,
-                      "text": "7 new pods within time range - review uptime graph for gaps"
-                    },
-                    "8": {
-                      "color": "light-yellow",
-                      "index": 8,
-                      "text": "8 new pods within time range - review uptime graph for gaps"
-                    },
-                    "9": {
-                      "color": "light-yellow",
-                      "index": 9,
-                      "text": "9 new pods within time range - review uptime graph for gaps"
-                    }
-                  },
-                  "type": "value"
-                },
-                {
-                  "options": {
-                    "from": 10,
-                    "result": {
-                      "color": "yellow",
-                      "index": 10,
-                      "text": "10-20 new pods within time range - review uptime graph for gaps"
-                    },
-                    "to": 20
-                  },
-                  "type": "range"
-                },
-                {
-                  "options": {
-                    "from": 21,
-                    "result": {
-                      "color": "light-red",
-                      "index": 11,
-                      "text": "21-40 new pods within time range - review uptime graph for gaps"
-                    },
-                    "to": 40
-                  },
-                  "type": "range"
-                },
-                {
-                  "options": {
-                    "from": 41,
-                    "result": {
-                      "color": "red",
-                      "index": 12,
-                      "text": "41+ new pods within time range - review uptime graph for gaps"
-                    },
-                    "to": 10000
-                  },
-                  "type": "range"
-                }
-              ],
-              "noValue": "pods are stable - no new pods within time range",
+              "mappings": [],
               "thresholds": {
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "dark-green"
+                    "color": "red",
+                    "value": 0
+                  },
+                  {
+                    "color": "#EAB839",
+                    "value": 3600
+                  },
+                  {
+                    "color": "super-light-yellow",
+                    "value": 43200
+                  },
+                  {
+                    "color": "green",
+                    "value": 86400
                   }
                 ]
-              }
+              },
+              "unit": "s"
             },
             "overrides": []
           },
           "gridPos": {
-            "h": 1,
+            "h": 3,
             "w": 24,
             "x": 0,
-            "y": 933
+            "y": 49
           },
-          "id": 193,
+          "id": 216,
           "options": {
             "colorMode": "background_solid",
             "graphMode": "none",
-            "justifyMode": "center",
+            "justifyMode": "auto",
             "orientation": "auto",
             "percentChangeColorMode": "standard",
             "reduceOptions": {
@@ -5982,12 +5835,13 @@
             },
             "showPercentChange": false,
             "text": {
+              "titleSize": 16,
               "valueSize": 20
             },
-            "textMode": "value",
+            "textMode": "auto",
             "wideLayout": true
           },
-          "pluginVersion": "11.3.0",
+          "pluginVersion": "12.3.0",
           "targets": [
             {
               "datasource": {
@@ -5995,13 +5849,13 @@
                 "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
-              "expr": "sum(((sum((time() - kube_pod_start_time{pod=~\"aiops-ir-core-ncodl-.*\", pod!~\".*cjob.*\", pod!~\".*presetup.*\"}) - $__range_s) by (pod)) < 60) <= bool 0)",
+              "expr": "time() -topk(5, sum(kube_pod_start_time{pod=~\"aiops-ir-core-ncodl-.*\", pod!~\".*cjob.*\", pod!~\".*presetup.*\"}) by (pod))",
               "legendFormat": "__auto",
               "range": true,
               "refId": "A"
             }
           ],
-          "title": "",
+          "title": "Lowest Pod Uptimes",
           "type": "stat"
         },
         {
@@ -6020,6 +5874,9 @@
                 "cellOptions": {
                   "type": "auto"
                 },
+                "footer": {
+                  "reducers": []
+                },
                 "inspect": false
               },
               "mappings": [],
@@ -6027,7 +5884,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": 0
                   },
                   {
                     "color": "red",
@@ -6042,22 +5900,14 @@
             "h": 9,
             "w": 8,
             "x": 0,
-            "y": 934
+            "y": 52
           },
           "id": 66,
           "options": {
             "cellHeight": "sm",
-            "footer": {
-              "countRows": false,
-              "fields": "",
-              "reducer": [
-                "sum"
-              ],
-              "show": false
-            },
             "showHeader": true
           },
-          "pluginVersion": "11.3.0",
+          "pluginVersion": "12.3.0",
           "targets": [
             {
               "datasource": {
@@ -6153,6 +6003,7 @@
                   "type": "linear"
                 },
                 "showPoints": "auto",
+                "showValues": false,
                 "spanNulls": false,
                 "stacking": {
                   "group": "A",
@@ -6167,7 +6018,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": 0
                   }
                 ]
               },
@@ -6179,7 +6031,7 @@
             "h": 9,
             "w": 16,
             "x": 8,
-            "y": 934
+            "y": 52
           },
           "id": 129,
           "options": {
@@ -6190,11 +6042,12 @@
               "showLegend": true
             },
             "tooltip": {
+              "hideZeros": false,
               "mode": "multi",
               "sort": "desc"
             }
           },
-          "pluginVersion": "11.3.0",
+          "pluginVersion": "12.3.0",
           "targets": [
             {
               "datasource": {
@@ -6250,7 +6103,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": 0
                   },
                   {
                     "color": "red",
@@ -6265,7 +6119,7 @@
             "h": 6,
             "w": 13,
             "x": 0,
-            "y": 943
+            "y": 61
           },
           "id": 1,
           "options": {
@@ -6285,7 +6139,7 @@
             "textMode": "auto",
             "wideLayout": true
           },
-          "pluginVersion": "11.3.0",
+          "pluginVersion": "12.3.0",
           "targets": [
             {
               "datasource": {
@@ -6403,6 +6257,7 @@
                   "type": "linear"
                 },
                 "showPoints": "auto",
+                "showValues": false,
                 "spanNulls": false,
                 "stacking": {
                   "group": "A",
@@ -6418,7 +6273,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": 0
                   },
                   {
                     "color": "red",
@@ -6434,7 +6290,7 @@
             "h": 6,
             "w": 6,
             "x": 13,
-            "y": 943
+            "y": 61
           },
           "id": 147,
           "options": {
@@ -6445,11 +6301,12 @@
               "showLegend": true
             },
             "tooltip": {
+              "hideZeros": false,
               "mode": "single",
               "sort": "none"
             }
           },
-          "pluginVersion": "11.3.0",
+          "pluginVersion": "12.3.0",
           "targets": [
             {
               "datasource": {
@@ -6487,7 +6344,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": 0
                   }
                 ]
               },
@@ -6499,7 +6357,7 @@
             "h": 6,
             "w": 5,
             "x": 19,
-            "y": 943
+            "y": 61
           },
           "id": 148,
           "options": {
@@ -6519,7 +6377,7 @@
             "textMode": "auto",
             "wideLayout": true
           },
-          "pluginVersion": "11.3.0",
+          "pluginVersion": "12.3.0",
           "targets": [
             {
               "datasource": {
@@ -6623,7 +6481,7 @@
             "h": 1,
             "w": 12,
             "x": 0,
-            "y": 604
+            "y": 2027
           },
           "id": 198,
           "options": {
@@ -6733,7 +6591,7 @@
             "h": 1,
             "w": 12,
             "x": 12,
-            "y": 604
+            "y": 2027
           },
           "id": 200,
           "options": {
@@ -6843,7 +6701,7 @@
             "h": 1,
             "w": 12,
             "x": 0,
-            "y": 856
+            "y": 2279
           },
           "id": 204,
           "options": {
@@ -6952,7 +6810,7 @@
             "h": 1,
             "w": 12,
             "x": 12,
-            "y": 856
+            "y": 2279
           },
           "id": 206,
           "options": {
@@ -7108,7 +6966,7 @@
             "h": 6,
             "w": 12,
             "x": 0,
-            "y": 857
+            "y": 2280
           },
           "id": 30,
           "options": {
@@ -7285,7 +7143,7 @@
             "h": 6,
             "w": 12,
             "x": 12,
-            "y": 857
+            "y": 2280
           },
           "id": 34,
           "options": {
@@ -7464,7 +7322,7 @@
             "h": 6,
             "w": 12,
             "x": 0,
-            "y": 863
+            "y": 2286
           },
           "id": 12,
           "options": {
@@ -7641,7 +7499,7 @@
             "h": 6,
             "w": 12,
             "x": 12,
-            "y": 863
+            "y": 2286
           },
           "id": 15,
           "options": {
@@ -7820,7 +7678,7 @@
             "h": 6,
             "w": 12,
             "x": 0,
-            "y": 869
+            "y": 2292
           },
           "id": 14,
           "options": {
@@ -7997,7 +7855,7 @@
             "h": 6,
             "w": 12,
             "x": 12,
-            "y": 869
+            "y": 2292
           },
           "id": 13,
           "options": {
@@ -8194,7 +8052,7 @@
             "h": 1,
             "w": 24,
             "x": 0,
-            "y": 605
+            "y": 2028
           },
           "id": 207,
           "options": {
@@ -8269,7 +8127,7 @@
             "h": 10,
             "w": 8,
             "x": 0,
-            "y": 814
+            "y": 2237
           },
           "id": 180,
           "options": {
@@ -8416,7 +8274,7 @@
             "h": 10,
             "w": 16,
             "x": 8,
-            "y": 814
+            "y": 2237
           },
           "id": 181,
           "options": {
@@ -8502,7 +8360,7 @@
             "h": 3,
             "w": 8,
             "x": 0,
-            "y": 824
+            "y": 2247
           },
           "id": 5,
           "options": {
@@ -8596,7 +8454,7 @@
             "h": 3,
             "w": 8,
             "x": 8,
-            "y": 824
+            "y": 2247
           },
           "id": 153,
           "options": {
@@ -8692,7 +8550,7 @@
             "h": 3,
             "w": 8,
             "x": 16,
-            "y": 824
+            "y": 2247
           },
           "id": 152,
           "options": {
@@ -8787,7 +8645,7 @@
             "h": 3,
             "w": 8,
             "x": 0,
-            "y": 827
+            "y": 2250
           },
           "id": 4,
           "options": {
@@ -8881,7 +8739,7 @@
             "h": 3,
             "w": 8,
             "x": 8,
-            "y": 827
+            "y": 2250
           },
           "id": 154,
           "options": {
@@ -8975,7 +8833,7 @@
             "h": 3,
             "w": 8,
             "x": 16,
-            "y": 827
+            "y": 2250
           },
           "id": 17,
           "options": {
@@ -9083,7 +8941,7 @@
             "h": 1,
             "w": 12,
             "x": 0,
-            "y": 830
+            "y": 2253
           },
           "id": 194,
           "options": {
@@ -9193,7 +9051,7 @@
             "h": 1,
             "w": 12,
             "x": 12,
-            "y": 830
+            "y": 2253
           },
           "id": 196,
           "options": {
@@ -9303,7 +9161,7 @@
             "h": 1,
             "w": 12,
             "x": 0,
-            "y": 831
+            "y": 2254
           },
           "id": 199,
           "options": {
@@ -9412,7 +9270,7 @@
             "h": 1,
             "w": 12,
             "x": 12,
-            "y": 831
+            "y": 2254
           },
           "id": 197,
           "options": {
@@ -9562,7 +9420,7 @@
             "h": 6,
             "w": 12,
             "x": 0,
-            "y": 832
+            "y": 2255
           },
           "id": 166,
           "options": {
@@ -9736,7 +9594,7 @@
             "h": 6,
             "w": 12,
             "x": 12,
-            "y": 832
+            "y": 2255
           },
           "id": 167,
           "options": {
@@ -9912,7 +9770,7 @@
             "h": 6,
             "w": 12,
             "x": 0,
-            "y": 838
+            "y": 2261
           },
           "id": 168,
           "options": {
@@ -10082,7 +9940,7 @@
             "h": 6,
             "w": 12,
             "x": 12,
-            "y": 838
+            "y": 2261
           },
           "id": 169,
           "options": {
@@ -10258,7 +10116,7 @@
             "h": 6,
             "w": 12,
             "x": 0,
-            "y": 844
+            "y": 2267
           },
           "id": 170,
           "options": {
@@ -10428,7 +10286,7 @@
             "h": 6,
             "w": 12,
             "x": 12,
-            "y": 844
+            "y": 2267
           },
           "id": 171,
           "options": {
@@ -10604,7 +10462,7 @@
             "h": 6,
             "w": 12,
             "x": 0,
-            "y": 850
+            "y": 2273
           },
           "id": 213,
           "options": {
@@ -10774,7 +10632,7 @@
             "h": 6,
             "w": 12,
             "x": 12,
-            "y": 850
+            "y": 2273
           },
           "id": 214,
           "options": {
@@ -10893,7 +10751,7 @@
             "h": 4,
             "w": 12,
             "x": 0,
-            "y": 33
+            "y": 1456
           },
           "id": 19,
           "options": {
@@ -11018,7 +10876,7 @@
             "h": 4,
             "w": 12,
             "x": 12,
-            "y": 33
+            "y": 1456
           },
           "id": 151,
           "options": {
@@ -11131,7 +10989,7 @@
             "h": 8,
             "w": 12,
             "x": 0,
-            "y": 37
+            "y": 1460
           },
           "id": 145,
           "options": {
@@ -11209,7 +11067,7 @@
             "h": 8,
             "w": 12,
             "x": 12,
-            "y": 37
+            "y": 1460
           },
           "id": 144,
           "options": {
@@ -11287,7 +11145,7 @@
             "h": 10,
             "w": 4,
             "x": 0,
-            "y": 45
+            "y": 1468
           },
           "id": 149,
           "options": {
@@ -11449,7 +11307,7 @@
             "h": 10,
             "w": 20,
             "x": 4,
-            "y": 45
+            "y": 1468
           },
           "id": 211,
           "options": {
@@ -11577,7 +11435,7 @@
             "h": 9,
             "w": 4,
             "x": 0,
-            "y": 55
+            "y": 1478
           },
           "id": 210,
           "options": {
@@ -11715,7 +11573,7 @@
             "h": 9,
             "w": 20,
             "x": 4,
-            "y": 55
+            "y": 1478
           },
           "id": 212,
           "options": {
@@ -11832,7 +11690,7 @@
             "h": 8,
             "w": 12,
             "x": 0,
-            "y": 34
+            "y": 1457
           },
           "id": 141,
           "options": {
@@ -11906,7 +11764,7 @@
             "h": 8,
             "w": 12,
             "x": 12,
-            "y": 34
+            "y": 1457
           },
           "id": 142,
           "options": {
@@ -11974,7 +11832,7 @@
             "h": 5,
             "w": 24,
             "x": 0,
-            "y": 608
+            "y": 10
           },
           "id": 58,
           "options": {
@@ -11986,7 +11844,7 @@
             "content": "# Runbook Automation (RBA) Component\n\nThe runbook automation component manages and executes user/system defined actions and runbooks.\nIt can be broken down into the following sub-components:\n- ***Automation Service***: Responsible for executing all user/system-defined actions as well as managing related integrations such as Ansible and SSH connections.\n- ***Runbook Service***: Responsible for executing all user/system-defined runbooks. It also serves the publicly documented [Runbook Automation API](https://www.ibm.com/docs/en/cloud-paks/cloud-pak-aiops/latest?topic=apis-automation-runbook-api).",
             "mode": "markdown"
           },
-          "pluginVersion": "11.3.0",
+          "pluginVersion": "12.3.0",
           "title": "",
           "type": "text"
         },
@@ -11995,128 +11853,49 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "description": "Count that tracks the number of pods that were newly created within the time range.\n\nNew pods indicate restarts may have occurred which could result in loss of functionality. Review the pod uptime graph to see if any gaps in uptime occurred.\n\nNew pods don't always indicate a problem and in some cases are part of routine processing and scaling. ",
+          "description": "The 5 lowest uptimes within the component pods. Pod restarts can impact functionality, review the pod table and uptime graph for more details.",
           "fieldConfig": {
             "defaults": {
               "color": {
                 "mode": "thresholds"
               },
-              "mappings": [
-                {
-                  "options": {
-                    "0": {
-                      "color": "dark-green",
-                      "index": 0,
-                      "text": "pods are stable - no new pods within time range"
-                    },
-                    "1": {
-                      "color": "semi-dark-green",
-                      "index": 1,
-                      "text": "1 new pod within time range - review uptime graph for gaps"
-                    },
-                    "2": {
-                      "color": "green",
-                      "index": 2,
-                      "text": "2 new pods within time range - review uptime graph for gaps"
-                    },
-                    "3": {
-                      "color": "light-green",
-                      "index": 3,
-                      "text": "3 new pods within time range - review uptime graph for gaps"
-                    },
-                    "4": {
-                      "color": "super-light-green",
-                      "index": 4,
-                      "text": "4 new pods within time range - review uptime graph for gaps"
-                    },
-                    "5": {
-                      "color": "super-light-green",
-                      "index": 5,
-                      "text": "5 new pods within time range - review uptime graph for gaps"
-                    },
-                    "6": {
-                      "color": "super-light-yellow",
-                      "index": 6,
-                      "text": "6 new pods within time range - review uptime graph for gaps"
-                    },
-                    "7": {
-                      "color": "super-light-yellow",
-                      "index": 7,
-                      "text": "7 new pods within time range - review uptime graph for gaps"
-                    },
-                    "8": {
-                      "color": "light-yellow",
-                      "index": 8,
-                      "text": "8 new pods within time range - review uptime graph for gaps"
-                    },
-                    "9": {
-                      "color": "light-yellow",
-                      "index": 9,
-                      "text": "9 new pods within time range - review uptime graph for gaps"
-                    }
-                  },
-                  "type": "value"
-                },
-                {
-                  "options": {
-                    "from": 10,
-                    "result": {
-                      "color": "yellow",
-                      "index": 10,
-                      "text": "10-20 new pods within time range - review uptime graph for gaps"
-                    },
-                    "to": 20
-                  },
-                  "type": "range"
-                },
-                {
-                  "options": {
-                    "from": 21,
-                    "result": {
-                      "color": "light-red",
-                      "index": 11,
-                      "text": "21-40 new pods within time range - review uptime graph for gaps"
-                    },
-                    "to": 40
-                  },
-                  "type": "range"
-                },
-                {
-                  "options": {
-                    "from": 41,
-                    "result": {
-                      "color": "red",
-                      "index": 12,
-                      "text": "41+ new pods within time range - review uptime graph for gaps"
-                    },
-                    "to": 10000
-                  },
-                  "type": "range"
-                }
-              ],
-              "noValue": "pods are stable - no new pods within time range",
+              "mappings": [],
               "thresholds": {
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "dark-green"
+                    "color": "red",
+                    "value": 0
+                  },
+                  {
+                    "color": "#EAB839",
+                    "value": 3600
+                  },
+                  {
+                    "color": "super-light-yellow",
+                    "value": 43200
+                  },
+                  {
+                    "color": "green",
+                    "value": 86400
                   }
                 ]
-              }
+              },
+              "unit": "s"
             },
             "overrides": []
           },
           "gridPos": {
-            "h": 1,
+            "h": 3,
             "w": 24,
             "x": 0,
-            "y": 613
+            "y": 15
           },
-          "id": 202,
+          "id": 217,
           "options": {
             "colorMode": "background_solid",
             "graphMode": "none",
-            "justifyMode": "center",
+            "justifyMode": "auto",
             "orientation": "auto",
             "percentChangeColorMode": "standard",
             "reduceOptions": {
@@ -12128,12 +11907,13 @@
             },
             "showPercentChange": false,
             "text": {
+              "titleSize": 16,
               "valueSize": 20
             },
-            "textMode": "value",
+            "textMode": "auto",
             "wideLayout": true
           },
-          "pluginVersion": "11.3.0",
+          "pluginVersion": "12.3.0",
           "targets": [
             {
               "datasource": {
@@ -12141,13 +11921,13 @@
                 "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
-              "expr": "sum(((sum((time() - kube_pod_start_time{pod=~\"aiops-ir-core-rba.*\"}) - $__range_s) by (pod)) < 60) <= bool 0)",
+              "expr": "time() -topk(5, sum(kube_pod_start_time{pod=~\"aiops-ir-core-rba.*\"}) by (pod))",
               "legendFormat": "__auto",
               "range": true,
               "refId": "A"
             }
           ],
-          "title": "",
+          "title": "Lowest Pod Uptimes",
           "type": "stat"
         },
         {
@@ -12164,17 +11944,21 @@
               "custom": {
                 "align": "auto",
                 "cellOptions": {
-                  "type": "auto",
-                  "wrapText": true
+                  "type": "auto"
                 },
-                "inspect": false
+                "footer": {
+                  "reducers": []
+                },
+                "inspect": false,
+                "wrapText": true
               },
               "mappings": [],
               "thresholds": {
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": 0
                   }
                 ]
               }
@@ -12185,24 +11969,16 @@
             "h": 7,
             "w": 8,
             "x": 0,
-            "y": 614
+            "y": 18
           },
           "id": 155,
           "options": {
             "cellHeight": "sm",
-            "footer": {
-              "countRows": false,
-              "enablePagination": false,
-              "fields": "",
-              "reducer": [
-                "sum"
-              ],
-              "show": false
-            },
+            "enablePagination": false,
             "showHeader": true,
             "sortBy": []
           },
-          "pluginVersion": "11.3.0",
+          "pluginVersion": "12.3.0",
           "targets": [
             {
               "datasource": {
@@ -12305,6 +12081,7 @@
                   "type": "linear"
                 },
                 "showPoints": "auto",
+                "showValues": false,
                 "spanNulls": false,
                 "stacking": {
                   "group": "A",
@@ -12319,7 +12096,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": 0
                   }
                 ]
               },
@@ -12331,7 +12109,7 @@
             "h": 7,
             "w": 16,
             "x": 8,
-            "y": 614
+            "y": 18
           },
           "id": 95,
           "options": {
@@ -12342,11 +12120,12 @@
               "showLegend": true
             },
             "tooltip": {
+              "hideZeros": false,
               "mode": "multi",
               "sort": "desc"
             }
           },
-          "pluginVersion": "11.3.0",
+          "pluginVersion": "12.3.0",
           "targets": [
             {
               "datasource": {
@@ -12380,7 +12159,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": 0
                   }
                 ]
               },
@@ -12392,7 +12172,7 @@
             "h": 5,
             "w": 4,
             "x": 0,
-            "y": 621
+            "y": 25
           },
           "id": 97,
           "options": {
@@ -12410,7 +12190,7 @@
             "textMode": "auto",
             "wideLayout": true
           },
-          "pluginVersion": "11.3.0",
+          "pluginVersion": "12.3.0",
           "targets": [
             {
               "datasource": {
@@ -12444,7 +12224,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": 0
                   }
                 ]
               },
@@ -12456,7 +12237,7 @@
             "h": 5,
             "w": 4,
             "x": 4,
-            "y": 621
+            "y": 25
           },
           "id": 99,
           "options": {
@@ -12474,7 +12255,7 @@
             "textMode": "auto",
             "wideLayout": true
           },
-          "pluginVersion": "11.3.0",
+          "pluginVersion": "12.3.0",
           "targets": [
             {
               "datasource": {
@@ -12526,6 +12307,7 @@
                   "type": "linear"
                 },
                 "showPoints": "auto",
+                "showValues": false,
                 "spanNulls": false,
                 "stacking": {
                   "group": "A",
@@ -12540,7 +12322,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": 0
                   }
                 ]
               },
@@ -12613,7 +12396,7 @@
             "h": 10,
             "w": 16,
             "x": 8,
-            "y": 621
+            "y": 25
           },
           "id": 42,
           "options": {
@@ -12624,11 +12407,12 @@
               "showLegend": true
             },
             "tooltip": {
+              "hideZeros": false,
               "mode": "multi",
               "sort": "desc"
             }
           },
-          "pluginVersion": "11.3.0",
+          "pluginVersion": "12.3.0",
           "targets": [
             {
               "datasource": {
@@ -12711,7 +12495,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": 0
                   },
                   {
                     "color": "#EAB839",
@@ -12731,7 +12516,7 @@
             "h": 5,
             "w": 4,
             "x": 0,
-            "y": 626
+            "y": 30
           },
           "id": 98,
           "options": {
@@ -12749,7 +12534,7 @@
             "textMode": "auto",
             "wideLayout": true
           },
-          "pluginVersion": "11.3.0",
+          "pluginVersion": "12.3.0",
           "targets": [
             {
               "datasource": {
@@ -12783,7 +12568,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": 0
                   },
                   {
                     "color": "#EAB839",
@@ -12803,7 +12589,7 @@
             "h": 5,
             "w": 4,
             "x": 4,
-            "y": 626
+            "y": 30
           },
           "id": 100,
           "options": {
@@ -12821,7 +12607,7 @@
             "textMode": "auto",
             "wideLayout": true
           },
-          "pluginVersion": "11.3.0",
+          "pluginVersion": "12.3.0",
           "targets": [
             {
               "datasource": {
@@ -12855,7 +12641,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": 0
                   }
                 ]
               },
@@ -12867,7 +12654,7 @@
             "h": 5,
             "w": 4,
             "x": 0,
-            "y": 631
+            "y": 35
           },
           "id": 101,
           "options": {
@@ -12885,7 +12672,7 @@
             "textMode": "auto",
             "wideLayout": true
           },
-          "pluginVersion": "11.3.0",
+          "pluginVersion": "12.3.0",
           "targets": [
             {
               "datasource": {
@@ -12919,7 +12706,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": 0
                   }
                 ]
               },
@@ -12931,7 +12719,7 @@
             "h": 5,
             "w": 4,
             "x": 4,
-            "y": 631
+            "y": 35
           },
           "id": 102,
           "options": {
@@ -12949,7 +12737,7 @@
             "textMode": "auto",
             "wideLayout": true
           },
-          "pluginVersion": "11.3.0",
+          "pluginVersion": "12.3.0",
           "targets": [
             {
               "datasource": {
@@ -13001,6 +12789,7 @@
                   "type": "linear"
                 },
                 "showPoints": "auto",
+                "showValues": false,
                 "spanNulls": false,
                 "stacking": {
                   "group": "A",
@@ -13015,7 +12804,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": 0
                   }
                 ]
               },
@@ -13088,7 +12878,7 @@
             "h": 10,
             "w": 16,
             "x": 8,
-            "y": 631
+            "y": 35
           },
           "id": 45,
           "options": {
@@ -13099,11 +12889,12 @@
               "showLegend": true
             },
             "tooltip": {
+              "hideZeros": false,
               "mode": "multi",
               "sort": "desc"
             }
           },
-          "pluginVersion": "11.3.0",
+          "pluginVersion": "12.3.0",
           "targets": [
             {
               "datasource": {
@@ -13202,7 +12993,7 @@
             "h": 5,
             "w": 4,
             "x": 0,
-            "y": 636
+            "y": 40
           },
           "id": 103,
           "options": {
@@ -13274,7 +13065,7 @@
             "h": 5,
             "w": 4,
             "x": 4,
-            "y": 636
+            "y": 40
           },
           "id": 104,
           "options": {
@@ -13393,7 +13184,7 @@
             "h": 1,
             "w": 12,
             "x": 0,
-            "y": 4617
+            "y": 6040
           },
           "id": 203,
           "options": {
@@ -13503,7 +13294,7 @@
             "h": 1,
             "w": 12,
             "x": 12,
-            "y": 4617
+            "y": 6040
           },
           "id": 205,
           "options": {
@@ -13613,7 +13404,7 @@
             "h": 1,
             "w": 12,
             "x": 0,
-            "y": 4618
+            "y": 6041
           },
           "id": 190,
           "options": {
@@ -13722,7 +13513,7 @@
             "h": 1,
             "w": 12,
             "x": 12,
-            "y": 4618
+            "y": 6041
           },
           "id": 201,
           "options": {
@@ -13871,7 +13662,7 @@
             "h": 7,
             "w": 12,
             "x": 0,
-            "y": 4619
+            "y": 6042
           },
           "id": 50,
           "options": {
@@ -14041,7 +13832,7 @@
             "h": 7,
             "w": 12,
             "x": 12,
-            "y": 4619
+            "y": 6042
           },
           "id": 7,
           "options": {
@@ -14213,7 +14004,7 @@
             "h": 8,
             "w": 12,
             "x": 0,
-            "y": 4626
+            "y": 6049
           },
           "id": 52,
           "options": {
@@ -14385,7 +14176,7 @@
             "h": 8,
             "w": 12,
             "x": 12,
-            "y": 4626
+            "y": 6049
           },
           "id": 31,
           "options": {
@@ -14451,7 +14242,8 @@
       "type": "row"
     }
   ],
-  "schemaVersion": 41,
+  "preload": false,
+  "schemaVersion": 42,
   "tags": [],
   "templating": {
     "list": []
@@ -14464,7 +14256,7 @@
   "timezone": "browser",
   "title": "IBM Cloud Pak for AIOps - Event Processing",
   "uid": "cba10e90-4d65-4e53-ba73-13ec30de6f85",
-  "version": 3,
-  "weekStart": ""
+  "version": 2,
+  "weekStart": "",
+  "id": null
 }
-
