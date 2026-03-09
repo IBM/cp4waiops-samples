@@ -391,12 +391,7 @@ describe('Schema test', () => {
         'parentid',
         'parenttype',
         'policyid',
-        'runbookid',
         'runbookinstanceid',
-        'runbookname',
-        'runbookstatus',
-        'runbooktype',
-        'runbookversion',
         'tenantid',
         'timeadded',
         'type',
@@ -450,12 +445,7 @@ describe('Schema test', () => {
         userid: 'testuser@example.com',
         comment: 'This is a test comment on the alert',
         policyid: null,
-        runbookid: null,
-        runbookname: null,
-        runbookversion: null,
         runbookinstanceid: null,
-        runbookstatus: null,
-        runbooktype: null,
         actioninstanceid: null,
         timeadded: new Date('2024-09-10T23:21:46.000Z'),
         oldvalue: null,
@@ -509,12 +499,7 @@ describe('Schema test', () => {
         userid: 'system',
         comment: 'Runbook executed successfully',
         policyid: null,
-        runbookid: 'runbook-123',
-        runbookname: 'Restart Service',
-        runbookversion: 1,
         runbookinstanceid: 'instance-456',
-        runbookstatus: 'completed',
-        runbooktype: 'automated',
         actioninstanceid: 'action-789',
         timeadded: new Date('2024-09-10T23:21:46.000Z'),
         oldvalue: null,
@@ -526,13 +511,11 @@ describe('Schema test', () => {
       await client.query(`
         INSERT INTO ACTIVITY_ENTRY (
           tenantid, id, parentId, parentType, createdTime, type, userId, comment,
-          runbookId, runbookName, runbookVersion, runbookInstanceId,
-          runbookStatus, runbookType, actionInstanceId, timeAdded, uuid
+          runbookInstanceId, actionInstanceId, timeAdded, uuid
         ) VALUES (
           'cfd95b7e-3bc7-4006-a4a8-a73a79c71255', 'activity-002',
           'ea6cf743-7a3a-4d1a-8d6f-faaa1df573d5', 'alert', '${mockDate}', 'automation',
-          'system', 'Runbook executed successfully', 'runbook-123',
-          'Restart Service', 1, 'instance-456', 'completed', 'automated',
+          'system', 'Runbook executed successfully', 'instance-456',
           'action-789', '${mockDate}',
           'cfd95b7e-3bc7-4006-a4a8-a73a79c71255_activity-002'
         )
