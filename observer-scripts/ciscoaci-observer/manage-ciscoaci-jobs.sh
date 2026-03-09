@@ -376,8 +376,6 @@ parse_job_list() {
     log_success "Found $TOTAL_JOBS job(s) to process"
 }
 
-# Made with Bob
-
 ################################################################################
 # CREATE/UPDATE ACTION FUNCTIONS
 ################################################################################
