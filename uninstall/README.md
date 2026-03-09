@@ -2,9 +2,15 @@
 
 # Uninstall Cloud Pak for Watson AIOps
 
-The scripts provided here can be used to uninstall Cloud Pak for Watson AIOps and delete resources created by it.  
+The scripts provided here can be used to uninstall Cloud Pak for Watson AIOps and delete resources created by it.
 
 Note: For uninstall scripts v3.x, the script includes optionally uninstalling the IBM Automation Foundation (IAF).  IAF is the common layer shared by multiple Cloud Paks. IAF has been removed from CP4WAIOPS v4.1 and up.
+
+## Deprecation Notice
+
+**The uninstall script support has been deprecated starting from version 4.13.**
+
+For Cloud Pak for Watson AIOps version 4.13 and later, please refer to the [official IBM documentation](https://www.ibm.com/docs/en/cloud-paks/cloud-pak-watson-aiops) for the latest uninstall procedures and best practices.
 
 ## Prereqs
 - You need to have OC CLI installed
@@ -30,7 +36,7 @@ Once you have carefully reviewed and decided on what to delete, you can move for
 The `./x.y/uninstall-cp4waiops-props.sh` file is used to tell the uninstall script what to uninstall and cleanup.  Update the properties in this file with your preference.  An explanation for each property is provided in the file.
 
 ## Running the uninstall script
-Once you have updated the `./x.y/uninstall-cp4waiops-props.sh` file, you are ready to run the script!  
+Once you have updated the `./x.y/uninstall-cp4waiops-props.sh` file, you are ready to run the script!
 
 To run the uninstall, you can run
 ```
@@ -39,3 +45,22 @@ To run the uninstall, you can run
 ```
 
 You can choose to skip confirmation messages by passing in `-s`.
+
+## Optional: Removing Custom Resource Definitions (CRDs)
+
+After running the uninstall command, you may optionally remove the Custom Resource Definitions (CRDs) that were deployed by Cloud Pak for Watson AIOps. This is an optional cleanup step that should only be performed if you are certain you will not be reinstalling CP4WAIOps.
+
+**Warning:** Removing CRDs is a destructive operation. Ensure all custom resources have been properly deleted before removing the CRDs.
+
+To remove the CRDs, run:
+```
+  cd uninstall
+  ./remove-crds.sh
+```
+
+The script will:
+1. Check for any remaining custom resources associated with CP4WAIOps CRDs
+2. Exit with an error if any custom resources are still present
+3. Delete all CP4WAIOps CRDs if no custom resources remain
+
+**Note:** Only run this script after successfully completing the uninstall process and verifying that all CP4WAIOps resources have been removed.
