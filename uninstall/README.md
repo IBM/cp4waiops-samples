@@ -4,7 +4,7 @@
 
 The scripts provided here can be used to uninstall Cloud Pak for AIOps and delete resources created by it.
 
-Note: For uninstall scripts v3.x, the script includes optionally uninstalling the IBM Automation Foundation (IAF).  IAF is the common layer shared by multiple Cloud Paks. IAF has been removed from CP4WAIOPS v4.1 and up.
+Note: For uninstall scripts v3.x, the script includes optionally uninstalling the IBM Automation Foundation (IAF).  IAF is the common layer shared by multiple Cloud Paks. IAF has been removed from CP4AIOps v4.1 and up.
 
 ## Deprecation Notice
 
@@ -48,7 +48,7 @@ You can choose to skip confirmation messages by passing in `-s`.
 
 ## Optional: Removing Custom Resource Definitions (CRDs)
 
-After running the uninstall command, you may optionally remove the Custom Resource Definitions (CRDs) that were deployed by Cloud Pak for AIOps. This is an optional cleanup step that should only be performed if you are certain you will not be reinstalling CP4WAIOps.
+After running the uninstall command, you may optionally remove the Custom Resource Definitions (CRDs) that were deployed by Cloud Pak for AIOps. This is an optional cleanup step that should only be performed if you are certain you will not be reinstalling CP4AIOps.
 
 **Warning:** Removing CRDs is a destructive operation. Ensure all custom resources have been properly deleted before removing the CRDs.
 
@@ -59,8 +59,8 @@ To remove the CRDs, run:
 ```
 
 The script will:
-1. Check for any remaining custom resources associated with CP4WAIOps CRDs
+1. Check for any remaining custom resources associated with CP4AIOps CRDs
 2. Exit with an error if any custom resources are still present
-3. Delete all CP4WAIOps CRDs if no custom resources remain
+3. Delete all CP4AIOps CRDs if no custom resources remain
 
-**Note:** Only run this script after successfully completing the uninstall process and verifying that all CP4WAIOps resources have been removed.
+**Note:** Only run this script after successfully completing the uninstall process and verifying that all CP4AIOps resources have been removed.
