@@ -88,25 +88,50 @@ camIdentity,defaultName,type
 
 ## Importing into Cognos Analytics
 
+**IMPORTANT PREREQUISITES:**
+- Imports can **only** be performed by a user who is authenticated from the namespace itself (the one created by `setupCognos.sh`)
+- You must complete the `setupCognos.sh` integration process before attempting imports
+
+**CRITICAL: Automatic User and Group Creation**
+
+When a user logs into Cognos for the first time using the AIOps namespace (after running `setupCognos.sh`), Cognos automatically creates:
+1. The user account in the namespace
+2. All LDAP groups that the user belongs to
+
+Therefore, you **MUST exclude** from your CSV files:
+- Any users who have already logged into Cognos using the AIOps namespace (including the user performing the imports)
+- Any LDAP groups that already-logged-in users belong to
+
+**Recommended Workflow:**
+1. Complete the `setupCognos.sh` integration
+2. Have the administrator log into Cognos using the AIOps namespace (this creates their account and groups automatically)
+3. Create CSV files that **exclude** the administrator and their groups
+4. Perform the imports as described below
+5. Subsequent users will be created automatically when they first log in, or can be pre-imported using this process
+
 ### Importing Users
 
-1. Log into Cognos Analytics as an administrator
+1. Log into Cognos Analytics using the AIOps namespace authentication (not as a Cognos admin from another namespace)
 2. Navigate to **Manage** > **People** > **Accounts**
 3. Select your namespace (the one created by the `setupCognos.sh` script)
 4. Click the **Import user or group** icon in the top right corner of the table
 5. Follow the import wizard and upload your `users.csv` file
 6. After some time the page should refresh and the users will appear. It may take a short while for all users to be added, but you can use the refresh icon to check on the status of the import
 
+**Note:** Omit any users who have already logged into Cognos from this namespace, as they will already exist.
+
 For detailed instructions, see: [Creating a CSV file containing user account information](https://www.ibm.com/docs/en/cognos-analytics/12.1.x?topic=namespaces-creating-csv-file-containing-user-account-information)
 
 ### Importing Groups
 
-1. Log into Cognos Analytics as an administrator
+1. Log into Cognos Analytics using the AIOps namespace authentication (not as a Cognos admin from another namespace)
 2. Navigate to **Manage** > **People** > **Accounts**
 3. Select your namespace (the one created by the `setupCognos.sh` script)
 4. Click the **Import user or group** icon in the top right corner of the table
 5. Follow the import wizard and upload your `groups.csv` file
-6. After some time the page should refresh and the groups will appear. It may take a short while for all users to be added, but you can use the refresh icon to check on the status of the import
+6. After some time the page should refresh and the groups will appear. It may take a short while for all groups to be added, but you can use the refresh icon to check on the status of the import
+
+**Note:** Omit any groups that already-logged-in users belong to, as these groups will have been automatically created when those users first logged in.
 
 For detailed instructions, see: [Creating a CSV file containing group information](https://www.ibm.com/docs/en/cognos-analytics/12.1.x?topic=namespaces-creating-csv-file-containing-group-information)
 
