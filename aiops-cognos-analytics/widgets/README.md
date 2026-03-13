@@ -19,7 +19,7 @@ From the `aiops-cognos-analytics/widgets` path run
 ./installWidgets.sh -u cognos_url [-k cognos_api_key]
 ```
 
-`-u cognos_url` (required) Cognos server in the form of `http(s)://hostname:port`
+`-u cognos_url` (required) Cognos server in the form of `http(s)://hostname:port`. Do not include the gateway (e.g `/bi`).
 
 `-k cognos_api_key` (optional) API key of the Cognos user installing the widgets. If no API key is specified, anonymous user will be used.
 
