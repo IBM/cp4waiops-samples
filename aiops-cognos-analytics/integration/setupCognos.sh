@@ -334,10 +334,16 @@ function createNamespace() {
         "clientId": "$clientId",
         "returnUrl": "$url$gateway/completeAuth.jsp",
         "clientSecret": "$clientSecret",
+        "acMemberOf": "groups",
         "customProperties": {
           "preferred_username": "preferred_username",
           "uniqueSecurityName": "uniqueSecurityName",
           "aiops_proxy": "$cpdRoute"
+        },
+        "advancedProperties": {
+          "groupStrategy": "idToken",
+          "groupIdMapping": "groupIds",
+          "groupNameMapping": "groups"
         }
       }
 EOF
@@ -371,10 +377,16 @@ EOF
         "accountCamidProperty": "uniqueSecurityName",
         "acEmail": "email",
         "acUsername": "preferred_username",
+        "acMemberOf": "groups",
         "customProperties": {
           "preferred_username": "preferred_username",
           "uniqueSecurityName": "uniqueSecurityName",
           "aiops_proxy": "$cpdRoute"
+        },
+        "advancedProperties": {
+          "groupStrategy": "idToken",
+          "groupIdMapping": "groupIds",
+          "groupNameMapping": "groups"
         }
       }
 EOF
@@ -447,10 +459,10 @@ function main() {
     createNamespace
     createUIExtension
   else
-    # removeClient
-    # removeFromAllowList
+    removeClient
+    removeFromAllowList
     removeNamespace
-    # removeUIExtension
+    removeUIExtension
   fi
   echo "Done"
 }
