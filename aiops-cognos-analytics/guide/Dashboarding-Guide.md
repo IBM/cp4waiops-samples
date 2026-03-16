@@ -185,6 +185,13 @@ Follow the respective Readme files in each section to setup Cognos and AIOps to 
 
 For any roles that require visibility of the Cognos navigation entries you can add the required permission via the Access Control UI. View the [user access control documentation](https://www.ibm.com/docs/en/cloud-paks/cloud-pak-aiops/latest?topic=pak-managing-user-access-control) for overall details, and add the appropriate dashboarding role.
 
+### Configure access control in Cognos
+The integration sets up an OIDC flow between Cognos and AIOps, but does not provide any mapping of users/groups into Cognos. However, it is possible to do this manually by using the following guidance:
+
+For LDAP user and group management, see [Importing Users and Groups](../integration/ImportingUsersAndGroups.md).
+
+Whilst the guide is LDAP oriented, in theory it can be adjusted if you are using a different IdP for AIOps. The `camIdentity` will need to be adjusted accordingly to match the identifiers of the underlying IdP you are using.
+
 ### Connecting AIOps to DB2
 
 Using the IBM Db2 integration is straightforward. Navigate to **Menu → Define → Integrations**, click **'Add integration +'** and search for IBM Db2. Follow the on-screen guidance, or the [IBM documentation](https://www.ibm.com/docs/en/cloud-paks/cloud-pak-aiops/latest?topic=integrations-db2-integration).

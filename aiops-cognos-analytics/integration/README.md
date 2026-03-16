@@ -9,9 +9,9 @@ Configure OIDC authentication and single sign-on (SSO) between IBM Cloud Pak for
   - The Cognos administrator will first need to "Renew" credentials if "My credentials - Manage" is disabled.
   ![credentials](../images/credentials.png)
   - The Cognos user should have administration capabilities "Manage Namespaces" and "Users, Groups, and Roles".
-  
+
 - From the command-line, authenticate with the Cloud Pak for AIOps cluster as an admin user with `kubectl` or `oc`.
-- Add the Cloud Pak for AIOps cluster CA to Cognos as documented [here](https://www.ibm.com/docs/en/cognos-analytics/12.0.0?topic=servers-copying-ca-certificate-cognos). If you're using 
+- Add the Cloud Pak for AIOps cluster CA to Cognos as documented [here](https://www.ibm.com/docs/en/cognos-analytics/12.0.0?topic=servers-copying-ca-certificate-cognos). If you're using
 the default [OpenShift ingress CA](https://docs.openshift.com/container-platform/4.16/security/certificate_types_descriptions/ingress-certificates.html), find it by running
 
 ```bash
@@ -39,6 +39,8 @@ kubectl get -n openshift-ingress-operator secrets router-ca -o jsonpath={.data."
 <a id="notes-section"></a>
 ## Additional notes
 - **IMPORTANT**: If you had previously run setupCognos.sh and later upgraded to Cloud Pak for AIOps 4.12, you may see an error "redirect URI was not valid" when authenticating with Cognos. Download the latest setupCognos.sh script and re-run it to fix the problem.
+
+- For information on importing LDAP users and groups into Cognos Analytics, see [Importing Users and Groups](ImportingUsersAndGroups.md).
 
 - SSO with OpenShift is currently not supported.
 

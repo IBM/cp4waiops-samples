@@ -5,7 +5,7 @@ Create custom dashboards in IBM Cognos Analytics using Cloud Pak for AIOps data.
 ## Content
 
 ### [IBM Cognos Analytics + Cloud Pak for AIOps](integration/README.md)
-Integrate an existing IBM Cognos Analytics server with a Cloud Pak for AIOps cluster.
+Integrate an existing IBM Cognos Analytics server with a Cloud Pak for AIOps cluster. See also [Importing Users and Groups](integration/ImportingUsersAndGroups.md) for LDAP user and group management.
 
 ### [Schemas](schemas/README.md)
 Install default schemas for storing IBM Cloud Pak for AIOps data in DB2.
