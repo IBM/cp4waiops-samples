@@ -1,14 +1,4 @@
 {
-  "__inputs": [
-    {
-      "name": "DS_PROMETHEUS",
-      "label": "Prometheus",
-      "description": "",
-      "type": "datasource",
-      "pluginId": "prometheus",
-      "pluginName": "Prometheus"
-    }
-  ],
   "__elements": {},
   "__requires": [
     {
@@ -87,8 +77,7 @@
       "panels": [
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Percentage of CPU usage across all nodes taken at 5 minute averages",
           "fieldConfig": {
@@ -158,8 +147,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "expr": "sum (rate (container_cpu_usage_seconds_total{id=\"/\",node=~\"^.*$\"}[5m])) / sum (machine_cpu_cores{ node=~\"^.*$\"}) * 100",
               "format": "time_series",
@@ -174,8 +162,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Percentage of memory usage across all nodes",
           "fieldConfig": {
@@ -244,8 +231,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "expr": "sum (container_memory_working_set_bytes{id=\"/\",node=~\"^.*$\"}) / sum (machine_memory_bytes{node=~\"^.*$\"}) * 100",
               "format": "time_series",
@@ -260,8 +246,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Percentage of filesystem usage across all nodes",
           "fieldConfig": {
@@ -331,8 +316,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "expr": "sum (container_fs_usage_bytes{device=~\"^/dev/.*$\",id=\"/\",node=~\"^.*$\"}) / sum (container_fs_limit_bytes{device=~\"^/dev/.*$\",id=\"/\",node=~\"^.*$\"}) * 100",
               "format": "time_series",
@@ -349,8 +333,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Sum of the 5 min avg of the cumulative cpu time consumed in seconds for all nodes",
           "fieldConfig": {
@@ -415,8 +398,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum (rate (container_cpu_usage_seconds_total{id=\"/\",node=~\"^.*$\"}[5m]))",
@@ -433,8 +415,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Total number of logical cores across all nodes",
           "fieldConfig": {
@@ -499,8 +480,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum (machine_cpu_cores{node=~\"^.*$\"})",
@@ -516,8 +496,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "fieldConfig": {
             "defaults": {
@@ -581,8 +560,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "expr": "sum (container_memory_working_set_bytes{id=\"/\",node=~\"^.*$\"})",
               "interval": "10s",
@@ -596,8 +574,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "fieldConfig": {
             "defaults": {
@@ -661,8 +638,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "expr": "sum (machine_memory_bytes{node=~\"^.*$\"})",
               "interval": "10s",
@@ -676,8 +652,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "fieldConfig": {
             "defaults": {
@@ -741,8 +716,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "expr": "sum (container_fs_usage_bytes{device=~\"^/dev/.*$\",id=\"/\",node=~\"^.*$\"})",
               "interval": "10s",
@@ -756,8 +730,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "fieldConfig": {
             "defaults": {
@@ -821,8 +794,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "expr": "sum (container_fs_limit_bytes{device=~\"^/dev/.*$\",id=\"/\",node=~\"^.*$\"})",
               "interval": "10s",
@@ -850,8 +822,7 @@
       "panels": [
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Sum of nodes in a \"ready\" state across a period of time",
           "fieldConfig": {
@@ -947,8 +918,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "expr": "sum(kube_node_info{node=~\".*\"})",
               "format": "time_series",
@@ -958,8 +928,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "expr": "sum(kube_node_status_condition{condition=\"Ready\", node=~\".*\", status!=\"true\"})",
               "format": "time_series",
@@ -974,8 +943,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Number of nodes experiencing low disk space (default value of 85%)",
           "fieldConfig": {
@@ -1043,8 +1011,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "expr": "sum(kube_node_status_condition{condition=\"DiskPressure\", node=~\".*\", status!=\"false\"})",
               "format": "time_series",
@@ -1057,8 +1024,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Number of nodes experiencing memory pressure",
           "fieldConfig": {
@@ -1126,8 +1092,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "expr": "sum(kube_node_status_condition{condition=\"MemoryPressure\", node=~\".*\", status!=\"false\"})",
               "format": "time_series",
@@ -1140,8 +1105,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Number of nodes experiencing PID pressure",
           "fieldConfig": {
@@ -1209,8 +1173,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "expr": "sum(kube_node_status_condition{condition=\"PIDPressure\", node=~\".*\", status!=\"false\"})",
               "format": "time_series",
@@ -1223,8 +1186,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Number of nodes that are unschedulable. New pods cannot be scheduled on nodes in this state.",
           "fieldConfig": {
@@ -1292,8 +1254,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "expr": "sum(kube_node_spec_unschedulable{node=~\".*\"})",
               "format": "time_series",
@@ -1306,8 +1267,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Number of nodes that are out of disk storage",
           "fieldConfig": {
@@ -1368,8 +1328,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "expr": "sum(kube_node_status_condition{condition=\"OutOfDisk\", node=~\".*\", status=\"true\"})",
               "format": "time_series",
@@ -1382,8 +1341,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Number of nodes with a \"NetworkUnavailable\" status",
           "fieldConfig": {
@@ -1451,8 +1409,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "expr": "sum(kube_node_status_condition{condition=\"NetworkUnavailable\", node=~\".*\", status!=\"false\"})",
               "format": "time_series",
@@ -1479,8 +1436,7 @@
       "panels": [
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Count of PVCs in a \"bound\" state",
           "fieldConfig": {
@@ -1527,8 +1483,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "count(kube_persistentvolumeclaim_status_phase{namespace=\"$namespace\",phase=\"Bound\"})",
@@ -1542,8 +1497,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "fieldConfig": {
             "defaults": {
@@ -1589,8 +1543,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum by (phase)(kube_persistentvolumeclaim_status_phase{namespace=\"$namespace\",phase!~\"Bound\"})",
@@ -1604,8 +1557,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "PVC usage percentage for each PVC in the namespace, thresholds of 85% & 95% usage",
           "fieldConfig": {
@@ -1667,8 +1619,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sort_desc(kubelet_volume_stats_used_bytes{namespace=\"$namespace\"}/kubelet_volume_stats_capacity_bytes{namespace=\"$namespace\"} * 100) or sort_desc(kubelet_volume_stats_used_bytes{exported_namespace=\"$namespace\"}/kubelet_volume_stats_capacity_bytes{exported_namespace=\"$namespace\"} * 100)",
@@ -1682,8 +1633,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Max and current PVC usage",
           "fieldConfig": {
@@ -1772,8 +1722,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum by (persistentvolumeclaim) (kubelet_volume_stats_used_bytes{namespace=\"$namespace\"}/kubelet_volume_stats_capacity_bytes{namespace=\"$namespace\"} * 100) or sum by (persistentvolumeclaim) (kubelet_volume_stats_used_bytes{exported_namespace=\"$namespace\"}/kubelet_volume_stats_capacity_bytes{exported_namespace=\"$namespace\"} * 100)",
@@ -1802,8 +1751,7 @@
       "panels": [
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Number of pods in a \"running\" state in $namespace namespace",
           "fieldConfig": {
@@ -1869,8 +1817,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "expr": "sum(kube_pod_status_phase{namespace=\"$namespace\", phase=\"Running\"})",
               "format": "time_series",
@@ -1884,8 +1831,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Number of pods in a \"succeeded\" state in $namespace namespace",
           "fieldConfig": {
@@ -1951,8 +1897,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "expr": "sum(kube_pod_status_phase{namespace=\"$namespace\", phase=\"Succeeded\"})",
               "format": "time_series",
@@ -1966,8 +1911,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Number of pods in a \"failed\" state in $namespace namespace",
           "fieldConfig": {
@@ -2029,8 +1973,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "expr": "sum(kube_pod_status_phase{namespace=\"$namespace\", phase=\"Failed\"})",
               "format": "time_series",
@@ -2044,8 +1987,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Number of pods in an \"unknown\" state in $namespace namespace",
           "fieldConfig": {
@@ -2111,8 +2053,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "expr": "sum(kube_pod_status_phase{namespace=\"$namespace\", phase=\"Unknown\"})",
               "format": "time_series",
@@ -2126,8 +2067,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Number of pods in a \"pending\" state in $namespace namespace",
           "fieldConfig": {
@@ -2185,8 +2125,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "builder",
               "expr": "sum(kube_pod_container_status_waiting_reason{namespace=\"$namespace\"}) by (pod, reason)",
@@ -2230,8 +2169,7 @@
       {
         "current": {},
         "datasource": {
-          "type": "prometheus",
-          "uid": "${DS_PROMETHEUS}"
+          "name": "prometheus"
         },
         "definition": "label_values(kube_namespace_status_phase{job=\"kube-state-metrics\", cluster=\"$cluster\"}, namespace)",
         "includeAll": false,
@@ -2249,8 +2187,7 @@
       {
         "current": {},
         "datasource": {
-          "type": "prometheus",
-          "uid": "${DS_PROMETHEUS}"
+          "name": "prometheus"
         },
         "definition": "label_values(up{job=\"kube-state-metrics\"}, cluster)",
         "hide": 2,

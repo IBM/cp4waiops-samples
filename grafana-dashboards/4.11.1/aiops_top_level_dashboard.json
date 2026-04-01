@@ -1,14 +1,4 @@
 {
-  "__inputs": [
-    {
-      "name": "DS_PROMETHEUS",
-      "label": "prometheus",
-      "description": "",
-      "type": "datasource",
-      "pluginId": "prometheus",
-      "pluginName": "Prometheus"
-    }
-  ],
   "__elements": {},
   "__requires": [
     {
@@ -156,8 +146,7 @@
     },
     {
       "datasource": {
-        "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "name": "prometheus"
       },
       "description": "Current number of nodes in a non-ready state across the entire cluster. Prolonged node outages can disrupt functionality if not handled quickly. Review the health of your nodes to get them back in a ready state. ",
       "fieldConfig": {
@@ -204,8 +193,7 @@
       "targets": [
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "editorMode": "code",
           "expr": "sum(kube_node_status_condition{condition=\"Ready\", node=~\".*\", status=\"true\"})",
@@ -219,8 +207,7 @@
     },
     {
       "datasource": {
-        "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "name": "prometheus"
       },
       "description": "Current number of nodes in a non-ready state across the entire cluster. Prolonged node outages can disrupt functionality if not handled quickly. Review the health of your nodes to get them back in a ready state. ",
       "fieldConfig": {
@@ -279,8 +266,7 @@
       "targets": [
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "editorMode": "code",
           "expr": "sum(kube_node_status_condition{condition=\"Ready\", node=~\".*\", status=~\"False|Unknown\"}) or vector(0)",
@@ -294,8 +280,7 @@
     },
     {
       "datasource": {
-        "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "name": "prometheus"
       },
       "description": "This panel shows the CPU utilization across the entire cluster. Consistently high CPU usage will lead to slower processing, ensure CPU is allocated appropriately.",
       "fieldConfig": {
@@ -355,8 +340,7 @@
       "targets": [
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "editorMode": "code",
           "expr": "sum (rate (container_cpu_usage_seconds_total{id=\"/\",node=~\"^.*$\"}[5m])) / sum (machine_cpu_cores{node=~\"^.*$\"}) * 100",
@@ -370,8 +354,7 @@
     },
     {
       "datasource": {
-        "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "name": "prometheus"
       },
       "description": "This panel shows the memory utilization across the entire cluster. Consistently high memory usage can lead to pods getting killed, potentially resulting in loss of functionality. Ensure allocated memory is sufficient to avoid this.",
       "fieldConfig": {
@@ -431,8 +414,7 @@
       "targets": [
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "editorMode": "code",
           "expr": "sum(container_memory_working_set_bytes{id=\"/\"})\n/\nsum(machine_memory_bytes)\n* 100\n",
@@ -446,8 +428,7 @@
     },
     {
       "datasource": {
-        "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "name": "prometheus"
       },
       "description": "Number of PVCs that have exceeded 50% of their allocated storage within the selected namespace . PVCs approaching/exceeding 100% will cause pod failures, leading to loss of functionality. To view more PVC details, refer to the Health dashboard under the \"Storage Health\" section.",
       "fieldConfig": {
@@ -499,8 +480,7 @@
       "targets": [
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "editorMode": "code",
           "expr": "count(kubelet_volume_stats_used_bytes{namespace=\"$namespace\"}/kubelet_volume_stats_capacity_bytes{namespace=\"$namespace\"} * 100 > 50) or vector(0)",
@@ -514,8 +494,7 @@
     },
     {
       "datasource": {
-        "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "name": "prometheus"
       },
       "description": "Number of PVCs that have exceeded 80% of their allocated storage within the selected namespace . PVCs approaching/exceeding 100% will cause pod failures, leading to loss of functionality. To view more PVC details, refer to the Health dashboard under the \"Storage Health\" section.",
       "fieldConfig": {
@@ -583,8 +562,7 @@
       "targets": [
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "editorMode": "code",
           "expr": "count(kubelet_volume_stats_used_bytes{namespace=\"$namespace\"}/kubelet_volume_stats_capacity_bytes{namespace=\"$namespace\"} * 100 > 80) or vector(0)",
@@ -611,8 +589,7 @@
     },
     {
       "datasource": {
-        "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "name": "prometheus"
       },
       "description": "Refer to the \"Event Processing dashboard\" -> \"Policy Automation Dependencies\" for further details.\n\nCount that tracks the number of pods that were newly created within the time range.\n\nNew pods indicate restarts may have occurred which could result in loss of functionality. Review the pod uptime time graph to see if any gaps in uptime occurred.\n\nNew pods don't always indicate a problem and in some cases are part of routine processing and scaling. ",
       "fieldConfig": {
@@ -686,8 +663,7 @@
       "targets": [
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "editorMode": "code",
           "expr": "sum(((sum((time() - kube_pod_start_time{pod=~\"aiops-topology-cassandra-.*\"}) - $__range_s) by (pod)) < 60) <= bool 0)",
@@ -701,8 +677,7 @@
     },
     {
       "datasource": {
-        "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "name": "prometheus"
       },
       "description": "Count that tracks the number of pods that were newly created within the time range.\n\nNew pods indicate restarts may have occurred which could result in loss of functionality. Review the pod uptime time graph to see if any gaps in uptime occurred.\n\nNew pods don't always indicate a problem and in some cases are part of routine processing and scaling. ",
       "fieldConfig": {
@@ -776,8 +751,7 @@
       "targets": [
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "editorMode": "code",
           "expr": "sum(((sum((time() - kube_pod_start_time{pod=~\".*couchdb.*\"}) - $__range_s) by (pod)) < 60) <= bool 0)",
@@ -791,8 +765,7 @@
     },
     {
       "datasource": {
-        "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "name": "prometheus"
       },
       "description": "Count that tracks the number of pods that were newly created within the time range.\n\nNew pods indicate restarts may have occurred which could result in loss of functionality. Review the pod uptime time graph to see if any gaps in uptime occurred.\n\nNew pods don't always indicate a problem and in some cases are part of routine processing and scaling. ",
       "fieldConfig": {
@@ -876,8 +849,7 @@
       "targets": [
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "editorMode": "code",
           "expr": "sum(((sum((time() - kube_pod_start_time{pod=~\"aiops-ir-lifecycle-flink-.*\", pod!~\".*validation.*\"}) - $__range_s) by (pod)) < 60) <= bool 0)",
@@ -891,8 +863,7 @@
     },
     {
       "datasource": {
-        "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "name": "prometheus"
       },
       "description": "Refer to the \"Event Processing dashboard\" -> \"Policy Automation Dependencies\" for further details.\n\nCount that tracks the number of pods that were newly created within the time range.\n\nNew pods indicate restarts may have occurred which could result in loss of functionality. Review the pod uptime time graph to see if any gaps in uptime occurred.\n\nNew pods don't always indicate a problem and in some cases are part of routine processing and scaling. ",
       "fieldConfig": {
@@ -966,8 +937,7 @@
       "targets": [
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "editorMode": "code",
           "expr": "sum(((sum((time() - kube_pod_start_time{pod=~\"iaf-system-kafka.*\"}) - $__range_s) by (pod)) < 60) <= bool 0)",
@@ -981,8 +951,7 @@
     },
     {
       "datasource": {
-        "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "name": "prometheus"
       },
       "description": "Count that tracks the number of pods that were newly created within the time range.\n\nNew pods indicate restarts may have occurred which could result in loss of functionality. Review the pod uptime time graph to see if any gaps in uptime occurred.\n\nNew pods don't always indicate a problem and in some cases are part of routine processing and scaling. ",
       "fieldConfig": {
@@ -1066,8 +1035,7 @@
       "targets": [
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "editorMode": "code",
           "expr": "sum(((sum((time() - kube_pod_start_time{pod=~\".*minio.*\", pod!~\".*validation.*|.*create.*\"}) - $__range_s) by (pod)) < 60) <= bool 0)",
@@ -1081,8 +1049,7 @@
     },
     {
       "datasource": {
-        "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "name": "prometheus"
       },
       "description": "Refer to the \"Event Processing dashboard\" -> \"Datalayer Dependencies\" for further details.\n\nCount that tracks the number of pods that were newly created within the time range.\n\nNew pods indicate restarts may have occurred which could result in loss of functionality. Review the pod uptime time graph to see if any gaps in uptime occurred.\n\nNew pods don't always indicate a problem and in some cases are part of routine processing and scaling. ",
       "fieldConfig": {
@@ -1156,8 +1123,7 @@
       "targets": [
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "editorMode": "code",
           "expr": "sum(((sum((time() - kube_pod_start_time{pod=~\"aiops-opensearch.*\"}) - $__range_s) by (pod)) < 60) <= bool 0)",
@@ -1171,8 +1137,7 @@
     },
     {
       "datasource": {
-        "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "name": "prometheus"
       },
       "description": "Refer to the \"Event Processing dashboard\" -> \"Policy Automation Dependencies\" for further details.\n\nCount that tracks the number of pods that were newly created within the time range.\n\nNew pods indicate restarts may have occurred which could result in loss of functionality. Review the pod uptime time graph to see if any gaps in uptime occurred.\n\nNew pods don't always indicate a problem and in some cases are part of routine processing and scaling. ",
       "fieldConfig": {
@@ -1256,8 +1221,7 @@
       "targets": [
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "editorMode": "code",
           "expr": "sum(((sum((time() - kube_pod_start_time{pod=~\".*core-postgres.*\"}) - $__range_s) by (pod)) < 60) <= bool 0)",
@@ -1271,8 +1235,7 @@
     },
     {
       "datasource": {
-        "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "name": "prometheus"
       },
       "description": "Refer to the \"Analytics\" dashboard for further details.\n\nCount that tracks the number of pods that were newly created within the time range.\n\nNew pods indicate restarts may have occurred which could result in loss of functionality. Review the pod uptime time graph to see if any gaps in uptime occurred.\n\nNew pods don't always indicate a problem and in some cases are part of routine processing and scaling. ",
       "fieldConfig": {
@@ -1356,8 +1319,7 @@
       "targets": [
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "editorMode": "code",
           "expr": "sum(((sum((time() - kube_pod_start_time{pod=~\"aiops-ir-analytics-.*\"}) - $__range_s) by (pod)) < 60) <= bool 0)",
@@ -1371,8 +1333,7 @@
     },
     {
       "datasource": {
-        "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "name": "prometheus"
       },
       "description": "Refer to the \"Event Processing\" dashboard for further details.\n\nCount that tracks the number of pods that were newly created within the time range.\n\nNew pods indicate restarts may have occurred which could result in loss of functionality. Review the pod uptime time graph to see if any gaps in uptime occurred.\n\nNew pods don't always indicate a problem and in some cases are part of routine processing and scaling. ",
       "fieldConfig": {
@@ -1456,8 +1417,7 @@
       "targets": [
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "editorMode": "code",
           "expr": "sum(((sum((time() - kube_pod_start_time{pod=~\"aiops-ir-core-ncodl-.*\", pod!~\".*cjob.*\", pod!~\".*presetup.*\"}) - $__range_s) by (pod)) < 60) <= bool 0)",
@@ -1471,8 +1431,7 @@
     },
     {
       "datasource": {
-        "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "name": "prometheus"
       },
       "description": "Refer to the \"Event Integrations\" dashboard for further details.\n\nCount that tracks the number of pods that were newly created within the time range.\n\nNew pods indicate restarts may have occurred which could result in loss of functionality. Review the pod uptime time graph to see if any gaps in uptime occurred.\n\nNew pods don't always indicate a problem and in some cases are part of routine processing and scaling. ",
       "fieldConfig": {
@@ -1556,8 +1515,7 @@
       "targets": [
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "editorMode": "code",
           "expr": "sum(((sum((time() - kube_pod_start_time{pod=~\"netcool-conn-.*|ibm-grpc-instana-connector-.*|.*-webhook-connector-.*\"}) - $__range_s) by (pod)) < 60) <= bool 0)",
@@ -1571,8 +1529,7 @@
     },
     {
       "datasource": {
-        "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "name": "prometheus"
       },
       "description": "Refer to the \"Log Integrations\" dashboard for further details.\n\nCount that tracks the number of pods that were newly created within the time range.\n\nNew pods indicate restarts may have occurred which could result in loss of functionality. Review the pod uptime time graph to see if any gaps in uptime occurred.\n\nNew pods don't always indicate a problem and in some cases are part of routine processing and scaling. ",
       "fieldConfig": {
@@ -1656,8 +1613,7 @@
       "targets": [
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "editorMode": "code",
           "expr": "sum(((sum((time() - kube_pod_start_time{pod=~\"ibm-falcon-logs-conn-.*|ibm-custom-logs-conn-.*|ibm-elk-logs-conn-.*|splunk-conn-.*|ibm-mezmo-logs-conn-.*\"}) - $__range_s) by (pod)) < 60) <= bool 0)",
@@ -1671,8 +1627,7 @@
     },
     {
       "datasource": {
-        "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "name": "prometheus"
       },
       "description": "Refer to the \"Metric Integrations\" dashboard for further details.\n\nCount that tracks the number of pods that were newly created within the time range.\n\nNew pods indicate restarts may have occurred which could result in loss of functionality. Review the pod uptime time graph to see if any gaps in uptime occurred.\n\nNew pods don't always indicate a problem and in some cases are part of routine processing and scaling. ",
       "fieldConfig": {
@@ -1756,8 +1711,7 @@
       "targets": [
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "editorMode": "code",
           "expr": "sum(((sum((time() - kube_pod_start_time{pod=~\"nrelic-conn-.*|ibm-grpc-instana-connector-.*|appd-conn-.*|ibm-awscw-conn-.*|splunk-conn-.*|ibm-zabbix-conn-.*\"}) - $__range_s) by (pod)) < 60) <= bool 0)",
@@ -1771,8 +1725,7 @@
     },
     {
       "datasource": {
-        "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "name": "prometheus"
       },
       "description": "Refer to the \"Event Processing\" dashboard for further details.\n\nCount that tracks the number of pods that were newly created within the time range.\n\nNew pods indicate restarts may have occurred which could result in loss of functionality. Review the pod uptime time graph to see if any gaps in uptime occurred.\n\nNew pods don't always indicate a problem and in some cases are part of routine processing and scaling. ",
       "fieldConfig": {
@@ -1856,8 +1809,7 @@
       "targets": [
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "editorMode": "code",
           "expr": "sum(((sum((time() - kube_pod_start_time{pod=~\".*-lifecycle-.*\", pod!~\".*validation.*\", pod!~\".*job.*\", pod!~\".*operand-deployment-lifecycle-manager.*\"}) - $__range_s) by (pod)) < 60) <= bool 0)",
@@ -1871,8 +1823,7 @@
     },
     {
       "datasource": {
-        "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "name": "prometheus"
       },
       "description": "Refer to the \"Event Processing\" dashboard for further details.\n\nCount that tracks the number of pods that were newly created within the time range.\n\nNew pods indicate restarts may have occurred which could result in loss of functionality. Review the pod uptime time graph to see if any gaps in uptime occurred.\n\nNew pods don't always indicate a problem and in some cases are part of routine processing and scaling. ",
       "fieldConfig": {
@@ -1956,8 +1907,7 @@
       "targets": [
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "editorMode": "code",
           "expr": "sum(((sum((time() - kube_pod_start_time{pod=~\"aiops-ir-core-rba.*\"}) - $__range_s) by (pod)) < 60) <= bool 0)",
@@ -1971,8 +1921,7 @@
     },
     {
       "datasource": {
-        "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "name": "prometheus"
       },
       "description": "Refer to the \"Topology\" dashboard for further details.\n\nCount that tracks the number of pods that were newly created within the time range.\n\nNew pods indicate restarts may have occurred which could result in loss of functionality. Review the pod uptime time graph to see if any gaps in uptime occurred.\n\nNew pods don't always indicate a problem and in some cases are part of routine processing and scaling. ",
       "fieldConfig": {
@@ -2056,8 +2005,7 @@
       "targets": [
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "editorMode": "code",
           "expr": "sum(((sum((time() - kube_pod_start_time{pod=~\".*-topology-.*\", pod!~\".*cassandra.*\", pod!~\".*file-observer.*\", pod!~\".*kubernetes-observer.*\", pod!~\".*observer.*\",pod!~\".*api.*\", pod!~\".*aiopsedge.*\", pod!~\".*job.*\", pod!~\".*schema.*\"}) - $__range_s) by (pod)) < 60) <= bool 0)",
@@ -2071,8 +2019,7 @@
     },
     {
       "datasource": {
-        "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "name": "prometheus"
       },
       "description": "Refer to the \"Web UI\" dashboard for further details.\n\nCount that tracks the number of pods that were newly created within the time range.\n\nNew pods indicate restarts may have occurred which could result in loss of functionality. Review the pod uptime time graph to see if any gaps in uptime occurred.\n\nNew pods don't always indicate a problem and in some cases are part of routine processing and scaling. ",
       "fieldConfig": {
@@ -2156,8 +2103,7 @@
       "targets": [
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "editorMode": "code",
           "expr": "sum(((sum((time() - kube_pod_start_time{pod=~\"aiops-base-ui.*|aiops-akora-ui.*|aiops-ai-model-ui.*|aiops-connections-ui-.*|aiops-insights-ui-.*\"}) - $__range_s) by (pod)) < 60) <= bool 0)",
@@ -2184,8 +2130,7 @@
     },
     {
       "datasource": {
-        "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "name": "prometheus"
       },
       "description": "Refer to the \"Event Integrations\" dashboard -> \"Webhook integration\" for further details.\n\nCount of  exceptions, and status failures that occurred within the Webhook integration.",
       "fieldConfig": {
@@ -2253,8 +2198,7 @@
       "targets": [
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "editorMode": "code",
           "expr": "round(\n  sum(increase(connectors_sdk_connectorexceptions_thrown_total{pod=~\".*-webhook-.*\"}[$__range]) or vector(0)) + \n  sum(increase(connector_sdk_status_failed_total{pod=~\".*-webhook-.*\"}[$__range]) or vector(0))\n)\n",
@@ -2269,8 +2213,7 @@
     },
     {
       "datasource": {
-        "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "name": "prometheus"
       },
       "description": "Refer to the \"Analytics\" dashboard for further details.\n\nCount of event classification errors.",
       "fieldConfig": {
@@ -2340,8 +2283,7 @@
       "targets": [
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "editorMode": "code",
           "expr": "sum(increase(ibm_aiops_mime_classfier_cassandra_errors_total[$__range])) + \nsum(increase(ibm_aiops_mime_classfier_http_requests_errors_total[$__range])) + \nsum(increase(ibm_aiops_mime_classfier_kafka_errors_total[$__range]))\n",
@@ -2356,8 +2298,7 @@
     },
     {
       "datasource": {
-        "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "name": "prometheus"
       },
       "description": "Refer to the \"Event Processing\" dashboard -> \"Datalayer Component\" for further details.\n\nTotal failure count for alert expire/close/delete actions executed by the Job Manager service that occurred within the time range.\n\n- **Alert expire**: occurs when an alert's expiration team has been reached\n- **Alert close**: occurs when alert expires or is closed by an event or triggered by manual user action in the UI\n- **Alert delete**: occurs after an alert has been closed for a period of time. This will delete it from the database",
       "fieldConfig": {
@@ -2414,8 +2355,7 @@
       "targets": [
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "editorMode": "code",
           "expr": "sum(increase(ibm_aiops_ircore_ncodl_jobmgr_job_alert_delete_counter{container=\"jobmgr\", kind=\"failed\"}[$__range]) or vector(0)) + \nsum(increase(ibm_aiops_ircore_ncodl_jobmgr_job_alert_close_counter{container=\"jobmgr\", kind=\"failed\"}[$__range]) or vector(0)) + \nsum(increase(ibm_aiops_ircore_ncodl_jobmgr_job_alert_expire_counter{container=\"jobmgr\", kind=\"failed\"}[$__range]) or vector(0))",
@@ -2431,8 +2371,7 @@
     },
     {
       "datasource": {
-        "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "name": "prometheus"
       },
       "description": "Refer to the \"Event Processing\" dashboard -> \"Datalayer Component\" for further details.\n\nTotal failure count for incident close/delete actions executed by the Job Manager service that occurred within the time range.",
       "fieldConfig": {
@@ -2489,8 +2428,7 @@
       "targets": [
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "editorMode": "code",
           "expr": "sum(increase(ibm_aiops_ircore_ncodl_jobmgr_job_story_close_counter{container=\"jobmgr\", kind=\"failed\"}[$__range]) or vector(0)) + sum(increase(ibm_aiops_ircore_ncodl_jobmgr_job_story_delete_counter{container=\"jobmgr\", kind=\"failed\"}[$__range]) or vector(0))",
@@ -2506,8 +2444,7 @@
     },
     {
       "datasource": {
-        "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "name": "prometheus"
       },
       "description": "Refer to the \"Event Integrations\" dashboard -> \"Instana integration\" for further details.\n\nCount of dropped kafka messages, exceptions, and status failures that occurred within the Instana integration.",
       "fieldConfig": {
@@ -2575,8 +2512,7 @@
       "targets": [
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "editorMode": "code",
           "expr": "round(\n  sum(increase(connectors_sdk_connectorexceptions_thrown_total{pod=~\".*-instana-.*\"}[$__range]) or vector(0)) + \n  sum(increase(connector_sdk_status_failed_total{pod=~\".*-instana-.*\"}[$__range]) or vector(0)) +\n  sum(increase(connector_sdk_kafka_consumer_dropped_total{pod=~\".*-instana-.*\"}[$__range]) or vector(0))\n)\n",
@@ -2590,8 +2526,7 @@
     },
     {
       "datasource": {
-        "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "name": "prometheus"
       },
       "description": "Refer to the \"Event Integrations\" dashboard -> \"Netcool integration\" for further details.\n\nCount of dropped kafka messages, exceptions, and status failures that occurred within the Netcool integration.",
       "fieldConfig": {
@@ -2659,8 +2594,7 @@
       "targets": [
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "editorMode": "code",
           "expr": "round(\n  sum(increase(connectors_sdk_connectorexceptions_thrown_total{pod=~\"netcool-conn-.*\"}[$__range]) or vector(0)) + \n  sum(increase(connector_sdk_status_failed_total{pod=~\"netcool-conn-.*\"}[$__range]) or vector(0)) +\n  sum(increase(connector_sdk_kafka_consumer_dropped_total{pod=~\".*-instana-.*\"}[$__range]) or vector(0))\n) or vector(0)\n",
@@ -2675,8 +2609,7 @@
     },
     {
       "datasource": {
-        "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "name": "prometheus"
       },
       "description": "Refer to the \"Analytics\" dashboard for further details.\n\nCount of AI training errors.",
       "fieldConfig": {
@@ -2745,8 +2678,7 @@
       "targets": [
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "editorMode": "code",
           "expr": "round(\n  sum(increase(ibm_aiops_training_spark_cluster_drivers_FAILED_count[$__range])) + \n  sum(increase(ibm_aiops_training_spark_lack_of_resource_failure_total[$__range])) + \n  sum(increase(ibm_aiops_training_spark_cluster_drivers_KILLED_count[$__range])) + \n  sum(increase(ibm_aiops_training_spark_submission_failed_total[$__range]))\n)\n",
@@ -2760,8 +2692,7 @@
     },
     {
       "datasource": {
-        "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "name": "prometheus"
       },
       "description": "Refer to the \"Event Processing\" dashboard -> \"RBA Component\" for further details.\n\nCount of Actions that failed to start or completed unsuccessfully.",
       "fieldConfig": {
@@ -2817,8 +2748,7 @@
       "targets": [
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "editorMode": "code",
           "expr": "round(\n  sum(increase(ibm_aiops_rba_as_action_start_failed[$__range]) or vector(0)) + \n  sum(increase(ibm_aiops_rba_as_actions_finished{status=\"unsuccessful\"}[$__range]) or vector(0))\n)\n",
@@ -2832,8 +2762,7 @@
     },
     {
       "datasource": {
-        "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "name": "prometheus"
       },
       "description": "Refer to the \"Event Processing\" dashboard -> \"RBA Component\" for further details.\n\nCount of runbook executions that failed to start or completed unsuccessfully",
       "fieldConfig": {
@@ -2889,8 +2818,7 @@
       "targets": [
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "editorMode": "code",
           "expr": "round(\n  sum(increase(ibm_aiops_rba_rbs_runbooks_start_failed[$__range]) or vector(0))+\n  sum(increase(ibm_aiops_rba_rbs_runbooks_finished{status=\"unsuccessful\"}[$__range]) or vector(0))\n) or vector(0)\n",
@@ -2905,8 +2833,7 @@
     },
     {
       "datasource": {
-        "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "name": "prometheus"
       },
       "description": "Refer to the \"Topology\" dashboard for further details.\n\nCount of database query failures made by the Topology Services within the time range",
       "fieldConfig": {
@@ -2962,8 +2889,7 @@
       "targets": [
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "editorMode": "code",
           "expr": "round(\n  sum(increase(ibm_aiops_topo_janusgraph_query_graph_exceptions{service=\"aiops-topology-merge\"}[$__range]) or vector(0)) + \n  sum(increase(ibm_aiops_topo_janusgraph_query_graph_exceptions{service=\"aiops-topology-status\"}[$__range]) or vector(0)) +\n  sum(increase(ibm_aiops_topo_janusgraph_query_graph_exceptions{service=\"aiops-topology-layout\"}[$__range]) or vector(0)) +\n  sum(increase(ibm_aiops_topo_janusgraph_query_graph_exceptions{service=\"aiops-topology-topology\"}[$__range]) or vector(0))\n)\n",
@@ -2977,8 +2903,7 @@
     },
     {
       "datasource": {
-        "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "name": "prometheus"
       },
       "description": "Refer to the \"Web UI\" dashboard for further details.\n\nCount of 400 errors that occurred within the time range.",
       "fieldConfig": {
@@ -3034,8 +2959,7 @@
       "targets": [
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "editorMode": "code",
           "expr": "round(\n  sum(increase(ibm_aiops_aiops_akora_ui_request_total{code=~\"4..\"}[$__range]) or vector(0)) + \n  sum(increase(ibm_aiops_aiops_base_ui_request_total{code=~\"4..\"}[$__range]) or vector(0)) + \n  sum(increase(ibm_aiops_aiops_integration_ui_request_total{code=~\"4..\"}[$__range]) or vector(0)) +\n  sum(increase(ibm_aiops_aiops_ai_models_ui_request_total{code=~\"4..\"}[$__range]) or vector(0)) +\n  sum(increase(ibm_aiops_aiops_insights_ui_request_total{code=~\"4..\"}[$__range]) or vector(0))\n)",
@@ -3050,8 +2974,7 @@
     },
     {
       "datasource": {
-        "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "name": "prometheus"
       },
       "description": "Refer to the \"Web UI\" dashboard for further details.\n\nCount of 500 errors that occurred within the time range.",
       "fieldConfig": {
@@ -3107,8 +3030,7 @@
       "targets": [
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "editorMode": "code",
           "expr": "round(\n  sum(increase(ibm_aiops_aiops_akora_ui_request_total{code=~\"5..\"}[$__range]) or vector(0)) + \n  sum(increase(ibm_aiops_aiops_base_ui_request_total{code=~\"5..\"}[$__range]) or vector(0)) + \n  sum(increase(ibm_aiops_aiops_integration_ui_request_total{code=~\"5..\"}[$__range]) or vector(0)) +\n  sum(increase(ibm_aiops_aiops_ai_models_ui_request_total{code=~\"5..\"}[$__range]) or vector(0)) +\n  sum(increase(ibm_aiops_aiops_insights_ui_request_total{code=~\"5..\"}[$__range]) or vector(0))\n)\n",
@@ -3135,8 +3057,7 @@
     },
     {
       "datasource": {
-        "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "name": "prometheus"
       },
       "description": "Refer to the \"Event Processing\" dashboard -> \"Policy Automation message I/O\" for further details.\n\nEvents ingested within the time range.",
       "fieldConfig": {
@@ -3185,8 +3106,7 @@
       "targets": [
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "editorMode": "code",
           "expr": "sum(increase(kafka_server_brokertopicmetrics_messagesin_total{topic=\"cp4waiops-cartridge.lifecycle.input.events\"}[$__range]) or vector(0))",
@@ -3200,8 +3120,7 @@
     },
     {
       "datasource": {
-        "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "name": "prometheus"
       },
       "description": "Refer to the \"Event Processing\" dashboard -> \"Policy Automation message I/O\" for further details.\n\nAlerts created/updated within the time range.",
       "fieldConfig": {
@@ -3250,8 +3169,7 @@
       "targets": [
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "editorMode": "code",
           "expr": "sum(increase(kafka_server_brokertopicmetrics_messagesin_total{topic=\"cp4waiops-cartridge.irdatalayer.changes.alerts\"}[$__range]) or vector(0))",
@@ -3267,8 +3185,7 @@
     },
     {
       "datasource": {
-        "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "name": "prometheus"
       },
       "description": "Refer to the \"Event Processing\" dashboard -> \"Policy Automation message I/O\" for further details.\n\nIncidents created/updated within the time range.",
       "fieldConfig": {
@@ -3317,8 +3234,7 @@
       "targets": [
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "editorMode": "code",
           "expr": "sum(increase(kafka_server_brokertopicmetrics_messagesin_total{topic=\"cp4waiops-cartridge.irdatalayer.changes.stories\"}[$__range]) or vector(0))",
@@ -3334,8 +3250,7 @@
     },
     {
       "datasource": {
-        "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "name": "prometheus"
       },
       "description": "Refer to the \"Topology\" dashboard\" for further details.\n\nTotal number of bytes sent by Topology Observers to the central Topology Service within the time range.",
       "fieldConfig": {
@@ -3384,8 +3299,7 @@
       "targets": [
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "editorMode": "code",
           "exemplar": false,
@@ -3403,8 +3317,7 @@
     },
     {
       "datasource": {
-        "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "name": "prometheus"
       },
       "description": "Refer to the \"Metric Integrations\" component dashboard -> \"Total Metrics Collected\" for further details.\n\nTotal number of metrics collected within the time range across all metric integrations.",
       "fieldConfig": {
@@ -3455,8 +3368,7 @@
       "targets": [
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "editorMode": "code",
           "expr": "sum(increase(kafka_server_brokertopicmetrics_messagesin_total{topic=~\"cp4waiops-cartridge.analyticsorchestrator.metrics.itsm.aggregated\"}[$__range]) or vector(0))",
@@ -3470,8 +3382,7 @@
     },
     {
       "datasource": {
-        "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "name": "prometheus"
       },
       "description": "Refer to the \"Log Integrations\" component dashboard -> \"Total Logs Collected\" for further details.\n\nTotal number of logs collected within the time range across all logs integrations.",
       "fieldConfig": {
@@ -3522,8 +3433,7 @@
       "targets": [
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "editorMode": "code",
           "expr": "sum(increase(ibm_aiops_logconnector_custom_live_logs_data_size_objects_sum[$__range]) or vector(0)) +\nsum(increase(ibm_aiops_logconnector_custom_historical_logs_data_size_objects_sum[$__range]) or vector(0)) +\nsum(increase(ibm_aiops_logconnector_elk_live_logs_data_size_objects_sum[$__range]) or vector(0)) +\nsum(increase(ibm_aiops_logconnector_elk_historical_logs_data_size_objects_sum[$__range]) or vector(0)) +\nsum(increase(ibm_aiops_logconnector_logscale_live_logs_data_size_objects_sum[$__range]) or vector(0)) +\nsum(increase(ibm_aiops_logconnector_logscale_historical_logs_data_size_objects_sum[$__range]) or vector(0)) +\nsum(increase(ibm_aiops_logconnector_mezmo_live_logs_data_size_objects_sum[$__range]) or vector(0)) +\nsum(increase(ibm_aiops_logconnector_mezmo_historical_logs_data_size_objects_sum[$__range]) or vector(0)) +\nsum(increase(ibm_aiops_logconnector_splunk_live_logs_data_size_objects_sum[$__range]) or vector(0)) +\nsum(increase(ibm_aiops_logconnector_splunk_historical_logs_data_size_objects_sum[$__range]) or vector(0))",

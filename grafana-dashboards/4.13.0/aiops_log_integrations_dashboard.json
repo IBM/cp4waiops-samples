@@ -1,14 +1,4 @@
 {
-  "__inputs": [
-    {
-      "name": "DS_PROMETHEUS",
-      "label": "prometheus",
-      "description": "",
-      "type": "datasource",
-      "pluginId": "prometheus",
-      "pluginName": "Prometheus"
-    }
-  ],
   "__elements": {},
   "__requires": [
     {
@@ -112,8 +102,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "The 5 lowest uptimes within the component pods. Pod restarts can impact functionality, review the pod table and uptime graph for more details.",
           "fieldConfig": {
@@ -179,8 +168,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "time() -topk(5, sum(kube_pod_start_time{pod=~\".*falcon-conn.*|.*custom-conn.*|.*elk-conn-.*|.*splunk-conn.*|.*mezmo-conn.*\"}) by (pod))",
@@ -194,8 +182,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "This panel displays the number of active pods for all defined Log integration pods. Pods stuck in \"Pending\" or \"Unknown\" states for prolonged periods of time are problematic and may result in loss of functionality.",
           "fieldConfig": {
@@ -244,8 +231,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "disableTextWrap": false,
               "editorMode": "code",
@@ -311,8 +297,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Pod uptimes for log integrations",
           "fieldConfig": {
@@ -392,8 +377,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "time() -sum(kube_pod_start_time{pod=~\".*falcon-conn.*|.*custom-conn.*|.*elk-conn-.*|.*splunk-conn.*|.*mezmo-conn.*\"}) by (pod)",
@@ -421,8 +405,7 @@
       "panels": [
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Count of pods that have exceeded 80% of their CPU limits within the time range. This will result in CPU throttling and potentially temporary loss of functionality\n\nThis will only compare against the ***current*** CPU limit of each pod. If the limits were updated within the time range, the count may be inaccurate.",
           "fieldConfig": {
@@ -517,8 +500,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum((((max(kube_pod_container_resource_limits{pod=~\".*falcon-conn.*|.*custom-conn.*|.*elk-conn-.*|.*splunk-conn.*|.*mezmo-conn.*\", container!=\"\", container!=\"POD\", resource=\"cpu\"}) by (pod)) * 0.8 <= max(max_over_time(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{pod=~\".*falcon-conn.*|.*custom-conn.*|.*elk-conn-.*|.*splunk-conn.*|.*mezmo-conn.*\", container!=\"\", container!=\"POD\"}[$__range])) by (pod)) or vector(0)) > bool 0)",
@@ -532,8 +514,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Count of component pods that have exceeded their memory limits within the time range.\n\nThis will only compare against the ***current*** memory limit of each pod. If the limits were updated within the time range, the count may be inaccurate.",
           "fieldConfig": {
@@ -627,8 +608,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum((((max(kube_pod_container_resource_limits{pod=~\".*falcon-conn.*|.*custom-conn.*|.*elk-conn-.*|.*splunk-conn.*|.*mezmo-conn.*\", container!=\"\", container!=\"POD\", resource=\"memory\"}) by (pod)) <= max(max_over_time(container_memory_working_set_bytes{pod=~\".*falcon-conn.*|.*custom-conn.*|.*elk-conn-.*|.*splunk-conn.*|.*mezmo-conn.*\", container!=\"\", container!=\"POD\"}[$__range])) by (pod)) or vector(0)) > bool 0)",
@@ -642,8 +622,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Count of pods that have exceeded their CPU limits within the time range. This will result in CPU throttling and potentially temporary loss of functionality.\n\nThis will only compare against the ***current*** CPU limit of each pod. If the limits were updated within the time range, the count may be inaccurate.",
           "fieldConfig": {
@@ -738,8 +717,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum((((max(kube_pod_container_resource_limits{pod=~\".*falcon-conn.*|.*custom-conn.*|.*elk-conn-.*|.*splunk-conn.*|.*mezmo-conn.*\", container!=\"\", container!=\"POD\", resource=\"cpu\"}) by (pod)) <= max(max_over_time(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{pod=~\".*falcon-conn.*|.*custom-conn.*|.*elk-conn-.*|.*splunk-conn.*|.*mezmo-conn.*\", container!=\"\", container!=\"POD\"}[$__range])) by (pod)) or vector(0)) > bool 0)",
@@ -753,8 +731,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Count of pods that have exceeded 80% of their memory limits within the time range.\n\nThis will only compare against the ***current*** memory limit of each pod. If the limits were updated within the time range, the count may be inaccurate.",
           "fieldConfig": {
@@ -849,8 +826,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum((((max(kube_pod_container_resource_limits{pod=~\".*falcon-conn.*|.*custom-conn.*|.*elk-conn-.*|.*splunk-conn.*|.*mezmo-conn.*\", container!=\"\", container!=\"POD\", resource=\"memory\"}) by (pod)) * 0.8 <= max(max_over_time(container_memory_working_set_bytes{pod=~\".*falcon-conn.*|.*custom-conn.*|.*elk-conn-.*|.*splunk-conn.*|.*mezmo-conn.*\", container!=\"\", container!=\"POD\"}[$__range])) by (pod)) or vector(0)) > bool 0)",
@@ -864,8 +840,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "This panel displays the CPU usage over time of the integration pod(s). Spikes can occur during data collection, monitor these to ensure the integration is not ingesting more than it can process. Create more integrations as needed to ensure stable collection and timely processing.",
           "fieldConfig": {
@@ -990,8 +965,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{pod=~\".*custom-conn.*\"}) by (pod)",
@@ -1001,8 +975,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(kube_pod_container_resource_requests{pod=~\".*custom-conn.*\", resource=\"cpu\"})",
@@ -1014,8 +987,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(kube_pod_container_resource_limits{pod=~\".*custom-conn.*\", resource=\"cpu\"}) ",
@@ -1031,8 +1003,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "This panel displays the memory usage over time of the integration pod(s). Spikes can occur during data collection, monitor these to ensure the integration is not ingesting more than it can process. Create more integrations as needed to ensure stable collection and timely processing.",
           "fieldConfig": {
@@ -1158,8 +1129,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(container_memory_working_set_bytes{pod=~\".*custom-conn.*\", container!=\"\", container!=\"POD\"}) by (pod)",
@@ -1169,8 +1139,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(kube_pod_container_resource_requests{pod=~\".*custom-conn.*\", resource=\"memory\"}) ",
@@ -1182,8 +1151,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(kube_pod_container_resource_limits{pod=~\".*custom-conn.*\", resource=\"memory\"}) ",
@@ -1199,8 +1167,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "This panel displays the CPU usage over time of the integration pod(s). Spikes can occur during data collection, monitor these to ensure the integration is not ingesting more than it can process. Create more integrations as needed to ensure stable collection and timely processing.",
           "fieldConfig": {
@@ -1325,8 +1292,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{pod=~\".*elk-conn.*\"}) by (pod)",
@@ -1336,8 +1302,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(kube_pod_container_resource_requests{pod=~\".*elk-conn.*\", resource=\"cpu\"})",
@@ -1349,8 +1314,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(kube_pod_container_resource_limits{pod=~\".*elk-conn.*\", resource=\"cpu\"}) ",
@@ -1366,8 +1330,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "This panel displays the memory usage over time of the integration pod(s). Spikes can occur during data collection, monitor these to ensure the integration is not ingesting more than it can process. Create more integrations as needed to ensure stable collection and timely processing.",
           "fieldConfig": {
@@ -1493,8 +1456,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(container_memory_working_set_bytes{pod=~\".*elk-conn.*\", container!=\"\", container!=\"POD\"}) by (pod)",
@@ -1504,8 +1466,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(kube_pod_container_resource_requests{pod=~\".*elk-conn.*\", resource=\"memory\"}) ",
@@ -1517,8 +1478,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(kube_pod_container_resource_limits{pod=~\".*elk-conn.*\", resource=\"memory\"}) ",
@@ -1534,8 +1494,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "This panel displays the CPU usage over time of the integration pod(s). Spikes can occur during data collection, monitor these to ensure the integration is not ingesting more than it can process. Create more integrations as needed to ensure stable collection and timely processing.",
           "fieldConfig": {
@@ -1660,8 +1619,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{pod=~\".*falcon-conn.*\"}) by (pod)",
@@ -1671,8 +1629,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(kube_pod_container_resource_requests{pod=~\".*falcon-conn.*\", resource=\"cpu\"})",
@@ -1684,8 +1641,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(kube_pod_container_resource_limits{pod=~\".*falcon-conn.*\", resource=\"cpu\"}) ",
@@ -1701,8 +1657,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "This panel displays the memory usage over time of the integration pod(s). Spikes can occur during data collection, monitor these to ensure the integration is not ingesting more than it can process. Create more integrations as needed to ensure stable collection and timely processing.",
           "fieldConfig": {
@@ -1828,8 +1783,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(container_memory_working_set_bytes{pod=~\".*falcon-conn.*\", container!=\"\", container!=\"POD\"}) by (pod)",
@@ -1839,8 +1793,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(kube_pod_container_resource_requests{pod=~\".*falcon-conn.*\", resource=\"memory\"}) ",
@@ -1852,8 +1805,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(kube_pod_container_resource_limits{pod=~\".*falcon-conn.*\", resource=\"memory\"}) ",
@@ -1869,8 +1821,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "This panel displays the CPU usage over time of the integration pod(s). Spikes can occur during data collection, monitor these to ensure the integration is not ingesting more than it can process. Create more integrations as needed to ensure stable collection and timely processing.",
           "fieldConfig": {
@@ -1995,8 +1946,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{pod=~\".*mezmo-conn.*\"}) by (pod)",
@@ -2006,8 +1956,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(kube_pod_container_resource_requests{pod=~\".*mezmo-conn.*\", resource=\"cpu\"})",
@@ -2019,8 +1968,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(kube_pod_container_resource_limits{pod=~\".*mezmo-conn.*\", resource=\"cpu\"}) ",
@@ -2036,8 +1984,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "This panel displays the memory usage over time of the integration pod(s). Spikes can occur during data collection, monitor these to ensure the integration is not ingesting more than it can process. Create more integrations as needed to ensure stable collection and timely processing.",
           "fieldConfig": {
@@ -2163,8 +2110,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(container_memory_working_set_bytes{pod=~\".*mezmo-conn.*\", container!=\"\", container!=\"POD\"}) by (pod)",
@@ -2174,8 +2120,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(kube_pod_container_resource_requests{pod=~\".*mezmo-conn.*\", resource=\"memory\"}) ",
@@ -2187,8 +2132,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(kube_pod_container_resource_limits{pod=~\".*mezmo-conn.*\", resource=\"memory\"}) ",
@@ -2204,8 +2148,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "This panel displays the CPU usage over time of the integration pod(s). Spikes can occur during data collection, monitor these to ensure the integration is not ingesting more than it can process. Create more integrations as needed to ensure stable collection and timely processing.",
           "fieldConfig": {
@@ -2330,8 +2273,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{pod=~\".*splunk-conn.*\"}) by (pod)",
@@ -2341,8 +2283,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(kube_pod_container_resource_requests{pod=~\".*splunk-conn.*\", resource=\"cpu\"})",
@@ -2354,8 +2295,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(kube_pod_container_resource_limits{pod=~\".*splunk-conn.*\", resource=\"cpu\"}) ",
@@ -2371,8 +2311,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "This panel displays the memory usage over time of the integration pod(s). Spikes can occur during data collection, monitor these to ensure the integration is not ingesting more than it can process. Create more integrations as needed to ensure stable collection and timely processing.",
           "fieldConfig": {
@@ -2498,8 +2437,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(container_memory_working_set_bytes{pod=~\".*splunk-conn.*\", container!=\"\", container!=\"POD\"}) by (pod)",
@@ -2509,8 +2447,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(kube_pod_container_resource_requests{pod=~\".*splunk-conn.*\", resource=\"memory\"}) ",
@@ -2522,8 +2459,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(kube_pod_container_resource_limits{pod=~\".*splunk-conn.*\", resource=\"memory\"}) ",
@@ -2553,8 +2489,7 @@
       "panels": [
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Total number of logs collected within the time range across all logs integrations.",
           "fieldConfig": {
@@ -2605,8 +2540,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum(increase(ibm_aiops_logconnector_custom_live_logs_data_size_objects_sum[$__range]) or vector(0)) +\nsum(increase(ibm_aiops_logconnector_custom_historical_logs_data_size_objects_sum[$__range]) or vector(0)) +\nsum(increase(ibm_aiops_logconnector_elk_live_logs_data_size_objects_sum[$__range]) or vector(0)) +\nsum(increase(ibm_aiops_logconnector_elk_historical_logs_data_size_objects_sum[$__range]) or vector(0)) +\nsum(increase(ibm_aiops_logconnector_logscale_live_logs_data_size_objects_sum[$__range]) or vector(0)) +\nsum(increase(ibm_aiops_logconnector_logscale_historical_logs_data_size_objects_sum[$__range]) or vector(0)) +\nsum(increase(ibm_aiops_logconnector_mezmo_live_logs_data_size_objects_sum[$__range]) or vector(0)) +\nsum(increase(ibm_aiops_logconnector_mezmo_historical_logs_data_size_objects_sum[$__range]) or vector(0)) +\nsum(increase(ibm_aiops_logconnector_splunk_live_logs_data_size_objects_sum[$__range]) or vector(0)) +\nsum(increase(ibm_aiops_logconnector_splunk_historical_logs_data_size_objects_sum[$__range]) or vector(0))",
@@ -2620,8 +2554,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Total number of logs collected by each integration within the time range.",
           "fieldConfig": {
@@ -2678,8 +2611,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum by (pod) (\n  (\n    increase(ibm_aiops_logconnector_custom_live_logs_data_size_objects_sum[$__range]) or 0 * increase(ibm_aiops_logconnector_custom_historical_logs_data_size_objects_sum[$__range])\n  )\n  + on(pod) group_left() (\n    increase(ibm_aiops_logconnector_custom_historical_logs_data_size_objects_sum[$__range]) or 0 * increase(ibm_aiops_logconnector_custom_live_logs_data_size_objects_sum[$__range])\n  )\n)",
@@ -2691,8 +2623,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum by (pod) (\n  (\n    increase(ibm_aiops_logconnector_elk_live_logs_data_size_objects_sum[$__range]) or 0 * increase(ibm_aiops_logconnector_elk_historical_logs_data_size_objects_sum[$__range])\n  )\n  + on(pod) group_left() (\n    increase(ibm_aiops_logconnector_elk_historical_logs_data_size_objects_sum[$__range]) or 0 * increase(ibm_aiops_logconnector_elk_live_logs_data_size_objects_sum[$__range])\n  )\n)",
@@ -2704,8 +2635,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum by (pod) (\n  (\n    increase(ibm_aiops_logconnector_logscale_live_logs_data_size_objects_sum[$__range]) or 0 * increase(ibm_aiops_logconnector_logscale_historical_logs_data_size_objects_sum[$__range])\n  )\n  + on(pod) group_left() (\n    increase(ibm_aiops_logconnector_logscale_historical_logs_data_size_objects_sum[$__range]) or 0 * increase(ibm_aiops_logconnector_logscale_live_logs_data_size_objects_sum[$__range])\n  )\n)",
@@ -2717,8 +2647,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum by (pod) (\n  (\n    increase(ibm_aiops_logconnector_mezmo_live_logs_data_size_objects_sum[$__range]) or 0 * increase(ibm_aiops_logconnector_mezmo_historical_logs_data_size_objects_sum[$__range])\n  )\n  + on(pod) group_left() (\n    increase(ibm_aiops_logconnector_mezmo_historical_logs_data_size_objects_sum[$__range]) or 0 * increase(ibm_aiops_logconnector_mezmo_live_logs_data_size_objects_sum[$__range])\n  )\n)",
@@ -2730,8 +2659,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum by (pod) (\n  (\n    increase(ibm_aiops_logconnector_splunk_live_logs_data_size_objects_sum[$__range]) or 0 * increase(ibm_aiops_logconnector_splunk_historical_logs_data_size_objects_sum[$__range])\n  )\n  + on(pod) group_left() (\n    increase(ibm_aiops_logconnector_splunk_historical_logs_data_size_objects_sum[$__range]) or 0 * increase(ibm_aiops_logconnector_splunk_live_logs_data_size_objects_sum[$__range])\n  )\n)",
@@ -2747,8 +2675,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Per-second rates of logs collected by each integration..",
           "fieldConfig": {
@@ -2832,8 +2759,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum by (pod) (\n  (\n    rate(ibm_aiops_logconnector_custom_live_logs_data_size_objects_sum[3m]) or 0 * rate(ibm_aiops_logconnector_custom_historical_logs_data_size_objects_sum[3m])\n  )\n  + on(pod) group_left() (\n    rate(ibm_aiops_logconnector_custom_historical_logs_data_size_objects_sum[3m]) or 0 * rate(ibm_aiops_logconnector_custom_live_logs_data_size_objects_sum[3m])\n  )\n)",
@@ -2843,8 +2769,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum by (pod) (\n  (\n    rate(ibm_aiops_logconnector_elk_live_logs_data_size_objects_sum[3m]) or 0 * rate(ibm_aiops_logconnector_elk_historical_logs_data_size_objects_sum[3m])\n  )\n  + on(pod) group_left() (\n    rate(ibm_aiops_logconnector_elk_historical_logs_data_size_objects_sum[3m]) or 0 * rate(ibm_aiops_logconnector_elk_live_logs_data_size_objects_sum[3m])\n  )\n)",
@@ -2856,8 +2781,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum by (pod) (\n  (\n    rate(ibm_aiops_logconnector_logscale_live_logs_data_size_objects_sum[3m]) or 0 * rate(ibm_aiops_logconnector_logscale_historical_logs_data_size_objects_sum[3m])\n  )\n  + on(pod) group_left() (\n    rate(ibm_aiops_logconnector_logscale_historical_logs_data_size_objects_sum[3m]) or 0 * rate(ibm_aiops_logconnector_logscale_live_logs_data_size_objects_sum[3m])\n  )\n)",
@@ -2869,8 +2793,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum by (pod) (\n  (\n    rate(ibm_aiops_logconnector_mezmo_live_logs_data_size_objects_sum[3m]) or 0 * rate(ibm_aiops_logconnector_mezmo_historical_logs_data_size_objects_sum[3m])\n  )\n  + on(pod) group_left() (\n    rate(ibm_aiops_logconnector_mezmo_historical_logs_data_size_objects_sum[3m]) or 0 * rate(ibm_aiops_logconnector_mezmo_live_logs_data_size_objects_sum[3m])\n  )\n)",
@@ -2882,8 +2805,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum by (pod) (\n  (\n    rate(ibm_aiops_logconnector_splunk_live_logs_data_size_objects_sum[3m]) or 0 * rate(ibm_aiops_logconnector_splunk_historical_logs_data_size_objects_sum[3m])\n  )\n  + on(pod) group_left() (\n    rate(ibm_aiops_logconnector_splunk_historical_logs_data_size_objects_sum[3m]) or 0 * rate(ibm_aiops_logconnector_splunk_live_logs_data_size_objects_sum[3m])\n  )\n)",
@@ -2913,8 +2835,7 @@
       "panels": [
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Number of collections conducted within the time range.",
           "fieldConfig": {
@@ -2962,8 +2883,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum(increase(ibm_aiops_logconnector_custom_historical_logs_run_count_total[$__range]) or vector(0)) + \nsum(increase(ibm_aiops_logconnector_custom_live_logs_run_count_total[$__range]))or vector(0)",
@@ -2977,8 +2897,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Number of collections that resulted in an error within the time range. Errors will end the current collection, but will not impact future collections from happening. The subsequent collection after an error will proceed as scheduled.",
           "fieldConfig": {
@@ -3030,8 +2949,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum(increase(ibm_aiops_logconnector_custom_historical_logs_error_count_total[$__range]) or vector(0)) +\nsum(increase(ibm_aiops_logconnector_custom_live_logs_error_count_total[$__range]) or vector(0))",
@@ -3045,8 +2963,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Number of collections that were interrupted within the time range. Interruptions are more severe than errors and will prevent any further collections. Review the component pods for error logs.",
           "fieldConfig": {
@@ -3098,8 +3015,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum(increase(ibm_aiops_logconnector_custom_historical_logs_interrupted_count_total[$__range]) or vector(0)) +\nsum(increase(ibm_aiops_logconnector_custom_live_logs_interrupted_count_total[$__range]) or vector(0))",
@@ -3113,8 +3029,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Total number of logs collected within the time range per integration.",
           "fieldConfig": {
@@ -3167,8 +3082,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum by (pod) (\n  (\n    increase(ibm_aiops_logconnector_custom_live_logs_data_size_objects_sum[$__range]) or 0 * increase(ibm_aiops_logconnector_custom_historical_logs_data_size_objects_sum[$__range])\n  )\n  + on(pod) group_left() (\n    increase(ibm_aiops_logconnector_custom_historical_logs_data_size_objects_sum[$__range]) or 0 * increase(ibm_aiops_logconnector_custom_live_logs_data_size_objects_sum[$__range])\n  )\n)",
@@ -3182,8 +3096,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Per-second rates of logs collected by each integration..",
           "fieldConfig": {
@@ -3264,8 +3177,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum by (pod) (\n  (\n    rate(ibm_aiops_logconnector_custom_live_logs_data_size_objects_sum[3m]) or 0 * rate(ibm_aiops_logconnector_custom_historical_logs_data_size_objects_sum[3m])\n  )\n  + on(pod) group_left() (\n    rate(ibm_aiops_logconnector_custom_historical_logs_data_size_objects_sum[3m]) or 0 * rate(ibm_aiops_logconnector_custom_live_logs_data_size_objects_sum[3m])\n  )\n)",
@@ -3279,8 +3191,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Total number of logs collected within the time range.",
           "fieldConfig": {
@@ -3330,8 +3241,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum(increase(ibm_aiops_logconnector_custom_historical_logs_data_size_objects_sum[$__range]) or vector(0)) +\nsum(increase(ibm_aiops_logconnector_custom_live_logs_data_size_objects_sum[$__range]) or vector(0))",
@@ -3359,8 +3269,7 @@
       "panels": [
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Number of collections conducted within the time range.",
           "fieldConfig": {
@@ -3408,8 +3317,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum(increase(ibm_aiops_logconnector_elk_historical_logs_run_count_total[$__range]) or vector(0)) + \nsum(increase(ibm_aiops_logconnector_elk_live_logs_run_count_total[$__range]))or vector(0)",
@@ -3423,8 +3331,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Number of collections that resulted in an error within the time range. Errors will end the current collection, but will not impact future collections from happening. The subsequent collection after an error will proceed as scheduled.",
           "fieldConfig": {
@@ -3476,8 +3383,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum(increase(ibm_aiops_logconnector_elk_historical_logs_error_count_total[$__range]) or vector(0)) +\nsum(increase(ibm_aiops_logconnector_elk_live_logs_error_count_total[$__range]) or vector(0))",
@@ -3491,8 +3397,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Number of collections that were interrupted within the time range. Interruptions are more severe than errors and will prevent any further collections. Review the component pods for error logs.",
           "fieldConfig": {
@@ -3544,8 +3449,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum(increase(ibm_aiops_logconnector_elk_historical_logs_interrupted_count_total[$__range]) or vector(0)) +\nsum(increase(ibm_aiops_logconnector_elk_live_logs_interrupted_count_total[$__range]) or vector(0))",
@@ -3559,8 +3463,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Total number of logs collected within the time range per integration.",
           "fieldConfig": {
@@ -3613,8 +3516,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum by (pod) (\n  (\n    increase(ibm_aiops_logconnector_elk_live_logs_data_size_objects_sum[$__range]) or 0 * increase(ibm_aiops_logconnector_elk_historical_logs_data_size_objects_sum[$__range])\n  )\n  + on(pod) group_left() (\n    increase(ibm_aiops_logconnector_elk_historical_logs_data_size_objects_sum[$__range]) or 0 * increase(ibm_aiops_logconnector_elk_live_logs_data_size_objects_sum[$__range])\n  )\n)",
@@ -3628,8 +3530,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Per-second rates of logs collected by each integration..",
           "fieldConfig": {
@@ -3710,8 +3611,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum by (pod) (\n  (\n    rate(ibm_aiops_logconnector_elk_live_logs_data_size_objects_sum[3m]) or 0 * rate(ibm_aiops_logconnector_elk_historical_logs_data_size_objects_sum[3m])\n  )\n  + on(pod) group_left() (\n    rate(ibm_aiops_logconnector_elk_historical_logs_data_size_objects_sum[3m]) or 0 * rate(ibm_aiops_logconnector_elk_live_logs_data_size_objects_sum[3m])\n  )\n)",
@@ -3725,8 +3625,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Total number of logs collected within the time range.",
           "fieldConfig": {
@@ -3776,8 +3675,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum(increase(ibm_aiops_logconnector_elk_historical_logs_data_size_objects_sum[$__range]) or vector(0)) +\nsum(increase(ibm_aiops_logconnector_elk_live_logs_data_size_objects_sum[$__range]) or vector(0))",
@@ -3805,8 +3703,7 @@
       "panels": [
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Number of collections conducted within the time range.",
           "fieldConfig": {
@@ -3854,8 +3751,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum(increase(ibm_aiops_logconnector_logscale_historical_logs_run_count_total[$__range]) or vector(0)) + sum(increase(ibm_aiops_logconnector_logscale_live_logs_run_count_total[$__range]))or vector(0)",
@@ -3869,8 +3765,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Number of collections that resulted in an error within the time range. Errors will end the current collection, but will not impact future collections from happening. The subsequent collection after an error will proceed as scheduled.",
           "fieldConfig": {
@@ -3922,8 +3817,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum(increase(ibm_aiops_logconnector_logscale_historical_logs_error_count_total[$__range]) or vector(0)) +\nsum(increase(ibm_aiops_logconnector_logscale_live_logs_error_count_total[$__range]) or vector(0))",
@@ -3937,8 +3831,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Number of collections that were interrupted within the time range. Interruptions are more severe than errors and will prevent any further collections. Review the component pods for error logs.",
           "fieldConfig": {
@@ -3990,8 +3883,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum(increase(ibm_aiops_logconnector_logscale_historical_logs_interrupted_count_total[$__range]) or vector(0)) +\nsum(increase(ibm_aiops_logconnector_logscale_live_logs_interrupted_count_total[$__range]) or vector(0))",
@@ -4005,8 +3897,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Total number of logs collected within the time range per integration.",
           "fieldConfig": {
@@ -4059,8 +3950,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum by (pod) (\n  (\n    increase(ibm_aiops_logconnector_logscale_live_logs_data_size_objects_sum[$__range]) or 0 * increase(ibm_aiops_logconnector_logscale_historical_logs_data_size_objects_sum[$__range])\n  )\n  + on(pod) group_left() (\n    increase(ibm_aiops_logconnector_logscale_historical_logs_data_size_objects_sum[$__range]) or 0 * increase(ibm_aiops_logconnector_logscale_live_logs_data_size_objects_sum[$__range])\n  )\n)",
@@ -4074,8 +3964,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Per-second rates of logs collected by each integration..",
           "fieldConfig": {
@@ -4156,8 +4045,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum by (pod) (\n  (\n    rate(ibm_aiops_logconnector_logscale_live_logs_data_size_objects_sum[3m]) or 0 * rate(ibm_aiops_logconnector_logscale_historical_logs_data_size_objects_sum[3m])\n  )\n  + on(pod) group_left() (\n    rate(ibm_aiops_logconnector_logscale_historical_logs_data_size_objects_sum[3m]) or 0 * rate(ibm_aiops_logconnector_logscale_live_logs_data_size_objects_sum[3m])\n  )\n)",
@@ -4171,8 +4059,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Total number of logs collected within the time range.",
           "fieldConfig": {
@@ -4222,8 +4109,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum(increase(ibm_aiops_logconnector_logscale_historical_logs_data_size_objects_sum[$__range]) or vector(0)) +\nsum(increase(ibm_aiops_logconnector_logscale_live_logs_data_size_objects_sum[$__range]) or vector(0))",
@@ -4251,8 +4137,7 @@
       "panels": [
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Number of collections conducted within the time range.",
           "fieldConfig": {
@@ -4300,8 +4185,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum(increase(ibm_aiops_logconnector_mezmo_historical_logs_run_count_total[$__range]) or vector(0)) + sum(increase(ibm_aiops_logconnector_mezmo_live_logs_run_count_total[$__range]))or vector(0)",
@@ -4315,8 +4199,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Number of collections that resulted in an error within the time range. Errors will end the current collection, but will not impact future collections from happening. The subsequent collection after an error will proceed as scheduled.",
           "fieldConfig": {
@@ -4368,8 +4251,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum(increase(ibm_aiops_logconnector_mezmo_historical_logs_error_count_total[$__range]) or vector(0)) +\nsum(increase(ibm_aiops_logconnector_mezmo_live_logs_error_count_total[$__range]) or vector(0))",
@@ -4383,8 +4265,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Number of collections that were interrupted within the time range. Interruptions are more severe than errors and will prevent any further collections. Review the component pods for error logs.",
           "fieldConfig": {
@@ -4436,8 +4317,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum(increase(ibm_aiops_logconnector_mezmo_historical_logs_interrupted_count_total[$__range]) or vector(0)) +\nsum(increase(ibm_aiops_logconnector_mezmo_live_logs_interrupted_count_total[$__range]) or vector(0))",
@@ -4451,8 +4331,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Total number of logs collected within the time range per integration.",
           "fieldConfig": {
@@ -4505,8 +4384,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum by (pod) (\n  (\n    increase(ibm_aiops_logconnector_mezmo_live_logs_data_size_objects_sum[$__range]) or 0 * increase(ibm_aiops_logconnector_mezmo_historical_logs_data_size_objects_sum[$__range])\n  )\n  + on(pod) group_left() (\n    increase(ibm_aiops_logconnector_mezmo_historical_logs_data_size_objects_sum[$__range]) or 0 * increase(ibm_aiops_logconnector_mezmo_live_logs_data_size_objects_sum[$__range])\n  )\n)",
@@ -4520,8 +4398,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Per-second rates of logs collected by each integration..",
           "fieldConfig": {
@@ -4602,8 +4479,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum by (pod) (\n  (\n    rate(ibm_aiops_logconnector_mezmo_live_logs_data_size_objects_sum[3m]) or 0 * rate(ibm_aiops_logconnector_mezmo_historical_logs_data_size_objects_sum[3m])\n  )\n  + on(pod) group_left() (\n    rate(ibm_aiops_logconnector_mezmo_historical_logs_data_size_objects_sum[3m]) or 0 * rate(ibm_aiops_logconnector_mezmo_live_logs_data_size_objects_sum[3m])\n  )\n)",
@@ -4617,8 +4493,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Total number of logs collected within the time range.",
           "fieldConfig": {
@@ -4668,8 +4543,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum(increase(ibm_aiops_logconnector_mezmo_historical_logs_data_size_objects_sum[$__range]) or vector(0)) +\nsum(increase(ibm_aiops_logconnector_mezmo_live_logs_data_size_objects_sum[$__range]) or vector(0))",
@@ -4697,8 +4571,7 @@
       "panels": [
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Number of collections conducted within the time range.",
           "fieldConfig": {
@@ -4746,8 +4619,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum(increase(ibm_aiops_logconnector_splunk_historical_logs_run_count_total[$__range]) or vector(0)) + sum(increase(ibm_aiops_logconnector_splunk_live_logs_run_count_total[$__range]))or vector(0)",
@@ -4761,8 +4633,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Number of collections that resulted in an error within the time range. Errors will end the current collection, but will not impact future collections from happening. The subsequent collection after an error will proceed as scheduled.",
           "fieldConfig": {
@@ -4814,8 +4685,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum(increase(ibm_aiops_logconnector_splunk_historical_logs_error_count_total[$__range]) or vector(0)) +\nsum(increase(ibm_aiops_logconnector_splunk_live_logs_error_count_total[$__range]) or vector(0))",
@@ -4829,8 +4699,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Number of collections that were interrupted within the time range. Interruptions are more severe than errors and will prevent any further collections. Review the component pods for error logs.",
           "fieldConfig": {
@@ -4882,8 +4751,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum(increase(ibm_aiops_logconnector_splunk_historical_logs_interrupted_count_total[$__range]) or vector(0)) +\nsum(increase(ibm_aiops_logconnector_splunk_live_logs_interrupted_count_total[$__range]) or vector(0))",
@@ -4897,8 +4765,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Total number of logs collected within the time range per integration.",
           "fieldConfig": {
@@ -4951,8 +4818,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum by (pod) (\n  (\n    increase(ibm_aiops_logconnector_splunk_live_logs_data_size_objects_sum[$__range]) or 0 * increase(ibm_aiops_logconnector_splunk_historical_logs_data_size_objects_sum[$__range])\n  )\n  + on(pod) group_left() (\n    increase(ibm_aiops_logconnector_splunk_historical_logs_data_size_objects_sum[$__range]) or 0 * increase(ibm_aiops_logconnector_splunk_live_logs_data_size_objects_sum[$__range])\n  )\n)",
@@ -4966,8 +4832,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Per-second rates of logs collected by each integration..",
           "fieldConfig": {
@@ -5048,8 +4913,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum by (pod) (\n  (\n    rate(ibm_aiops_logconnector_splunk_live_logs_data_size_objects_sum[3m]) or 0 * rate(ibm_aiops_logconnector_splunk_historical_logs_data_size_objects_sum[3m])\n  )\n  + on(pod) group_left() (\n    rate(ibm_aiops_logconnector_splunk_historical_logs_data_size_objects_sum[3m]) or 0 * rate(ibm_aiops_logconnector_splunk_live_logs_data_size_objects_sum[3m])\n  )\n)",
@@ -5063,8 +4927,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Total number of logs collected within the time range.",
           "fieldConfig": {
@@ -5114,8 +4977,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum(increase(ibm_aiops_logconnector_splunk_historical_logs_data_size_objects_sum[$__range]) or vector(0)) +\nsum(increase(ibm_aiops_logconnector_splunk_live_logs_data_size_objects_sum[$__range]) or vector(0))",

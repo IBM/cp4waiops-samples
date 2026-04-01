@@ -1,14 +1,4 @@
 {
-  "__inputs": [
-    {
-      "name": "DS_PROMETHEUS",
-      "label": "prometheus",
-      "description": "",
-      "type": "datasource",
-      "pluginId": "prometheus",
-      "pluginName": "Prometheus"
-    }
-  ],
   "__elements": {},
   "__requires": [
     {
@@ -119,8 +109,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Count that tracks the number of pods that were newly created within the time range.\n\nNew pods indicate restarts may have occurred which could result in loss of functionality. Review the pod uptime graph to see if any gaps in uptime occurred.\n\nNew pods don't always indicate a problem and in some cases are part of routine processing and scaling. ",
           "fieldConfig": {
@@ -263,8 +252,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum(((sum((time() - kube_pod_start_time{pod=~\"netcool-conn-.*|ibm-grpc-instana-connector-.*|.*-webhook-connector-.*\"}) - $__range_s) by (pod)) < 60) <= bool 0)",
@@ -278,8 +266,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "This panel monitors the status of pods in the Event Integration Component of AIOps, Pods stuck in \"Pending\" or \"Unknown\" states for prolonged periods of time are problematic and may result in loss of functionality to the component. ",
           "fieldConfig": {
@@ -333,8 +320,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "disableTextWrap": false,
               "editorMode": "code",
@@ -400,8 +386,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Pod Uptimes for Event Integration component pods\n\n",
           "fieldConfig": {
@@ -479,8 +464,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "time() -sum(kube_pod_start_time{pod=~\"netcool-conn-.*|ibm-grpc-instana-connector-.*|.*-webhook-connector-.*\"}) by (pod)",
@@ -508,8 +492,7 @@
       "panels": [
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "This panel tracks Kafka messages that were received by Netcool Integrations but could not be properly deserialized or processed, resulting in data loss. Non-zero values indicate potential issues with message format compatibility, serialization errors, or corrupt data that may impact the completeness of information flowing through the system. If dropped messages are detected, check connector logs for deserialization errors and verify that message producers are generating correctly formatted data.\n\n\n",
           "fieldConfig": {
@@ -574,8 +557,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "increase(connector_sdk_kafka_consumer_dropped_total{pod=~\"netcool-conn-.*\"}[$__range])",
@@ -590,8 +572,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "This panel tracks internal exceptions thrown by Netcool Integrations during data collection and processing operations. Non-zero values indicate functional failures that may impact data completeness or accuracy, requiring investigation of connector logs for specific error details. If exceptions persist, check the connector's configuration, verify endpoint accessibility, and ensure sufficient resources are allocated to connector pods.\n\n\n",
           "fieldConfig": {
@@ -667,8 +648,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "increase(connectors_sdk_connectorexceptions_thrown_total{pod=~\"netcool-conn-.*\"}[$__range])",
@@ -683,8 +663,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "This panel tracks status communication failures between Netcool connectors and the connector-bridge pod, indicating instances where connectors may be functioning but unable to report their health status. When values are non-zero, check network connectivity, certificate validity, and the connector-bridge pod's health, as these failures can cause connectors to incorrectly appear as \"Down\" or \"Unknown\" in the management interface. Most issues can be resolved by addressing network problems or restarting the affected connectors.\n\n\n",
           "fieldConfig": {
@@ -760,8 +739,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "increase(connector_sdk_status_failed_total{pod=~\"netcool-conn-.*\"}[$__range])",
@@ -776,8 +754,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Shows the per-second rate of netcool actions messages over 3m averages. \n",
           "fieldConfig": {
@@ -855,8 +832,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum (rate(aiops_connector_messages_action_processed_total{container=\"netcool-connector\"}[3m])) by (pod)",
@@ -870,8 +846,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "This panel tracks the count of connector action messages processed within the time range, per Netcool connector. Healthy systems show consistent rates matching typical workloads, while sudden drops or spikes may indicate connector failures or backlogs.\n",
           "fieldConfig": {
@@ -924,8 +899,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum(increase(aiops_connector_messages_action_processed_total{container=\"netcool-connector\"}[$__range])) by (pod)",
@@ -940,8 +914,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Shows the per-second rate of netcool messaging over 3m averages. \n",
           "fieldConfig": {
@@ -1023,8 +996,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum (rate(aiops_connector_messages_processed_total{container=\"netcool-connector\"}[3m])) by (pod)",
@@ -1038,8 +1010,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "This panel tracks the count of messages processed within the time range, per Netcool Integration. Consistent patterns indicate healthy data flow, while sudden drops may signal connector failures affecting incident detection.\n\n\n\n\n\n",
           "fieldConfig": {
@@ -1101,8 +1072,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum(increase(aiops_connector_messages_processed_total{container=\"netcool-connector\"}[$__range])) by (pod)",
@@ -1116,8 +1086,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Shows the per-second rate of alerts emitted by netcool connector over 3m averages. \n",
           "fieldConfig": {
@@ -1199,8 +1168,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum (rate(aiops_connector_netcool_events_emitted_total[3m])) by (pod)",
@@ -1214,8 +1182,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "This panel tracks alerts emitted within the time range, per Netcool Integration. Consistent emission patterns indicate healthy integration, while drops may signal failures affecting alert delivery.\n\n\n\n\n\n\n\n",
           "fieldConfig": {
@@ -1265,8 +1232,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum(increase(aiops_connector_netcool_events_emitted_total[$__range])) by (pod)",
@@ -1294,8 +1260,7 @@
       "panels": [
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "This panel tracks Kafka messages that were received by Instana Integrations but could not be properly deserialized or processed, resulting in data loss. Non-zero values indicate potential issues with message format compatibility, serialization errors, or corrupt data that may impact the completeness of information flowing through the system. If dropped messages are detected, check integration pod  logs for deserialization errors and verify that message producers are generating correctly formatted data.\n\n\n\n\n\n\n\n\n\n",
           "fieldConfig": {
@@ -1361,8 +1326,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum(increase(connector_sdk_kafka_consumer_dropped_total{pod=~\".*-instana-.*\"}[$__range])) by (pod)",
@@ -1377,8 +1341,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "This panel tracks internal exceptions thrown by Instana Integrations during data collection and processing operations. Non-zero values indicate functional failures that may impact data completeness or accuracy, requiring investigation of connector logs for specific error details. If exceptions persist, check the connector's configuration, verify endpoint accessibility, and ensure sufficient resources are allocated to connector pods.\n\n\n\n\n\n",
           "fieldConfig": {
@@ -1454,8 +1417,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum(increase(connectors_sdk_connectorexceptions_thrown_total{pod=~\".*-instana-.*\"}[$__range])) by (pod)",
@@ -1470,8 +1432,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "This panel tracks status communication failures between Instana Integrations and the connector-bridge pod that occurred within the time range. These failures indicate instances where integrations may be functioning but are unable to report their health status. When values are non-zero, check network connectivity, certificate validity, and the connector-bridge pod's health, as these failures can cause integrations to incorrectly appear as \"Down\" or \"Unknown\" in the management interface. Most issues can be resolved by addressing network problems or restarting the affected integrations.\n",
           "fieldConfig": {
@@ -1542,8 +1503,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum(increase(connector_sdk_status_failed_total{pod=~\".*-instana-.*\"}[$__range])) by (pod)",
@@ -1558,8 +1518,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Shows the per-second rate for incoming events and alert create/update messages over 3m averages ingested from Instana. \n",
           "fieldConfig": {
@@ -1641,8 +1600,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum (rate(connector_cloudevents_emitted_total{channel_name=\"cp4waiops-cartridge.lifecycle.input.events\", component_name=\"instana\"}[3m])) by (pod)",
@@ -1658,8 +1616,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "This panel tracks the count of event/alert messages ingested by each Instana integration within the given time range. Consistent data flow in indicates healthy data collection and processing, while drops may indicate integration issues affecting ingestion.\n\n\n\n\n\n\n\n",
           "fieldConfig": {
@@ -1711,8 +1668,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum(increase(connector_cloudevents_emitted_total{channel_name=\"cp4waiops-cartridge.lifecycle.input.events\", component_name=\"instana\"}[$__range])) by (pod)",
@@ -1728,8 +1684,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Shows the per-second rate for data transferred through integration over 3m averages by Instana Integration pods. \n\n\n\n\n\n\n\n\n\n",
           "fieldConfig": {
@@ -1807,8 +1762,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum(rate(aiops_connector_api_calls_kilobytes_sum{component_name=\"instana\"}[3m])) by (pod)",
@@ -1824,8 +1778,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "This panel shows aggregate data transferred through integration APIs by pod.\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n",
           "fieldConfig": {
@@ -1879,8 +1832,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum(increase(aiops_connector_api_calls_kilobytes_sum{component_name=\"instana\"}[$__range])) by (pod)",
@@ -1910,8 +1862,7 @@
       "panels": [
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "This panel tracks internal exceptions thrown by WebHook Integrations during data collection and processing operations. Non-zero values indicate functional failures that may impact data completeness or accuracy, requiring investigation of integrations logs for specific error details. If exceptions persist, check the integration's configuration, verify endpoint accessibility, and ensure sufficient resources are allocated to integration pods.\n\n\n\n\n\n",
           "fieldConfig": {
@@ -1987,8 +1938,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum(increase(connectors_sdk_connectorexceptions_thrown_total{pod=~\".*-webhook-.*\"}[$__range])) by (pod)",
@@ -2003,8 +1953,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "This panel tracks status communication failures between WebHook Integrations and the connector-bridge pod, indicating instances where integrations may be functioning but unable to report their health status. When values are non-zero, check network connectivity, certificate validity, and the connector-bridge pod's health, as these failures can cause connectors to incorrectly appear as \"Down\" or \"Unknown\" in the management interface. Most issues can be resolved by addressing network problems or restarting the affected integrations.\n\n\n",
           "fieldConfig": {
@@ -2080,8 +2029,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "increase(connector_sdk_status_failed_total{pod=~\".*-webhook-.*\"}[$__range])",
@@ -2110,8 +2058,7 @@
       "panels": [
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Count of pods that have exceeded 80% of their CPU limits within the time range. This will result in CPU throttling and potentially temporary loss of functionality\n\nThis will only compare against the ***current*** CPU limit of each pod. If the limits were updated within the time range, the count may be inaccurate.",
           "fieldConfig": {
@@ -2206,8 +2153,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum((((max(kube_pod_container_resource_limits{pod=~\"netcool-conn-.*|ibm-grpc-instana-connector-.*\", container!=\"\", container!=\"POD\", resource=\"cpu\"}) by (pod)) * 0.8 <= max(max_over_time(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{pod=~\"netcool-conn-.*|ibm-grpc-instana-connector-.*\", container!=\"\", container!=\"POD\"}[$__range])) by (pod)) or vector(0)) > bool 0)",
@@ -2221,8 +2167,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Count of pods that have exceeded 80% of their memory limits within the time range.\n\nThis will only compare against the ***current*** memory limit of each pod. If the limits were updated within the time range, the count may be inaccurate.",
           "fieldConfig": {
@@ -2317,8 +2262,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum((((max(kube_pod_container_resource_limits{pod=~\"netcool-conn-.*|ibm-grpc-instana-connector-.*\", container!=\"\", container!=\"POD\", resource=\"memory\"}) by (pod)) * 0.8 <= max(max_over_time(container_memory_working_set_bytes{pod=~\"netcool-conn-.*|ibm-grpc-instana-connector-.*\", container!=\"\", container!=\"POD\"}[$__range])) by (pod)) or vector(0)) > bool 0)",
@@ -2332,8 +2276,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Count of pods that have exceeded their CPU limits within the time range. This will result in CPU throttling and potentially temporary loss of functionality.\n\nThis will only compare against the ***current*** CPU limit of each pod. If the limits were updated within the time range, the count may be inaccurate.",
           "fieldConfig": {
@@ -2428,8 +2371,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum((((max(kube_pod_container_resource_limits{pod=~\"netcool-conn-.*|ibm-grpc-instana-connector-.*\", container!=\"\", container!=\"POD\", resource=\"cpu\"}) by (pod)) <= max(max_over_time(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{pod=~\"netcool-conn-.*|ibm-grpc-instana-connector-.*\", container!=\"\", container!=\"POD\"}[$__range])) by (pod)) or vector(0)) > bool 0)",
@@ -2443,8 +2385,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Count of component pods that have exceeded their memory limits within the time range.\n\nThis will only compare against the ***current*** memory limit of each pod. If the limits were updated within the time range, the count may be inaccurate.",
           "fieldConfig": {
@@ -2538,8 +2479,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum((((max(kube_pod_container_resource_limits{pod=~\"netcool-conn-.*|ibm-grpc-instana-connector-.*\", container!=\"\", container!=\"POD\", resource=\"memory\"}) by (pod)) <= max(max_over_time(container_memory_working_set_bytes{pod=~\"netcool-conn-.*|ibm-grpc-instana-connector-.*\", container!=\"\", container!=\"POD\"}[$__range])) by (pod)) or vector(0)) > bool 0)",
@@ -2553,8 +2493,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "This panel displays the per-second CPU usage rate of Netcool Integration pod. High CPU usage may indicate that the Netcool Integration pods are under heavy load, potentially impacting event ingestion and synchronization performance. Monitor this metric to ensure optimal resource allocation and efficient processing of integration tasks",
           "fieldConfig": {
@@ -2677,8 +2616,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{pod=~\"netcool-conn-.*\"}) by (pod)",
@@ -2688,8 +2626,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(kube_pod_container_resource_requests{pod=~\"netcool-conn-.*\", resource=\"cpu\"})",
@@ -2701,8 +2638,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(kube_pod_container_resource_limits{pod=~\"netcool-conn-.*\", resource=\"cpu\"}) ",
@@ -2718,8 +2654,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "This panel displays the per-second Memory usage rate of Netcool Integration pod. High Memory usage may indicate that the Netcool Integration pods are consuming significant resources. Monitor this metric to ensure optimal resource allocation and efficient processing of integration tasks.",
           "fieldConfig": {
@@ -2843,8 +2778,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(container_memory_working_set_bytes{pod=~\"netcool-conn-.*\", container!=\"\", container!=\"POD\"}) by (pod)",
@@ -2854,8 +2788,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(kube_pod_container_resource_requests{pod=~\"netcool-conn-.*\", resource=\"memory\"}) ",
@@ -2867,8 +2800,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(kube_pod_container_resource_limits{pod=~\"netcool-conn-.*\", resource=\"memory\"}) ",
@@ -2884,8 +2816,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "This panel displays the per-second CPU usage rate of Instana Integration pod. High CPU usage may indicate that the Instana Integration pods are under heavy load, potentially impacting event ingestion and synchronization performance. Monitor this metric to ensure optimal resource allocation and efficient processing of integration tasks\n\n",
           "fieldConfig": {
@@ -3008,8 +2939,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{pod=~\"ibm-grpc-instana-connector-.*\"}) by (pod)",
@@ -3019,8 +2949,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(kube_pod_container_resource_requests{pod=~\"ibm-grpc-instana-connector-.*\", resource=\"cpu\"}) ",
@@ -3032,8 +2961,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(kube_pod_container_resource_requests{pod=~\"ibm-grpc-instana-connector-.*\", resource=\"cpu\"}) ",
@@ -3049,8 +2977,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "This panel displays the per-second Memory usage rate of Instana Integration pod. High Memory usage may indicate that the Instana Integration pods are consuming significant resources. Monitor this metric to ensure optimal resource allocation and efficient processing of integration tasks.",
           "fieldConfig": {
@@ -3174,8 +3101,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(container_memory_working_set_bytes{pod=~\"ibm-grpc-instana-connector-.*\", container!=\"\", container!=\"POD\"}) by (pod)",
@@ -3185,8 +3111,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(kube_pod_container_resource_requests{pod=~\"ibm-grpc-instana-connector-.*\", resource=\"memory\"}) ",
@@ -3198,8 +3123,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(kube_pod_container_resource_limits{pod=~\"ibm-grpc-instana-connector-.*\", resource=\"memory\"}) ",
@@ -3215,8 +3139,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "This panel displays the per-second CPU usage rate of Webhook Integration pod. High CPU usage may indicate that the Webhook Integration pods are under heavy load, potentially impacting event ingestion and synchronization performance. Monitor this metric to ensure optimal resource allocation and efficient processing of integration tasks\n\n",
           "fieldConfig": {
@@ -3346,8 +3269,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{pod=~\"ibm-grpc-webhook-connector-.*\"}) by (pod)",
@@ -3357,8 +3279,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(kube_pod_container_resource_requests{pod=~\"ibm-grpc-webhook-connector-.*\", resource=\"cpu\"}) ",
@@ -3370,8 +3291,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(kube_pod_container_resource_requests{pod=~\"ibm-grpc-webhook-connector-.*\", resource=\"cpu\"}) ",
@@ -3387,8 +3307,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "This panel displays the per-second Memory usage rate of Webhook Integration pod(s). High Memory usage may indicate that the Webhook Integration pods are consuming significant resources. Monitor this metric to ensure optimal resource allocation and efficient processing of integration tasks.",
           "fieldConfig": {
@@ -3519,8 +3438,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(container_memory_working_set_bytes{pod=~\"ibm-grpc-webhook-.*\", container!=\"\", container!=\"POD\"}) by (pod)",
@@ -3530,8 +3448,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(kube_pod_container_resource_requests{pod=~\"ibm-grpc-webhook-.*\", resource=\"memory\"}) ",
@@ -3543,8 +3460,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(kube_pod_container_resource_limits{pod=~\"ibm-grpc-webhook-.*\", resource=\"memory\"}) ",

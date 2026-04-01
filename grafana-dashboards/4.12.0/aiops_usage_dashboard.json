@@ -1,14 +1,4 @@
 {
-  "__inputs": [
-    {
-      "name": "DS_PROMETHEUS",
-      "label": "prometheus",
-      "description": "",
-      "type": "datasource",
-      "pluginId": "prometheus",
-      "pluginName": "Prometheus"
-    }
-  ],
   "__elements": {},
   "__requires": [
     {
@@ -126,8 +116,7 @@
       "panels": [
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Shows the per-second rate of events ingested into the system over 3m averages. \n\nKafka topic: cp4waiops-cartridge.lifecycle.input.events ",
           "fieldConfig": {
@@ -207,8 +196,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum (rate(kafka_server_brokertopicmetrics_messagesin_total{topic=\"cp4waiops-cartridge.lifecycle.input.events\"}[3m]))",
@@ -222,8 +210,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "",
           "fieldConfig": {
@@ -272,8 +259,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum(increase(kafka_server_brokertopicmetrics_messagesin_total{topic=\"cp4waiops-cartridge.lifecycle.input.events\"}[$__range]) or vector(0))",
@@ -301,8 +287,7 @@
       "panels": [
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Shows the per-second rate of alert create/update requests over 3m averages. \n\nKafka topic: cp4waiops-cartridge.irdatalayer.changes.alerts",
           "fieldConfig": {
@@ -382,8 +367,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum (rate(kafka_server_brokertopicmetrics_messagesin_total{topic=\"cp4waiops-cartridge.irdatalayer.changes.alerts\"}[3m]))",
@@ -398,8 +382,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Count that tracks alert create/update requests in time range. Updates can come from events, manual user changes, and Cloud Pak for AIOps enrichments.",
           "fieldConfig": {
@@ -448,8 +431,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum(increase(kafka_server_brokertopicmetrics_messagesin_total{topic=\"cp4waiops-cartridge.irdatalayer.changes.alerts\"}[$__range]) or vector(0))",
@@ -477,8 +459,7 @@
       "panels": [
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Shows the per-second rate of incident create/update requests over 3m averages. \n\nKafka topic: cp4waiops-cartridge.irdatalayer.changes.stories",
           "fieldConfig": {
@@ -558,8 +539,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum (rate(kafka_server_brokertopicmetrics_messagesin_total{topic=\"cp4waiops-cartridge.irdatalayer.changes.stories\"}[3m]))",
@@ -574,8 +554,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Count that tracks incident create/update requests in time range. Updates can come from alerts, manual user changes, and IBM Cloud Pak for AIOps enrichments.",
           "fieldConfig": {
@@ -624,8 +603,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum(increase(kafka_server_brokertopicmetrics_messagesin_total{topic=\"cp4waiops-cartridge.irdatalayer.changes.stories\"}[$__range]) or vector(0))",
@@ -653,8 +631,7 @@
       "panels": [
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Shows the per-second rate of logs ingested into the system over 1m averages. Log integrations can be created in the Cloud Pak for AIOps integrations page.\n\nKafka topic: cp4waiops-cartridge-logs-.*-raw",
           "fieldConfig": {
@@ -735,8 +712,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum (rate(kafka_server_brokertopicmetrics_messagesin_total{topic=~\"cp4waiops-cartridge-logs-.*-raw\"}[1m]))",
@@ -750,8 +726,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "",
           "fieldConfig": {
@@ -801,8 +776,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum(increase(kafka_server_brokertopicmetrics_messagesin_total{topic=~\"cp4waiops-cartridge-logs-.*-raw\"}[$__range]) or vector(0))",
@@ -830,8 +804,7 @@
       "panels": [
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Shows the per-second rate of metrics ingested into the system over 3m averages. Metric integrations can be created in the IBM Cloud Pak for AIOps integrations page.\n\nKafka topic: cp4waiops-cartridge.analyticsorchestrator.metrics.itsm.aggregated",
           "fieldConfig": {
@@ -912,8 +885,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum (rate(kafka_server_brokertopicmetrics_messagesin_total{topic=~\"cp4waiops-cartridge.analyticsorchestrator.metrics.itsm.aggregated\"}[3m]))",
@@ -927,8 +899,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Count of metrics ingested within the time range. Metric integrations can be created in the IBM Cloud Pak for AIOps integrations page.\n\nTo view an accurate count, select a time window that is equal to, or longer than the metric aggregation interval . For example, if the aggregation interval is 5 minutes, select a time window from the time picker that is at least 5 minutes long. The aggregation interval is viewable and configurable in the IBM Cloud Pak for AIOps integrations page.\n\nKafka topic: cp4waiops-cartridge.analyticsorchestrator.metrics.itsm.aggregated",
           "fieldConfig": {
@@ -978,8 +949,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum(increase(kafka_server_brokertopicmetrics_messagesin_total{topic=~\"cp4waiops-cartridge.analyticsorchestrator.metrics.itsm.aggregated\"}[$__range]) or vector(0))",
@@ -1007,8 +977,7 @@
       "panels": [
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Shows the per-second rate of runbooks executed in the system over 1m averages. Runbooks can be created and configured under the Cloud Pak for AIOps Automations page.\n\nKafka topic: cp4waiops-cartridge.lifecycle.output.rba-exec-requests",
           "fieldConfig": {
@@ -1089,8 +1058,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum (rate(kafka_server_brokertopicmetrics_messagesin_total{topic=~\"cp4waiops-cartridge.lifecycle.output.rba-exec-requests\"}[3m]))",
@@ -1104,8 +1072,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "",
           "fieldConfig": {
@@ -1155,8 +1122,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum(increase(kafka_server_brokertopicmetrics_messagesin_total{topic=~\"cp4waiops-cartridge.lifecycle.output.rba-exec-requests\"}[$__range]) or vector(0))",
@@ -1184,8 +1150,7 @@
       "panels": [
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Time series that tracks the ServiceNow request rates per minute for:\n* incidents create/updates\n* alerts updates\n* change risk assessments\n\nThis does not include requests made for polling. Those requests are made at consistent, configurable intervals that can be set in the IBM Cloud Pak for AIOps ServiceNow integration.",
           "fieldConfig": {
@@ -1269,8 +1234,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum((rate(snow_incident_create_action_total[3m]) * 60) or vector(0))",
@@ -1280,8 +1244,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum((rate(snow_incident_create_action_error_total[3m]) * 60) or vector(0))",
@@ -1293,8 +1256,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum((rate(snow_alert_update_action_total[3m]) * 60) or vector(0))",
@@ -1306,8 +1268,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum((rate(snow_alert_update_action_error_total[3m]) * 60) or vector(0))",
@@ -1319,8 +1280,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum((rate(snow_comment_create_action_total[3m]) * 60) or vector(0))",
@@ -1332,8 +1292,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum((rate(snow_comment_create_action_error_total[3m]) * 60) or vector(0))",
@@ -1349,8 +1308,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Count that tracks incident create/update requests sent to ServiceNow within the time range. Subtract (Incident create/update failures) from this number to calculate the number of successful requests.",
           "fieldConfig": {
@@ -1398,8 +1356,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum(increase(snow_incident_create_action_total[$__range]))",
@@ -1413,8 +1370,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Count that tracks incident create/update requests sent to ServiceNow that resulted in an error within the time range. \n\nFailures could be due to lack of permissions, check that the integration user has the appropriate roles: https://www.ibm.com/docs/en/cloud-paks/cloud-pak-aiops/latest?topic=integrations-servicenow-app-integration#create_roles ",
           "fieldConfig": {
@@ -1466,8 +1422,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum(increase(snow_incident_create_action_error_total[$__range]))",
@@ -1495,8 +1450,7 @@
       "panels": [
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Time series that tracks the request rates per minute for:\n* Issue creation requests/success/failure\n* Issue update requests/success/failure\n* Poll requests/success/failure",
           "fieldConfig": {
@@ -1580,8 +1534,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum((rate(ibm_aiops_ticket_github_issue_create_action_total[3m])) * 60) or vector(0)",
@@ -1591,8 +1544,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum((rate(ibm_aiops_ticket_github_issue_create_action_success_total[3m])) * 60) or vector(0)",
@@ -1604,8 +1556,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum((rate(ibm_aiops_ticket_github_issue_create_action_error_total[3m])) * 60) or vector(0)",
@@ -1617,8 +1568,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum((rate(ibm_aiops_ticket_github_issue_update_action_total[3m])) * 60) or vector(0)",
@@ -1630,8 +1580,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum((rate(ibm_aiops_ticket_github_issue_update_action_success_total[3m])) * 60) or vector(0)",
@@ -1643,8 +1592,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum((rate(ibm_aiops_ticket_github_issue_update_action_error_total[3m])) * 60) or vector(0)",
@@ -1656,8 +1604,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum((rate(ibm_aiops_ticket_github_issue_poll_action_total[3m])) * 60) or vector(0)",
@@ -1669,8 +1616,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum((rate(ibm_aiops_ticket_github_issue_poll_action_success_total[3m])) * 60) or vector(0)",
@@ -1682,8 +1628,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum((rate(ibm_aiops_ticket_github_issue_poll_action_error_total[3m])) * 60) or vector(0)",
@@ -1699,8 +1644,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Count that tracks the number of Github issues created successfully within the time range.",
           "fieldConfig": {
@@ -1748,8 +1692,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum(increase(ibm_aiops_ticket_github_issue_create_action_success_total[$__range]))",
@@ -1763,8 +1706,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Count that tracks the number of Github issues that could not be created due to errors within the time range.\n\nPlease review that the Github credentials and instance details are valid. For more information on configuring the Github integration see: https://www.ibm.com/docs/en/cloud-paks/cloud-pak-aiops/latest?topic=integrations-github",
           "fieldConfig": {
@@ -1812,8 +1754,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum(increase(ibm_aiops_ticket_github_issue_create_action_error_total[$__range]))",
@@ -1827,8 +1768,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Count that tracks the number of Github issues updated successfully within the time range.",
           "fieldConfig": {
@@ -1876,8 +1816,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum(increase(ibm_aiops_ticket_github_issue_update_action_success_total[$__range]))",
@@ -1891,8 +1830,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Count that tracks the number of Github issues that could not be updated due to errors within the time range.\n\nIt is expected for a few update failures to occur when an incident is initially created. Incident creation is usually immediately followed by a few updates. The Github integration cannot process these updates until after the Github issue has been created, thus the updates will fail. Subsequent updates should succeed as normal.\n\nFor failures that occur after initial incident creation, please review that the Github credentials and instance details are valid. For more information on configuring the Github integration see: https://www.ibm.com/docs/en/cloud-paks/cloud-pak-aiops/latest?topic=integrations-github",
           "fieldConfig": {
@@ -1940,8 +1878,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum(increase(ibm_aiops_ticket_github_issue_update_action_error_total[$__range]))",
@@ -1969,8 +1906,7 @@
       "panels": [
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Time series that tracks the request rates per minute for:\n* Issue creation requests/success/failure\n* Issue update requests/success/failure\n* Poll requests/success/failure",
           "fieldConfig": {
@@ -2054,8 +1990,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum((rate(ibm_aiops_ticket_jira_issue_create_action_total[3m])) * 60) or vector(0)",
@@ -2065,8 +2000,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum((rate(ibm_aiops_ticket_jira_issue_create_action_success_total[3m])) * 60) or vector(0)",
@@ -2078,8 +2012,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum((rate(ibm_aiops_ticket_jira_issue_create_action_error_total[3m])) * 60) or vector(0)",
@@ -2091,8 +2024,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum((rate(ibm_aiops_ticket_jira_issue_update_action_total[3m])) * 60) or vector(0)",
@@ -2104,8 +2036,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum((rate(ibm_aiops_ticket_jira_issue_update_action_success_total[3m])) * 60) or vector(0)",
@@ -2117,8 +2048,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum((rate(ibm_aiops_ticket_jira_issue_update_action_error_total[3m])) * 60) or vector(0)",
@@ -2130,8 +2060,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum((rate(ibm_aiops_ticket_jira_issue_poll_action_total[3m])) * 60) or vector(0)",
@@ -2143,8 +2072,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum((rate(ibm_aiops_ticket_jira_issue_poll_action_success_total[3m])) * 60) or vector(0)",
@@ -2156,8 +2084,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum((rate(ibm_aiops_ticket_jira_issue_poll_action_error_total[3m])) * 60) or vector(0)",
@@ -2173,8 +2100,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Count that tracks the number of Jira issues created successfully within the time range.",
           "fieldConfig": {
@@ -2222,8 +2148,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum(increase(ibm_aiops_ticket_jira_issue_create_action_success_total[$__range]))",
@@ -2237,8 +2162,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Count that tracks the number of Jira issues that could not be created due to errors within the time range.\n\nPlease review that the Jira credentials and instance details are valid. For more information on configuring the Jira integration see: https://www.ibm.com/docs/en/cloud-paks/cloud-pak-aiops/latest?topic=integrations-jira",
           "fieldConfig": {
@@ -2286,8 +2210,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum(increase(ibm_aiops_ticket_jira_issue_create_action_error_total[$__range]))",
@@ -2301,8 +2224,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Count that tracks the number of Jira issues updated successfully within the time range.",
           "fieldConfig": {
@@ -2350,8 +2272,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum(increase(ibm_aiops_ticket_jira_issue_update_action_success_total[$__range]))",
@@ -2365,8 +2286,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Count that tracks the number of Jira issues that could not be updated due to errors within the time range.\n\nIt is expected for a few update failures to occur when an incident is initially created. Incident creation is usually immediately followed by a few updates. The Jira integration cannot process these updates until after the Jira ticket has been created, thus the updates will fail. Subsequent updates should succeed as normal.\n\nFor failures that occur after initial incident creation, please review that the Jira credentials and instance details are valid. For more information on configuring the Jira integration see: https://www.ibm.com/docs/en/cloud-paks/cloud-pak-aiops/latest?topic=integrations-jira",
           "fieldConfig": {
@@ -2414,8 +2334,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum(increase(ibm_aiops_ticket_jira_issue_update_action_error_total[$__range]))",
@@ -2443,8 +2362,7 @@
       "panels": [
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Time series that tracks the ChatOps request rates per minute for:\n* Notification requests received (by internal ChatOps component)\n* notifications sent successfully\n* notification failures",
           "fieldConfig": {
@@ -2528,8 +2446,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum((rate(ibm_aiops_chatops_slack_incidents_create_requests[3m]) * 60) or vector(0)) + sum((rate(ibm_aiops_chatops_teams_incidents_create_requests[3m]) * 60) or vector(0))",
@@ -2539,8 +2456,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum((rate(ibm_aiops_chatops_slack_incidents_create_success[3m]) * 60) or vector(0)) + sum((rate(ibm_aiops_chatops_teams_incidents_create_success[3m]) * 60) or vector(0))",
@@ -2552,8 +2468,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum((rate(ibm_aiops_chatops_slack_incidents_created_errors[3m]) * 60) or vector(0)) + sum((rate(ibm_aiops_chatops_teams_incidents_created_errors[3m]) * 60) or vector(0))",
@@ -2569,8 +2484,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Count that tracks the number of notifications successfully sent to the external Chat Platform (Slack/Teams) within the time range.",
           "fieldConfig": {
@@ -2618,8 +2532,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "disableTextWrap": false,
               "editorMode": "code",
@@ -2639,8 +2552,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Count that tracks the number of notifications that could not be sent to the external Chat Platform (Slack/Teams) due to errors within the time range.\n\nPlease review that the ChatOps credentials and channel ids are valid. For more information on configuring the ChatOps integrations, see:\n* MS Teams: https://www.ibm.com/docs/en/cloud-paks/cloud-pak-aiops/latest?topic=integrations-microsoft-teams-integration\n* Slack: https://www.ibm.com/docs/en/cloud-paks/cloud-pak-aiops/latest?topic=integrations-slack-integration",
           "fieldConfig": {
@@ -2692,8 +2604,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "disableTextWrap": false,
               "editorMode": "code",
@@ -2713,8 +2624,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Histogram displaying the ChatOps notification times. This shows the time elapsed from incident creation to ChatOps notification. \n\nThis gives insight into the speed at which users are being notified of incidents via ChatOps.\n\nValues on the bottom are ranges of time in seconds. Values on the top are the number of notifications that were sent in that time range.\n",
           "fieldConfig": {
@@ -2769,8 +2679,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "disableTextWrap": false,
               "editorMode": "code",
@@ -2784,8 +2693,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "disableTextWrap": false,
               "editorMode": "code",
@@ -2801,8 +2709,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "disableTextWrap": false,
               "editorMode": "code",
@@ -2818,8 +2725,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "disableTextWrap": false,
               "editorMode": "code",
@@ -2835,8 +2741,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "disableTextWrap": false,
               "editorMode": "code",
@@ -2852,8 +2757,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "disableTextWrap": false,
               "editorMode": "code",
@@ -2869,8 +2773,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "disableTextWrap": false,
               "editorMode": "code",

@@ -1,14 +1,4 @@
 {
-  "__inputs": [
-    {
-      "name": "DS_PROMETHEUS",
-      "label": "prometheus",
-      "description": "",
-      "type": "datasource",
-      "pluginId": "prometheus",
-      "pluginName": "Prometheus"
-    }
-  ],
   "__elements": {},
   "__requires": [
     {
@@ -118,8 +108,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "The 5 lowest uptimes within the component pods. Pod restarts can impact functionality, review the pod table and uptime graph for more details.",
           "fieldConfig": {
@@ -185,8 +174,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "time() -topk(5, sum(kube_pod_start_time{pod=~\"aiops-ir-analytics-.*|aiops-lad-flink.*\"}) by (pod))",
@@ -200,8 +188,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "This panel monitors the status of pods in the Analytics Component of AIOps, Pods stuck in \"Pending\" or \"Unknown\" states for prolonged periods of time are problematic and may result in loss of functionality to the component.",
           "fieldConfig": {
@@ -250,8 +237,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "disableTextWrap": false,
               "editorMode": "code",
@@ -317,8 +303,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Pod Uptimes for analytics component pods",
           "fieldConfig": {
@@ -398,8 +383,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "time() -sum(kube_pod_start_time{pod=~\"aiops-ir-analytics-.*|aiops-lad-flink.*\"}) by (pod)",
@@ -452,8 +436,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "This panel shows the status of the Spark cluster used for analytics processing. The metric reports a healthy status when the Spark master node is responsive and at least one worker node is active. If this metric shows unhealthy status, check the Spark cluster health, as this may impact training and analytics capabilities within the AIOps platform.\n\n\n",
           "fieldConfig": {
@@ -525,8 +508,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "ibm_aiops_training_spark_cluster_status",
@@ -540,8 +522,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "This panel displays the total number of currently active Spark worker nodes in the AIOps platform. More alive worker nodes mean a stronger cluster for handling larger jobs. Fewer nodes may indicate resource issues or cluster problems, risking delays or failures.",
           "fieldConfig": {
@@ -594,8 +575,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "ibm_aiops_training_spark_cluster_aliveWorkers",
@@ -609,8 +589,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "This panel tracks the count of Spark driver submissions, representing the total number of analytics training jobs initiated in the system within the selected time range. Each count increment indicates a new training job has started, regardless of the specific application type.",
           "fieldConfig": {
@@ -671,8 +650,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "(increase(ibm_aiops_training_spark_driver_submissions_total[$__range]))",
@@ -686,8 +664,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "This panel shows the number of analytics training jobs that have successfully completed during the selected time period. Each increment represents a Spark driver that has finished its execution with a \"FINISHED\" status, indicating the associated training job completed successfully. Comparing this metric with the total driver submissions helps identify potential issues with training job completion rates and overall analytics system health. Consistently low or dropping numbers may signal job failures, scheduling inefficiencies, or resource issues.",
           "fieldConfig": {
@@ -750,8 +727,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "increase(ibm_aiops_training_spark_cluster_drivers_FINISHED_count[$__range])",
@@ -766,8 +742,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Count of Spark drivers that failed during execution. A low count is expected. High or increasing counts may indicate job failures, scheduling inefficiencies, or resource issues within the Spark cluster. Failed drivers result in incomplete analytics training, which can lead to outdated or missing models for various analytics services. If this metric shows persistent failures, check Spark worker logs, verify memory/CPU allocations, and ensure data sources are accessible.\n",
           "fieldConfig": {
@@ -938,8 +913,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum(increase(ibm_aiops_training_spark_cluster_drivers_FAILED_count[$__range]))",
@@ -955,8 +929,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Job submissions failed due to insufficient cluster CPU/memory resources. A low count is expected. High or increasing counts may indicate resource issues, poor workload distribution, or cluster scaling limitations.\n\n",
           "fieldConfig": {
@@ -1127,8 +1100,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum(increase(ibm_aiops_training_spark_lack_of_resource_failure_total[$__range]))",
@@ -1144,8 +1116,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Count of manually shut down Spark drivers. A low count is expected, but higher counts may occur during maintenance or when training jobs are intentionally canceled. Frequent unexpected driver kills can interrupt training jobs and prevent model updates. If high counts occur outside maintenance windows, investigate resource constraints or system instability.\n\n",
           "fieldConfig": {
@@ -1316,8 +1287,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum(increase(ibm_aiops_training_spark_cluster_drivers_KILLED_count[$__range]))",
@@ -1331,8 +1301,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Count of failed Spark job submissions. Meaning the jobs couldn't start, often due to Spark driver issues, resource exhaustion, or cluster health problems. Failed submissions prevent analytics models from being trained or updated, potentially leading to outdated anomaly detection capabilities. If this count increases, check Spark cluster health, verify resource availability, and review pod logs for specific error messages.\n\n\n",
           "fieldConfig": {
@@ -1503,8 +1472,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum(increase(ibm_aiops_training_spark_submission_failed_total[$__range]))",
@@ -1534,8 +1502,7 @@
       "panels": [
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Total number of logs received by the LAD pipeline and normalized with the field mapping set in the log integration UI(s) within the time range.",
           "fieldConfig": {
@@ -1585,8 +1552,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum(increase(ibm_aiops_ladgs_inference_splunkmaplc_normalized_logs[$__range]) or vector(0)) +\nsum(increase(ibm_aiops_ladgs_inference_elkmaplc_normalized_logs[$__range]) or vector(0)) +\nsum(increase(ibm_aiops_ladgs_inference_humiomaplc_normalized_logs[$__range]) or vector(0)) +\nsum(increase(ibm_aiops_ladgs_inference_kafkamaplc_normalized_logs[$__range]) or vector(0)) +\nsum(increase(ibm_aiops_ladgs_inference_logdnamaplc_normalized_logs[$__range]) or vector(0)) +\nsum(increase(ibm_aiops_ladgs_inference_custommaplc_normalized_logs[$__range]) or vector(0))",
@@ -1600,8 +1566,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Total number of logs collected by each integration within the time range.",
           "fieldConfig": {
@@ -1658,8 +1623,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum(increase(ibm_aiops_ladgs_inference_splunkmaplc_normalized_logs[$__range]) or vector(0))",
@@ -1671,8 +1635,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum(increase(ibm_aiops_ladgs_inference_elkmaplc_normalized_logs[$__range]) or vector(0))",
@@ -1684,8 +1647,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum(increase(ibm_aiops_ladgs_inference_humiomaplc_normalized_logs[$__range]) or vector(0))",
@@ -1697,8 +1659,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum(increase(ibm_aiops_ladgs_inference_kafkamaplc_normalized_logs[$__range]) or vector(0))",
@@ -1710,8 +1671,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum(increase(ibm_aiops_ladgs_inference_logdnamaplc_normalized_logs[$__range]) or vector(0))",
@@ -1723,8 +1683,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum(increase(ibm_aiops_ladgs_inference_custommaplc_normalized_logs[$__range]) or vector(0))",
@@ -1740,8 +1699,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Total number of logs received by the LAD pipeline and normalized with the field mapping set in the Splunk integration UI within the time range.",
           "fieldConfig": {
@@ -1791,8 +1749,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum(increase(ibm_aiops_ladgs_inference_splunkmaplc_normalized_logs[$__range]) or vector(0))",
@@ -1806,8 +1763,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Total number of logs received by the LAD pipeline and normalized with the field mapping set in the Elk integration UI within the time range.",
           "fieldConfig": {
@@ -1857,8 +1813,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum(increase(ibm_aiops_ladgs_inference_elkmaplc_normalized_logs[$__range]) or vector(0))",
@@ -1872,8 +1827,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Total number of logs received by the LAD pipeline and normalized with the field mapping set in the Falcon LogScale integration UI within the time range.",
           "fieldConfig": {
@@ -1923,8 +1877,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum(increase(ibm_aiops_ladgs_inference_humiomaplc_normalized_logs[$__range]) or vector(0))",
@@ -1938,8 +1891,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Percentage of logs filtered out by the LAD pipeline due to: empty messages, json parsing exceptions, template matching exceptions. \n\nIf this percentage is higher than expected, double check your log source is formatting messages properly within the time range. ",
           "fieldConfig": {
@@ -2010,8 +1962,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "((sum(increase(ibm_aiops_ladgs_inference_emptymessagefilter_logs_with_empty_messages[$__range]) or vector(0)) +\nsum(increase(ibm_aiops_ladgs_inference_jsonoptionparser_option_parsing_exception_logs[$__range]) or vector(0)) +\nsum(increase(ibm_aiops_ladgs_inference_loganomalygoldensignaltemplatematching_gs_template_matching_exception_logs[$__range]) or vector(0)))\n/\nsum(increase(ibm_aiops_ladgs_inference_splunkmaplc_normalized_logs[$__range]) or vector(0)) +\nsum(increase(ibm_aiops_ladgs_inference_elkmaplc_normalized_logs[$__range]) or vector(0)) +\nsum(increase(ibm_aiops_ladgs_inference_humiomaplc_normalized_logs[$__range]) or vector(0)) +\nsum(increase(ibm_aiops_ladgs_inference_kafkamaplc_normalized_logs[$__range]) or vector(0)) +\nsum(increase(ibm_aiops_ladgs_inference_logdnamaplc_normalized_logs[$__range]) or vector(0)) +\nsum(increase(ibm_aiops_ladgs_inference_custommaplc_normalized_logs[$__range]) or vector(0)))\n* 100",
@@ -2025,8 +1976,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Total number of logs received by the LAD pipeline and normalized with the field mapping set in the Kafka integration UI within the time range.",
           "fieldConfig": {
@@ -2076,8 +2026,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum(increase(ibm_aiops_ladgs_inference_kafkamaplc_normalized_logs[$__range]) or vector(0))",
@@ -2091,8 +2040,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Total number of logs received by the LAD pipeline and normalized with the field mapping set in the Mezmo integration UI within the time range.",
           "fieldConfig": {
@@ -2142,8 +2090,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum(increase(ibm_aiops_ladgs_inference_logdnamaplc_normalized_logs[$__range]) or vector(0))",
@@ -2157,8 +2104,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Total number of logs received by the LAD pipeline and normalized with the field mapping set in the custom connector integration UI within the time range.",
           "fieldConfig": {
@@ -2208,8 +2154,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum(increase(ibm_aiops_ladgs_inference_custommaplc_normalized_logs[$__range]) or vector(0))",
@@ -2262,8 +2207,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "This panel shows the total number of failed Cassandra connections and queries in the Event Classifier service of the AIOps platform that occurred within the time range. The Event Classifier relies on Cassandra for storing and retrieving event data and model information. Persistent errors can impact event classification accuracy and priority scoring; if errors are detected, check Cassandra pod status, network connectivity, and resource allocation.",
           "fieldConfig": {
@@ -2331,8 +2275,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum(increase(ibm_aiops_mime_classfier_cassandra_errors_total[$__range]))",
@@ -2346,8 +2289,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "This panel displays the total number of failed HTTP requests in the Event Classifier service of the AIOps platform. The Event Classifier makes HTTP requests to communicate with other services or external APIs. Failures here can prevent alerts/incidents from recieving the appropriate insights such as temporal correlation or seasonality. Review the component pods for specific error messages.",
           "fieldConfig": {
@@ -2411,8 +2353,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum(increase(ibm_aiops_mime_classfier_http_requests_errors_total[$__range]))",
@@ -2426,8 +2367,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "This panel displays the total number of failed Kafka connections in the Event Classifier service of the AIOps platform. The Event Classifier relies on Kafka for ingesting and processing system events. A consistently high number of failed connections might indicate network issues, misconfigurations, or problems with Kafka. Persistent errors can lead to missed critical events and incomplete event classification; if errors occur, check Kafka broker pod status, verify broker connectivity, and ensure proper topic configurations are in place.",
           "fieldConfig": {
@@ -2491,8 +2431,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum(increase(ibm_aiops_mime_classfier_kafka_errors_total[$__range]))",
@@ -2506,8 +2445,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "The Event Classifier service disk usage refers to the sizing of the classifier models and logging. If usage is above healthy thresholds, determine the sizing of trained data. High usage should be monitored to ensure the Event Classifier functionality is not interrupted.",
           "fieldConfig": {
@@ -2565,8 +2503,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum(ibm_aiops_mime_classfier_disk_usage{generation=\"used\"})/sum(ibm_aiops_mime_classfier_disk_usage{generation=\"total\"})*100",
@@ -2619,8 +2556,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Tracks the p50 over time of API operations computed at 10 minute intervals. Used to monitor the performance and responsiveness of metric processing.\n\np50 - shows typical performance. p50 = 1 second means half of all requests occurred in 1 second or less.",
           "fieldConfig": {
@@ -2700,8 +2636,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "ibm_aiops_metric_api_BlockedApi_metric_ingestion_timed{quantile=\"0.5\"}",
@@ -2711,8 +2646,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "ibm_aiops_metric_api_MetricIngestionApi_metric_ingestion_timed{quantile=\"0.5\"}",
@@ -2723,8 +2657,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "ibm_aiops_metric_api_MetricIngestionApi_metricz_ingestion_timed{quantile=\"0.5\"}",
@@ -2735,8 +2668,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "ibm_aiops_metric_api_MetricRetrievalApi_metric_forecast_timed{quantile=\"0.5\"}",
@@ -2747,8 +2679,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "ibm_aiops_metric_api_MetricRetrievalApi_metric_retrieval_timed{quantile=\"0.5\"}",
@@ -2759,8 +2690,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "ibm_aiops_metric_api_MetricTypesApi_metric_ingestion_timed{quantile=\"0.5\"}",
@@ -2772,8 +2702,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "ibm_aiops_metric_api_PurgeApi_metric_ingestion_timed{quantile=\"0.5\"}",
@@ -2785,8 +2714,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "ibm_aiops_metric_api_com_ibm_itsm_servicemonitor_api_ServiceMonitorApi_itsm_servicemonitor_consolidate_timed{quantile=\"0.5\"}",
@@ -2798,8 +2726,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "ibm_aiops_metric_api_metric_ingestion_kafka_publish_latency{quantile=\"0.5\"}",
@@ -2811,8 +2738,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "ibm_aiops_metric_api_metricz_ingestion_kafka_publish_latency{quantile=\"0.5\"}",
@@ -2828,8 +2754,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Tracks the p99 over time for API operations computed at 10 minute intervals. Used to monitor the performance and responsiveness of metric processing.\np99 - gives insight into slowest response times. p99 = 1 second means 99% of all requests occurred in 1 second or less.",
           "fieldConfig": {
@@ -2909,8 +2834,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "ibm_aiops_metric_api_BlockedApi_metric_ingestion_timed{quantile=\"0.99\"}",
@@ -2920,8 +2844,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "ibm_aiops_metric_api_MetricIngestionApi_metric_ingestion_timed{quantile=\"0.99\"}",
@@ -2932,8 +2855,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "ibm_aiops_metric_api_MetricIngestionApi_metricz_ingestion_timed{quantile=\"0.99\"}",
@@ -2944,8 +2866,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "ibm_aiops_metric_api_MetricRetrievalApi_metric_forecast_timed{quantile=\"0.99\"}",
@@ -2956,8 +2877,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "ibm_aiops_metric_api_MetricRetrievalApi_metric_retrieval_timed{quantile=\"0.99\"}",
@@ -2968,8 +2888,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "ibm_aiops_metric_api_MetricTypesApi_metric_ingestion_timed{quantile=\"0.99\"}",
@@ -2981,8 +2900,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "ibm_aiops_metric_api_PurgeApi_metric_ingestion_timed{quantile=\"0.99\"}",
@@ -2994,8 +2912,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "ibm_aiops_metric_api_com_ibm_itsm_servicemonitor_api_ServiceMonitorApi_itsm_servicemonitor_consolidate_timed{quantile=\"0.99\"}",
@@ -3007,8 +2924,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "ibm_aiops_metric_api_metric_ingestion_kafka_publish_latency{quantile=\"0.99\"}",
@@ -3020,8 +2936,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "ibm_aiops_metric_api_metricz_ingestion_kafka_publish_latency{quantile=\"0.99\"}",
@@ -3037,8 +2952,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "This panel visualizes the total number of exceptions raised on requests across various APIs/services in the Analytics component over a specified time range. \nExceptions can lead to gaps in functionality, review the component pod health as a starting point. If pod uptime and resource usage are healthy, review their logs for any visible exceptions. \n\n",
           "fieldConfig": {
@@ -3106,8 +3020,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum(increase(ibm_aiops_training_rest_BatchTrainingServiceApi_batch_training_exceptionmetered_exceptions_total[$__range]))",
@@ -3117,8 +3030,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum(increase(ibm_aiops_training_rest_ConfigurationServiceApi_configurations_exceptionmetered_exceptions_total[$__range]))",
@@ -3130,8 +3042,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum(increase(ibm_aiops_metric_api_com_ibm_itsm_servicemonitor_api_ServiceMonitorApi_itsm_servicemonitor_consolidate_exceptionmetered_exceptions_total[$__range]))",
@@ -3143,8 +3054,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum(increase(ibm_aiops_training_rest_ScheduleServiceApi_schedules_exceptionmetered_exceptions_total[$__range]))",
@@ -3156,8 +3066,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum(increase(ibm_aiops_metric_api_MetricRetrievalApi_metric_forecast_exceptionmetered_exceptions_total[$__range])) + sum(increase(ibm_aiops_metric_api_metric_forecast_api_failures_total[$__range]))",
@@ -3169,8 +3078,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum(increase(ibm_aiops_metric_api_MetricIngestionApi_metric_ingestion_exceptionmetered_exceptions_total[$__range])) + sum(increase(ibm_aiops_metric_api_metric_ingestion_api_failures_total[$__range]))",
@@ -3182,8 +3090,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum(increase(ibm_aiops_metric_api_BlockedApi_metric_ingestion_exceptionmetered_exceptions_total[$__range]))",
@@ -3195,8 +3102,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum(increase(ibm_aiops_metric_api_MetricRetrievalApi_metric_retrieval_exceptionmetered_exceptions_total[$__range])) + sum(increase(ibm_aiops_metric_api_metric_retrieval_api_failures_total[$__range]))",
@@ -3208,8 +3114,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum(increase(ibm_aiops_metric_api_MetricIngestionApi_metricz_ingestion_exceptionmetered_exceptions_total[$__range])) + sum(increase(ibm_aiops_metric_api_metricz_ingestion_api_failures_total[$__range]))",
@@ -3221,8 +3126,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum(increase(ibm_aiops_metric_api_MetricTypesApi_metric_ingestion_exceptionmetered_exceptions_total[$__range]))",
@@ -3234,8 +3138,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum(increase(ibm_aiops_metric_api_MetricTypesApi_metric_ingestion_exceptionmetered_exceptions_total[$__range]))",
@@ -3247,8 +3150,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum(increase(ibm_aiops_training_rest_BatchTrainingServiceApi_batch_training_status_exceptionmetered_exceptions_total[$__range]))",
@@ -3260,8 +3162,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum(increase(ibm_aiops_metric_api_metricz_ingestion_kafka_publish_failures_total[$__range]))",
@@ -3273,8 +3174,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum(increase(ibm_aiops_metric_api_metric_ingestion_kafka_publish_failures_total[$__range]))",
@@ -3290,8 +3190,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "This panel visualizes the total number of API requests observed across various APIs in the AIOps platform over a specified time range. A consistently high number of API instances or operations might indicate increased workload, potential performance bottlenecks, or the need for additional resources.",
           "fieldConfig": {
@@ -3341,8 +3240,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum(increase(ibm_aiops_metric_api_metric_forecast_api_requests_total[$__range]))",
@@ -3352,8 +3250,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum(increase(ibm_aiops_metric_api_metric_ingestion_api_requests_total[$__range]))",
@@ -3365,8 +3262,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum(increase(ibm_aiops_metric_api_metricz_ingestion_api_requests_total[$__range]))",
@@ -3378,8 +3274,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum(increase(ibm_aiops_metric_api_metric_retrieval_api_requests_total[$__range]))",
@@ -3391,8 +3286,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum(increase(ibm_aiops_metric_api_metricz_ingestion_kafka_publish_count_total[$__range]))",
@@ -3404,8 +3298,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum(increase(ibm_aiops_metric_api_metric_ingestion_kafka_publish_count_total[$__range]))",
@@ -3435,8 +3328,7 @@
       "panels": [
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Count of pods that have exceeded 80% of their CPU limits within the time range. This will result in CPU throttling and potentially temporary loss of functionality\n\nThis will only compare against the ***current*** CPU limit of each pod. If the limits were updated within the time range, the count may be inaccurate.",
           "fieldConfig": {
@@ -3531,8 +3423,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum((((max(kube_pod_container_resource_limits{pod=~\"aiops-ir-analytics-.*|aiops-lad-flink.*\", container!=\"\", container!=\"POD\", resource=\"cpu\"}) by (pod)) * 0.8 <= max(max_over_time(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{pod=~\"aiops-ir-analytics-.*|aiops-lad-flink.*\", container!=\"\", container!=\"POD\"}[$__range])) by (pod)) or vector(0)) > bool 0)",
@@ -3546,8 +3437,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Count of pods that have exceeded 80% of their memory limits within the time range.\n\nThis will only compare against the ***current*** memory limit of each pod. If the limits were updated within the time range, the count may be inaccurate.",
           "fieldConfig": {
@@ -3642,8 +3532,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum((((max(kube_pod_container_resource_limits{pod=~\"aiops-ir-analytics-.*|aiops-lad-flink.*\", container!=\"\", container!=\"POD\", resource=\"memory\"}) by (pod)) * 0.8 <= max(max_over_time(container_memory_working_set_bytes{pod=~\"aiops-ir-analytics-.*|aiops-lad-flink.*\", container!=\"\", container!=\"POD\"}[$__range])) by (pod)) or vector(0)) > bool 0)",
@@ -3657,8 +3546,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Count of pods that have exceeded their CPU limits within the time range. This will result in CPU throttling and potentially temporary loss of functionality.\n\nThis will only compare against the ***current*** CPU limit of each pod. If the limits were updated within the time range, the count may be inaccurate.",
           "fieldConfig": {
@@ -3753,8 +3641,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum((((max(kube_pod_container_resource_limits{pod=~\"aiops-ir-analytics-.*|aiops-lad-flink.*\", container!=\"\", container!=\"POD\", resource=\"cpu\"}) by (pod)) <= max(max_over_time(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{pod=~\"aiops-ir-analytics-.*|aiops-lad-flink.*\", container!=\"\", container!=\"POD\"}[$__range])) by (pod)) or vector(0)) > bool 0)",
@@ -3768,8 +3655,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Count of component pods that have exceeded their memory limits within the time range.\n\nThis will only compare against the ***current*** memory limit of each pod. If the limits were updated within the time range, the count may be inaccurate.",
           "fieldConfig": {
@@ -3863,8 +3749,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum((((max(kube_pod_container_resource_limits{pod=~\"aiops-ir-analytics-.*|aiops-lad-flink.*\", resource=\"memory\"}) by (pod)) <= max(max_over_time(container_memory_working_set_bytes{pod=~\"aiops-ir-analytics-.*|aiops-lad-flink.*\", container!=\"\", container!=\"POD\"}[$__range])) by (pod)) or vector(0)) > bool 0)",
@@ -3878,8 +3763,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "This panel displays the per-second CPU usage rate of Spark Master pod in the Analytics component. High CPU usage may indicate that the Spark Master pod are under heavy load, potentially impacting analytics execution performance. Monitor this metric to ensure optimal resource allocation and efficient processing of analytics tasks.",
           "fieldConfig": {
@@ -4005,8 +3889,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{pod=~\".*spark-master.*\", container!=\"\", container!=\"POD\"}) by (pod)",
@@ -4016,8 +3899,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(kube_pod_container_resource_requests{pod=~\".*spark-master.*\", container!=\"\", container!=\"POD\", resource=\"cpu\"})",
@@ -4029,8 +3911,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(kube_pod_container_resource_limits{pod=~\".*spark-master.*\", container!=\"\", container!=\"POD\", resource=\"cpu\"})",
@@ -4046,8 +3927,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "This panel displays the working set memory usage of Spark Master Node pods in the Analytics component. High memory usage may indicate that the Spark Master Node  are consuming significant resources, potentially impacting policy execution performance. Monitor this metric to ensure optimal resource allocation and efficient processing of policy tasks.\n\n\n\n\n",
           "fieldConfig": {
@@ -4173,8 +4053,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(container_memory_working_set_bytes{pod=~\".*spark-master.*\", container!=\"\", container!=\"POD\"}) by (pod)",
@@ -4184,8 +4063,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(kube_pod_container_resource_requests{pod=~\".*spark-master.*\", resource=\"memory\"})",
@@ -4197,8 +4075,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(kube_pod_container_resource_limits{pod=~\".*spark-master.*\", resource=\"memory\"}) ",
@@ -4214,8 +4091,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "This panel displays the per-second CPU usage rate of Spark Workers in the Analytics component. High CPU usage may indicate that the Spark Workers are under heavy load, potentially impacting analytics execution performance. Monitor this metric to ensure optimal resource allocation and efficient processing of analytics tasks.",
           "fieldConfig": {
@@ -4348,8 +4224,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{pod=~\".*spark-worker.*\", container!=\"\", container!=\"POD\"}) by (pod)",
@@ -4359,8 +4234,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(kube_pod_container_resource_requests{pod=~\".*spark-worker.*\", container!=\"\", container!=\"POD\", resource=\"cpu\"})",
@@ -4372,8 +4246,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(kube_pod_container_resource_limits{pod=~\".*spark-worker.*\", container!=\"\", container!=\"POD\", resource=\"cpu\"})",
@@ -4389,8 +4262,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "This panel displays the working set memory usage of Spark Workers pods in the Analytics component. High memory usage may indicate that the Spark Workers are consuming significant resources, potentially impacting policy execution performance. Monitor this metric to ensure optimal resource allocation and efficient processing of policy tasks.\n\n\n\n\n",
           "fieldConfig": {
@@ -4523,8 +4395,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(container_memory_working_set_bytes{pod=~\".*spark-worker.*\", container!=\"\", container!=\"POD\"}) by (pod)",
@@ -4534,8 +4405,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(kube_pod_container_resource_requests{pod=~\".*spark-worker.*\", resource=\"memory\"}) ",
@@ -4547,8 +4417,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(kube_pod_container_resource_limits{pod=~\".*spark-worker.*\", resource=\"memory\"}) ",
@@ -4564,8 +4433,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "This panel displays the per-second CPU usage rate of Spark Pipeline Composer in the Analytics component. High CPU usage may indicate that the Spark Pipeline Composer is under heavy load, potentially impacting analytics execution performance. Monitor this metric to ensure optimal resource allocation and efficient processing of analytics tasks.",
           "fieldConfig": {
@@ -4722,8 +4590,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{pod=~\".*spark-pipeline-composer.*\", container!=\"\", container!=\"POD\"}) by (pod)",
@@ -4733,8 +4600,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(kube_pod_container_resource_requests{pod=~\".*spark-pipeline-composer.*\", container!=\"\", container!=\"POD\", resource=\"cpu\"})",
@@ -4746,8 +4612,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(kube_pod_container_resource_limits{pod=~\".*spark-pipeline-composer.*\", container!=\"\", container!=\"POD\", resource=\"cpu\"})",
@@ -4763,8 +4628,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "This panel displays the working set memory usage of Spark Pipeline Composer pods in the Analytics component. High memory usage may indicate that the Spark Pipeline Composer is consuming significant resources, potentially impacting policy execution performance. Monitor this metric to ensure optimal resource allocation and efficient processing of policy tasks.\n\n\n\n\n",
           "fieldConfig": {
@@ -4897,8 +4761,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(container_memory_working_set_bytes{pod=~\".*spark-pipeline-composer.*\", container!=\"\", container!=\"POD\"}) by (pod)",
@@ -4908,8 +4771,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(kube_pod_container_resource_requests{pod=~\".*spark-pipeline-composer.*\", resource=\"memory\"}) ",
@@ -4921,8 +4783,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(kube_pod_container_resource_limits{pod=~\".*spark-pipeline-composer.*\", resource=\"memory\"}) ",
@@ -4938,8 +4799,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "This panel displays the per-second CPU usage rate of Classifier Service in the Analytics component. High CPU usage may indicate that the Classifier Service pod is under heavy load, potentially impacting analytics execution performance. Monitor this metric to ensure optimal resource allocation and efficient processing of analytics tasks.",
           "fieldConfig": {
@@ -5065,8 +4925,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{pod=~\"aiops-ir-analytics-classifier-.*\", container!=\"\", container!=\"POD\"}) by (pod)",
@@ -5076,8 +4935,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(kube_pod_container_resource_requests{pod=~\"aiops-ir-analytics-classifier-.*\", container!=\"\", container!=\"POD\", resource=\"cpu\"}) ",
@@ -5089,8 +4947,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(kube_pod_container_resource_limits{pod=~\"aiops-ir-analytics-classifier-.*\", container!=\"\", container!=\"POD\", resource=\"cpu\"})",
@@ -5106,8 +4963,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "This panel displays the working set memory usage of Classifier Service pods in the Analytics component. High memory usage may indicate that the Classifier Service are consuming significant resources, potentially impacting policy execution performance. Monitor this metric to ensure optimal resource allocation and efficient processing of policy tasks.\n\n\n\n\n",
           "fieldConfig": {
@@ -5233,8 +5089,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(container_memory_working_set_bytes{pod=~\"aiops-ir-analytics-classifier-.*\", container!=\"\", container!=\"POD\"}) by (pod)",
@@ -5244,8 +5099,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(kube_pod_container_resource_requests{pod=~\"aiops-ir-analytics-classifier-.*\", resource=\"memory\"}) ",
@@ -5257,8 +5111,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(kube_pod_container_resource_limits{pod=~\"aiops-ir-analytics-classifier-.*\", resource=\"memory\"})",
@@ -5274,8 +5127,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "This panel displays the per-second CPU usage rate of Metric Action pods in the Analytics component. High CPU usage may indicate that the Metric Action pod is under heavy load, potentially impacting analytics execution performance. Monitor this metric to ensure optimal resource allocation and efficient processing of analytics tasks.",
           "fieldConfig": {
@@ -5401,8 +5253,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{pod=~\"aiops-ir-analytics-metric-action-.*\", container!=\"\", container!=\"POD\"}) by (pod)",
@@ -5412,8 +5263,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(kube_pod_container_resource_requests{pod=~\"aiops-ir-analytics-metric-action-.*\", container!=\"\", container!=\"POD\", resource=\"cpu\"}) ",
@@ -5425,8 +5275,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(kube_pod_container_resource_limits{pod=~\"aiops-ir-analytics-metric-action-.*\", container!=\"\", container!=\"POD\", resource=\"cpu\"}) ",
@@ -5442,8 +5291,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "This panel displays the working set memory usage of Metric Action  pods in the Analytics component. High memory usage may indicate that the Metric Action  are consuming significant resources, potentially impacting policy execution performance. Monitor this metric to ensure optimal resource allocation and efficient processing of policy tasks.\n\n\n\n\n",
           "fieldConfig": {
@@ -5569,8 +5417,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(container_memory_working_set_bytes{pod=~\"aiops-ir-analytics-metric-action-.*\", container!=\"\", container!=\"POD\"}) by (pod)",
@@ -5580,8 +5427,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(kube_pod_container_resource_requests{pod=~\"aiops-ir-analytics-metric-action-.*\", resource=\"memory\"}) ",
@@ -5593,8 +5439,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(kube_pod_container_resource_limits{pod=~\"aiops-ir-analytics-metric-action-.*\", resource=\"memory\"}) ",
@@ -5610,8 +5455,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "This panel displays the per-second CPU usage rate of Metric API pods in the Analytics component. High CPU usage may indicate that the Metric API pod is under heavy load, potentially impacting analytics execution performance. Monitor this metric to ensure optimal resource allocation and efficient processing of analytics tasks.",
           "fieldConfig": {
@@ -5737,8 +5581,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{pod=~\"aiops-ir-analytics-metric-api-.*\", container!=\"\", container!=\"POD\"}) by (pod)",
@@ -5748,8 +5591,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(kube_pod_container_resource_requests{pod=~\"aiops-ir-analytics-metric-api-.*\", container!=\"\", container!=\"POD\", resource=\"cpu\"}) ",
@@ -5761,8 +5603,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(kube_pod_container_resource_limits{pod=~\"aiops-ir-analytics-metric-api-.*\", container!=\"\", container!=\"POD\", resource=\"cpu\"}) ",
@@ -5778,8 +5619,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "This panel displays the working set memory usage of Metric API  pods in the Analytics component. High memory usage may indicate that the Metric API  are consuming significant resources, potentially impacting policy execution performance. Monitor this metric to ensure optimal resource allocation and efficient processing of policy tasks.\n\n\n\n\n",
           "fieldConfig": {
@@ -5905,8 +5745,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(container_memory_working_set_bytes{pod=~\"aiops-ir-analytics-metric-api-.*\", container!=\"\", container!=\"POD\"}) by (pod)",
@@ -5916,8 +5755,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(kube_pod_container_resource_requests{pod=~\"aiops-ir-analytics-metric-api-.*\", resource=\"memory\"}) ",
@@ -5929,8 +5767,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(kube_pod_container_resource_limits{pod=~\"aiops-ir-analytics-metric-api-.*\", resource=\"memory\"}) ",
@@ -5946,8 +5783,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "This panel displays the per-second CPU usage rate of Metric Spark pods in the Analytics component. High CPU usage may indicate that the Metric Spark pod is under heavy load, potentially impacting analytics execution performance. Monitor this metric to ensure optimal resource allocation and efficient processing of analytics tasks.",
           "fieldConfig": {
@@ -6073,8 +5909,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{pod=~\"aiops-ir-analytics-metric-spark-.*\", container!=\"\", container!=\"POD\"}) by (pod)",
@@ -6084,8 +5919,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(kube_pod_container_resource_requests{pod=~\"aiops-ir-analytics-metric-spark-.*\", container!=\"\", container!=\"POD\", resource=\"cpu\"}) ",
@@ -6097,8 +5931,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(kube_pod_container_resource_limits{pod=~\"aiops-ir-analytics-metric-spark-.*\", container!=\"\", container!=\"POD\", resource=\"cpu\"}) ",
@@ -6114,8 +5947,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "This panel displays the working set memory usage of Metric Spark  pods in the Analytics component. High memory usage may indicate that the Metric Spark  are consuming significant resources, potentially impacting policy execution performance. Monitor this metric to ensure optimal resource allocation and efficient processing of policy tasks.\n\n\n\n\n",
           "fieldConfig": {
@@ -6242,8 +6074,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(container_memory_working_set_bytes{pod=~\"aiops-ir-analytics-metric-spark-.*\", container!=\"\", container!=\"POD\"}) by (pod)",
@@ -6253,8 +6084,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(kube_pod_container_resource_requests{pod=~\"aiops-ir-analytics-metric-spark-.*\", resource=\"memory\"}) ",
@@ -6266,8 +6096,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(kube_pod_container_resource_limits{pod=~\"aiops-ir-analytics-metric-spark-.*\", resource=\"memory\"}) ",
@@ -6283,8 +6112,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "This panel displays the per-second CPU usage rate of Probable Cause pods in the Analytics component. High CPU usage may indicate that the Probable Cause pod is under heavy load, potentially impacting analytics execution performance. Monitor this metric to ensure optimal resource allocation and efficient processing of analytics tasks.",
           "fieldConfig": {
@@ -6410,8 +6238,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{pod=~\"aiops-ir-analytics-probablecause-.*\", container!=\"\", container!=\"POD\"}) by (pod)",
@@ -6421,8 +6248,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(kube_pod_container_resource_requests{pod=~\"aiops-ir-analytics-probablecause-.*\", container!=\"\", container!=\"POD\", resource=\"cpu\"}) ",
@@ -6434,8 +6260,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(kube_pod_container_resource_limits{pod=~\"aiops-ir-analytics-probablecause-.*\", container!=\"\", container!=\"POD\", resource=\"cpu\"}) ",
@@ -6451,8 +6276,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "This panel displays the working set memory usage of Probable Cause  pods in the Analytics component. High memory usage may indicate that the Probable Cause  are consuming significant resources, potentially impacting policy execution performance. Monitor this metric to ensure optimal resource allocation and efficient processing of policy tasks.\n\n\n\n\n",
           "fieldConfig": {
@@ -6578,8 +6402,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(container_memory_working_set_bytes{pod=~\"aiops-ir-analytics-probablecause-.*\", container!=\"\", container!=\"POD\"}) by (pod)",
@@ -6589,8 +6412,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(kube_pod_container_resource_requests{pod=~\"aiops-ir-analytics-probablecause-.*\", resource=\"memory\"})",
@@ -6602,8 +6424,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(kube_pod_container_resource_limits{pod=~\"aiops-ir-analytics-probablecause-.*\", resource=\"memory\"}) ",
@@ -6619,8 +6440,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "This panel displays the per-second CPU usage rate of the LAD Manager in the Analytics component. High CPU usage may indicate that the Job Manager is under heavy load, potentially impacting policy execution performance. Monitor this metric to ensure optimal resource allocation and efficient processing of policy tasks.",
           "fieldConfig": {
@@ -6746,8 +6566,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{pod=~\".*lad-flink-.*\", pod!~\".*lad-flink-taskmanager.*\", container!=\"\", container!=\"POD\", container=~\"flink-main-container\"}) by (pod)",
@@ -6757,8 +6576,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(kube_pod_container_resource_requests{pod=~\".*lad-flink-.*\", pod!~\".*lad-flink-taskmanager.*\", container!=\"\", container!=\"POD\", container=~\"flink-main-container\", resource=\"cpu\"}) ",
@@ -6770,8 +6588,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(kube_pod_container_resource_limits{pod=~\".*lad-flink-.*\", pod!~\".*lad-flink-taskmanager.*\", container!=\"\", container!=\"POD\", container=~\"flink-main-container\", resource=\"cpu\"}) ",
@@ -6787,8 +6604,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "This panel displays the working set memory usage of Job Manager pods in the Analytics component. High memory usage may suggest that the Job Managers are consuming significant resources, potentially affecting policy execution performance. Monitor this metric to ensure efficient resource allocation and optimal processing of policy tasks.\n\n\n",
           "fieldConfig": {
@@ -6914,8 +6730,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(container_memory_working_set_bytes{pod=~\".*lad-flink-.*\", pod!~\".*lad-flink-taskmanager.*\", container=~\"flink-main-container\", container!=\"\", container!=\"POD\"}) by (pod)",
@@ -6925,8 +6740,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(kube_pod_container_resource_requests{pod=~\".*lad-flink-.*\", pod!~\".*lad-flink-taskmanager.*\", container=~\"flink-main-container\", container!=\"\", container!=\"POD\", resource=\"memory\"})",
@@ -6938,8 +6752,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(kube_pod_container_resource_limits{pod=~\".*lad-flink-.*\", pod!~\".*lad-flink-taskmanager.*\", container=~\"flink-main-container\", container!=\"\", container!=\"POD\", resource=\"memory\"}) ",
@@ -6955,8 +6768,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "This panel displays the per-second CPU usage rate of the LAD Manager in the Analytics component. High CPU usage may indicate that the Job Manager is under heavy load, potentially impacting policy execution performance. Monitor this metric to ensure optimal resource allocation and efficient processing of policy tasks.",
           "fieldConfig": {
@@ -7082,8 +6894,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{pod=~\".*lad-flink-taskmanager.*\", container!=\"\", container!=\"POD\", container=~\"flink-main-container\"}) by (pod)",
@@ -7093,8 +6904,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(kube_pod_container_resource_requests{pod=~\".*lad-flink-taskmanager.*\", container!=\"\", container!=\"POD\", container=~\"flink-main-container\", resource=\"cpu\"}) ",
@@ -7106,8 +6916,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(kube_pod_container_resource_limits{pod=~\".*lad-flink-taskmanager.*\", container!=\"\", container!=\"POD\", container=~\"flink-main-container\", resource=\"cpu\"}) ",
@@ -7123,8 +6932,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "This panel displays the working set memory usage of Task Manager pods in the Analytics component. High memory usage may suggest that the Task Managers are consuming significant resources, potentially affecting policy execution performance. Monitor this metric to ensure efficient resource allocation and optimal processing of policy tasks.",
           "fieldConfig": {
@@ -7250,8 +7058,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(container_memory_working_set_bytes{pod=~\".*lad-flink-taskmanager.*\", container=~\"flink-main-container\", container!=\"\", container!=\"POD\"}) by (pod)",
@@ -7261,8 +7068,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(kube_pod_container_resource_requests{pod=~\".*lad-flink-taskmanager.*\", container=~\"flink-main-container\", container!=\"\", container!=\"POD\", resource=\"memory\"})",
@@ -7274,8 +7080,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(kube_pod_container_resource_limits{pod=~\".*lad-flink-taskmanager.*\", container=~\"flink-main-container\", container!=\"\", container!=\"POD\", resource=\"memory\"}) ",
