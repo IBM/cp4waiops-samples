@@ -1,14 +1,4 @@
 {
-  "__inputs": [
-    {
-      "name": "DS_PROMETHEUS",
-      "label": "prometheus",
-      "description": "",
-      "type": "datasource",
-      "pluginId": "prometheus",
-      "pluginName": "Prometheus"
-    }
-  ],
   "__elements": {},
   "__requires": [
     {
@@ -118,8 +108,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "The 5 lowest uptimes within the component pods. Pod restarts can impact functionality, review the pod table and uptime graph for more details.",
           "fieldConfig": {
@@ -185,8 +174,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "time() -topk(5, sum(kube_pod_start_time{pod=~\".*-topology-.*\", pod!~\".*cassandra.*\", pod!~\".*file-observer.*\", pod!~\".*kubernetes-observer.*\", pod!~\".*observer.*\",pod!~\".*api.*\", pod!~\".*aiopsedge.*\", pod!~\".*job.*\", pod!~\".*schema.*\"}) by (pod))",
@@ -200,8 +188,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "fieldConfig": {
             "defaults": {
@@ -247,8 +234,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "kube_pod_status_phase{pod=~\".*-topology-.*\", pod!~\".*cassandra.*\", pod!~\".*file-observer.*\", pod!~\".*kubernetes-observer.*\", pod!~\".*observer.*\",pod!~\".*api.*\", pod!~\".*aiopsedge.*\", pod!~\".*job.*\", pod!~\".*schema.*\", phase=~\"Running|Pending|Unknown\"} == 1",
@@ -302,8 +288,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "",
           "fieldConfig": {
@@ -383,8 +368,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "time() -sum(kube_pod_start_time{pod=~\".*-topology-.*\", pod!~\".*cassandra.*\", pod!~\".*file-observer.*\", pod!~\".*kubernetes-observer.*\", pod!~\".*observer.*\",pod!~\".*api.*\", pod!~\".*aiopsedge.*\", pod!~\".*job.*\", pod!~\".*schema.*\"}) by (pod)",
@@ -412,8 +396,7 @@
       "panels": [
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Count of pods that have exceeded 80% of their CPU limits within the time range. This will result in CPU throttling and potentially temporary loss of functionality\n\nThis will only compare against the ***current*** CPU limit of each pod. If the limits were updated within the time range, the count may be inaccurate.",
           "fieldConfig": {
@@ -507,8 +490,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum((((max(kube_pod_container_resource_limits{pod=~\".*-topology-.*\", pod!~\".*cassandra.*\", pod!~\".*file-observer.*\", pod!~\".*kubernetes-observer.*\", pod!~\".*observer.*\",pod!~\".*api.*\", pod!~\".*aiopsedge.*\", pod!~\".*job.*\", pod!~\".*schema.*\", container!=\"\", container!=\"POD\", resource=\"cpu\"}) by (pod)) * 0.8 <= max(max_over_time(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{pod=~\".*-topology-.*\", pod!~\".*cassandra.*\", pod!~\".*file-observer.*\", pod!~\".*kubernetes-observer.*\", pod!~\".*observer.*\",pod!~\".*api.*\", pod!~\".*aiopsedge.*\", pod!~\".*job.*\", pod!~\".*schema.*\", container!=\"\", container!=\"POD\"}[$__range])) by (pod)) or vector(0)) > bool 0)",
@@ -522,8 +504,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Count of pods that have exceeded 80% of their memory limits within the time range.\n\nThis will only compare against the ***current*** memory limit of each pod. If the limits were updated within the time range, the count may be inaccurate.",
           "fieldConfig": {
@@ -617,8 +598,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum((((max(kube_pod_container_resource_limits{pod=~\".*-topology-.*\", pod!~\".*cassandra.*\", pod!~\".*file-observer.*\", pod!~\".*kubernetes-observer.*\", pod!~\".*observer.*\",pod!~\".*api.*\", pod!~\".*aiopsedge.*\", pod!~\".*job.*\", pod!~\".*schema.*\", container!=\"\", container!=\"POD\", resource=\"memory\"}) by (pod)) * 0.8 <= max(max_over_time(container_memory_working_set_bytes{pod=~\".*-topology-.*\", pod!~\".*cassandra.*\", pod!~\".*file-observer.*\", pod!~\".*kubernetes-observer.*\", pod!~\".*observer.*\",pod!~\".*api.*\", pod!~\".*aiopsedge.*\", pod!~\".*job.*\", pod!~\".*schema.*\", container!=\"\", container!=\"POD\"}[$__range])) by (pod)) or vector(0)) > bool 0)",
@@ -632,8 +612,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Count of pods that have exceeded their CPU limits within the time range. This will result in CPU throttling and potentially temporary loss of functionality.\n\nThis will only compare against the ***current*** CPU limit of each pod. If the limits were updated within the time range, the count may be inaccurate.",
           "fieldConfig": {
@@ -727,8 +706,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum((((max(kube_pod_container_resource_limits{pod=~\".*-topology-.*\", pod!~\".*cassandra.*\", pod!~\".*file-observer.*\", pod!~\".*kubernetes-observer.*\", pod!~\".*observer.*\",pod!~\".*api.*\", pod!~\".*aiopsedge.*\", pod!~\".*job.*\", pod!~\".*schema.*\", container!=\"\", container!=\"POD\", resource=\"cpu\"}) by (pod)) <= max(max_over_time(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{pod=~\".*-topology-.*\", pod!~\".*cassandra.*\", pod!~\".*file-observer.*\", pod!~\".*kubernetes-observer.*\", pod!~\".*observer.*\",pod!~\".*api.*\", pod!~\".*aiopsedge.*\", pod!~\".*job.*\", pod!~\".*schema.*\", container!=\"\", container!=\"POD\"}[$__range])) by (pod)) or vector(0)) > bool 0)",
@@ -742,8 +720,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Count of component pods that have exceeded their memory limits within the time range.\n\nThis will only compare against the ***current*** memory limit of each pod. If the limits were updated within the time range, the count may be inaccurate.",
           "fieldConfig": {
@@ -836,8 +813,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum((((max(kube_pod_container_resource_limits{pod=~\".*-topology-.*\", pod!~\".*cassandra.*\", pod!~\".*file-observer.*\", pod!~\".*kubernetes-observer.*\", pod!~\".*observer.*\",pod!~\".*api.*\", pod!~\".*aiopsedge.*\", pod!~\".*job.*\", resource=\"memory\"}) by (pod)) <= max(max_over_time(container_memory_working_set_bytes{pod=~\".*-topology-.*\", pod!~\".*cassandra.*\", pod!~\".*file-observer.*\", pod!~\".*kubernetes-observer.*\", pod!~\".*observer.*\",pod!~\".*api.*\", pod!~\".*aiopsedge.*\", pod!~\".*job.*\", container!=\"\", container!=\"POD\"}[$__range])) by (pod)) or vector(0)) > bool 0)",
@@ -851,8 +827,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Topology Service CPU Usage",
           "fieldConfig": {
@@ -978,8 +953,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{pod=~\"aiops-topology-topology-.*\", pod!~\".*schema.*\" ,pod!~\".*job.*\"}) by (pod)",
@@ -989,8 +963,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(kube_pod_container_resource_requests{pod=~\"aiops-topology-topology-.*\", pod!~\".*job.*\", pod!~\".*schema.*\"  , resource=\"cpu\"})",
@@ -1002,8 +975,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(kube_pod_container_resource_limits{pod=~\"aiops-topology-topology-.*\",pod!~\".*job.*\" , pod!~\".*schema.*\", resource=\"cpu\"})",
@@ -1019,8 +991,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Topology Service Memory Usage",
           "fieldConfig": {
@@ -1147,8 +1118,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(container_memory_working_set_bytes{pod=~\"aiops-topology-topology.*\", pod!~\".*schema.*\" ,pod!~\".*job.*\", container!=\"\", container!=\"POD\"}) by(pod)",
@@ -1158,8 +1128,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(kube_pod_container_resource_requests{pod=~\"aiops-topology-topology-.*\", pod!~\".*job.*\", pod!~\".*schema.*\", resource=\"memory\"})",
@@ -1171,8 +1140,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(kube_pod_container_resource_limits{pod=~\"aiops-topology-topology-.*\",pod!~\".*job.*\" , pod!~\".*schema.*\",resource=\"memory\"})",
@@ -1188,8 +1156,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Status Service CPU Usage",
           "fieldConfig": {
@@ -1316,8 +1283,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{pod=~\"aiops-topology-status-.*\", pod!~\".*schema.*\" ,pod!~\".*job.*\"}) by (pod)",
@@ -1327,8 +1293,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(kube_pod_container_resource_requests{pod=~\"aiops-topology-status-.*\", pod!~\".*job.*\", pod!~\".*schema.*\"  , resource=\"cpu\"})",
@@ -1340,8 +1305,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(kube_pod_container_resource_limits{pod=~\"aiops-topology-status-.*\",pod!~\".*job.*\" , pod!~\".*schema.*\", resource=\"cpu\"})",
@@ -1357,8 +1321,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Status Service Memory Usage",
           "fieldConfig": {
@@ -1485,8 +1448,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(container_memory_working_set_bytes{pod=~\"aiops-topology-status-.*\", pod!~\".*schema.*\" ,pod!~\".*job.*\", container!=\"\", container!=\"POD\"}) by(pod)",
@@ -1496,8 +1458,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(kube_pod_container_resource_requests{pod=~\"aiops-topology-status-.*\", pod!~\".*job.*\", pod!~\".*schema.*\", resource=\"memory\"})",
@@ -1509,8 +1470,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(kube_pod_container_resource_limits{pod=~\"aiops-topology-status-.*\",pod!~\".*job.*\" , pod!~\".*schema.*\",resource=\"memory\"})",
@@ -1526,8 +1486,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Merge Service CPU Usage",
           "fieldConfig": {
@@ -1653,8 +1612,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{pod=~\"aiops-topology-merge-.*\", pod!~\".*schema.*\" ,pod!~\".*job.*\"}) by (pod)",
@@ -1664,8 +1622,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(kube_pod_container_resource_requests{pod=~\"aiops-topology-merge-.*\", pod!~\".*job.*\", pod!~\".*schema.*\"  , resource=\"cpu\"})",
@@ -1677,8 +1634,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(kube_pod_container_resource_limits{pod=~\"aiops-topology-merge-.*\",pod!~\".*job.*\" , pod!~\".*schema.*\", resource=\"cpu\"})",
@@ -1694,8 +1650,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Merge Service Memory Usage",
           "fieldConfig": {
@@ -1822,8 +1777,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(container_memory_working_set_bytes{pod=~\"aiops-topology-merge.*\", pod!~\".*schema.*\" ,pod!~\".*job.*\", container!=\"\", container!=\"POD\"}) by(pod)",
@@ -1833,8 +1787,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(kube_pod_container_resource_requests{pod=~\"aiops-topology-merge-.*\", pod!~\".*job.*\", pod!~\".*schema.*\", resource=\"memory\"})",
@@ -1846,8 +1799,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(kube_pod_container_resource_limits{pod=~\"aiops-topology-merge-.*\",pod!~\".*job.*\" , pod!~\".*schema.*\",resource=\"memory\"})",
@@ -1863,8 +1815,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Layout Service CPU Usage",
           "fieldConfig": {
@@ -1990,8 +1941,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{pod=~\"aiops-topology-layout-.*\", pod!~\".*schema.*\" ,pod!~\".*job.*\"}) by (pod)",
@@ -2001,8 +1951,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(kube_pod_container_resource_requests{pod=~\"aiops-topology-layout-.*\", pod!~\".*job.*\", pod!~\".*schema.*\"  , resource=\"cpu\"})",
@@ -2014,8 +1963,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(kube_pod_container_resource_limits{pod=~\"aiops-topology-layout-.*\",pod!~\".*job.*\" , pod!~\".*schema.*\", resource=\"cpu\"})",
@@ -2031,8 +1979,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Layout Service Memory Usage",
           "fieldConfig": {
@@ -2159,8 +2106,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(container_memory_working_set_bytes{pod=~\"aiops-topology-layout.*\", pod!~\".*schema.*\" ,pod!~\".*job.*\", container!=\"\", container!=\"POD\"}) by(pod)",
@@ -2170,8 +2116,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(kube_pod_container_resource_requests{pod=~\"aiops-topology-layout-.*\", pod!~\".*job.*\", pod!~\".*schema.*\", resource=\"memory\"})",
@@ -2183,8 +2128,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(kube_pod_container_resource_limits{pod=~\"aiops-topology-layout-.*\",pod!~\".*job.*\" , pod!~\".*schema.*\",resource=\"memory\"})",
@@ -2200,8 +2144,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Inventory Service CPU Usage",
           "fieldConfig": {
@@ -2327,8 +2270,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{pod=~\"aiops-topology-inventory-.*\", pod!~\".*schema.*\" ,pod!~\".*job.*\"}) by (pod)",
@@ -2338,8 +2280,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(kube_pod_container_resource_requests{pod=~\"aiops-topology-inventory-.*\", pod!~\".*job.*\", pod!~\".*schema.*\"  , resource=\"cpu\"})",
@@ -2351,8 +2292,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(kube_pod_container_resource_limits{pod=~\"aiops-topology-inventory-.*\",pod!~\".*job.*\" , pod!~\".*schema.*\", resource=\"cpu\"})",
@@ -2368,8 +2308,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Inventory Service Memory Usage",
           "fieldConfig": {
@@ -2496,8 +2435,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(container_memory_working_set_bytes{pod=~\"aiops-topology-inventory.*\", pod!~\".*schema.*\" ,pod!~\".*job.*\", container!=\"\", container!=\"POD\"}) by(pod)",
@@ -2507,8 +2445,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(kube_pod_container_resource_requests{pod=~\"aiops-topology-inventory-.*\", pod!~\".*job.*\", pod!~\".*schema.*\", resource=\"memory\"})",
@@ -2520,8 +2457,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(kube_pod_container_resource_limits{pod=~\"aiops-topology-inventory-.*\",pod!~\".*job.*\" , pod!~\".*schema.*\",resource=\"memory\"})",
@@ -2551,8 +2487,7 @@
       "panels": [
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Count that tracks the number of pods that were newly created within the time range.\n\nNew pods indicate restarts may have occurred which could result in loss of functionality. Review the pod uptime graph to see if any gaps in uptime occurred.\n\nNew pods don't always indicate a problem and in some cases are part of routine processing and scaling. ",
           "fieldConfig": {
@@ -2696,8 +2631,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum(((sum((time() - kube_pod_start_time{pod=~\".*topology-postgres.*|aiops-topology-cassandra.*|iaf-system-kafka.*\", pod!~\".*job.*\"}) - $__range_s) by (pod)) < 60) <= bool 0)",
@@ -2711,8 +2645,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "",
           "fieldConfig": {
@@ -2765,8 +2698,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "disableTextWrap": false,
               "editorMode": "code",
@@ -2832,8 +2764,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Pod Uptimes for Policy Automation dependency pods",
           "fieldConfig": {
@@ -2911,8 +2842,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "time() -sum(kube_pod_start_time{pod=~\"aiops-topology-cassandra.*|.*topology-postgres.*|iaf-system-kafka.*\", pod!~\".*job.*\"}) by (pod)",
@@ -2926,8 +2856,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Count of pods that have exceeded 80% of their CPU limits within the time range. This will result in CPU throttling and potentially temporary loss of functionality\n\nThis will only compare against the ***current*** CPU limit of each pod. If the limits were updated within the time range, the count may be inaccurate.",
           "fieldConfig": {
@@ -3021,8 +2950,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum((((max(kube_pod_container_resource_limits{pod=~\"aiops-topology-cassandra.*|.*topology-postgres.*|iaf-system-kafka.*\", pod!~\".*job.*\", container!=\"\", container!=\"POD\", resource=\"cpu\"}) by (pod)) * 0.8 <= max(max_over_time(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{pod=~\"aiops-topology-cassandra.*|.*topology-postgres.*|iaf-system-kafka.*\", pod!~\".*job.*\", container!=\"\", container!=\"POD\"}[$__range])) by (pod)) or vector(0)) > bool 0)",
@@ -3036,8 +2964,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Count of pods that have exceeded 80% of their memory limits within the time range.\n\nThis will only compare against the ***current*** memory limit of each pod. If the limits were updated within the time range, the count may be inaccurate.",
           "fieldConfig": {
@@ -3131,8 +3058,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum((((max(kube_pod_container_resource_limits{pod=~\"aiops-topology-cassandra.*|.*topology-postgres.*|iaf-system-kafka.*\", pod!~\".*job.*\", container!=\"\", container!=\"POD\", resource=\"memory\"}) by (pod)) * 0.8 <= max(max_over_time(container_memory_working_set_bytes{pod=~\"aiops-topology-cassandra.*|.*topology-postgres.*|iaf-system-kafka.*\", pod!~\".*job.*\", container!=\"\", container!=\"POD\", container!=\"\", container!=\"POD\"}[$__range])) by (pod)) or vector(0)) > bool 0)",
@@ -3146,8 +3072,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Count of pods that have exceeded their CPU limits within the time range. This will result in CPU throttling and potentially temporary loss of functionality.\n\nThis will only compare against the ***current*** CPU limit of each pod. If the limits were updated within the time range, the count may be inaccurate.",
           "fieldConfig": {
@@ -3241,8 +3166,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum((((max(kube_pod_container_resource_limits{pod=~\"aiops-topology-cassandra.*|.*topology-postgres.*|iaf-system-kafka.*\", pod!~\".*job.*\", container!=\"\", container!=\"POD\", resource=\"cpu\"}) by (pod)) <= max(max_over_time(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{pod=~\"aiops-topology-cassandra.*|.*topology-postgres.*|iaf-system-kafka.*\", pod!~\".*job.*\", container!=\"\", container!=\"POD\"}[$__range])) by (pod)) or vector(0)) > bool 0)",
@@ -3256,8 +3180,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Count of component pods that have exceeded their memory limits within the time range.\n\nThis will only compare against the ***current*** memory limit of each pod. If the limits were updated within the time range, the count may be inaccurate.",
           "fieldConfig": {
@@ -3350,8 +3273,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum((((max(kube_pod_container_resource_limits{pod=~\"aiops-topology-cassandra.*|.*topology-postgres.*|iaf-system-kafka.*\", pod!~\".*job.*\", container!=\"\", container!=\"POD\", resource=\"memory\"}) by (pod)) <= max(max_over_time(container_memory_working_set_bytes{pod=~\"aiops-topology-cassandra.*|.*topology-postgres.*|iaf-system-kafka.*\", pod!~\".*job.*\", container!=\"\", container!=\"POD\"}[$__range])) by (pod)) or vector(0)) > bool 0)",
@@ -3365,8 +3287,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Cassandra: The policies store, managed by the Policy Registry Service.",
           "fieldConfig": {
@@ -3495,8 +3416,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{pod=~\"aiops-topology-cassandra.*\"}) by (pod)",
@@ -3506,8 +3426,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(kube_pod_container_resource_requests{pod=~\"aiops-topology-cassandra.*\", resource=\"cpu\"})",
@@ -3519,8 +3438,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(kube_pod_container_resource_limits{pod=~\"aiops-topology-cassandra.*\", resource=\"cpu\"})",
@@ -3536,8 +3454,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Cassandra: The policies store, managed by the Policy Registry Service.",
           "fieldConfig": {
@@ -3666,8 +3583,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(container_memory_working_set_bytes{pod=~\"aiops-topology-cassandra.*\", container!=\"\", container!=\"POD\"}) by (pod)",
@@ -3679,8 +3595,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(kube_pod_container_resource_requests{pod=~\"aiops-topology-cassandra.*\", resource=\"memory\"})",
@@ -3692,8 +3607,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(kube_pod_container_resource_limits{pod=~\"aiops-topology-cassandra.*\", resource=\"memory\"})",
@@ -3709,8 +3623,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Message Broker system used within Policy Automation Component.",
           "fieldConfig": {
@@ -3843,8 +3756,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{pod=~\"iaf-system-kafka.*\"}) by (pod)",
@@ -3854,8 +3766,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(kube_pod_container_resource_requests{pod=~\"iaf-system-kafka.*\", resource=\"cpu\"})",
@@ -3867,8 +3778,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(kube_pod_container_resource_limits{pod=~\"iaf-system-kafka.*\", resource=\"cpu\"})",
@@ -3884,8 +3794,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Message Broker system used within Policy Automation Component.",
           "fieldConfig": {
@@ -4014,8 +3923,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(container_memory_working_set_bytes{pod=~\"iaf-system-kafka.*\", container!=\"\", container!=\"POD\"}) by (pod)",
@@ -4027,8 +3935,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(kube_pod_container_resource_requests{pod=~\"iaf-system-kafka.*\", resource=\"memory\"}) by (pod)",
@@ -4040,8 +3947,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(kube_pod_container_resource_limits{pod=~\"iaf-system-kafka.*\", resource=\"memory\"}) by (pod)",
@@ -4057,8 +3963,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Replacement DB for Policy Registry Store.",
           "fieldConfig": {
@@ -4187,8 +4092,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{pod=~\".*topology-postgres.*\"}) by (pod)",
@@ -4198,8 +4102,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(kube_pod_container_resource_requests{pod=~\".*topology-postgres.*\", resource=\"cpu\"})",
@@ -4211,8 +4114,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(kube_pod_container_resource_limits{pod=~\".*topology-postgres.*\", resource=\"cpu\"})",
@@ -4228,8 +4130,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Replacement DB for Policy Registry Store.",
           "fieldConfig": {
@@ -4362,8 +4263,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(container_memory_working_set_bytes{pod=~\".*topology-postgres.*\", container!=\"\", container!=\"POD\"}) by (pod)",
@@ -4375,8 +4275,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(kube_pod_container_resource_requests{pod=~\".*topology-postgres.*\", resource=\"memory\"})",
@@ -4388,8 +4287,7 @@
             },
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "max(kube_pod_container_resource_limits{pod=~\".*topology-postgres.*\", resource=\"memory\"})",
@@ -4419,8 +4317,7 @@
       "panels": [
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Total count of messages sent by Topology Observers to the central Topology Service within the time range.",
           "fieldConfig": {
@@ -4468,8 +4365,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "exemplar": false,
@@ -4487,8 +4383,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Total number of bytes sent by Topology Observers to the central Topology Service within the time range.",
           "fieldConfig": {
@@ -4535,8 +4430,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum(increase(ibm_aiops_topo_kafka_incoming_size_bytes_sum{service=\"aiops-topology-topology\"}[$__range])) by (service)",
@@ -4550,8 +4444,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Histogram displaying the message processing times of incoming traffic from Topology Observers via Kafka occurring within the time range. \n\nThis gives insight into the volume of messages being fed into Topology by the Observers and how quickly those messages are being processed.\n\nValues on the left are ranges of time in seconds, values on the right are the number of requests that fall into that time range.",
           "fieldConfig": {
@@ -4609,8 +4502,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "exemplar": false,
@@ -4628,8 +4520,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Count of messages sent by each Topology Observer to the central Topology Service within the time range.",
           "fieldConfig": {
@@ -4687,8 +4578,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "exemplar": false,
@@ -4706,8 +4596,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "TODO: ADD CONTEXT",
           "fieldConfig": {
@@ -4784,8 +4673,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum(rate(ibm_aiops_topo_ingress_task_seconds_count{service=\"aiops-topology-topology\"}[3m])) by (observer)",
@@ -4813,8 +4701,7 @@
       "panels": [
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Number of incoming bytes for the topology sub-component.",
           "fieldConfig": {
@@ -4861,8 +4748,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum(increase(ibm_aiops_topo_kafka_incoming_size_bytes_sum{service!=\"aiops-topology-observer-service\"}[$__range])) by (service)",
@@ -4876,8 +4762,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Rate of incoming messages for the topology sub-components. Messages represent requests received by the sub-component and are broken down further into ",
           "fieldConfig": {
@@ -4954,8 +4839,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum(rate(ibm_aiops_topo_kafka_incoming_size_bytes_count{service!=\"aiops-topology-observer-service\"}[3m])) by (service)",
@@ -4969,8 +4853,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Rate of incoming bytes for the topology sub-components.",
           "fieldConfig": {
@@ -5047,8 +4930,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum(rate(ibm_aiops_topo_kafka_incoming_size_bytes_sum{service!=\"aiops-topology-observer-service\"}[3m])) by (service)",
@@ -5062,8 +4944,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Number of outgoing bytes for the topology sub-component.",
           "fieldConfig": {
@@ -5110,8 +4991,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum(increase(ibm_aiops_topo_kafka_outgoing_size_bytes_sum{service!=\"aiops-topology-observer-service\"}[$__range])) by (service)",
@@ -5125,8 +5005,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Rate of outgoing messages for the topology sub-components.",
           "fieldConfig": {
@@ -5203,8 +5082,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum(rate(ibm_aiops_topo_kafka_outgoing_size_bytes_count{service!=\"aiops-topology-observer-service\"}[3m])) by (service)",
@@ -5218,8 +5096,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Rate of outgoing bytes for the topology sub-components.",
           "fieldConfig": {
@@ -5296,8 +5173,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum(rate(ibm_aiops_topo_kafka_outgoing_size_bytes_sum{service!=\"aiops-topology-observer-service\"}[3m])) by (service)",
@@ -5311,8 +5187,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Histogram displaying the message processing times processed by the topology sub-component within the time range. \n\nThis gives insight into the volume of messages being fed into the topology sub-component and how quickly those messages are being processed.\n\nValues on the left are ranges of time in seconds, values on the right are the number of requests that fall into that time range.",
           "fieldConfig": {
@@ -5370,8 +5245,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "exemplar": false,
@@ -5389,8 +5263,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Histogram displaying the message processing times processed by the topology sub-component within the time range. \n\nThis gives insight into the volume of messages being fed into the topology sub-component and how quickly those messages are being processed.\n\nValues on the left are ranges of time in seconds, values on the right are the number of requests that fall into that time range.",
           "fieldConfig": {
@@ -5448,8 +5321,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "exemplar": false,
@@ -5467,8 +5339,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Histogram displaying the message processing times processed by the topology sub-component within the time range. \n\nThis gives insight into the volume of messages being fed into the topology sub-component and how quickly those messages are being processed.\n\nValues on the left are ranges of time in seconds, values on the right are the number of requests that fall into that time range.",
           "fieldConfig": {
@@ -5526,8 +5397,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "exemplar": false,
@@ -5545,8 +5415,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Histogram displaying the message processing times processed by the topology sub-component within the time range. \n\nThis gives insight into the volume of messages being fed into the topology sub-component and how quickly those messages are being processed.\n\nValues on the left are ranges of time in seconds, values on the right are the number of requests that fall into that time range.",
           "fieldConfig": {
@@ -5604,8 +5473,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "exemplar": false,
@@ -5637,8 +5505,7 @@
       "panels": [
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "This time series displays the message processing lag over time per topology sub-component. Message lag is the number of messages that are waiting to be processed. The higher the lag, the longer it will take for new messages to get processed.\n\nLag will increase during message bursts but should always stabilize and ideally decrease. If lag is steadily increasing over time, more resources may need to be allocated to sub-component to ensure timely message processing.",
           "fieldConfig": {
@@ -5715,8 +5582,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum(ibm_aiops_topo_kafka_lag{service!=\"aiops-topology-observer-service\"}) by (service)",
@@ -5730,8 +5596,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Current message lag per component. Message lag is the number of messages that are waiting to be processed. The higher the lag, the longer it will take for new messages to get processed.\n\nLag will increase during message bursts but should always stabilize and ideally decrease. If lag is steadily increasing over time, more resources may need to be allocated to sub-component to ensure timely message processing.",
           "fieldConfig": {
@@ -5788,8 +5653,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum(ibm_aiops_topo_kafka_lag{service!=\"aiops-topology-observer-service\"}) by (service)",
@@ -5803,8 +5667,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "This time series displays the message processing lag over time for the Topology Service. This is the central component that acts as the point of entry for messages coming in from Topological observers. As such, spikes are expected to occur at each collection interval.\n\nThe legend on the right shows: \"<topic> - <partition>\". Topics act as roads between components, allowing messages to pass from one to the other. Topics are made up of partitions, like lanes in the road.  Messages relating to a particular resource, are typically sent to the same partition to maintain ordering. Too much traffic on one partition is what causes lag.\n\nLag will increase during message bursts but should always stabilize and ideally decrease. If lag is steadily increasing over time, more resources may need to be allocated to sub-component to ensure timely message processing.",
           "fieldConfig": {
@@ -5881,8 +5744,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum(ibm_aiops_topo_kafka_lag{service=\"aiops-topology-topology\"}) by (topic, partition)",
@@ -5896,8 +5758,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "This time series displays the message processing lag over time for the Inventory Service.\n\nThe legend on the right shows: \"<topic> - <partition>\". Topics act as roads between components, allowing messages to pass from one to the other. Topics are made up of partitions, like lanes in the road.  Messages relating to a particular resource, are typically sent to the same partition to maintain ordering. Too much traffic on one partition is what causes lag.\n\nLag will increase during message bursts but should always stabilize and ideally decrease. If lag is steadily increasing over time, more resources may need to be allocated to sub-component to ensure timely message processing.",
           "fieldConfig": {
@@ -5974,8 +5835,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum(ibm_aiops_topo_kafka_lag{service=\"aiops-topology-inventory\"}) by (topic, partition)",
@@ -5989,8 +5849,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "This time series displays the message processing lag over time for the Status Service.\n\nThe legend on the right shows: \"<topic> - <partition>\". Topics act as roads between components, allowing messages to pass from one to the other. Topics are made up of partitions, like lanes in the road.  Messages relating to a particular resource, are typically sent to the same partition to maintain ordering. Too much traffic on one partition is what causes lag.\n\nLag will increase during message bursts but should always stabilize and ideally decrease. If lag is steadily increasing over time, more resources may need to be allocated to sub-component to ensure timely message processing.",
           "fieldConfig": {
@@ -6067,8 +5926,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum(ibm_aiops_topo_kafka_lag{service=\"aiops-topology-status\"}) by (topic, partition)",
@@ -6082,8 +5940,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "This time series displays the message processing lag over time for the Merge Service.\n\nThe legend on the right shows: \"<topic> - <partition>\". Topics act as roads between components, allowing messages to pass from one to the other. Topics are made up of partitions, like lanes in the road.  Messages relating to a particular resource, are typically sent to the same partition to maintain ordering. Too much traffic on one partition is what causes lag.\n\nLag will increase during message bursts but should always stabilize and ideally decrease. If lag is steadily increasing over time, more resources may need to be allocated to sub-component to ensure timely message processing.",
           "fieldConfig": {
@@ -6160,8 +6017,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum(ibm_aiops_topo_kafka_lag{service=\"aiops-topology-merge\"}) by (topic, partition)",
@@ -6189,8 +6045,7 @@
       "panels": [
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Count of database queries executed by the Topology Service within the time range",
           "fieldConfig": {
@@ -6238,8 +6093,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum(increase(ibm_aiops_topo_janusgraph_query_graph_total{service=\"aiops-topology-topology\"}[$__range])) by (service)",
@@ -6253,8 +6107,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "fieldConfig": {
             "defaults": {
@@ -6334,8 +6187,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum(rate(ibm_aiops_topo_janusgraph_query_graph_total{service=\"aiops-topology-topology\"}[3m])) by (pod)",
@@ -6349,8 +6201,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Timeline of Topology database request times, made by the Topology Service, represented in quantiles.\n\nA quantile represents a percentage of the requests. Quantiles are computed across 10 minute sliding windows.\n\n***p50=1s*** means 50% of all requests in the window took less than or equal to 1s\n\n***p98=3s*** means 98% of all requests in the window took less than or equal to 3s\n\n***p99.9=5s*** means 99.9% of all requests in the window took less than or equal to 5s\n",
           "fieldConfig": {
@@ -6434,8 +6285,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum(ibm_aiops_topo_janusgraph_query_graph_seconds{service=\"aiops-topology-topology\"}) by (quantile, pod)",
@@ -6449,8 +6299,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Count of database query failures made by the Topology Service within the time range",
           "fieldConfig": {
@@ -6502,8 +6351,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum(increase(ibm_aiops_topo_janusgraph_query_graph_exceptions{service=\"aiops-topology-topology\"}[$__range])) by (service)",
@@ -6531,8 +6379,7 @@
       "panels": [
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Count of database queries executed by the Layout Service within the time range",
           "fieldConfig": {
@@ -6580,8 +6427,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum(increase(ibm_aiops_topo_janusgraph_query_graph_total{service=\"aiops-topology-layout\"}[$__range])) by (service)",
@@ -6595,8 +6441,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "fieldConfig": {
             "defaults": {
@@ -6676,8 +6521,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum(rate(ibm_aiops_topo_janusgraph_query_graph_total{service=\"aiops-topology-layout\"}[3m])) by (pod)",
@@ -6691,8 +6535,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Timeline of Topology database request times, made by the Layout Service, represented in quantiles.\n\nA quantile represents a percentage of the requests. Quantiles are computed across 10 minute sliding windows.\n\n***p50=1s*** means 50% of all requests in the window took less than or equal to 1s\n\n***p98=3s*** means 98% of all requests in the window took less than or equal to 3s\n\n***p99.9=5s*** means 99.9% of all requests in the window took less than or equal to 5s",
           "fieldConfig": {
@@ -6776,8 +6619,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum(ibm_aiops_topo_janusgraph_query_graph_seconds{service=\"aiops-topology-layout\"}) by (quantile, pod)",
@@ -6791,8 +6633,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Count of database query failures made by the Layout Service within the time range",
           "fieldConfig": {
@@ -6844,8 +6685,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum(increase(ibm_aiops_topo_janusgraph_query_graph_exceptions{service=\"aiops-topology-layout\"}[$__range])) by (service)",
@@ -6873,8 +6713,7 @@
       "panels": [
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Count of database queries executed by the Status Service within the time range",
           "fieldConfig": {
@@ -6922,8 +6761,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum(increase(ibm_aiops_topo_janusgraph_query_graph_total{service=\"aiops-topology-status\"}[$__range])) by (service)",
@@ -6937,8 +6775,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "fieldConfig": {
             "defaults": {
@@ -7018,8 +6855,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum(rate(ibm_aiops_topo_janusgraph_query_graph_total{service=\"aiops-topology-status\"}[3m])) by (pod)",
@@ -7033,8 +6869,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Timeline of Topology database request times, made by the Status Service, represented in quantiles.\n\nA quantile represents a percentage of the requests. Quantiles are computed across 10 minute sliding windows.\n\n***p50=1s*** means 50% of all requests in the window took less than or equal to 1s\n\n***p98=3s*** means 98% of all requests in the window took less than or equal to 3s\n\n***p99.9=5s*** means 99.9% of all requests in the window took less than or equal to 5s",
           "fieldConfig": {
@@ -7118,8 +6953,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum(ibm_aiops_topo_janusgraph_query_graph_seconds{service=\"aiops-topology-status\"}) by (quantile, pod)",
@@ -7133,8 +6967,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Count of database query failures made by the Status Service within the time range",
           "fieldConfig": {
@@ -7186,8 +7019,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum(increase(ibm_aiops_topo_janusgraph_query_graph_exceptions{service=\"aiops-topology-status\"}[$__range])) by (service)",
@@ -7215,8 +7047,7 @@
       "panels": [
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Count of database queries executed by the Merge Service within the time range",
           "fieldConfig": {
@@ -7264,8 +7095,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum(increase(ibm_aiops_topo_janusgraph_query_graph_total{service=\"aiops-topology-merge\"}[$__range])) by (service)",
@@ -7279,8 +7109,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "fieldConfig": {
             "defaults": {
@@ -7360,8 +7189,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum(rate(ibm_aiops_topo_janusgraph_query_graph_total{service=\"aiops-topology-merge\"}[3m])) by (pod)",
@@ -7375,8 +7203,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Timeline of Topology database request times, made by the Merge Service, represented in quantiles.\n\nA quantile represents a percentage of the requests. Quantiles are computed across 10 minute sliding windows.\n\n***p50=1s*** means 50% of all requests in the window took less than or equal to 1s\n\n***p98=3s*** means 98% of all requests in the window took less than or equal to 3s\n\n***p99.9=5s*** means 99.9% of all requests in the window took less than or equal to 5s",
           "fieldConfig": {
@@ -7460,8 +7287,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum(ibm_aiops_topo_janusgraph_query_graph_seconds{service=\"aiops-topology-merge\"}) by (quantile, pod)",
@@ -7475,8 +7301,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Count of database query failures made by the Merge Service within the time range",
           "fieldConfig": {
@@ -7528,8 +7353,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum(increase(ibm_aiops_topo_janusgraph_query_graph_exceptions{service=\"aiops-topology-merge\"}[$__range])) by (service)",
@@ -7557,8 +7381,7 @@
       "panels": [
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Timeline of  Topology Inventory Service ***query api endpoint*** response times, represented in quantiles.\n\nA quantile represents a percentage of the requests. Quantiles are computed across 10 minute sliding windows.\n\n***p50=1s*** means 50% of all requests in the window took less than or equal to 1s\n\n***p98=3s*** means 98% of all requests in the window took less than or equal to 3s\n\n***p99.9=5s*** means 99.9% of all requests in the window took less than or equal to 5s",
           "fieldConfig": {
@@ -7642,8 +7465,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum(ibm_aiops_topo_inventory_service_api_query_seconds{service=\"aiops-topology-inventory\"}) by (quantile, operation, pod)",
@@ -7657,8 +7479,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Timeline of  Topology Inventory Service ***suggest api endpoint*** response times, represented in quantiles.\n\nA quantile represents a percentage of the requests. Quantiles are computed across 10 minute sliding windows.\n\n***p50=1s*** means 50% of all requests in the window took less than or equal to 1s\n\n***p98=3s*** means 98% of all requests in the window took less than or equal to 3s\n\n***p99.9=5s*** means 99.9% of all requests in the window took less than or equal to 5s",
           "fieldConfig": {
@@ -7742,8 +7563,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum(ibm_aiops_topo_inventory_service_api_suggest_seconds{service=\"aiops-topology-inventory\"}) by (quantile, operation, pod)",
