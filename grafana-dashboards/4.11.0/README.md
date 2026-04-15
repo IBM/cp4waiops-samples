@@ -22,4 +22,3 @@
 
 Version 4.11.0 represents a major expansion of the dashboard collection, more than doubling the number of available dashboards. This release introduces comprehensive integration monitoring capabilities across events, logs, and metrics, along with a new top-level overview dashboard and dedicated analytics dashboard. The Prometheus stack dashboard provides enhanced monitoring for the underlying metrics infrastructure.
 
-To ensure compatibility, always use the version of the dashboards that matches the version of IBM Cloud Pak for AIOps.

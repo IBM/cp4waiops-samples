@@ -8,4 +8,3 @@
 - **aiops_topology_dashboard.json** - New dashboard for visualizing topology data and relationships
 - **aiops_web_ui_dashboard.json** - New dashboard for monitoring web UI performance and usage
 
-To ensure compatibility, always use the version of the dashboards that matches the version of IBM Cloud Pak for AIOps.

@@ -4,4 +4,3 @@
 
 Dashboards are now supported on Linux-based installations of IBM Cloud Pak for AIOps.
 
-To ensure compatibility, always use the version of the dashboards that matches the version of IBM Cloud Pak for AIOps.
