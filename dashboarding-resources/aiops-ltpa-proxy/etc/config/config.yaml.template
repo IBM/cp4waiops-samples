@@ -1,0 +1,81 @@
+logging:
+  transport:
+    targets:
+      - target: 'pino-pretty'
+        level: info
+        options:
+          translateTime: 'HH:MM:ss Z'
+          ignore: 'pid,hostname'
+
+      - target: 'pino/file'
+        level: info
+        options:
+          destination: 'logs/server.log'
+          mkdir: true
+
+tls:
+  # Path to a directory containing certificates
+  # that should be trusted for downstream communication
+  # Local: etc/trusted-certs
+  # OpenShift: /etc/trusted-certs (mounted from ConfigMap)
+  trusted_certificates_path: etc/trusted-certs
+
+target:
+  # The downstream target URL, for example an Impact GUI endpoint
+  url: https://127.0.0.1:16311
+  authentication:
+    # Path to the LTPA key file used to mint LtpaToken2 cookies
+    # This file is typically retrieved from your Liberty server's
+    # resources/security directory (e.g., ltpa.keys)
+    #
+    # Local: etc/ltpa.key
+    # OpenShift: /etc/secrets/ltpa/ltpa.key (mounted from Secret)
+    ltpa_key_file_path: etc/ltpa.key
+
+    # Password for the LTPA key file
+    # This matches the keysPassword in your Liberty server.xml:
+    # <ltpa keysFileName="ltpa.keys" keysPassword="your-password" expiration="120"/>
+    #
+    # Local: plain text password or !file reference
+    # OpenShift: !file /etc/secrets/ltpa/ltpa.password (mounted from Secret)
+    ltpa_password: changeme
+
+    # LDAP user template used when generating the LTPA token
+    # The ${aiopsUser} placeholder is replaced with the username from the JWT token
+    # This must match the LDAP structure configured on your downstream target
+    ltpa_user_template: 'user\:customRealm/uid=${aiopsUser},ou=People,dc=ibm,dc=com'
+
+    # Lifetime of generated LTPA tokens in milliseconds
+    # Should match or be less than the expiration configured in Liberty server.xml
+    # Default: 3600000 (1 hour), Liberty default: 7200000 (2 hours)
+    ltpa_expiry_ms: 3600000
+
+proxy:
+  # The port the proxy will listen on
+  port: 8443
+
+  # The port the health endpoint will listen on
+  health_port: 8444
+
+  tls:
+    # Path to a certificate to use for TLS
+    # Generate with: npm run generate-cert
+    #
+    # Local: !file etc/server-cert/server-cert.pem
+    # OpenShift: !file /etc/secrets/proxy-cert/tls.crt (mounted from Secret)
+    cert: !file etc/server-cert/server-cert.pem
+
+    # Path to a private key to use for TLS
+    # Local: !file etc/server-cert/server-key.key
+    # OpenShift: !file /etc/secrets/proxy-cert/tls.key (mounted from Secret)
+    key: !file etc/server-cert/server-key.key
+
+  authentication:
+    endpoints:
+      # Issuer of the JWT token (your AIOps cluster URL)
+      # Example: https://cpd-aiops.apps.your-cluster.com
+      issuer: https://some-host
+
+      # Path to the JWKS endpoint in the above domain
+      # AIOps default: /.well-known/jwks.json
+      jwks_path: /.well-known/jwks.json

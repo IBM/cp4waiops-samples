@@ -1,0 +1,26 @@
+# Use FIPS-enabled Node.js 22 image (same as aiops-ltpa-proxy)
+# This image has OpenSSL configured to work with LTPA2 crypto operations
+FROM docker-na-public.artifactory.swg-devops.com/hyc-hdm-staging-docker-local/hdm/ubi-nodejs-without-npm-fips:v22
+
+EXPOSE 8443 8444
+
+USER 0
+
+WORKDIR /opt/app-root/src
+
+# Copy pre-installed node_modules (install them locally first with: npm ci --omit=dev)
+COPY --chown=1001:0 node_modules ./node_modules
+COPY --chown=1001:0 package.json package-lock.json ./
+COPY --chown=1001:0 index.js generate-cert.js ./
+COPY --chown=1001:0 lib ./lib
+COPY --chown=1001:0 etc ./etc
+
+RUN mkdir -p /opt/app-root/src/logs && \
+    chown -R 1001:0 /opt/app-root/src && \
+    chmod -R g=u /opt/app-root/src
+
+ENV NODE_ENV=production
+
+USER 1001
+
+CMD ["node", "index.js"]

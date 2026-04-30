@@ -1,0 +1,29 @@
+{
+  "name": "aiops-ltpa-proxy",
+  "version": "2.0.0",
+  "description": "AIOps LTPA Proxy - A JWT/JWKS-authenticating proxy that injects LtpaToken2 cookies for downstream requests",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node index.js",
+    "generate-cert": "node generate-cert.js"
+  },
+  "keywords": [
+    "aiops",
+    "proxy",
+    "jwt",
+    "jwks",
+    "ltpa"
+  ],
+  "author": "IBM",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "@fastify/http-proxy": "^11.3.0",
+    "@fastify/jwt": "^10.0.0",
+    "fastify": "^5.6.1",
+    "get-jwks": "^11.0.3",
+    "oniyi-ltpa": "^2.1.0",
+    "pino-pretty": "^13.1.2",
+    "yaml": "^2.8.1"
+  }
+}

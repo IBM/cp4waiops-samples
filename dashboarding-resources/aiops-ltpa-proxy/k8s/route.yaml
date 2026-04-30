@@ -1,0 +1,19 @@
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: aiops-ltpa-proxy
+spec:
+  port:
+    targetPort: proxy
+  tls:
+    # Re-encrypt termination: OpenShift terminates external TLS and re-encrypts to the pod
+    # This works with the service serving certificate (Option B)
+    termination: reencrypt
+    # The destination CA is automatically trusted (OpenShift service CA)
+  to:
+    kind: Service
+    name: aiops-ltpa-proxy
+    weight: 100
+  wildcardPolicy: None
+
+# Made with Bob
