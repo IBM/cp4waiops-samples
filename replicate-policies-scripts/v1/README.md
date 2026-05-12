@@ -1,6 +1,6 @@
-# Policy Replication Tool for IBM AIOps
+# Policy Replication Tool for IBM Concert Operate
 
-A Python-based tool for migrating policies between IBM AIOps clusters using the IR Core API.
+A Python-based tool for migrating policies between IBM Concert Operate clusters using the IR Core API.
 
 ## Requirements
 
