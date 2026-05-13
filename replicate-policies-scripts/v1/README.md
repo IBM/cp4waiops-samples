@@ -14,7 +14,7 @@ A Python-based tool for migrating policies between IBM Concert Operate clusters 
 1. Clone the repository:
 ```bash
 git clone <repository-url>
-cd replicate-policies
+cd replicate-policies-scripts/v1
 ```
 
 2. Make scripts executable:
