@@ -369,6 +369,226 @@ describe('Schema test', () => {
     });
   });
 
+  describe('Activity', () => {
+    before(async () => {
+      return await client.executeFile(path.resolve(__dirname, schemaPath + '/reporter_aiops_activity.sql'));
+    });
+
+    after(async () => {
+      return await client.executeFile(path.resolve(__dirname, schemaPath + '/reporter_aiops_activity_remove.sql'));
+    });
+
+    it('should have the correct columns in ACTIVITY_ENTRY', async () => {
+      const results = await client.query(`SELECT distinct(name) FROM sysibm.syscolumns WHERE tbname = 'ACTIVITY_ENTRY'`);
+      const columnNames = results.rows.map((result) => result.name.toLowerCase());
+      expect(columnNames).to.eql([
+        'actioninstanceid',
+        'comment',
+        'createdtime',
+        'id',
+        'newvalue',
+        'oldvalue',
+        'parentid',
+        'parenttype',
+        'policyid',
+        'runbookinstanceid',
+        'tenantid',
+        'timeadded',
+        'type',
+        'userid',
+        'uuid'
+      ]);
+    });
+
+    it('should have the correct columns in ACTIVITY_ENTRY_TYPES', async () => {
+      const results = await client.query(`SELECT distinct(name) FROM sysibm.syscolumns WHERE tbname = 'ACTIVITY_ENTRY_TYPES'`);
+      const columnNames = results.rows.map((result) => result.name.toLowerCase());
+      expect(columnNames).to.eql([
+        'description',
+        'name',
+        'type'
+      ]);
+    });
+
+    it('should have all activity types populated', async () => {
+      const results = await client.query(`SELECT type, name FROM ACTIVITY_ENTRY_TYPES ORDER BY type`);
+      expect(results.rows.length).to.equal(11);
+      
+      const expectedTypes = [
+        { type: 'alertadded', name: 'Alert Added' },
+        { type: 'automation', name: 'Automation' },
+        { type: 'comment', name: 'Comment' },
+        { type: 'created', name: 'Created' },
+        { type: 'eventadded', name: 'Event Added' },
+        { type: 'notification', name: 'Notification' },
+        { type: 'ownerchange', name: 'Owner Change' },
+        { type: 'policy', name: 'Policy' },
+        { type: 'statechange', name: 'State Change' },
+        { type: 'unknown', name: 'Unknown' },
+        { type: 'updated', name: 'Updated' }
+      ];
+      
+      results.rows.forEach((row, index) => {
+        expect(row.type).to.equal(expectedTypes[index].type);
+        expect(row.name).to.equal(expectedTypes[index].name);
+      });
+    });
+
+    it('should insert activity entry successfully', async () => {
+      const expectedActivity = {
+        tenantid: 'cfd95b7e-3bc7-4006-a4a8-a73a79c71255',
+        id: 'activity-001',
+        parentid: 'ea6cf743-7a3a-4d1a-8d6f-faaa1df573d5',
+        parenttype: 'alert',
+        createdtime: new Date('2024-09-10T23:21:46.000Z'),
+        type: 'comment',
+        userid: 'testuser@example.com',
+        comment: 'This is a test comment on the alert',
+        policyid: null,
+        runbookinstanceid: null,
+        actioninstanceid: null,
+        timeadded: new Date('2024-09-10T23:21:46.000Z'),
+        oldvalue: null,
+        newvalue: null,
+        uuid: 'cfd95b7e-3bc7-4006-a4a8-a73a79c71255_activity-001'
+      };
+
+      const mockDate = client.formatTimestamp('2024-09-10T18:21:46.000Z');
+      const queryString = fs.readFileSync(path.resolve(__dirname, './insert-activity.sql'), 'utf8');
+      await client.query(queryString, [mockDate, mockDate]);
+
+      const res = await client.query('SELECT * FROM ACTIVITY_ENTRY');
+      expect(res.rows[0]).to.eql(expectedActivity);
+    });
+
+    it('should query activity by parent ID using index', async () => {
+      const res = await client.query(`SELECT id, parentId, parentType FROM ACTIVITY_ENTRY WHERE parentId = 'ea6cf743-7a3a-4d1a-8d6f-faaa1df573d5' ORDER BY createdTime DESC`);
+      expect(res.rows.length).to.equal(1);
+      expect(res.rows[0].id).to.equal('activity-001');
+      expect(res.rows[0].parentid).to.equal('ea6cf743-7a3a-4d1a-8d6f-faaa1df573d5');
+      expect(res.rows[0].parenttype).to.equal('alert');
+    });
+
+    it('should query activity by user ID using index', async () => {
+      const res = await client.query(`SELECT id, userId FROM ACTIVITY_ENTRY WHERE userId = 'testuser@example.com' ORDER BY createdTime DESC`);
+      expect(res.rows.length).to.equal(1);
+      expect(res.rows[0].id).to.equal('activity-001');
+      expect(res.rows[0].userid).to.equal('testuser@example.com');
+    });
+
+    it('should query ACTIVITY_VW view correctly', async () => {
+      const res = await client.query(`SELECT * FROM ACTIVITY_VW`);
+      expect(res.rows.length).to.equal(1);
+      
+      const activity = res.rows[0];
+      expect(activity.userid).to.equal('testuser@example.com');
+      expect(activity.type).to.equal('Comment');
+      expect(activity.comment).to.equal('This is a test comment on the alert');
+      expect(activity.parentid).to.equal('ea6cf743-7a3a-4d1a-8d6f-faaa1df573d5');
+      expect(activity.parenttype).to.equal('alert');
+    });
+
+    it('should insert automation activity with runbook details', async () => {
+      const automationActivity = {
+        tenantid: 'cfd95b7e-3bc7-4006-a4a8-a73a79c71255',
+        id: 'activity-002',
+        parentid: 'ea6cf743-7a3a-4d1a-8d6f-faaa1df573d5',
+        parenttype: 'alert',
+        createdtime: new Date('2024-09-10T23:21:46.000Z'),
+        type: 'automation',
+        userid: 'system',
+        comment: 'Runbook executed successfully',
+        policyid: null,
+        runbookinstanceid: 'instance-456',
+        actioninstanceid: 'action-789',
+        timeadded: new Date('2024-09-10T23:21:46.000Z'),
+        oldvalue: null,
+        newvalue: null,
+        uuid: 'cfd95b7e-3bc7-4006-a4a8-a73a79c71255_activity-002'
+      };
+
+      const mockDate = client.formatTimestamp('2024-09-10T18:21:46.000Z');
+      await client.query(`
+        INSERT INTO ACTIVITY_ENTRY (
+          tenantid, id, parentId, parentType, createdTime, type, userId, comment,
+          runbookInstanceId, actionInstanceId, timeAdded, uuid
+        ) VALUES (
+          'cfd95b7e-3bc7-4006-a4a8-a73a79c71255', 'activity-002',
+          'ea6cf743-7a3a-4d1a-8d6f-faaa1df573d5', 'alert', '${mockDate}', 'automation',
+          'system', 'Runbook executed successfully', 'instance-456',
+          'action-789', '${mockDate}',
+          'cfd95b7e-3bc7-4006-a4a8-a73a79c71255_activity-002'
+        )
+      `);
+
+      const res = await client.query(`SELECT * FROM ACTIVITY_ENTRY WHERE id = 'activity-002'`);
+      expect(res.rows[0]).to.eql(automationActivity);
+    });
+
+    it('should insert state change activity with old and new values', async () => {
+      const mockDate = client.formatTimestamp('2024-09-10T18:21:46.000Z');
+      await client.query(`
+        INSERT INTO ACTIVITY_ENTRY (
+          tenantid, id, parentId, parentType, createdTime, type, userId, comment,
+          oldValue, newValue, timeAdded, uuid
+        ) VALUES (
+          'cfd95b7e-3bc7-4006-a4a8-a73a79c71255', 'activity-003',
+          'ea6cf743-7a3a-4d1a-8d6f-faaa1df573d5', 'alert', '${mockDate}', 'statechange',
+          'admin@example.com', 'State changed from open to acknowledged',
+          'open', 'acknowledged', '${mockDate}',
+          'cfd95b7e-3bc7-4006-a4a8-a73a79c71255_activity-003'
+        )
+      `);
+
+      const res = await client.query(`SELECT * FROM ACTIVITY_ENTRY WHERE id = 'activity-003'`);
+      expect(res.rows[0].type).to.equal('statechange');
+      expect(res.rows[0].parenttype).to.equal('alert');
+      expect(res.rows[0].oldvalue).to.equal('open');
+      expect(res.rows[0].newvalue).to.equal('acknowledged');
+    });
+
+    it('should query activity by parentType using index', async () => {
+      const res = await client.query(`SELECT id, parentType FROM ACTIVITY_ENTRY WHERE parentType = 'alert' ORDER BY createdTime DESC`);
+      expect(res.rows.length).to.equal(3);
+      res.rows.forEach(row => {
+        expect(row.parenttype).to.equal('alert');
+      });
+    });
+
+    it('should insert incident activity with parentType incident', async () => {
+      const mockDate = client.formatTimestamp('2024-09-10T18:21:46.000Z');
+      await client.query(`
+        INSERT INTO ACTIVITY_ENTRY (
+          tenantid, id, parentId, parentType, createdTime, type, userId, comment,
+          timeAdded, uuid
+        ) VALUES (
+          'cfd95b7e-3bc7-4006-a4a8-a73a79c71255', 'activity-004',
+          '24fba2e3-0000-4000-8000-000000000002', 'incident', '${mockDate}', 'comment',
+          'testuser@example.com', 'This is a comment on the incident',
+          '${mockDate}',
+          'cfd95b7e-3bc7-4006-a4a8-a73a79c71255_activity-004'
+        )
+      `);
+
+      const res = await client.query(`SELECT * FROM ACTIVITY_ENTRY WHERE id = 'activity-004'`);
+      expect(res.rows[0].parenttype).to.equal('incident');
+      expect(res.rows[0].parentid).to.equal('24fba2e3-0000-4000-8000-000000000002');
+      expect(res.rows[0].comment).to.equal('This is a comment on the incident');
+    });
+
+    it('should filter activities by parentType', async () => {
+      const alertActivities = await client.query(`SELECT id FROM ACTIVITY_ENTRY WHERE parentType = 'alert' ORDER BY id`);
+      expect(alertActivities.rows.length).to.equal(3);
+      expect(alertActivities.rows[0].id).to.equal('activity-001');
+      expect(alertActivities.rows[1].id).to.equal('activity-002');
+      expect(alertActivities.rows[2].id).to.equal('activity-003');
+
+      const incidentActivities = await client.query(`SELECT id FROM ACTIVITY_ENTRY WHERE parentType = 'incident' ORDER BY id`);
+      expect(incidentActivities.rows.length).to.equal(1);
+      expect(incidentActivities.rows[0].id).to.equal('activity-004');
+    });
+  });
+
   describe('Noise reduction', () => {
     before(async () => {
       await client.executeFile(path.resolve(__dirname, schemaPath + '/reporter_aiops_alerts.sql'));
