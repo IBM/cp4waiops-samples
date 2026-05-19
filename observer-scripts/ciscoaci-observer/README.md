@@ -9,14 +9,15 @@ This file provides instructions for managing Cisco ACI observer jobs using the R
 1. [Overview](#overview)
 2. [Prerequisites](#prerequisites)
 3. [Quick Start](#quick-start)
-4. [Script Usage](#script-usage)
-5. [Configuration](#configuration)
+4. [Configuration](#configuration)
+5. [Script Usage](#script-usage)
 6. [Actions Reference](#actions-reference)
    - [Create Jobs](#create-jobs)
    - [Update Jobs](#update-jobs)
    - [Stop Jobs](#stop-jobs)
    - [Delete Jobs](#delete-jobs)
    - [Query Job Status](#query-job-status)
+   - [Export Jobs](#export-jobs)
 7. [Troubleshooting](#troubleshooting)
 
 ---
@@ -30,6 +31,7 @@ The `manage-ciscoaci-jobs.sh` script provides automated management of Cisco ACI 
 - **Stop Jobs**: Stop running observer jobs
 - **Delete Jobs**: Delete observer jobs from topology (non-running jobs only)
 - **Query Jobs**: Query the status of observer jobs
+- **Export Jobs**: Export existing job definitions
 
 ---
 
@@ -98,31 +100,78 @@ chmod +x manage-ciscoaci-jobs.sh
 ### Basic Syntax
 
 ```bash
-./manage-ciscoaci-jobs.sh <action> <input-file> [log-file-path]
+./manage-ciscoaci-jobs.sh <action> [input-file] [log-file-path] [options]
 ```
 
 ### Parameters
 
 | Parameter | Required | Description | Valid Values |
 |-----------|----------|-------------|--------------|
-| `action` | Yes | Operation to perform (case-insensitive) | create, update, stop, delete, status |
-| `input-file` | Yes | JSON or TXT file with job data | Path to file |
+| `action` | Yes | Operation to perform (case-insensitive) | create, update, stop, delete, status, export |
+| `input-file` | Conditional | JSON/TXT file or directory with job data | Path to file or directory (not required for export) |
 | `log-file-path` | No | Directory for log file output | Valid directory path (default: current directory) |
 
 ### Quick Examples
 
 ```bash
-# Create new jobs
+# Create new jobs from a single file
 ./manage-ciscoaci-jobs.sh create cisco-jobs-sample.json
 
+# Create jobs from a directory (all .json files merged)
+./manage-ciscoaci-jobs.sh create /path/to/jobs-directory/
+
+# Create jobs with automatic password encryption
+./manage-ciscoaci-jobs.sh create cisco-jobs.json --apic-password 'MyPassword'
+
 # Stop running jobs
+./manage-ciscoaci-jobs.sh stop jobs-to-stop.txt
+
 ./manage-ciscoaci-jobs.sh stop jobs-to-stop.json
 
 # Delete jobs from topology
 ./manage-ciscoaci-jobs.sh delete jobs-to-delete.txt
 
+# Export all jobs (single file in current directory)
+./manage-ciscoaci-jobs.sh export
+
+# Export all jobs with encrypted passwords included
+./manage-ciscoaci-jobs.sh export --include-secrets
+
+# Export to specific directory (creates per-job files)
+./manage-ciscoaci-jobs.sh export /path/to/output/ --include-secrets
+
 # Specify custom log directory
 ./manage-ciscoaci-jobs.sh create cisco-jobs-sample.json /var/logs/
+```
+
+---
+
+## Configuration
+
+### Failure Handling Mode
+
+The script includes a configurable failure handling behavior for create and update operations.
+
+```bash
+CONTINUE_ON_FAILURE=false
+```
+
+**Options:**
+
+- **`false` (default)**: Stop script execution on first failure
+  - Recommended for production environments
+  - Ensures no partial deployments
+  - Provides immediate feedback on errors
+
+- **`true`**: Continue processing remaining jobs even if some fail
+  - Useful for bulk operations
+  - Processes all jobs and provides complete failure report
+  - Allows maximum job creation despite individual failures
+
+**To Change:**
+Edit the script and modify line:
+```bash
+CONTINUE_ON_FAILURE=true  # Continue on failure
 ```
 
 ---
@@ -135,7 +184,7 @@ chmod +x manage-ciscoaci-jobs.sh
 
 **Format:** JSON array with complete job definitions
 
-**File:** `cisco-jobs-sample.json`
+**Single File:** `cisco-jobs-sample.json`
 
 ```json
 [
@@ -172,6 +221,27 @@ chmod +x manage-ciscoaci-jobs.sh
     }
   }
 ]
+```
+
+**Directory Input:** You can also provide a directory path containing multiple `.json` files. The script will automatically discover, validate, and merge all JSON files in the directory.
+
+```bash
+# Directory structure example
+jobs-directory/
+  ├── load-jobs.json
+  ├── listen-jobs.json
+  └── fabric-jobs.json
+
+# Usage
+./manage-ciscoaci-jobs.sh create jobs-directory/
+```
+
+**Password Encryption:** Use `--apic-password` and `--truststore-password` flags to automatically encrypt cleartext passwords:
+
+```bash
+./manage-ciscoaci-jobs.sh create cisco-jobs.json \
+  --apic-password 'MyCleartextPassword' \
+  --truststore-password 'MyTruststorePassword'
 ```
 
 #### For STOP, DELETE, and STATUS Actions
@@ -223,25 +293,44 @@ Creates new Cisco ACI observer jobs via REST API.
 #### Usage
 
 ```bash
-./manage-ciscoaci-jobs.sh create <jobs-file.json> [log-path]
+./manage-ciscoaci-jobs.sh create <jobs-file-or-directory> [log-path] [options]
 ```
 
 #### Input Requirements
 
-- **File Format**: JSON array with complete job definitions
-- **Required Fields**: 
+- **File Format**: JSON array with complete job definitions OR directory containing JSON files
+- **Required Fields**:
   - `unique_id`: Unique identifier for the job
   - `type`: Job type (`restapi` for load jobs, `websocket` for listen jobs) - required
   - `parameters`: Job-specific configuration
 
+#### Options
+
+- `--apic-password <password>`: Cleartext APIC password to encrypt and inject into all jobs
+- `--truststore-password <password>`: Cleartext SSL truststore password to encrypt and inject into all jobs
+
 #### Example
 
 ```bash
-# Create jobs with default log location
+# Create jobs from a single file
 ./manage-ciscoaci-jobs.sh create cisco-jobs-sample.json
 
-# Create jobs with custom log location
-./manage-ciscoaci-jobs.sh CREATE cisco-jobs-sample.json /var/logs/
+# Create jobs from a directory (all .json files merged)
+./manage-ciscoaci-jobs.sh create /path/to/jobs-directory/
+
+# Create jobs with automatic password encryption
+./manage-ciscoaci-jobs.sh create cisco-jobs.json --apic-password 'MyPassword'
+
+# Create jobs with both passwords encrypted
+./manage-ciscoaci-jobs.sh create cisco-jobs.json \
+  --apic-password 'MyApicPass' \
+  --truststore-password 'MyTruststorePass'
+
+# Create with custom log location
+./manage-ciscoaci-jobs.sh create cisco-jobs-sample.json /var/logs/
+
+# Directory input with password encryption
+./manage-ciscoaci-jobs.sh create /jobs-dir/ --apic-password 'MyPassword'
 ```
 
 #### Output
@@ -308,22 +397,27 @@ Job: ciscoaci_listen_job_1
 
 ### Update Jobs
 
-Updates existing Cisco ACI observer jobs via REST API.
+Updates existing Cisco ACI observer jobs via REST API with validation checks.
 
 #### Usage
 
 ```bash
-./manage-ciscoaci-jobs.sh update <jobs-file.json> [log-path]
+./manage-ciscoaci-jobs.sh update <jobs-file-or-directory> [log-path] [options]
 ```
 
 #### Input Requirements
 
-- **File Format**: JSON array with complete job definitions
+- **File Format**: JSON array with complete job definitions OR directory containing JSON files
 - **Same unique_id**: Must match the existing job you want to update
 - **Complete definition**: Include ALL job parameters, not just changed fields
 - **Job must exist**: The job must already exist in the topology
 - **Job not running**: The job must not be in RUNNING state (stop it first)
 - **Job type cannot change**: Cannot change between `restapi` and `websocket` types
+
+#### Options
+
+- `--apic-password <password>`: Cleartext APIC password to encrypt and inject into all jobs
+- `--truststore-password <password>`: Cleartext SSL truststore password to encrypt and inject into all jobs
 
 #### Validation Checks
 
@@ -337,8 +431,19 @@ If any validation fails, the update is skipped with an appropriate error message
 #### Example
 
 ```bash
-# Update jobs
+# Update jobs from a single file
 ./manage-ciscoaci-jobs.sh update cisco-jobs-update.json
+
+# Update jobs from a directory
+./manage-ciscoaci-jobs.sh update /path/to/jobs-directory/
+
+# Update with automatic password encryption
+./manage-ciscoaci-jobs.sh update cisco-jobs.json --apic-password 'NewPassword'
+
+# Update with both passwords
+./manage-ciscoaci-jobs.sh update cisco-jobs.json \
+  --apic-password 'NewApicPass' \
+  --truststore-password 'NewTruststorePass'
 
 # Update with case-insensitive action
 ./manage-ciscoaci-jobs.sh Update cisco-jobs-update.json
@@ -571,6 +676,148 @@ Job: ciscoaci_fabric_prod_1
 
 ---
 
+### Export Jobs
+
+Exports all existing Cisco ACI observer job definitions from topology to JSON file(s).
+
+#### Usage
+
+```bash
+./manage-ciscoaci-jobs.sh export [output-directory] [--include-secrets]
+```
+
+#### Parameters
+
+- **output-directory** (optional): Directory for export files
+  - If not specified: Creates single file `exported-ciscoaci-jobs-YYYYMMDD_HHMMSS.json` in current directory
+  - If specified: Creates subdirectory with per-job files plus combined file
+
+- **--include-secrets** (optional): Include encrypted password fields in export
+  - Without flag: Password fields (`ciscoapic_password`, `password_ssl_truststore_file`) are blanked to `""`
+  - With flag: Encrypted password values are preserved
+
+#### Example
+
+```bash
+# Export to current directory (single file)
+./manage-ciscoaci-jobs.sh export
+
+# Export to specific directory (per-job files + combined)
+./manage-ciscoaci-jobs.sh export /backup/ciscoaci-jobs/
+
+# Export with encrypted passwords included
+./manage-ciscoaci-jobs.sh export --include-secrets
+
+# Export to directory with passwords
+./manage-ciscoaci-jobs.sh export /backup/ciscoaci-jobs/ --include-secrets
+```
+
+#### Output
+
+**Single File Mode** (no output directory specified):
+```
+exported-ciscoaci-jobs-20260225_143000.json
+```
+
+**Directory Mode** (output directory specified):
+```
+/backup/ciscoaci-jobs/export-20260225_143000/
+  ├── ciscoaci_load_job_1.json
+  ├── ciscoaci_listen_job_1.json
+  ├── ciscoaci_fabric_prod_1.json
+  └── all-jobs-20260225_143000.json
+```
+
+**Console Output (Single File Mode):**
+```
+==========================================
+Cisco ACI Observer Job Management Script
+==========================================
+
+[INFO] Action: export
+[INFO] Checking prerequisites...
+[SUCCESS] All prerequisites met
+[INFO] Starting job export process...
+[INFO] Querying topology for all observer jobs...
+[SUCCESS] Found 3 job(s) in topology  - fetching full definitions...
+[INFO] Export mode: Single combined file
+[INFO] Fetching full job definitions...
+[STEP] [1/3] Fetched: ciscoaci_load_job_1
+[STEP] [2/3] Fetched: ciscoaci_listen_job_1
+[STEP] [3/3] Fetched: ciscoaci_fabric_prod_1
+[SUCCESS] Exported 3 job(s) to file: ./exported-ciscoaci-jobs-20260225_143000.json
+
+==========================================
+Job Export Summary
+==========================================
+Total Jobs Found: 3
+Exported: 3
+Output File: ./exported-ciscoaci-jobs-20260225_143000.json
+==========================================
+[SUCCESS] Export completed: ./exported-ciscoaci-jobs-20260225_143000.json
+```
+
+**Console Output (Directory Mode):**
+```
+==========================================
+Cisco ACI Observer Job Management Script
+==========================================
+
+[INFO] Action: export
+[INFO] Output directory: /backup/ciscoaci-jobs/
+[INFO] Checking prerequisites...
+[SUCCESS] All prerequisites met
+[INFO] Starting job export process...
+[INFO] Querying topology for all observer jobs...
+[SUCCESS] Found 3 job(s) in topology  - fetching full definitions...
+[INFO] Per-job export mode: writing individual files to /backup/ciscoaci-jobs/export-20260225_143000
+[INFO] Fetching full job definitions...
+[STEP] [1/3] Exported: ciscoaci_load_job_1.json
+[STEP] [2/3] Exported: ciscoaci_listen_job_1.json
+[STEP] [3/3] Exported: ciscoaci_fabric_prod_1.json
+[SUCCESS] Exported 3 job(s) to directory: /backup/ciscoaci-jobs/export-20260225_143000
+[INFO]   - Per-job files: <job_name>.json
+[INFO]   - Combined file: all-jobs-20260225_143000.json
+
+==========================================
+Job Export Summary
+==========================================
+Total Jobs Found: 3
+Exported: 3
+Output Directory: /backup/ciscoaci-jobs/export-20260225_143000
+  Per-job files: <job_name>.json
+  Combined file: all-jobs-20260225_143000.json
+==========================================
+[SUCCESS] Export completed: /backup/ciscoaci-jobs/export-20260225_143000
+```
+
+#### Export Format
+
+Exported jobs are in the same format as input for create/update actions:
+
+```json
+[
+  {
+    "unique_id": "ciscoaci_load_job_1",
+    "type": "restapi",
+    "description": "Production load job",
+    "parameters": {
+      "ciscoapic_username": "admin",
+      "tenant_name": "production",
+      "ciscoapic_password": "",
+      "ciscoapic_api_url": "https://apic.example.com/api",
+      "ciscoapic_certificate": "ciscoaci.crt",
+      "ssl_truststore_file": "truststore.jks",
+      "password_ssl_truststore_file": ""
+    }
+  }
+]
+```
+
+**Note:** Exported files can be directly used with create/update actions after updating password fields.
+
+---
+
 ## Troubleshooting
 
 ### Common Issues and Solutions
@@ -633,6 +880,15 @@ chmod +x scripts/manage-ciscoaci-jobs.sh
 - For stop/delete/status: Ensure file contains job IDs (TXT or JSON format)
 - Check file exists and is readable
 
+#### 9. "Job schema validation failed"
+
+**Solution:**
+- Check that all required fields are present: `unique_id`, `type`, `parameters`
+- Verify `type` is either `restapi` or `websocket`
+- Ensure `unique_id` is not empty or null
+- Verify `parameters` is a valid JSON object
+- Review error messages for specific job index and field
+
 ---
 
 ### Generated Log Files
@@ -644,5 +900,7 @@ The script generates timestamped log files for each operation:
 - `ciscoaci-job-stop-YYYYMMDD_HHMMSS.log` - Stop operation logs
 - `ciscoaci-job-delete-YYYYMMDD_HHMMSS.log` - Delete operation logs
 - `ciscoaci-job-status-YYYYMMDD_HHMMSS.log` - Status query logs
+
+**Note:** Export action creates JSON output files instead of log files.
 
 ---

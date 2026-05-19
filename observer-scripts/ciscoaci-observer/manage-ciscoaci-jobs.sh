@@ -1,4 +1,5 @@
 #!/bin/bash
+#set -x
 
 ################################################################################
 # Script: manage-ciscoaci-jobs.sh
@@ -47,6 +48,18 @@ ASYNC_COUNT=0
 NOT_FOUND_COUNT=0
 RUNNING_COUNT=0
 SKIPPED_COUNT=0
+EXPORT_FILE=""
+EXPORT_SUBDIR=""
+FETCH_FAILED=0
+INCLUDE_SECRETS=false
+APIC_PASSWORD=""
+TRUSTSTORE_PASSWORD=""
+ENCRYPTED_APIC_PASSWORD=""
+ENCRYPTED_TRUSTSTORE_PASSWORD=""
+TOPOLOGY_POD=""
+DIR_INPUT=false
+DIR_INPUT_PATH=""
+DIR_MERGED_TMPFILE=""
 
 ################################################################################
 # Logging Functions
@@ -76,14 +89,39 @@ log_step() {
 # Description: Show usage information
 ################################################################################
 display_usage() {
-    echo "Usage: $0 <action> <input-file> [log-file-path]"
+    echo "Usage: $0 <action> [input-file] [log-file-path] [options]"
     echo ""
-    echo "Actions: create, update, stop, delete, status (case-insensitive)"
+    echo "Actions: create, update, stop, delete, status, export (case-insensitive)"
     echo ""
     echo "Parameters:"
     echo "  action         - Action to perform (required)"
-    echo "  input-file     - JSON or TXT file with job data (required)"
+    echo "  input          - JSON file, TXT file, or directory with job data"
+    echo "                   (required for all actions except export)"
+    echo "                   For create/update: pass a .json file OR a directory"
+    echo "                   containing .json files (all are merged and processed)"
+    echo "                   For stop/delete/status: pass a .json or .txt file"
     echo "  log-file-path  - Optional directory path for log file (default: current directory)"
+    echo ""
+    echo "Options (create/update):"
+    echo "  --apic-password <password>       Cleartext APIC password to encrypt and inject"
+    echo "                                   into ciscoapic_password for all jobs"
+    echo "  --truststore-password <password>  Cleartext SSL truststore password to encrypt"
+    echo "                                   and inject into password_ssl_truststore_file"
+    echo ""
+    echo "Options (export):"
+    echo "  --include-secrets                Include encrypted password fields in export"
+    echo "                                   (ciscoapic_password, password_ssl_truststore_file)"
+    echo ""
+    echo "Examples:"
+    echo "  $0 create cisco-jobs.json"
+    echo "  $0 create /path/to/job-dir/"
+    echo "  $0 create cisco-jobs.json --apic-password 'MyPass' --truststore-password 'TrustPass'"
+    echo "  $0 update /path/to/job-dir/ --apic-password 'MyPass'"
+    echo "  $0 stop jobs.txt"
+    echo "  $0 export"
+    echo "  $0 export --include-secrets"
+    echo "  $0 export /path/to/output/ --include-secrets"
+    echo "    (with dir: writes per-job <name>.json files + combined all-jobs.json)"
     echo ""
 }
 
@@ -98,16 +136,115 @@ validate_action() {
     local action_lower=$(echo "$input_action" | tr '[:upper:]' '[:lower:]')
     
     case "$action_lower" in
-        create|update|stop|delete|status)
+        create|update|stop|delete|status|export)
             ACTION="$action_lower"
             ;;
         *)
             log_error "Invalid action: $input_action"
-            log_error "Valid actions: create, update, stop, delete, status"
+            log_error "Valid actions: create, update, stop, delete, status, export"
             display_usage
             exit 1
             ;;
     esac
+}
+
+################################################################################
+# Function: resolve_directory_input
+# Description: If the input path is a directory, find all .json files inside,
+#              validate each one, and merge them into a single temporary JSON
+#              array file.  Sets JOBS_FILE to the merged temp file and marks
+#              DIR_INPUT=true so the temp file is cleaned up on exit.
+#              Only applicable for create/update actions.
+################################################################################
+resolve_directory_input() {
+    local input_path="$1"
+
+    # Not a directory -- nothing to do
+    if [ ! -d "$input_path" ]; then
+        return 0
+    fi
+
+    # Only create/update support directory input
+    if [ "$ACTION" != "create" ] && [ "$ACTION" != "update" ]; then
+        log_error "Directory input is only supported for create/update actions"
+        log_error "Provided: $input_path"
+        exit 1
+    fi
+
+    DIR_INPUT=true
+    DIR_INPUT_PATH="$input_path"
+
+    log_info "Directory input detected: $input_path"
+
+    # Collect .json files (non-recursive, sorted for deterministic order)
+    local json_files=()
+    while IFS= read -r -d '' f; do
+        json_files+=("$f")
+    done < <(find "$input_path" -maxdepth 1 -name '*.json' -type f -print0 | sort -z)
+
+    if [ ${#json_files[@]} -eq 0 ]; then
+        log_error "No .json files found in directory: $input_path"
+        exit 1
+    fi
+
+    log_info "Found ${#json_files[@]} .json file(s) in directory"
+
+    # Validate each file and merge into a single JSON array
+    DIR_MERGED_TMPFILE=$(mktemp --suffix=.json)
+    echo '[]' > "$DIR_MERGED_TMPFILE"
+
+    local file_count=0
+    for json_file in "${json_files[@]}"; do
+        local basename_f
+        basename_f=$(basename "$json_file")
+
+        # Validate JSON syntax
+        if ! jq empty "$json_file" 2>/dev/null; then
+            log_error "Invalid JSON in file: $basename_f -- skipping"
+            continue
+        fi
+
+        # Must be an array
+        if ! jq -e 'type == "array"' "$json_file" >/dev/null 2>&1; then
+            log_error "File is not a JSON array: $basename_f -- skipping"
+            continue
+        fi
+
+        local job_count
+        job_count=$(jq 'length' "$json_file")
+        log_step "  $basename_f ($job_count job(s))"
+
+        # Merge into accumulator
+        DIR_MERGED_TMPFILE_NEW=$(mktemp --suffix=.json)
+        jq -s '.[0] + .[1]' "$DIR_MERGED_TMPFILE" "$json_file" > "$DIR_MERGED_TMPFILE_NEW"
+        mv "$DIR_MERGED_TMPFILE_NEW" "$DIR_MERGED_TMPFILE"
+
+        file_count=$((file_count + 1))
+    done
+
+    if [ $file_count -eq 0 ]; then
+        log_error "No valid .json files found in directory: $input_path"
+        rm -f "$DIR_MERGED_TMPFILE"
+        exit 1
+    fi
+
+    local total_merged
+    total_merged=$(jq 'length' "$DIR_MERGED_TMPFILE")
+    log_success "Merged $total_merged job(s) from $file_count file(s)"
+
+    # Point JOBS_FILE to the merged temp file
+    JOBS_FILE="$DIR_MERGED_TMPFILE"
+}
+
+################################################################################
+# Function: cleanup_dir_input
+# Description: Remove the temporary merged JSON file created by
+#              resolve_directory_input, if applicable.
+################################################################################
+cleanup_dir_input() {
+    if [ "$DIR_INPUT" = true ] && [ -n "$DIR_MERGED_TMPFILE" ] && [ -f "$DIR_MERGED_TMPFILE" ]; then
+        rm -f "$DIR_MERGED_TMPFILE"
+    fi
 }
 
 ################################################################################
@@ -144,7 +281,7 @@ validate_input_file() {
             fi
             ;;
             
-        stop|delete|status)
+        stop|delete|status|export)
             # Can be JSON or TXT
             if [ "$file_ext" = "json" ]; then
                 # Validate JSON syntax
@@ -259,33 +396,52 @@ get_credentials() {
 ################################################################################
 discover_observer_route() {
     log_info "Discovering Cisco ACI observer route..."
-    
-    # Try to find the ciscoaci route
-    ROUTE_INFO=$(oc get route 2>/dev/null | grep ciscoaci | head -n 1)
-    
-    if [ -z "$ROUTE_INFO" ]; then
-        log_error "Cisco ACI observer route not found"
-        log_error "Please ensure observer routes are enabled. Check documentation for steps"
-        exit 1
-    fi
-    
-    # Extract host and path from route
-    OBSERVER_HOST=$(echo "$ROUTE_INFO" | awk '{print $2}')
-    OBSERVER_PATH=$(oc get route -o json 2>/dev/null | jq -r '.items[] | select(.metadata.name | contains("ciscoaci")) | .spec.path // ""' | head -n 1)
-    
+
+    # Try OpenShift route first, fall back to ingress (Linux VM environments)
+    OBSERVER_HOST=$(
+        oc get route -n "$NAMESPACE" -o json 2>/dev/null \
+            | jq -r '.items[] | select(.metadata.name | contains("ciscoaci")) | .spec.host // ""' \
+            | head -n 1
+    )
+
     if [ -z "$OBSERVER_HOST" ]; then
-        log_error "Failed to extract observer host from route"
+        log_info "No OpenShift route found for ciscoaci observer, trying ingress..."
+        OBSERVER_HOST=$(
+            oc get ingress aiops-topology-ciscoaci-observer-9112 \
+                -n "$NAMESPACE" \
+                -o jsonpath='{.spec.rules[0].host}' 2>/dev/null
+        )
+    fi
+
+    if [ -z "$OBSERVER_HOST" ]; then
+        log_error "Cisco ACI observer route/ingress not found"
+        log_error "Please ensure observer routes or ingresses are enabled"
         exit 1
     fi
-    
+
+    # Extract path - check route first, then ingress
+    OBSERVER_PATH=$(
+        oc get route -n "$NAMESPACE" -o json 2>/dev/null \
+            | jq -r '.items[] | select(.metadata.name | contains("ciscoaci")) | .spec.path // ""' \
+            | head -n 1
+    )
+
+    if [ -z "$OBSERVER_PATH" ]; then
+        OBSERVER_PATH=$(
+            oc get ingress aiops-topology-ciscoaci-observer-9112 \
+                -n "$NAMESPACE" \
+                -o jsonpath='{.spec.rules[0].http.paths[0].path}' 2>/dev/null
+        )
+    fi
+
     # Construct base URL
-    if [ -n "$OBSERVER_PATH" ]; then
+    if [ -n "$OBSERVER_PATH" ] && [ "$OBSERVER_PATH" != "/" ]; then
         OBSERVER_BASE_URL="https://${OBSERVER_HOST}${OBSERVER_PATH}"
     else
         OBSERVER_BASE_URL="https://${OBSERVER_HOST}"
     fi
-    
-    log_success "Observer route discovered"
+
+    log_success "Observer endpoint discovered: $OBSERVER_BASE_URL"
 }
 
 ################################################################################
@@ -295,27 +451,32 @@ discover_observer_route() {
 discover_topology_route() {
     log_info "Discovering topology route..."
     
-    # Try to find the topology route
-    ROUTE_INFO=$(oc get route 2>/dev/null | grep topology-topology | head -n 1)
-    
-    if [ -z "$ROUTE_INFO" ]; then
-        log_error "Topology route not found"
-        log_error "Please ensure topology routes are enabled"
-        exit 1
-    fi
-    
-    # Extract host from route
-    TOPOLOGY_HOST=$(echo "$ROUTE_INFO" | awk '{print $2}')
-    
+    # Try OpenShift route first, fall back to ingress (Linux VM environments)
+    TOPOLOGY_HOST=$(
+        oc get route -n "$NAMESPACE" -o json 2>/dev/null \
+            | jq -r '.items[] | select(.metadata.name | contains("topology-topology")) | .spec.host // ""' \
+            | head -n 1
+    )
+
     if [ -z "$TOPOLOGY_HOST" ]; then
-        log_error "Failed to extract topology host from route"
+        log_info "No OpenShift route found for topology, trying ingress..."
+        TOPOLOGY_HOST=$(
+            oc get ingress aiops-topology-topology-8080 \
+                -n "$NAMESPACE" \
+                -o jsonpath='{.spec.rules[0].host}' 2>/dev/null
+        )
+    fi
+
+    if [ -z "$TOPOLOGY_HOST" ]; then
+        log_error "Topology route/ingress not found"
+        log_error "Please ensure topology routes or ingresses are enabled"
         exit 1
     fi
-    
+
     # Construct base URL
     TOPOLOGY_BASE_URL="https://${TOPOLOGY_HOST}/1.0/topology"
-    
-    log_success "Topology route discovered"
+
+    log_success "Topology endpoint discovered: $TOPOLOGY_BASE_URL"
 }
 
 ################################################################################
@@ -377,6 +538,129 @@ parse_job_list() {
 }
 
 ################################################################################
+# Password Encryption Functions
+################################################################################
+
+################################################################################
+# Function: discover_topology_pod
+# Description: Find a running topology-topology pod for password encryption
+################################################################################
+discover_topology_pod() {
+    log_info "Discovering topology-topology pod for password encryption..."
+
+    TOPOLOGY_POD=$(oc get pods -n "$NAMESPACE" --no-headers 2>/dev/null \
+        | grep 'topology-topology' \
+        | grep 'Running' \
+        | head -n 1 \
+        | awk '{print $1}')
+
+    if [ -z "$TOPOLOGY_POD" ]; then
+        log_error "No running topology-topology pod found in namespace: $NAMESPACE"
+        log_error "Password encryption requires a running topology-topology pod"
+        exit 1
+    fi
+
+    log_success "Using topology pod: $TOPOLOGY_POD"
+}
+
+################################################################################
+# Function: encrypt_password_in_pod
+# Description: Encrypt a cleartext password using the topology pod JAR utility.
+#              Uses 'oc exec' to run the encrypt_password command inside the pod.
+#              The Java process emits ERROR lines to stdout (Cassandra SSL
+#              warnings) which are filtered out; only the encrypted string is
+#              returned.
+# Arguments: $1 - cleartext password
+# Returns:   Encrypted password string via stdout
+################################################################################
+encrypt_password_in_pod() {
+    local cleartext="$1"
+
+    if [ -z "$cleartext" ]; then
+        log_error "Cannot encrypt empty password"
+        return 1
+    fi
+
+    local encrypted
+    encrypted=$(oc exec "$TOPOLOGY_POD" -n "$NAMESPACE" -- \
+        java -jar /opt/ibm/topology-service/topology-service.jar \
+        encrypt_password --password "$cleartext" 2>/dev/null \
+        | grep -v '^ERROR' \
+        | tail -1 \
+        | tr -d '\r\n')
+
+    if [ -z "$encrypted" ]; then
+        log_error "Password encryption returned empty result"
+        log_error "Verify the topology pod is healthy: $TOPOLOGY_POD"
+        return 1
+    fi
+
+    echo "$encrypted"
+}
+
+################################################################################
+# Function: prepare_encrypted_passwords
+# Description: Encrypt APIC and/or truststore passwords if provided via flags.
+#              Discovers a topology pod, runs encryption, and stores results in
+#              ENCRYPTED_APIC_PASSWORD / ENCRYPTED_TRUSTSTORE_PASSWORD globals.
+################################################################################
+prepare_encrypted_passwords() {
+    if [ -z "$APIC_PASSWORD" ] && [ -z "$TRUSTSTORE_PASSWORD" ]; then
+        return 0
+    fi
+
+    # Discover topology pod for encryption
+    discover_topology_pod
+
+    # Encrypt APIC password if provided
+    if [ -n "$APIC_PASSWORD" ]; then
+        log_info "Encrypting APIC password via pod: $TOPOLOGY_POD ..."
+        ENCRYPTED_APIC_PASSWORD=$(encrypt_password_in_pod "$APIC_PASSWORD")
+        if [ $? -ne 0 ] || [ -z "$ENCRYPTED_APIC_PASSWORD" ]; then
+            log_error "Failed to encrypt APIC password"
+            exit 1
+        fi
+        log_success "APIC password encrypted successfully"
+    fi
+
+    # Encrypt truststore password if provided
+    if [ -n "$TRUSTSTORE_PASSWORD" ]; then
+        log_info "Encrypting SSL truststore password via pod: $TOPOLOGY_POD ..."
+        ENCRYPTED_TRUSTSTORE_PASSWORD=$(encrypt_password_in_pod "$TRUSTSTORE_PASSWORD")
+        if [ $? -ne 0 ] || [ -z "$ENCRYPTED_TRUSTSTORE_PASSWORD" ]; then
+            log_error "Failed to encrypt truststore password"
+            exit 1
+        fi
+        log_success "Truststore password encrypted successfully"
+    fi
+}
+
+################################################################################
+# Function: inject_encrypted_passwords
+# Description: Inject encrypted passwords into a single job's JSON data.
+#              Replaces parameters.ciscoapic_password and/or
+#              parameters.password_ssl_truststore_file with the pre-encrypted
+#              values when the corresponding flags were provided.
+# Arguments:   $1 - compact JSON string for one job
+# Returns:     Modified JSON string via stdout
+################################################################################
+inject_encrypted_passwords() {
+    local job_data="$1"
+
+    if [ -n "$ENCRYPTED_APIC_PASSWORD" ]; then
+        job_data=$(echo "$job_data" | jq -c --arg pw "$ENCRYPTED_APIC_PASSWORD" \
+            '.parameters.ciscoapic_password = $pw')
+    fi
+
+    if [ -n "$ENCRYPTED_TRUSTSTORE_PASSWORD" ]; then
+        job_data=$(echo "$job_data" | jq -c --arg pw "$ENCRYPTED_TRUSTSTORE_PASSWORD" \
+            '.parameters.password_ssl_truststore_file = $pw')
+    fi
+
+    echo "$job_data"
+}
+
+################################################################################
 # CREATE/UPDATE ACTION FUNCTIONS
 ################################################################################
 
@@ -424,6 +708,9 @@ create_jobs() {
         JOB_TYPE=$(echo "$JOB_DATA" | jq -r '.type')
         
         log_step "[$((JOB_INDEX + 1))/$TOTAL_JOBS] Creating job: $JOB_ID (type: $JOB_TYPE)"
+        
+        # Inject encrypted passwords if provided via --apic-password / --truststore-password
+        JOB_DATA=$(inject_encrypted_passwords "$JOB_DATA")
         
         # Determine endpoint based on job type
         if [ "$JOB_TYPE" = "restapi" ]; then
@@ -584,6 +871,9 @@ update_jobs() {
         JOB_TYPE=$(echo "$JOB_DATA" | jq -r '.type')
         
         log_step "[$((JOB_INDEX + 1))/$TOTAL_JOBS] Updating job: $JOB_ID (type: $JOB_TYPE)"
+        
+        # Inject encrypted passwords if provided via --apic-password / --truststore-password
+        JOB_DATA=$(inject_encrypted_passwords "$JOB_DATA")
         
         # Validate job exists and is not running
         # Query topology to check if job exists
@@ -1308,6 +1598,201 @@ query_job_status() {
 }
 
 ################################################################################
+# EXPORT ACTION FUNCTIONS
+################################################################################
+
+################################################################################
+# Function: export_jobs
+# Description: Export full job definitions from topology to a JSON file
+################################################################################
+export_jobs() {
+    log_info "Starting global job export process..."
+
+    if [ "$INCLUDE_SECRETS" = true ]; then
+        log_warning "Including encrypted password fields in export (--include-secrets)"
+    fi
+
+    # Step 1: Query all ASM_OBSERVER_JOB IDs from mgmt_artifacts
+    QUERY_ENDPOINT="${TOPOLOGY_BASE_URL}/mgmt_artifacts"
+    QUERY_PARAMS="?_filter=entityTypes%3DASM_OBSERVER_JOB&_field=_id&_include_count=false&_limit=500"
+
+    # Create temporary files
+    RESPONSE_FILE=$(mktemp)
+    ERROR_FILE=$(mktemp)
+
+    HTTP_CODE=$(curl -ksS -w "%{http_code}" \
+        -X GET \
+        "${QUERY_ENDPOINT}${QUERY_PARAMS}" \
+        -H "X-TenantID: ${TENANT_ID}" \
+        -u "${API_USERNAME}:${API_PASSWORD}" \
+        -o "$RESPONSE_FILE" \
+        2>"$ERROR_FILE")
+
+    CURL_EXIT_CODE=$?
+
+    if [ $CURL_EXIT_CODE -ne 0 ]; then
+        log_error "Failed to query jobs for export"
+        log_error "Curl error: $(cat "$ERROR_FILE")"
+        rm -f "$RESPONSE_FILE" "$ERROR_FILE"
+        exit 1
+    fi
+
+    if [ "$HTTP_CODE" != "200" ]; then
+        log_error "Query failed with HTTP code: $HTTP_CODE"
+        log_error "Response: $(cat "$RESPONSE_FILE")"
+        rm -f "$RESPONSE_FILE" "$ERROR_FILE"
+        exit 1
+    fi
+
+    # Extract the list of IDs
+    ITEMS_COUNT=$(jq -r '._items | length' "$RESPONSE_FILE" 2>/dev/null)
+    IDS_ARRAY=($(jq -r '._items[]._id' "$RESPONSE_FILE" 2>/dev/null))
+
+    rm -f "$RESPONSE_FILE" "$ERROR_FILE"
+
+    if [ -z "$ITEMS_COUNT" ] || [ "$ITEMS_COUNT" = "null" ] || [ "$ITEMS_COUNT" -eq 0 ]; then
+        log_warning "No jobs found in topology"
+        EXPORT_FILE="${LOG_DIR}/exported-ciscoaci-jobs-$(date +"%Y%m%d_%H%M%S").json"
+        echo "[]" > "$EXPORT_FILE"
+        SUCCESS_COUNT=0
+        TOTAL_JOBS=0
+        return
+    fi
+
+    log_info "Found $ITEMS_COUNT job(s) - fetching full definitions..."
+
+    # Determine output mode:
+    # - LOG_DIR="." (default) -> single combined file
+    # - LOG_DIR explicitly set -> per-job files in a timestamped subdirectory
+    SPLIT_MODE=false
+    EXPORT_SUBDIR=""
+    if [ "$LOG_DIR" != "." ]; then
+        SPLIT_MODE=true
+        EXPORT_SUBDIR="${LOG_DIR}/export-$(date +"%Y%m%d_%H%M%S")"
+        mkdir -p "$EXPORT_SUBDIR"
+        log_info "Per-job export mode: writing individual files to $EXPORT_SUBDIR"
+    fi
+
+    # Step 2: Fetch each job individually and reshape to import format
+    FULL_JOBS="[]"
+    FETCH_SUCCESS=0
+    FETCH_FAILED=0
+
+    for MGMT_ID in "${IDS_ARRAY[@]}"; do
+        ITEM_FILE=$(mktemp)
+        ITEM_ERR=$(mktemp)
+
+        ITEM_CODE=$(curl -ksS -w "%{http_code}" \
+            -X GET \
+            "${TOPOLOGY_BASE_URL}/mgmt_artifacts/${MGMT_ID}" \
+            -H "X-TenantID: ${TENANT_ID}" \
+            -u "${API_USERNAME}:${API_PASSWORD}" \
+            -o "$ITEM_FILE" \
+            2>"$ITEM_ERR")
+
+        if [ "$ITEM_CODE" = "200" ]; then
+            # Reshape to import schema:
+            #   unique_id   <- .name
+            #   type        <- .path stripped of "/jobs/" prefix (restapi|websocket)
+            #   description <- .description (default "")
+            #   parameters  <- .parameters
+            #
+            # Encrypted blobs ({hiddenString, encrypted:true}) are stored by the
+            # topology service for credential fields (ciscoapic_password,
+            # password_ssl_truststore_file).  These cannot be re-posted to the
+            # observer as-is - it expects plaintext strings.
+            #
+            # Default:            encrypted fields are blanked to ""
+            # --include-secrets:  the encrypted hiddenString value is preserved
+            RESHAPED=$(INCLUDE_SECRETS="$INCLUDE_SECRETS" jq '{
+                unique_id: .name,
+                type: (.path // "" | ltrimstr("/jobs/")),
+                description: (.description // ""),
+                parameters: (
+                    (.parameters // {}) |
+                    with_entries(
+                        if (.value | type) == "object" and .value.encrypted == true
+                        then (
+                            if env.INCLUDE_SECRETS == "true"
+                            then .value = .value.hiddenString
+                            else .value = ""
+                            end
+                        )
+                        else .
+                        end
+                    )
+                )
+            }' "$ITEM_FILE" 2>/dev/null)
+
+            JOB_NAME=$(echo "$RESHAPED" | jq -r '.unique_id')
+
+            if [ "$SPLIT_MODE" = true ] && [ -n "$JOB_NAME" ] && [ "$JOB_NAME" != "null" ]; then
+                # Write individual file as a single-element array (required by create/update)
+                echo "[$RESHAPED]" | jq '.' > "${EXPORT_SUBDIR}/${JOB_NAME}.json"
+                log_step "Exported: ${JOB_NAME}.json"
+            fi
+
+            FULL_JOBS=$(echo "$FULL_JOBS" | jq --argjson obj "$RESHAPED" '. + [$obj]')
+            FETCH_SUCCESS=$((FETCH_SUCCESS + 1))
+        else
+            log_warning "Failed to fetch job $MGMT_ID (HTTP $ITEM_CODE)"
+            FETCH_FAILED=$((FETCH_FAILED + 1))
+        fi
+
+        rm -f "$ITEM_FILE" "$ITEM_ERR"
+    done
+
+    TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
+
+    if [ "$SPLIT_MODE" = true ]; then
+        # Also write the combined file into the subdirectory
+        EXPORT_FILE="${EXPORT_SUBDIR}/all-jobs-${TIMESTAMP}.json"
+    else
+        EXPORT_FILE="${LOG_DIR}/exported-ciscoaci-jobs-${TIMESTAMP}.json"
+    fi
+
+    echo "$FULL_JOBS" | jq '.' > "$EXPORT_FILE"
+
+    SUCCESS_COUNT=$FETCH_SUCCESS
+    TOTAL_JOBS=$ITEMS_COUNT
+
+    if [ $FETCH_FAILED -gt 0 ]; then
+        log_warning "$FETCH_FAILED job(s) could not be fetched individually"
+    fi
+
+    if [ "$SPLIT_MODE" = true ]; then
+        log_success "Exported $FETCH_SUCCESS job(s) to: $EXPORT_SUBDIR"
+    else
+        log_success "Exported $FETCH_SUCCESS job(s) to: $EXPORT_FILE"
+    fi
+}
+
+################################################################################
+# Function: generate_summary_export
+# Description: Generate summary for export action
+################################################################################
+generate_summary_export() {
+    echo ""
+    log_info "=========================================="
+    log_info "Job Export Summary"
+    log_info "=========================================="
+    log_info "Total Jobs Found: $TOTAL_JOBS"
+    log_info "Exported: $SUCCESS_COUNT"
+    if [ -n "$EXPORT_SUBDIR" ]; then
+        log_info "Output Directory: $EXPORT_SUBDIR"
+        log_info "  Per-job files: <job_name>.json"
+        log_info "  Combined file: $(basename "$EXPORT_FILE")"
+    else
+        log_info "Output File: $EXPORT_FILE"
+    fi
+    log_info "=========================================="
+
+    if [ "$FETCH_FAILED" -gt 0 ]; then
+        log_warning "$FETCH_FAILED job(s) could not be fetched and were excluded"
+    fi
+}
+
+################################################################################
 # SUMMARY AND EXIT FUNCTIONS
 ################################################################################
 
@@ -1477,6 +1962,14 @@ determine_exit_code() {
             log_success "Status query completed"
             exit 0
             ;;
+        export)
+            if [ -n "$EXPORT_SUBDIR" ]; then
+                log_success "Export completed: $EXPORT_SUBDIR"
+            else
+                log_success "Export completed: $EXPORT_FILE"
+            fi
+            exit 0
+            ;;
     esac
 }
 
@@ -1494,29 +1987,106 @@ main() {
     log_info "Cisco ACI Observer Job Management Script"
     log_info "=========================================="
     echo ""
-    
+
+    # Parse named flags and collect positional arguments
+    local positional_args=()
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            --apic-password)
+                if [ -z "${2:-}" ]; then
+                    log_error "--apic-password requires a value"
+                    display_usage
+                    exit 1
+                fi
+                APIC_PASSWORD="$2"
+                shift 2
+                ;;
+            --truststore-password)
+                if [ -z "${2:-}" ]; then
+                    log_error "--truststore-password requires a value"
+                    display_usage
+                    exit 1
+                fi
+                TRUSTSTORE_PASSWORD="$2"
+                shift 2
+                ;;
+            --include-secrets)
+                INCLUDE_SECRETS=true
+                shift
+                ;;
+            -h|--help)
+                display_usage
+                exit 0
+                ;;
+            *)
+                positional_args+=("$1")
+                shift
+                ;;
+        esac
+    done
+    set -- "${positional_args[@]}"
+
     # Step 1: Validate parameters
-    if [ $# -lt 2 ]; then
+    if [ $# -lt 1 ]; then
         log_error "Insufficient parameters"
         display_usage
         exit 1
     fi
-    
+
     # Step 2: Validate action
     validate_action "$1"
     log_info "Action: $ACTION"
-    
-    # Step 3: Set input file
-    JOBS_FILE="$2"
-    
-    # Step 4: Validate log path (optional)
-    validate_log_path "${3:-}"
-    
+
+    # Step 2.5: Validate flag usage for the chosen action
+    if [ -n "$APIC_PASSWORD" ] || [ -n "$TRUSTSTORE_PASSWORD" ]; then
+        if [ "$ACTION" != "create" ] && [ "$ACTION" != "update" ]; then
+            log_error "--apic-password / --truststore-password are only valid for create/update actions"
+            display_usage
+            exit 1
+        fi
+    fi
+    if [ "$INCLUDE_SECRETS" = true ] && [ "$ACTION" != "export" ]; then
+        log_error "--include-secrets is only valid for the export action"
+        display_usage
+        exit 1
+    fi
+
+    # Step 3: Set input file (not required for export)
+    if [ "$ACTION" = "export" ]; then
+        JOBS_FILE=""
+        # For export, optional output path is $2 - create it if it doesn't exist
+        if [ -n "${2:-}" ]; then
+            mkdir -p "$2" 2>/dev/null || {
+                log_error "Cannot create output directory: $2"
+                exit 1
+            }
+            LOG_DIR="$2"
+            log_info "Output directory: $LOG_DIR"
+        else
+            LOG_DIR="."
+        fi
+    else
+        if [ $# -lt 2 ]; then
+            log_error "Insufficient parameters: input-file is required for $ACTION"
+            display_usage
+            exit 1
+        fi
+        JOBS_FILE="$2"
+        # Step 4: Validate log path (optional)
+        validate_log_path "${3:-}"
+    fi
     # Step 5: Check prerequisites
     check_prerequisites
+
+    # Step 5.5: Resolve directory input (create/update only)
+    if [ "$ACTION" != "export" ]; then
+        resolve_directory_input "$JOBS_FILE"
+    fi
     
-    # Step 6: Validate input file
-    validate_input_file
+    # Step 6: Validate input file (not applicable for export)
+    if [ "$ACTION" != "export" ]; then
+        validate_input_file
+    fi
     
     # Step 7: Discover routes based on action
     case "$ACTION" in
@@ -1528,13 +2098,18 @@ main() {
             discover_topology_route
             discover_observer_route
             ;;
-        delete|status)
+        delete|status|export)
             discover_topology_route
             ;;
     esac
     
     # Step 8: Get credentials
     get_credentials
+
+    # Step 8.5: Encrypt passwords if --apic-password / --truststore-password provided
+    if [ "$ACTION" = "create" ] || [ "$ACTION" = "update" ]; then
+        prepare_encrypted_passwords
+    fi
     
     # Step 9: Setup log file
     setup_log_file
@@ -1566,9 +2141,16 @@ main() {
         status)
             query_job_status
             ;;
+        export)
+            export_jobs
+            generate_summary_export
+            ;;
     esac
-    
-    # Step 12: Exit with appropriate code
+
+    # Step 12: Cleanup temporary files from directory input
+    cleanup_dir_input
+
+    # Step 13: Exit with appropriate code
     determine_exit_code
 }
 
