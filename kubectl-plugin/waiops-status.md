@@ -202,14 +202,18 @@ Subscriptions from cp4aiops namespace:
 
 NAME                 PACKAGE              SOURCE                  CHANNEL
 aimanager-operator   aimanager-operator   ibm-cp-waiops-catalog   v5.1
+aimanager-operator   aimanager-operator   ibm-cp-waiops-catalog   v5.1
 
 NAME                 PACKAGE              SOURCE                  CHANNEL
+aiopsedge-operator   aiopsedge-operator   ibm-cp-waiops-catalog   v5.1
 aiopsedge-operator   aiopsedge-operator   ibm-cp-waiops-catalog   v5.1
 
 NAME           PACKAGE        SOURCE                  CHANNEL
 asm-operator   asm-operator   ibm-cp-waiops-catalog   v5.1
+asm-operator   asm-operator   ibm-cp-waiops-catalog   v5.1
 
 NAME                     PACKAGE                  SOURCE                  CHANNEL
+ibm-aiops-orchestrator   ibm-aiops-orchestrator   ibm-cp-waiops-catalog   v5.1
 ibm-aiops-orchestrator   ibm-aiops-orchestrator   ibm-cp-waiops-catalog   v5.1
 
 NAME                      PACKAGE                   SOURCE                  CHANNEL
@@ -220,17 +224,22 @@ ibm-opencontent-flink   ibm-opencontent-flink   ibm-cp-waiops-catalog   v2.0
 
 NAME                         PACKAGE                      SOURCE                  CHANNEL
 ibm-secure-tunnel-operator   ibm-secure-tunnel-operator   ibm-cp-waiops-catalog   v5.1
+ibm-secure-tunnel-operator   ibm-secure-tunnel-operator   ibm-cp-waiops-catalog   v5.1
 
 NAME                           PACKAGE                        SOURCE                  CHANNEL
+ibm-watson-aiops-ui-operator   ibm-watson-aiops-ui-operator   ibm-cp-waiops-catalog   v5.1
 ibm-watson-aiops-ui-operator   ibm-watson-aiops-ui-operator   ibm-cp-waiops-catalog   v5.1
 
 NAME              PACKAGE           SOURCE                  CHANNEL
 ibm-aiops-ir-ai   ibm-aiops-ir-ai   ibm-cp-waiops-catalog   v5.1
+ibm-aiops-ir-ai   ibm-aiops-ir-ai   ibm-cp-waiops-catalog   v5.1
 
 NAME                PACKAGE             SOURCE                  CHANNEL
 ibm-aiops-ir-core   ibm-aiops-ir-core   ibm-cp-waiops-catalog   v5.1
+ibm-aiops-ir-core   ibm-aiops-ir-core   ibm-cp-waiops-catalog   v5.1
 
 NAME                     PACKAGE                  SOURCE                  CHANNEL
+ibm-aiops-ir-lifecycle   ibm-aiops-ir-lifecycle   ibm-cp-waiops-catalog   v5.1
 ibm-aiops-ir-lifecycle   ibm-aiops-ir-lifecycle   ibm-cp-waiops-catalog   v5.1
 
 NAME           PACKAGE        SOURCE                  CHANNEL

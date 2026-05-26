@@ -278,6 +278,7 @@ getKafkaStatus() {
 
 getElasticsearchStatus() {
     if [[ "${VERSION_AIOPSORCHESTRATOR}" != "4.8" && "${VERSION_AIOPSORCHESTRATOR}" != "4.9" && "${VERSION_AIOPSORCHESTRATOR}" != "4.10" && "${VERSION_AIOPSORCHESTRATOR}" != "4.11" && "${VERSION_AIOPSORCHESTRATOR}" != "4.12" && "${VERSION_AIOPSORCHESTRATOR}" != "4.13" && "${VERSION_AIOPSORCHESTRATOR}" != "5.1" && "${VERSION_AIOPSORCHESTRATOR}" != "0.1" ]]; then
+    if [[ "${VERSION_AIOPSORCHESTRATOR}" != "4.8" && "${VERSION_AIOPSORCHESTRATOR}" != "4.9" && "${VERSION_AIOPSORCHESTRATOR}" != "4.10" && "${VERSION_AIOPSORCHESTRATOR}" != "4.11" && "${VERSION_AIOPSORCHESTRATOR}" != "4.12" && "${VERSION_AIOPSORCHESTRATOR}" != "4.13" && "${VERSION_AIOPSORCHESTRATOR}" != "5.1" && "${VERSION_AIOPSORCHESTRATOR}" != "0.1" ]]; then
         # Elastic status
         INSTANCE_ELASTIC=$(oc get elasticsearches.elastic.automation.ibm.com iaf-system -o custom-columns='KIND:.kind,NAMESPACE:.metadata.namespace,NAME:.metadata.name,STATUS:.status.conditions[?(@.type=="Ready")].status')
         STATUS_ELASTIC=$(oc get elasticsearches.elastic.automation.ibm.com iaf-system -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}')
@@ -287,6 +288,7 @@ getElasticsearchStatus() {
         else
             printStatus "$STATUS_ELASTIC" "True" "$INSTANCE_ELASTIC"
         fi
+    elif [[ "${VERSION_AIOPSORCHESTRATOR}" != "4.10" && "${VERSION_AIOPSORCHESTRATOR}" != "4.11" && "${VERSION_AIOPSORCHESTRATOR}" != "4.12" && "${VERSION_AIOPSORCHESTRATOR}" != "4.13" && "${VERSION_AIOPSORCHESTRATOR}" != "5.1" && "${VERSION_AIOPSORCHESTRATOR}" != "0.1" ]]; then
     elif [[ "${VERSION_AIOPSORCHESTRATOR}" != "4.10" && "${VERSION_AIOPSORCHESTRATOR}" != "4.11" && "${VERSION_AIOPSORCHESTRATOR}" != "4.12" && "${VERSION_AIOPSORCHESTRATOR}" != "4.13" && "${VERSION_AIOPSORCHESTRATOR}" != "5.1" && "${VERSION_AIOPSORCHESTRATOR}" != "0.1" ]]; then
         INSTANCE_ELASTIC=$(oc get elasticsearchcluster.elasticsearch.opencontent.ibm.com aiops -o custom-columns='KIND:.kind,NAMESPACE:.metadata.namespace,NAME:.metadata.name,STATUS:.status.phase')
         STATUS_ELASTIC=$(oc get elasticsearchcluster.elasticsearch.opencontent.ibm.com aiops -o jsonpath='{.status.phase}')
@@ -835,6 +837,7 @@ fi
 if [[ "$1" == "version" ]]
 then
     echo "0.0.41"
+    echo "0.0.41"
     exit 0
 fi
 
@@ -1116,6 +1119,7 @@ then
     fi
 
     if [[ "${VERSION_AIOPSORCHESTRATOR}" == "4.10" || "${VERSION_AIOPSORCHESTRATOR}" == "4.11" || "${VERSION_AIOPSORCHESTRATOR}" == "4.12" || "${VERSION_AIOPSORCHESTRATOR}" == "4.13" || "${VERSION_AIOPSORCHESTRATOR}" == "5.1" || "${VERSION_AIOPSORCHESTRATOR}" == "0.1" ]]; then
+    if [[ "${VERSION_AIOPSORCHESTRATOR}" == "4.10" || "${VERSION_AIOPSORCHESTRATOR}" == "4.11" || "${VERSION_AIOPSORCHESTRATOR}" == "4.12" || "${VERSION_AIOPSORCHESTRATOR}" == "4.13" || "${VERSION_AIOPSORCHESTRATOR}" == "5.1" || "${VERSION_AIOPSORCHESTRATOR}" == "0.1" ]]; then
         getCSVStatus "$INSTALLATION_NAMESPACE" "ibm-opensearch-operator"
     elif [[ "${VERSION_AIOPSORCHESTRATOR}" == "4.8" || "${VERSION_AIOPSORCHESTRATOR}" == "4.9" ]]; then
         getCSVStatus "$INSTALLATION_NAMESPACE" "ibm-elasticsearch-operator"
@@ -1123,6 +1127,7 @@ then
         getCSVStatus "$INSTALLATION_NAMESPACE" "ibm-automation-elastic"
     fi
     
+    if [[ "${VERSION_AIOPSORCHESTRATOR}" != "4.7" && "${VERSION_AIOPSORCHESTRATOR}" != "4.8" && "${VERSION_AIOPSORCHESTRATOR}" != "4.9" && "${VERSION_AIOPSORCHESTRATOR}" != "4.10" && "${VERSION_AIOPSORCHESTRATOR}" != "4.11"  && "${VERSION_AIOPSORCHESTRATOR}" != "4.12" && "${VERSION_AIOPSORCHESTRATOR}" != "4.13" && "${VERSION_AIOPSORCHESTRATOR}" != "5.1" && "${VERSION_AIOPSORCHESTRATOR}" != "0.1" ]];
     if [[ "${VERSION_AIOPSORCHESTRATOR}" != "4.7" && "${VERSION_AIOPSORCHESTRATOR}" != "4.8" && "${VERSION_AIOPSORCHESTRATOR}" != "4.9" && "${VERSION_AIOPSORCHESTRATOR}" != "4.10" && "${VERSION_AIOPSORCHESTRATOR}" != "4.11"  && "${VERSION_AIOPSORCHESTRATOR}" != "4.12" && "${VERSION_AIOPSORCHESTRATOR}" != "4.13" && "${VERSION_AIOPSORCHESTRATOR}" != "5.1" && "${VERSION_AIOPSORCHESTRATOR}" != "0.1" ]];
     then
         getCSVStatus "$INSTALLATION_NAMESPACE" "ibm-automation-flink"
@@ -1269,6 +1274,7 @@ then
         fi
 
         if [[ "${VERSION_AIOPSORCHESTRATOR}" == "4.10" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "4.11" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "4.12" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "4.13" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "5.1" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "0.1" ]] ; then
+        if [[ "${VERSION_AIOPSORCHESTRATOR}" == "4.10" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "4.11" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "4.12" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "4.13" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "5.1" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "0.1" ]] ; then
             getSubscriptionStatusGrep "ibm-opensearch-operator" "$INSTALLATION_NAMESPACE"
         elif [[ "${VERSION_AIOPSORCHESTRATOR}" == "4.8" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "4.9" ]]; then
             getSubscriptionStatusGrep "ibm-elasticsearch-operator" "$INSTALLATION_NAMESPACE"
@@ -1277,6 +1283,7 @@ then
         fi
         
         if [[ "${VERSION_AIOPSORCHESTRATOR}" == "4.9" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "4.10" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "4.11" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "4.12" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "4.13" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "5.1" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "0.1" ]];
+        if [[ "${VERSION_AIOPSORCHESTRATOR}" == "4.9" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "4.10" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "4.11" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "4.12" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "4.13" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "5.1" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "0.1" ]];
         then
             getSubscriptionStatusGrep "ibm-opencontent-flink" "$INSTALLATION_NAMESPACE"
         else
@@ -1284,6 +1291,7 @@ then
         fi
     fi
 
+    if [[ "$VERSION_AIOPSORCHESTRATOR" != "4.6" && "$VERSION_AIOPSORCHESTRATOR" != "4.7"  && "$VERSION_AIOPSORCHESTRATOR" != "4.8" && "$VERSION_AIOPSORCHESTRATOR" != "4.9" && "$VERSION_AIOPSORCHESTRATOR" != "4.10" && "$VERSION_AIOPSORCHESTRATOR" != "4.11" && "$VERSION_AIOPSORCHESTRATOR" != "4.12" && "$VERSION_AIOPSORCHESTRATOR" != "4.13" && "${VERSION_AIOPSORCHESTRATOR}" != "5.1" ]] && "$VERSION_AIOPSORCHESTRATOR" != "0.1" ]]; then
     if [[ "$VERSION_AIOPSORCHESTRATOR" != "4.6" && "$VERSION_AIOPSORCHESTRATOR" != "4.7"  && "$VERSION_AIOPSORCHESTRATOR" != "4.8" && "$VERSION_AIOPSORCHESTRATOR" != "4.9" && "$VERSION_AIOPSORCHESTRATOR" != "4.10" && "$VERSION_AIOPSORCHESTRATOR" != "4.11" && "$VERSION_AIOPSORCHESTRATOR" != "4.12" && "$VERSION_AIOPSORCHESTRATOR" != "4.13" && "${VERSION_AIOPSORCHESTRATOR}" != "5.1" ]] && "$VERSION_AIOPSORCHESTRATOR" != "0.1" ]]; then
         getSubscriptionStatus "ibm-management-kong" "$INSTALLATION_NAMESPACE"
     fi
@@ -1298,6 +1306,7 @@ then
     fi
     getSubscriptionStatus "ibm-watson-aiops-ui-operator" "$INSTALLATION_NAMESPACE"
 
+    if [[ "${VERSION_AIOPSORCHESTRATOR}" == "4.7" || "${VERSION_AIOPSORCHESTRATOR}" == "4.8" || "${VERSION_AIOPSORCHESTRATOR}" == "4.9" || "${VERSION_AIOPSORCHESTRATOR}" == "4.10" || "${VERSION_AIOPSORCHESTRATOR}" == "4.11" || "${VERSION_AIOPSORCHESTRATOR}" == "4.12" || "${VERSION_AIOPSORCHESTRATOR}" == "4.13" || "${VERSION_AIOPSORCHESTRATOR}" == "5.1" || "${VERSION_AIOPSORCHESTRATOR}" == "0.1" ]]; then
     if [[ "${VERSION_AIOPSORCHESTRATOR}" == "4.7" || "${VERSION_AIOPSORCHESTRATOR}" == "4.8" || "${VERSION_AIOPSORCHESTRATOR}" == "4.9" || "${VERSION_AIOPSORCHESTRATOR}" == "4.10" || "${VERSION_AIOPSORCHESTRATOR}" == "4.11" || "${VERSION_AIOPSORCHESTRATOR}" == "4.12" || "${VERSION_AIOPSORCHESTRATOR}" == "4.13" || "${VERSION_AIOPSORCHESTRATOR}" == "5.1" || "${VERSION_AIOPSORCHESTRATOR}" == "0.1" ]]; then
         getSubscriptionStatus "ibm-aiops-ir-ai" "$INSTALLATION_NAMESPACE"
         getSubscriptionStatus "ibm-aiops-ir-core" "$INSTALLATION_NAMESPACE"
@@ -1425,6 +1434,7 @@ then
             fi
 
             if [[ "${VERSION_AIOPSORCHESTRATOR}" == "4.7" || "${VERSION_AIOPSORCHESTRATOR}" == "4.8" || "${VERSION_AIOPSORCHESTRATOR}" == "4.9" || "${VERSION_AIOPSORCHESTRATOR}" == "4.10" || "${VERSION_AIOPSORCHESTRATOR}" == "4.11" || "${VERSION_AIOPSORCHESTRATOR}" == "4.12" || "${VERSION_AIOPSORCHESTRATOR}" == "4.13" || "${VERSION_AIOPSORCHESTRATOR}" == "5.1" ]] || "${VERSION_AIOPSORCHESTRATOR}" == "0.1" ]]; then
+            if [[ "${VERSION_AIOPSORCHESTRATOR}" == "4.7" || "${VERSION_AIOPSORCHESTRATOR}" == "4.8" || "${VERSION_AIOPSORCHESTRATOR}" == "4.9" || "${VERSION_AIOPSORCHESTRATOR}" == "4.10" || "${VERSION_AIOPSORCHESTRATOR}" == "4.11" || "${VERSION_AIOPSORCHESTRATOR}" == "4.12" || "${VERSION_AIOPSORCHESTRATOR}" == "4.13" || "${VERSION_AIOPSORCHESTRATOR}" == "5.1" ]] || "${VERSION_AIOPSORCHESTRATOR}" == "0.1" ]]; then
                 getSubscriptionStatus "ibm-commonui-operator-app" "$INSTALLATION_NAMESPACE"
             else
                 getSubscriptionStatus "ibm-idp-config-ui-operator" "$INSTALLATION_NAMESPACE"
@@ -1438,15 +1448,18 @@ then
             getSubscriptionStatus "ibm-events-operator" "$INSTALLATION_NAMESPACE"
 
             if [[ "$VERSION_AIOPSORCHESTRATOR" == "4.7" || "$VERSION_AIOPSORCHESTRATOR" == "4.8" || "$VERSION_AIOPSORCHESTRATOR" == "4.9" || "$VERSION_AIOPSORCHESTRATOR" == "4.10" || "$VERSION_AIOPSORCHESTRATOR" == "4.11" || "$VERSION_AIOPSORCHESTRATOR" == "4.12" || "$VERSION_AIOPSORCHESTRATOR" == "4.13" ||  "${VERSION_AIOPSORCHESTRATOR}" == "5.1" ]] || "$VERSION_AIOPSORCHESTRATOR" == "0.1" ]];  then
+            if [[ "$VERSION_AIOPSORCHESTRATOR" == "4.7" || "$VERSION_AIOPSORCHESTRATOR" == "4.8" || "$VERSION_AIOPSORCHESTRATOR" == "4.9" || "$VERSION_AIOPSORCHESTRATOR" == "4.10" || "$VERSION_AIOPSORCHESTRATOR" == "4.11" || "$VERSION_AIOPSORCHESTRATOR" == "4.12" || "$VERSION_AIOPSORCHESTRATOR" == "4.13" ||  "${VERSION_AIOPSORCHESTRATOR}" == "5.1" ]] || "$VERSION_AIOPSORCHESTRATOR" == "0.1" ]];  then
                 getSubscriptionStatus "ibm-iam-operator" "$INSTALLATION_NAMESPACE"
             else
                 getSubscriptionStatus "ibm-im-operator" "$INSTALLATION_NAMESPACE"
             fi
 
             if [[ "$VERSION_AIOPSORCHESTRATOR" != "4.6" && "$VERSION_AIOPSORCHESTRATOR" != "4.7" && "$VERSION_AIOPSORCHESTRATOR" != "4.8" && "$VERSION_AIOPSORCHESTRATOR" != "4.9" && "$VERSION_AIOPSORCHESTRATOR" != "4.10" && "$VERSION_AIOPSORCHESTRATOR" != "4.11" && "$VERSION_AIOPSORCHESTRATOR" != "4.12" && "$VERSION_AIOPSORCHESTRATOR" != "4.13" && "${VERSION_AIOPSORCHESTRATOR}" != "5.1" ]] && "$VERSION_AIOPSORCHESTRATOR" != "0.1" ]]; then
+            if [[ "$VERSION_AIOPSORCHESTRATOR" != "4.6" && "$VERSION_AIOPSORCHESTRATOR" != "4.7" && "$VERSION_AIOPSORCHESTRATOR" != "4.8" && "$VERSION_AIOPSORCHESTRATOR" != "4.9" && "$VERSION_AIOPSORCHESTRATOR" != "4.10" && "$VERSION_AIOPSORCHESTRATOR" != "4.11" && "$VERSION_AIOPSORCHESTRATOR" != "4.12" && "$VERSION_AIOPSORCHESTRATOR" != "4.13" && "${VERSION_AIOPSORCHESTRATOR}" != "5.1" ]] && "$VERSION_AIOPSORCHESTRATOR" != "0.1" ]]; then
                 getSubscriptionStatus "ibm-im-mongodb-operator" "$INSTALLATION_NAMESPACE"
             fi
             
+            if [[ "$VERSION_AIOPSORCHESTRATOR" == "4.7" || "$VERSION_AIOPSORCHESTRATOR" == "4.8" || "$VERSION_AIOPSORCHESTRATOR" == "4.9" || "$VERSION_AIOPSORCHESTRATOR" == "4.10" || "$VERSION_AIOPSORCHESTRATOR" == "4.11" || "$VERSION_AIOPSORCHESTRATOR" == "4.12" || "$VERSION_AIOPSORCHESTRATOR" == "4.13" || "${VERSION_AIOPSORCHESTRATOR}" == "5.1" ]] || "$VERSION_AIOPSORCHESTRATOR" == "0.1" ]]; then
             if [[ "$VERSION_AIOPSORCHESTRATOR" == "4.7" || "$VERSION_AIOPSORCHESTRATOR" == "4.8" || "$VERSION_AIOPSORCHESTRATOR" == "4.9" || "$VERSION_AIOPSORCHESTRATOR" == "4.10" || "$VERSION_AIOPSORCHESTRATOR" == "4.11" || "$VERSION_AIOPSORCHESTRATOR" == "4.12" || "$VERSION_AIOPSORCHESTRATOR" == "4.13" || "${VERSION_AIOPSORCHESTRATOR}" == "5.1" ]] || "$VERSION_AIOPSORCHESTRATOR" == "0.1" ]]; then
                 getSubscriptionStatus "ibm-zen-operator" "$INSTALLATION_NAMESPACE"
             else
@@ -2050,6 +2063,10 @@ then
     then
         component-versions-510
     elif [[ "${VERSION_AIOPSORCHESTRATOR}" == "4.13" ]];
+    if [[ "${VERSION_AIOPSORCHESTRATOR}" == "5.1" ]];
+    then
+        component-versions-510
+    elif [[ "${VERSION_AIOPSORCHESTRATOR}" == "4.13" ]];
     then
         component-versions-413
     elif [[ "${VERSION_AIOPSORCHESTRATOR}" == "4.12" ]];
@@ -2107,10 +2124,13 @@ then
     then
         # for developer builds (v0.1), we will check against release-5.1 versions
         component-versions-510
+        # for developer builds (v0.1), we will check against release-5.1 versions
+        component-versions-510
         echo ""
         echo "${red}${bold}NOTE: ${normal}Your IBM Concert Operate install appears to be an internal dev version (v${VERSION_AIOPSORCHESTRATOR})."
         echo "      The status-upgrade command checks the status of upgrades to v3.3 - v3.7 and v4.1 - v5.1 only."
         echo "      Therefore, the upgrade checks below will be against v4.13 component versions."
+        echo "      This may influence your results below if your dev build is not based on release-5.1.${normal}"
         echo "      This may influence your results below if your dev build is not based on release-5.1.${normal}"
     else
         echo ""
@@ -2145,6 +2165,7 @@ then
     postgresUpgradeStatus
     secureTunnelUpgradeStatus
     asmUpgradeStatus
+    if [[ "${VERSION_AIOPSORCHESTRATOR}" != "4.7" && "${VERSION_AIOPSORCHESTRATOR}" != "4.8" && "${VERSION_AIOPSORCHESTRATOR}" != "4.9" && "${VERSION_AIOPSORCHESTRATOR}" != "4.10" && "${VERSION_AIOPSORCHESTRATOR}" != "4.11" && "${VERSION_AIOPSORCHESTRATOR}" != "4.12" && "${VERSION_AIOPSORCHESTRATOR}" != "4.13" && "${VERSION_AIOPSORCHESTRATOR}" != "5.1" && "${VERSION_AIOPSORCHESTRATOR}" != "0.1" ]];
     if [[ "${VERSION_AIOPSORCHESTRATOR}" != "4.7" && "${VERSION_AIOPSORCHESTRATOR}" != "4.8" && "${VERSION_AIOPSORCHESTRATOR}" != "4.9" && "${VERSION_AIOPSORCHESTRATOR}" != "4.10" && "${VERSION_AIOPSORCHESTRATOR}" != "4.11" && "${VERSION_AIOPSORCHESTRATOR}" != "4.12" && "${VERSION_AIOPSORCHESTRATOR}" != "4.13" && "${VERSION_AIOPSORCHESTRATOR}" != "5.1" && "${VERSION_AIOPSORCHESTRATOR}" != "0.1" ]];
     then
         FlinkEventProcessorUpgradeStatus
