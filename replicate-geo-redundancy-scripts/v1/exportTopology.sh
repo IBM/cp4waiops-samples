@@ -7,33 +7,12 @@ set -a
 source config.env
 set +a
 
-# Auto-detect platform and get route if PRIMARY_CLUSTER_CPD_ENDPOINT is not set or empty
-if [ -z "${PRIMARY_CLUSTER_CPD_ENDPOINT}" ]; then
-  echo "PRIMARY_CLUSTER_CPD_ENDPOINT not set, attempting to auto-detect route..."
-  
-  # Check if we're on OpenShift (cpd route exists)
-  if oc get route cpd -n "${PRIMARY_CLUSTER_NAMESPACE}" &>/dev/null; then
-    echo "Detected OpenShift Container Platform"
-    ROUTE=$(oc get route cpd -n "${PRIMARY_CLUSTER_NAMESPACE}" --no-headers | awk '{print $2}')
-    PRIMARY_CLUSTER_CPD_ENDPOINT="https://${ROUTE}"
-    echo "Using route: ${PRIMARY_CLUSTER_CPD_ENDPOINT}"
-  # Check if we're on Linux (zen-ingress exists)
-  elif oc get ingress zen-ingress -n "${PRIMARY_CLUSTER_NAMESPACE}" &>/dev/null; then
-    echo "Detected Linux installation"
-    ROUTE=$(oc get ingress zen-ingress -n "${PRIMARY_CLUSTER_NAMESPACE}" -o jsonpath='{.spec.rules[0].host}')
-    PRIMARY_CLUSTER_CPD_ENDPOINT="https://${ROUTE}"
-    echo "Using route: ${PRIMARY_CLUSTER_CPD_ENDPOINT}"
-  else
-    echo "Error: Could not detect platform or find route. Please set PRIMARY_CLUSTER_CPD_ENDPOINT in your env file"
-    exit 1
-  fi
-fi
-
 # ============================================
 # OpenShift Login: Primary
 # ============================================
 echo "Logging into OpenShift cluster..."
 oc login "${PRIMARY_CLUSTER_API_ENDPOINT}" \
+  --namespace="${PRIMARY_CLUSTER_NAMESPACE}" \
   --token="${PRIMARY_CLUSTER_TOKEN}" \
   --insecure-skip-tls-verify=true
 
