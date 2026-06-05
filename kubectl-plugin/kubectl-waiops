@@ -2,7 +2,7 @@
 
 # © Copyright IBM Corp. 2020, 2025
 
-# The IBM Concert Opeate status checker tool prints out several components to indicate the status of your install.
+# The IBM Concert Operate status checker tool prints out several components to indicate the status of your install.
 # In a successful install, the components below should all have a successful STATUS/PROGRESS/PHASE indicator.
 # If any of the components are incomplete or are not reconciled after a significant period of time, 
 # please refer to the IBM troubleshooting docs at https://www.ibm.com/docs/en/concert-operate or open a support case. 
