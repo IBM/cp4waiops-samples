@@ -2,7 +2,7 @@
 
 # © Copyright IBM Corp. 2020, 2025
 
-# The IBM Concert Operate status checker tool prints out several components to indicate the status of your install.
+# The IBM Concert Opeate status checker tool prints out several components to indicate the status of your install.
 # In a successful install, the components below should all have a successful STATUS/PROGRESS/PHASE indicator.
 # If any of the components are incomplete or are not reconciled after a significant period of time, 
 # please refer to the IBM troubleshooting docs at https://www.ibm.com/docs/en/concert-operate or open a support case. 
@@ -642,11 +642,14 @@ function showMultiZoneStatus {
   ###########
   #Now that the node checks have run, check for IBM Concert Operate
   declare -A ains=()     #ConcertOperate namespaces
+  #Now that the node checks have run, check for IBM Concert Operate
+  declare -A ains=()     #ConcertOperate namespaces
   declare -A csns=()     #CommonServices namespaces
 
   eval $(oc get -A installation.orchestrator.aiops.ibm.com --ignore-not-found -o jsonpath='{range .items[*]} ains[{.metadata.namespace}]=1{end}')
   c=${#ains[@]}
   if [[ $c -gt 1 ]]; then
+    echo "INFO: IBM Concert Operate is installed in multiple namespaces: ${ains[@]}"
     echo "INFO: IBM Concert Operate is installed in multiple namespaces: ${ains[@]}"
   elif [[ $c -eq 0 ]]; then
     #May not have permissions to search all namespaces try the current
@@ -672,12 +675,14 @@ function showMultiZoneStatus {
 
   if [[ ${#csns[@]} -gt 1 ]]; then
     echo "WARNING: Found multiple IBM Foundational Services namespaces. Some pods shown may be from other IBM CloudPaks or cloud native IBM products"
+    echo "WARNING: Found multiple IBM Foundational Services namespaces. Some pods shown may be from other IBM CloudPaks or cloud native IBM products"
   fi
 
   if [[ ${#ains[@]} -lt 1 ]]; then
     ns=$(oc project -q)
     if [[ -n "$ns" ]]; then
       ains[$ns]=1
+      echo "WARNING: IBM Concert Operate namespace not found, using the current namespace $ns"
       echo "WARNING: IBM Concert Operate namespace not found, using the current namespace $ns"
     else
       #oc prints "error: no project has been set"
@@ -922,6 +927,7 @@ then
 
     echo ""
     echo "${blue}${bold}IBM Concert Operate v${VERSION_AIOPSORCHESTRATOR} installation status:${normal}"
+    echo "${blue}${bold}IBM Concert Operate v${VERSION_AIOPSORCHESTRATOR} installation status:${normal}"
 
     v=$(echo -e "${VERSION_AIOPSORCHESTRATOR}\n4.2" | sort -V | tail -1)
     if [[ "$v" != "4.2" ]]; then
@@ -990,6 +996,7 @@ then
     oc project ${INSTALLATION_NAMESPACE}
 
     echo ""
+    echo "${blue}${bold}IBM Concert Operate v${VERSION_AIOPSORCHESTRATOR} installation status:${normal}"
     echo "${blue}${bold}IBM Concert Operate v${VERSION_AIOPSORCHESTRATOR} installation status:${normal}"
     
     if [[ "$CLUSTER_ADMIN" == "no" ]];
@@ -2115,6 +2122,7 @@ then
     fi
 
     echo ""
+    echo "${blue}${bold}IBM Concert Operate v${VERSION_AIOPSORCHESTRATOR} upgrade status:${normal}"
     echo "${blue}${bold}IBM Concert Operate v${VERSION_AIOPSORCHESTRATOR} upgrade status:${normal}"
 
     aiopsEdgeBaseUpgradeStatus
