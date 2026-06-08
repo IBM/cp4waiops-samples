@@ -4,7 +4,7 @@ set -euo pipefail
 
 # Set environment variables
 set -a
-source config.env
+source geo_config.env
 set +a
 
 # ============================================

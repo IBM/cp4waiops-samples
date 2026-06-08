@@ -4,7 +4,7 @@ set -euo pipefail
 
 # Set environment variables
 set -a
-source config.env
+source geo_config.env
 set +a
 
 # ============================================
@@ -16,7 +16,7 @@ oc login "${BACKUP_CLUSTER_API_ENDPOINT}" \
   --token="${BACKUP_CLUSTER_TOKEN}" \
   --insecure-skip-tls-verify=true
 
-# Need to do an OC login here. The token in config.env is used here
+# Need to do an OC login here. The token in geo_config.env is used here
 CP_ROUTE=$(oc get cm management-ingress-ibmcloud-cluster-info -o jsonpath={.data.cluster_endpoint})
 ADMIN_USER=$(oc get secret platform-auth-idp-credentials -o jsonpath={.data.admin_username} | base64 -d)
 ADMIN_PASS=$(oc get secret platform-auth-idp-credentials -o jsonpath={.data.admin_password} | base64 -d)

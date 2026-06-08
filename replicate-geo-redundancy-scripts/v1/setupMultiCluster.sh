@@ -3,7 +3,7 @@
 set -euo pipefail
 
 set -a
-source config.env
+source geo_config.env
 set +a
 
 # Register the Primary cluster for multi-cluster support
