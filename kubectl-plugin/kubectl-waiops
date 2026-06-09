@@ -465,11 +465,11 @@ getVaultAccessStatus() {
     printStatus "$STATUS_VAULTACCESS" "True" "$INSTANCE_VAULTACCESS"
 }
 
-getEDBPostgresStatus() {
-    # EDB Postgres status-all
-    INSTANCE_EDBPOSTGRES=$(oc get clusters.postgresql.k8s.enterprisedb.io -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,STATUS:status.phase")
-    STATUS_EDBPOSTGRES=$(oc get clusters.postgresql.k8s.enterprisedb.io -o jsonpath='{.items[].status.phase}')
-    printStatus "$STATUS_EDBPOSTGRES" "Cluster in healthy state" "$INSTANCE_EDBPOSTGRES" 
+getPostgresStatus() {
+    # IBM-PG Postgres status-all
+    INSTANCE_POSTGRES=$(oc get clusters.pg.ibm.com -o custom-columns="KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,STATUS:status.phase")
+    STATUS_POSTGRES=$(oc get clusters.pg.ibm.com -o jsonpath='{.items[].status.phase}')
+    printStatus "$STATUS_POSTGRES" "Cluster in healthy state" "$INSTANCE_POSTGRES"
 }
 
 getPostgreservicesStatus() {
@@ -701,9 +701,9 @@ function showMultiZoneStatus {
     if [[ $? -ne 0 ]]; then (( ++e )); fi
     if [[ -n "$sps" ]]; then echo "ERROR: The following StrimziPodSets in namespace $ns are not ready: $sps"; exit $LINENO; fi
 
-    edb=$(oc get cluster.postgresql.k8s.enterprisedb.io -n $ns -o jsonpath='{.items[?(@.status.readyInstances!=@.status.instances)].metadata.name}')
+    pg=$(oc get cluster.pg.ibm.com -n $ns -o jsonpath='{.items[?(@.status.readyInstances!=@.status.instances)].metadata.name}')
     if [[ $? -ne 0 ]]; then (( ++e )); fi
-    if [[ -n "$edb" ]]; then echo "ERROR: The following EDB clusters in namespace $ns are not ready: $edb"; exit $LINENO; fi
+    if [[ -n "$pg" ]]; then echo "ERROR: The following IBM-PG clusters in namespace $ns are not ready: $pg"; exit $LINENO; fi
 
     pod=$(oc get po -n $ns)   #ensure we can list pods
     if [[ $? -ne 0 ]]; then (( ++e )); fi
@@ -720,13 +720,13 @@ function showMultiZoneStatus {
   declare -A query=( [StatefulSet]='.spec.replicas>1'
                      [ReplicaSet]='.spec.replicas>1'
                      [StrimziPodSet.core.ibmevents.ibm.com]='.status.pods>1'
-                     [Cluster.postgresql.k8s.enterprisedb.io]='.spec.instances>1' )
+                     [Cluster.pg.ibm.com]='.spec.instances>1' )
   zones="${!zone[@]}"
   lines=""
   dot=""
   for ns in ${!csns[@]} ${!ains[@]}; do
     echo -n "INFO: Checking the namespace $ns..."
-    for k in StatefulSet StrimziPodSet.core.ibmevents.ibm.com Cluster.postgresql.k8s.enterprisedb.io ReplicaSet; do
+    for k in StatefulSet StrimziPodSet.core.ibmevents.ibm.com Cluster.pg.ibm.com ReplicaSet; do
       for s in $(oc get $k -n $ns -o jsonpath='{.items[?(@'"${query[$k]}"')].metadata.name}'); do
         #elastic/open search creates a uniquely named sts for each zone
         if [[ $k == StatefulSet ]]; then echo $s | grep -q elasticsearch && continue; fi
@@ -1062,8 +1062,8 @@ then
     if [[ "${VERSION_AIOPSORCHESTRATOR}" != "3.3" ]];
     then 
         echo "______________________________________________________________"
-        echo "Postgres instances:" && echo "" 
-        getEDBPostgresStatus
+        echo "Postgres instances:" && echo ""
+        getPostgresStatus
     fi 
     
     if [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.3" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.4" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.5" ]];
@@ -1156,8 +1156,8 @@ then
         if [[ "$CLUSTER_ADMIN" == "yes" ]];
         then
             if [ "${VERSION_AIOPSORCHESTRATOR}" != "3.3" ];
-            then 
-                getCSVStatus "ibm-common-services" "cloud-native-postgresql"
+            then
+                getCSVStatus "ibm-common-services" "ibm-pg-operator"
             fi
             getCSVStatus "ibm-common-services" "ibm-cert-manager-operator"
             getCSVStatus "ibm-common-services" "ibm-common-service-operator"
@@ -1180,8 +1180,8 @@ then
         else
             printf "${gray}[INFO] Skipping the following components (Hint: log in with CLUSTER_ADMIN credentials to view):${normal}${newline}"
             if [ "${VERSION_AIOPSORCHESTRATOR}" != "3.3" ];
-            then 
-                clusterAdminSkipMessage "cloud-native-postgresql"
+            then
+                clusterAdminSkipMessage "ibm-pg-operator"
             fi
             clusterAdminSkipMessage "ibm-cert-manager-operator"
             clusterAdminSkipMessage "ibm-common-service-operator"
@@ -1206,8 +1206,8 @@ then
         if [[ "$CLUSTER_ADMIN" == "yes" ]];
         then
             if [ "${VERSION_AIOPSORCHESTRATOR}" != "3.3" ];
-            then 
-                getCSVStatus "$INSTALLATION_NAMESPACE" "cloud-native-postgresql"
+            then
+                getCSVStatus "$INSTALLATION_NAMESPACE" "ibm-pg-operator"
             fi
             getCSVStatus "$INSTALLATION_NAMESPACE" "ibm-cert-manager-operator"
             getCSVStatus "$INSTALLATION_NAMESPACE" "ibm-commonui-operator"
@@ -1223,8 +1223,8 @@ then
         else
             printf "${gray}[INFO] Skipping the following components (Hint: log in with CLUSTER_ADMIN credentials to view):${normal}${newline}"
             if [ "${VERSION_AIOPSORCHESTRATOR}" != "3.3" ];
-            then 
-                clusterAdminSkipMessage "cloud-native-postgresql"
+            then
+                clusterAdminSkipMessage "ibm-pg-operator"
             fi
             clusterAdminSkipMessage "ibm-cert-manager-operator"
             clusterAdminSkipMessage "ibm-common-service-operator"
@@ -1335,8 +1335,8 @@ then
         if [[ "$CLUSTER_ADMIN" == "yes" ]];
         then
             if [ "${VERSION_AIOPSORCHESTRATOR}" != "3.3" ];
-            then 
-                getSubscriptionStatus "cloud-native-postgresql" "ibm-common-services" 
+            then
+                getSubscriptionStatus "ibm-pg-operator" "ibm-common-services"
             fi
             getSubscriptionStatus "ibm-cert-manager-operator" "ibm-common-services" 
             if [ "${CLUSTER_SCOPE_INSTALL}" == "false" ];
@@ -1383,8 +1383,8 @@ then
         else
             printf "${gray}[INFO] Skipping the following components (Hint: log in with CLUSTER_ADMIN credentials to view):${normal}${newline}"
             if [ "${VERSION_AIOPSORCHESTRATOR}" != "3.3" ];
-            then 
-                clusterAdminSkipMessage "cloud-native-postgresql"
+            then
+                clusterAdminSkipMessage "ibm-pg-operator"
             fi
             clusterAdminSkipMessage "ibm-cert-manager-operator"
             if [ "${CLUSTER_SCOPE_INSTALL}" == "false" ];
@@ -1413,8 +1413,8 @@ then
         if [[ "$CLUSTER_ADMIN" == "yes" ]];
         then
             if [ "${VERSION_AIOPSORCHESTRATOR}" != "3.3" ];
-            then 
-                getSubscriptionStatus "cloud-native-postgresql" "$INSTALLATION_NAMESPACE" 
+            then
+                getSubscriptionStatus "ibm-pg-operator" "$INSTALLATION_NAMESPACE"
             fi
 
             if [[ "${VERSION_AIOPSORCHESTRATOR}" == "4.7" || "${VERSION_AIOPSORCHESTRATOR}" == "4.8" || "${VERSION_AIOPSORCHESTRATOR}" == "4.9" || "${VERSION_AIOPSORCHESTRATOR}" == "4.10" || "${VERSION_AIOPSORCHESTRATOR}" == "4.11" || "${VERSION_AIOPSORCHESTRATOR}" == "4.12" || "${VERSION_AIOPSORCHESTRATOR}" == "4.13" || "${VERSION_AIOPSORCHESTRATOR}" == "5.1" ]] || "${VERSION_AIOPSORCHESTRATOR}" == "0.1" ]]; then
@@ -1471,8 +1471,8 @@ then
         else
             printf "${gray}[INFO] Skipping the following components (Hint: log in with CLUSTER_ADMIN credentials to view):${normal}${newline}"
             if [ "${VERSION_AIOPSORCHESTRATOR}" != "3.3" ];
-            then 
-                clusterAdminSkipMessage "cloud-native-postgresql"
+            then
+                clusterAdminSkipMessage "ibm-pg-operator"
             fi
             clusterAdminSkipMessage "ibm-cert-manager-operator"
             if [ "${CLUSTER_SCOPE_INSTALL}" == "false" ];
@@ -1540,14 +1540,19 @@ then
         if [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.3" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.4" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.5" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.6" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "3.7" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "4.1" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "4.2" ]] || [[ "${VERSION_AIOPSORCHESTRATOR}" == "4.3" ]];
         then
             # Version 4.3 checks and above to account for Bedrock changes
-            getOperandRequestStatus "ibm-commonui-request" "ibm-common-services" 
-            getOperandRequestStatus "ibm-iam-request" "ibm-common-services" 
-            getOperandRequestStatus "ibm-mongodb-request" "ibm-common-services" 
-            getOperandRequestStatus "management-ingress" "ibm-common-services" 
-            getOperandRequestStatus "platform-api-request" "ibm-common-services" 
+            getOperandRequestStatus "ibm-commonui-request" "ibm-common-services"
+            getOperandRequestStatus "ibm-iam-request" "ibm-common-services"
+            getOperandRequestStatus "ibm-mongodb-request" "ibm-common-services"
+            getOperandRequestStatus "management-ingress" "ibm-common-services"
+            getOperandRequestStatus "platform-api-request" "ibm-common-services"
         else
-            # Version 4.4 checks and above to account for Bedrock changes
-            getOperandRequestStatus "ibm-iam-request" "$INSTALLATION_NAMESPACE" 
+            # Version 4.4+ checks - check if version is less than 4.19
+            v=$(echo -e "${VERSION_AIOPSORCHESTRATOR}\n4.19" | sort -V | head -1)
+            if [[ "$v" == "${VERSION_AIOPSORCHESTRATOR}" ]] && [[ "${VERSION_AIOPSORCHESTRATOR}" != "4.19" ]]; then
+                # Version 4.4 to 4.18 - ibm-iam-request exists
+                getOperandRequestStatus "ibm-iam-request" "$INSTALLATION_NAMESPACE"
+            fi
+            # Version 4.19+ - ibm-iam-request removed in Bedrock 4.19
         fi
     else
         printf "${gray}[INFO] Skipping the following components (Hint: log in with CLUSTER_ADMIN credentials to view):${normal}${newline}"
@@ -1566,8 +1571,13 @@ then
             clusterAdminSkipMessage "management-ingress"
             clusterAdminSkipMessage "platform-api-request"
         else
-            # Version 4.4 checks and above to account for Bedrock changes
-            clusterAdminSkipMessage "ibm-iam-request"
+            # Version 4.4+ checks - check if version is less than 4.19
+            v=$(echo -e "${VERSION_AIOPSORCHESTRATOR}\n4.19" | sort -V | head -1)
+            if [[ "$v" == "${VERSION_AIOPSORCHESTRATOR}" ]] && [[ "${VERSION_AIOPSORCHESTRATOR}" != "4.19" ]]; then
+                # Version 4.4 to 4.18 - ibm-iam-request exists
+                clusterAdminSkipMessage "ibm-iam-request"
+            fi
+            # Version 4.19+ - ibm-iam-request removed in Bedrock 4.19
         fi
     fi
 
@@ -1801,7 +1811,7 @@ then
         MAJORVERSION_IRCORE="5.1"
         MAJORVERSION_LIFECYCLESERVICE="5.1"
         MAJORVERSION_AIOPSANALYTICSORCHESTRATOR="5.1"
-        MAJORVERSION_ASM="3.1"
+        MAJORVERSION_ASM="3.0"
     }
 
 
