@@ -2,10 +2,10 @@
 
 # © Copyright IBM Corp. 2020, 2025
 
-# The CP4AIOps status checker tool prints out several components to indicate the status of your install.
+# The IBM Concert Operate status checker tool prints out several components to indicate the status of your install.
 # In a successful install, the components below should all have a successful STATUS/PROGRESS/PHASE indicator.
 # If any of the components are incomplete or are not reconciled after a significant period of time, 
-# please refer to the IBM troubleshooting docs online or open a support case. 
+# please refer to the IBM troubleshooting docs at https://www.ibm.com/docs/en/concert-operate or open a support case. 
 
 
 INSTALLATION_NAMESPACE=""
@@ -24,7 +24,7 @@ PLUGIN=${0##*-}
 # helper functions
 function printUsage {
   cat <<EOF
-Actions for working with IBM CloudPak for AI Ops
+Actions for working with IBM Concert Operate
 
 Usage:
   oc ${PLUGIN} COMMAND [flags]
@@ -33,10 +33,10 @@ Available Commands:
   multizone pods     Print the node topology and pods with zone distribution
   multizone status   Print the node topology and report status
 
-  status <namespace>             Print the status of the main components in the CloudPak
-  status-summary <namespace>     Print a brief summary status of the CloudPak
-  status-upgrade <namespace>     Print the upgrade status of the components in the CloudPak
-  status-all <namespace>         Print the most detail about the components in the CloudPak
+  status <namespace>             Print the status of the main components in IBM Concert Operate
+  status-summary <namespace>     Print a brief summary status of IBM Concert Operate
+  status-upgrade <namespace>     Print the upgrade status of the components in IBM Concert Operate
+  status-all <namespace>         Print the most detail about the components in IBM Concert Operate
 
 EOF
 }
@@ -640,14 +640,14 @@ function showMultiZoneStatus {
   echo
 
   ###########
-  #Now that the node checks have run, check for CloudPak for AI Ops
-  declare -A ains=()     #AIOps namespaces
+  #Now that the node checks have run, check for IBM Concert Operate
+  declare -A ains=()     #ConcertOperate namespaces
   declare -A csns=()     #CommonServices namespaces
 
   eval $(oc get -A installation.orchestrator.aiops.ibm.com --ignore-not-found -o jsonpath='{range .items[*]} ains[{.metadata.namespace}]=1{end}')
   c=${#ains[@]}
   if [[ $c -gt 1 ]]; then
-    echo "INFO: IBM CloudPak for AI Ops is installed in multiple namespaces: ${ains[@]}"
+    echo "INFO: IBM Concert Operate is installed in multiple namespaces: ${ains[@]}"
   elif [[ $c -eq 0 ]]; then
     #May not have permissions to search all namespaces try the current
     eval $(oc get installation.orchestrator.aiops.ibm.com --ignore-not-found -o jsonpath='{range .items[*]} ains[{.metadata.namespace}]=1{end}')
@@ -671,14 +671,14 @@ function showMultiZoneStatus {
   done
 
   if [[ ${#csns[@]} -gt 1 ]]; then
-    echo "WARNING: Found multiple IBM Foundational Services namespaces. Some pods shown may be from other CloudPaks"
+    echo "WARNING: Found multiple IBM Foundational Services namespaces. Some pods shown may be from other IBM CloudPaks or cloud native IBM products"
   fi
 
   if [[ ${#ains[@]} -lt 1 ]]; then
     ns=$(oc project -q)
     if [[ -n "$ns" ]]; then
       ains[$ns]=1
-      echo "WARNING: IBM CloudPak for AI Ops namespace not found, using the current namespace $ns"
+      echo "WARNING: IBM Concert Operate namespace not found, using the current namespace $ns"
     else
       #oc prints "error: no project has been set"
       exit $LINENO
@@ -921,7 +921,7 @@ then
     oc project ${INSTALLATION_NAMESPACE}
 
     echo ""
-    echo "${blue}${bold}Cloud Pak for AIOps v${VERSION_AIOPSORCHESTRATOR} installation status:${normal}"
+    echo "${blue}${bold}IBM Concert Operate v${VERSION_AIOPSORCHESTRATOR} installation status:${normal}"
 
     v=$(echo -e "${VERSION_AIOPSORCHESTRATOR}\n4.2" | sort -V | tail -1)
     if [[ "$v" != "4.2" ]]; then
@@ -990,7 +990,7 @@ then
     oc project ${INSTALLATION_NAMESPACE}
 
     echo ""
-    echo "${blue}${bold}Cloud Pak for AIOps v${VERSION_AIOPSORCHESTRATOR} installation status:${normal}"
+    echo "${blue}${bold}IBM Concert Operate v${VERSION_AIOPSORCHESTRATOR} installation status:${normal}"
     
     if [[ "$CLUSTER_ADMIN" == "no" ]];
     then
@@ -2091,13 +2091,13 @@ then
         # for developer builds (v0.1), we will check against release-5.1 versions
         component-versions-510
         echo ""
-        echo "${red}${bold}NOTE: ${normal}Your Cloud Pak for AIOps install appears to be an internal dev version (v${VERSION_AIOPSORCHESTRATOR})."
+        echo "${red}${bold}NOTE: ${normal}Your IBM Concert Operate install appears to be an internal dev version (v${VERSION_AIOPSORCHESTRATOR})."
         echo "      The status-upgrade command checks the status of upgrades to v3.3 - v3.7 and v4.1 - v5.1 only."
         echo "      Therefore, the upgrade checks below will be against v4.13 component versions."
         echo "      This may influence your results below if your dev build is not based on release-5.1.${normal}"
     else
         echo ""
-        echo "${red}${bold}ERROR: ${normal}Your Cloud Pak for AIOps install appears to be v${VERSION_AIOPSORCHESTRATOR}."
+        echo "${red}${bold}ERROR: ${normal}Your IBM Concert Operate install appears to be v${VERSION_AIOPSORCHESTRATOR}."
         echo "       The status-upgrade command checks the status of upgrades to v3.3 - v3.7 and v4.1 - v5.1 only."
         echo "       The version you are using is not supported for use with the status-upgrade command. Exiting."
         echo ""
@@ -2105,7 +2105,7 @@ then
     fi
 
     echo ""
-    echo "${blue}${bold}Cloud Pak for AIOps v${VERSION_AIOPSORCHESTRATOR} upgrade status:${normal}"
+    echo "${blue}${bold}IBM Concert Operate v${VERSION_AIOPSORCHESTRATOR} upgrade status:${normal}"
 
     aiopsEdgeBaseUpgradeStatus
     lifecycleUpgradeStatus
