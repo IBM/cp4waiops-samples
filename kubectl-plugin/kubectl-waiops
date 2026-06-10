@@ -5,7 +5,7 @@
 # The IBM Concert Operate status checker tool prints out several components to indicate the status of your install.
 # In a successful install, the components below should all have a successful STATUS/PROGRESS/PHASE indicator.
 # If any of the components are incomplete or are not reconciled after a significant period of time, 
-# please refer to the IBM troubleshooting docs online or open a support case. 
+# please refer to the IBM troubleshooting docs at https://www.ibm.com/docs/en/concert-operate or open a support case. 
 
 
 INSTALLATION_NAMESPACE=""
@@ -24,7 +24,7 @@ PLUGIN=${0##*-}
 # helper functions
 function printUsage {
   cat <<EOF
-Actions for working with IBM CloudPak for AI Ops
+Actions for working with IBM Concert Operate
 
 Usage:
   oc ${PLUGIN} COMMAND [flags]
@@ -33,10 +33,10 @@ Available Commands:
   multizone pods     Print the node topology and pods with zone distribution
   multizone status   Print the node topology and report status
 
-  status <namespace>             Print the status of the main components in the CloudPak
-  status-summary <namespace>     Print a brief summary status of the CloudPak
-  status-upgrade <namespace>     Print the upgrade status of the components in the CloudPak
-  status-all <namespace>         Print the most detail about the components in the CloudPak
+  status <namespace>             Print the status of the main components in IBM Concert Operate
+  status-summary <namespace>     Print a brief summary status of IBM Concert Operate
+  status-upgrade <namespace>     Print the upgrade status of the components in IBM Concert Operate
+  status-all <namespace>         Print the most detail about the components in IBM Concert Operate
 
 EOF
 }
@@ -2101,13 +2101,13 @@ then
         # for developer builds (v0.1), we will check against release-5.1 versions
         component-versions-510
         echo ""
-        echo "${red}${bold}NOTE: ${normal}Your Cloud Pak for AIOps install appears to be an internal dev version (v${VERSION_AIOPSORCHESTRATOR})."
+        echo "${red}${bold}NOTE: ${normal}Your IBM Concert Operate install appears to be an internal dev version (v${VERSION_AIOPSORCHESTRATOR})."
         echo "      The status-upgrade command checks the status of upgrades to v3.3 - v3.7 and v4.1 - v5.1 only."
         echo "      Therefore, the upgrade checks below will be against v4.13 component versions."
         echo "      This may influence your results below if your dev build is not based on release-5.1.${normal}"
     else
         echo ""
-        echo "${red}${bold}ERROR: ${normal}Your Cloud Pak for AIOps install appears to be v${VERSION_AIOPSORCHESTRATOR}."
+        echo "${red}${bold}ERROR: ${normal}Your IBM Concert Operate install appears to be v${VERSION_AIOPSORCHESTRATOR}."
         echo "       The status-upgrade command checks the status of upgrades to v3.3 - v3.7 and v4.1 - v5.1 only."
         echo "       The version you are using is not supported for use with the status-upgrade command. Exiting."
         echo ""
