@@ -28,7 +28,7 @@ export JWT_TOKEN=$(curl -k -X GET "${BACKUP_CLUSTER_CPD_ENDPOINT}/v1/preauth/val
 -H "username: ${ADMIN_USER}" \
 -H "iam-token: ${ACCESS_TOKEN}" | jq -r .accessToken)
 
-# Export policies
+# Import policies
 ../../replicate-policies-scripts/v1/import_policies.py \
   --archive prod-policies.tar.gz \
   --target-url "$BACKUP_CLUSTER_CPD_ENDPOINT" \
