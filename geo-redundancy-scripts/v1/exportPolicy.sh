@@ -12,9 +12,11 @@ set +a
 # ============================================
 echo "Logging into OpenShift cluster..."
 oc login "${PRIMARY_CLUSTER_API_ENDPOINT}" \
-  --namespace="${PRIMARY_CLUSTER_NAMESPACE}" \
   --token="${PRIMARY_CLUSTER_TOKEN}" \
   --insecure-skip-tls-verify=true
+
+# Switch to the correct namespace
+oc project "${PRIMARY_CLUSTER_NAMESPACE}"  
 
 # Need to do an OC login here. The token in geo_config.env is used here
 CP_ROUTE=$(oc get cm management-ingress-ibmcloud-cluster-info -o jsonpath={.data.cluster_endpoint})

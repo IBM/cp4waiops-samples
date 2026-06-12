@@ -28,6 +28,9 @@ oc login "${BACKUP_CLUSTER_API_ENDPOINT}" \
   --token="${BACKUP_CLUSTER_TOKEN}" \
   --insecure-skip-tls-verify=true
 
+# Switch to the correct namespace
+oc project "${BACKUP_CLUSTER_NAMESPACE}"  
+
 # ============================================
 # Get JWT Token
 # ============================================

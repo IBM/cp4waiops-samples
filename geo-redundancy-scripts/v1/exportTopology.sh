@@ -12,9 +12,11 @@ set +a
 # ============================================
 echo "Logging into OpenShift cluster..."
 oc login "${PRIMARY_CLUSTER_API_ENDPOINT}" \
-  --namespace="${PRIMARY_CLUSTER_NAMESPACE}" \
   --token="${PRIMARY_CLUSTER_TOKEN}" \
   --insecure-skip-tls-verify=true
+
+# Switch to the correct namespace
+oc project "${PRIMARY_CLUSTER_NAMESPACE}"
 
 # ============================================
 # Get JWT Token
