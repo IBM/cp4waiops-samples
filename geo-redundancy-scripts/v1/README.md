@@ -11,5 +11,5 @@ Scripts to support geo-reundancy
 For a failover scenario, where the Primary goes into Standby and the Backup clsuter becomes Active, run the following commands:
 failover.sh
 
-For a failback secnario, where the Primary goes back to being Active and the Backup cluster becomes Standby, run the following commands:
+For a failback scenario, where the Primary goes back to being Active and the Backup cluster becomes Standby, run the following commands:
 failback.sh
