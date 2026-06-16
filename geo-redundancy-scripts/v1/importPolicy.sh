@@ -1,38 +1,73 @@
 #!/usr/bin/env bash
+#!/usr/bin/env bash
+#
+# © Copyright IBM Corp. 2026
+# 
+#
+#
+# Imports policies from a specified cluster
+
 # Fail on error
 set -euo pipefail
 
-# Set environment variables
-set -a
-source geo_config.env
-set +a
+# Get the directory where this script is located
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+# Source common functions
+source "${SCRIPT_DIR}/common_functions.sh"
 
 # ============================================
-# OpenShift Login: Backup
+# Show usage
 # ============================================
-echo "Logging into OpenShift cluster..."
-oc login "${BACKUP_CLUSTER_API_ENDPOINT}" \
-  --token="${BACKUP_CLUSTER_TOKEN}" \
-  --insecure-skip-tls-verify=true
+show_usage() {
+    echo "Usage: $0 [OPTIONS]"
+    echo ""
+    echo "Import policies to the specified cluster."
+    echo ""
+    echo "Options:"
+    echo "  --cluster CLUSTER    Specify cluster: backup (default) or primary"
+    echo "  --config FILE        Path to config file (default: ./geo_config.env)"
+    echo "  -h, --help           Show this help message"
+    echo ""
+    echo "Examples:"
+    echo "  $0                                      # Import to backup cluster"
+    echo "  $0 --cluster primary                    # Import to primary cluster"
+    echo "  $0 --config /path/to/config.env --cluster primary  # Use custom config"
+    exit 0
+}
 
-# Switch to the correct namespace
-oc project "${BACKUP_CLUSTER_NAMESPACE}"
+# ============================================
+# Parse command line arguments
+# ============================================
+parse_result=0
+parse_arguments "backup" "$@" || parse_result=$?
 
-# Need to do an OC login here. The token in geo_config.env is used here
-CP_ROUTE=$(oc get cm management-ingress-ibmcloud-cluster-info -o jsonpath={.data.cluster_endpoint})
-ADMIN_USER=$(oc get secret platform-auth-idp-credentials -o jsonpath={.data.admin_username} | base64 -d)
-ADMIN_PASS=$(oc get secret platform-auth-idp-credentials -o jsonpath={.data.admin_password} | base64 -d)
-ACCESS_TOKEN=$(curl -k -H "Content-Type: application/x-www-form-urlencoded;charset=UTF-8" -d "grant_type=password&username=${ADMIN_USER}&password=${ADMIN_PASS}&scope=openid" ${CP_ROUTE}/idprovider/v1/auth/identitytoken | jq -r '.access_token')
+if [[ $parse_result -eq 1 ]]; then
+    show_usage
+elif [[ $parse_result -eq 2 ]]; then
+    exit 1
+fi
 
-export JWT_TOKEN=$(curl -k -X GET "${BACKUP_CLUSTER_CPD_ENDPOINT}/v1/preauth/validateAuth" \
--H "username: ${ADMIN_USER}" \
--H "iam-token: ${ACCESS_TOKEN}" | jq -r .accessToken)
+TARGET_CLUSTER="$SELECTED_CLUSTER"
 
+# ============================================
+# Load configuration and login
+# ============================================
+load_geo_config
+
+# Convert to uppercase for display (portable way)
+CLUSTER_DISPLAY=$(echo "$TARGET_CLUSTER" | tr '[:lower:]' '[:upper:]')
+echo "Importing policies to ${CLUSTER_DISPLAY} cluster..."
+login_and_get_token "$TARGET_CLUSTER"
+
+# ============================================
 # Import policies
+# ============================================
 ../../replicate-policies-scripts/v1/import_policies.py \
   --archive prod-policies.tar.gz \
-  --target-url "$BACKUP_CLUSTER_CPD_ENDPOINT" \
+  --target-url "$CLUSTER_CPD_ENDPOINT" \
   --target-token "$JWT_TOKEN" \
   --timeout 180
 
+echo "Policies imported successfully to ${TARGET_CLUSTER} cluster!"
 

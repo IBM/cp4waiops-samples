@@ -1,55 +1,84 @@
 #!/usr/bin/env bash
+#
+# © Copyright IBM Corp. 2026
+# 
+#
+#
+# Imports topology configurations from a specified cluster
+
 # Fail on error
 set -euo pipefail
 
-# Set environment variables
-set -a
-source geo_config.env
-set +a
+# Get the directory where this script is located
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+# Source common functions
+source "${SCRIPT_DIR}/common_functions.sh"
 
 # ============================================
-# Configuration
+# Show usage
 # ============================================
-INPUT_FILE="${1:-topology-export.json}"
+show_usage() {
+    echo "Usage: $0 [OPTIONS] [FILE]"
+    echo ""
+    echo "Import topology configuration to the specified cluster."
+    echo ""
+    echo "Options:"
+    echo "  --cluster CLUSTER    Specify cluster: backup (default) or primary"
+    echo "  --config FILE        Path to config file (default: ./geo_config.env)"
+    echo "  -h, --help           Show this help message"
+    echo ""
+    echo "Arguments:"
+    echo "  FILE                 Path to topology export file (default: topology-export.json)"
+    echo ""
+    echo "Examples:"
+    echo "  $0                                         # Import to backup from topology-export.json"
+    echo "  $0 my-topology.json                        # Import to backup from my-topology.json"
+    echo "  $0 --cluster primary                       # Import to primary from topology-export.json"
+    echo "  $0 --cluster primary my-topology.json      # Import to primary from my-topology.json"
+    echo "  $0 --config /path/to/config.env --cluster primary  # Use custom config"
+    exit 0
+}
 
+# ============================================
+# Parse command line arguments
+# ============================================
+parse_result=0
+parse_arguments "backup" "$@" || parse_result=$?
+
+if [[ $parse_result -eq 1 ]]; then
+    show_usage
+elif [[ $parse_result -eq 2 ]]; then
+    exit 1
+fi
+
+TARGET_CLUSTER="$SELECTED_CLUSTER"
+
+# Get input file from remaining arguments or use default
+if [[ ${#REMAINING_ARGS[@]} -gt 0 ]]; then
+    INPUT_FILE="${REMAINING_ARGS[0]}"
+else
+    INPUT_FILE="topology-export.json"
+fi
+
+# Check if input file exists
 if [ ! -f "${INPUT_FILE}" ]; then
   echo "Error: Input file not found: ${INPUT_FILE}"
-  echo "Usage: $0 [topology-export.json]"
+  echo "Usage: $0 [primary|backup] [topology-export.json]"
   exit 1
 fi
 
 echo "Using input file: ${INPUT_FILE}"
 
 # ============================================
-# OpenShift Login: Backup Cluster
+# Load configuration and login
 # ============================================
-echo "Logging into OpenShift backup cluster..."
-oc login "${BACKUP_CLUSTER_API_ENDPOINT}" \
-  --token="${BACKUP_CLUSTER_TOKEN}" \
-  --insecure-skip-tls-verify=true
+load_geo_config
 
-# Switch to the correct namespace
-oc project "${BACKUP_CLUSTER_NAMESPACE}"  
-
-# ============================================
-# Get JWT Token
-# ============================================
-echo "Getting JWT token for backup cluster..."
-CP_ROUTE=$(oc get cm management-ingress-ibmcloud-cluster-info -o jsonpath={.data.cluster_endpoint})
-ADMIN_USER=$(oc get secret platform-auth-idp-credentials -o jsonpath={.data.admin_username} | base64 -d)
-ADMIN_PASS=$(oc get secret platform-auth-idp-credentials -o jsonpath={.data.admin_password} | base64 -d)
-ACCESS_TOKEN=$(curl -k -H "Content-Type: application/x-www-form-urlencoded;charset=UTF-8" -d "grant_type=password&username=${ADMIN_USER}&password=${ADMIN_PASS}&scope=openid" ${CP_ROUTE}/idprovider/v1/auth/identitytoken | jq -r '.access_token')
-
-export JWT_TOKEN=$(curl -k -X GET "${BACKUP_CLUSTER_CPD_ENDPOINT}/v1/preauth/validateAuth" \
--H "username: ${ADMIN_USER}" \
--H "iam-token: ${ACCESS_TOKEN}" | jq -r .accessToken)
-
-if [ -z "$JWT_TOKEN" ] || [ "$JWT_TOKEN" = "null" ]; then
-  echo "Error: Failed to obtain JWT token"
-  exit 1
-fi
-
-echo "JWT token obtained successfully"
+# Convert to uppercase for display (portable way)
+CLUSTER_DISPLAY=$(echo "$TARGET_CLUSTER" | tr '[:lower:]' '[:upper:]')
+echo "Importing topology to ${CLUSTER_DISPLAY} cluster..."
+login_and_get_token "$TARGET_CLUSTER"
 
 # ============================================
 # Import Topology Configuration
@@ -60,7 +89,7 @@ echo "Importing topology configuration from ${INPUT_FILE}..."
 TOPOLOGY_DATA=$(cat "${INPUT_FILE}")
 
 # Import topology configuration
-HTTP_CODE=$(curl -k -X POST "${BACKUP_CLUSTER_CPD_ENDPOINT}/aiops/api/v2/configuration/topology/config/restore" \
+HTTP_CODE=$(curl -k -X POST "${CLUSTER_CPD_ENDPOINT}/aiops/api/v2/configuration/topology/config/restore" \
   --header "Content-Type: application/json" \
   --header "Authorization: Bearer ${JWT_TOKEN}" \
   --header "X-TenantID: cfd95b7e-3bc7-4006-a4a8-a73a79c71255" \
@@ -71,7 +100,7 @@ HTTP_CODE=$(curl -k -X POST "${BACKUP_CLUSTER_CPD_ENDPOINT}/aiops/api/v2/configu
 
 # Check if import was successful
 if [ "${HTTP_CODE}" -ge 200 ] && [ "${HTTP_CODE}" -lt 300 ]; then
-  echo "Topology configuration imported successfully!"
+  echo "Topology configuration imported successfully to ${TARGET_CLUSTER} cluster!"
   echo "HTTP Status: ${HTTP_CODE}"
 else
   echo "Error: Failed to import topology configuration"
@@ -80,7 +109,7 @@ else
   # Try to get error details
   echo ""
   echo "Attempting to get error details..."
-  curl -k -X POST "${BACKUP_CLUSTER_CPD_ENDPOINT}/aiops/api/v2/configuration/topology/config/restore" \
+  curl -k -X POST "${CLUSTER_CPD_ENDPOINT}/aiops/api/v2/configuration/topology/config/restore" \
     --header "Content-Type: application/json" \
     --header "Authorization: Bearer ${JWT_TOKEN}" \
     --header "X-TenantID: cfd95b7e-3bc7-4006-a4a8-a73a79c71255" \

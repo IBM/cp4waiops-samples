@@ -1,42 +1,63 @@
 #!/usr/bin/env bash
+#
+# © Copyright IBM Corp. 2026
+# 
+#
+#
+# Exports topology configurations from a specified cluster
+
 # Fail on error
 set -euo pipefail
 
-# Set environment variables
-set -a
-source geo_config.env
-set +a
+# Get the directory where this script is located
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+# Source common functions
+source "${SCRIPT_DIR}/common_functions.sh"
 
 # ============================================
-# OpenShift Login: Primary
+# Show usage
 # ============================================
-echo "Logging into OpenShift cluster..."
-oc login "${PRIMARY_CLUSTER_API_ENDPOINT}" \
-  --token="${PRIMARY_CLUSTER_TOKEN}" \
-  --insecure-skip-tls-verify=true
-
-# Switch to the correct namespace
-oc project "${PRIMARY_CLUSTER_NAMESPACE}"
+show_usage() {
+    echo "Usage: $0 [OPTIONS]"
+    echo ""
+    echo "Export topology configuration from the specified cluster."
+    echo ""
+    echo "Options:"
+    echo "  --cluster CLUSTER    Specify cluster: primary (default) or backup"
+    echo "  --config FILE        Path to config file (default: ./geo_config.env)"
+    echo "  -h, --help           Show this help message"
+    echo ""
+    echo "Examples:"
+    echo "  $0                                      # Export from primary cluster"
+    echo "  $0 --cluster backup                     # Export from backup cluster"
+    echo "  $0 --config /path/to/config.env --cluster backup  # Use custom config"
+    exit 0
+}
 
 # ============================================
-# Get JWT Token
+# Parse command line arguments
 # ============================================
-echo "Getting JWT token..."
-CP_ROUTE=$(oc get cm management-ingress-ibmcloud-cluster-info -o jsonpath={.data.cluster_endpoint})
-ADMIN_USER=$(oc get secret platform-auth-idp-credentials -o jsonpath={.data.admin_username} | base64 -d)
-ADMIN_PASS=$(oc get secret platform-auth-idp-credentials -o jsonpath={.data.admin_password} | base64 -d)
-ACCESS_TOKEN=$(curl -k -H "Content-Type: application/x-www-form-urlencoded;charset=UTF-8" -d "grant_type=password&username=${ADMIN_USER}&password=${ADMIN_PASS}&scope=openid" ${CP_ROUTE}/idprovider/v1/auth/identitytoken | jq -r '.access_token')
+parse_result=0
+parse_arguments "primary" "$@" || parse_result=$?
 
-export JWT_TOKEN=$(curl -k -X GET "${PRIMARY_CLUSTER_CPD_ENDPOINT}/v1/preauth/validateAuth" \
--H "username: ${ADMIN_USER}" \
--H "iam-token: ${ACCESS_TOKEN}" | jq -r .accessToken)
-
-if [ -z "$JWT_TOKEN" ] || [ "$JWT_TOKEN" = "null" ]; then
-  echo "Error: Failed to obtain JWT token"
-  exit 1
+if [[ $parse_result -eq 1 ]]; then
+    show_usage
+elif [[ $parse_result -eq 2 ]]; then
+    exit 1
 fi
 
-echo "JWT token obtained successfully"
+SOURCE_CLUSTER="$SELECTED_CLUSTER"
+
+# ============================================
+# Load configuration and login
+# ============================================
+load_geo_config
+
+# Convert to uppercase for display (portable way)
+CLUSTER_DISPLAY=$(echo "$SOURCE_CLUSTER" | tr '[:lower:]' '[:upper:]')
+echo "Exporting topology from ${CLUSTER_DISPLAY} cluster..."
+login_and_get_token "$SOURCE_CLUSTER"
 
 # ============================================
 # Export Topology Configuration
@@ -45,7 +66,7 @@ OUTPUT_FILE="topology-export.json"
 OUTPUT_FILE_TMP="${OUTPUT_FILE}.tmp"
 echo "Exporting topology configuration to ${OUTPUT_FILE}..."
 
-curl -k -X GET "${PRIMARY_CLUSTER_CPD_ENDPOINT}/aiops/api/v2/configuration/topology/config/backup" \
+curl -k -X GET "${CLUSTER_CPD_ENDPOINT}/aiops/api/v2/configuration/topology/config/backup" \
   --header "Content-Type: application/json" \
   --header "Authorization: Bearer ${JWT_TOKEN}" \
   --header "X-TenantID: cfd95b7e-3bc7-4006-a4a8-a73a79c71255" \
@@ -60,7 +81,7 @@ if [ $? -eq 0 ] && [ -f "${OUTPUT_FILE_TMP}" ]; then
   if jq '.' "${OUTPUT_FILE_TMP}" > "${OUTPUT_FILE}" 2>/dev/null; then
     rm -f "${OUTPUT_FILE_TMP}"
     FILE_SIZE=$(stat -f%z "${OUTPUT_FILE}" 2>/dev/null || stat -c%s "${OUTPUT_FILE}" 2>/dev/null)
-    echo "Topology configuration exported successfully!"
+    echo "Topology configuration exported successfully from ${SOURCE_CLUSTER} cluster!"
     echo "Output file: ${OUTPUT_FILE}"
     echo "File size: ${FILE_SIZE} bytes"
   else
@@ -68,7 +89,7 @@ if [ $? -eq 0 ] && [ -f "${OUTPUT_FILE_TMP}" ]; then
     echo "Warning: Could not prettify JSON, using raw format"
     mv "${OUTPUT_FILE_TMP}" "${OUTPUT_FILE}"
     FILE_SIZE=$(stat -f%z "${OUTPUT_FILE}" 2>/dev/null || stat -c%s "${OUTPUT_FILE}" 2>/dev/null)
-    echo "Topology configuration exported successfully!"
+    echo "Topology configuration exported successfully from ${SOURCE_CLUSTER} cluster!"
     echo "Output file: ${OUTPUT_FILE}"
     echo "File size: ${FILE_SIZE} bytes"
   fi

@@ -1,0 +1,3 @@
+# Exclude actual configuration files (keep template only)
+**/geo_config.env
+

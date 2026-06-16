@@ -1,0 +1,817 @@
+{
+  "items": [
+    {
+      "name": "aixServer",
+      "keyIndexName": "ASM::entityType::resource::aixServer",
+      "vertexType": "entityType",
+      "icon": "undefined",
+      "description": "resource",
+      "databaseSource": "types"
+    },
+    {
+      "name": "appServerJava",
+      "keyIndexName": "ASM::entityType::resource::appServerJava",
+      "vertexType": "entityType",
+      "icon": "undefined",
+      "description": "resource",
+      "databaseSource": "types"
+    },
+    {
+      "name": "appl",
+      "keyIndexName": "ASM::entityType::resource::appl",
+      "vertexType": "entityType",
+      "icon": "undefined",
+      "description": "resource",
+      "databaseSource": "types"
+    },
+    {
+      "name": "cluster",
+      "keyIndexName": "ASM::entityType::resource::cluster",
+      "vertexType": "entityType",
+      "icon": "cluster",
+      "description": "resource",
+      "databaseSource": "types"
+    },
+    {
+      "name": "clusterNode",
+      "keyIndexName": "ASM::entityType::resource::clusterNode",
+      "vertexType": "entityType",
+      "icon": "undefined",
+      "description": "resource",
+      "databaseSource": "types"
+    },
+    {
+      "name": "computer",
+      "keyIndexName": "ASM::entityType::resource::computer",
+      "vertexType": "entityType",
+      "icon": "computer",
+      "description": "resource",
+      "databaseSource": "types"
+    },
+    {
+      "name": "computerRoom",
+      "keyIndexName": "ASM::entityType::resource::computerRoom",
+      "vertexType": "entityType",
+      "icon": "undefined",
+      "description": "resource",
+      "databaseSource": "types"
+    },
+    {
+      "name": "database",
+      "keyIndexName": "ASM::entityType::resource::database",
+      "vertexType": "entityType",
+      "icon": "database",
+      "description": "resource",
+      "databaseSource": "types"
+    },
+    {
+      "name": "datacenter",
+      "keyIndexName": "ASM::entityType::resource::datacenter",
+      "vertexType": "entityType",
+      "icon": "industry",
+      "description": "resource",
+      "databaseSource": "types"
+    },
+    {
+      "name": "dbMysqlCatalog",
+      "keyIndexName": "ASM::entityType::resource::dbMysqlCatalog",
+      "vertexType": "entityType",
+      "icon": "undefined",
+      "description": "resource",
+      "databaseSource": "types"
+    },
+    {
+      "name": "dbOraCatalog",
+      "keyIndexName": "ASM::entityType::resource::dbOraCatalog",
+      "vertexType": "entityType",
+      "icon": "undefined",
+      "description": "resource",
+      "databaseSource": "types"
+    },
+    {
+      "name": "disk",
+      "keyIndexName": "ASM::entityType::resource::disk",
+      "vertexType": "entityType",
+      "icon": "disk",
+      "description": "resource",
+      "databaseSource": "types"
+    },
+    {
+      "name": "emailServer",
+      "keyIndexName": "ASM::entityType::resource::emailServer",
+      "vertexType": "entityType",
+      "icon": "undefined",
+      "description": "resource",
+      "databaseSource": "types"
+    },
+    {
+      "name": "ipRouter",
+      "keyIndexName": "ASM::entityType::resource::ipRouter",
+      "vertexType": "entityType",
+      "icon": "undefined",
+      "description": "resource",
+      "databaseSource": "types"
+    },
+    {
+      "name": "ipSwitch",
+      "keyIndexName": "ASM::entityType::resource::ipSwitch",
+      "vertexType": "entityType",
+      "icon": "undefined",
+      "description": "resource",
+      "databaseSource": "types"
+    },
+    {
+      "name": "linuxServer",
+      "keyIndexName": "ASM::entityType::resource::linuxServer",
+      "vertexType": "entityType",
+      "icon": "undefined",
+      "description": "resource",
+      "databaseSource": "types"
+    },
+    {
+      "name": "msd",
+      "keyIndexName": "ASM::entityType::resource::msd",
+      "vertexType": "entityType",
+      "icon": "undefined",
+      "description": "resource",
+      "databaseSource": "types"
+    },
+    {
+      "name": "netgear",
+      "keyIndexName": "ASM::entityType::resource::netgear",
+      "vertexType": "entityType",
+      "icon": "undefined",
+      "description": "resource",
+      "databaseSource": "types"
+    },
+    {
+      "name": "networkAdapter",
+      "keyIndexName": "ASM::entityType::resource::networkAdapter",
+      "vertexType": "entityType",
+      "icon": "undefined",
+      "description": "resource",
+      "databaseSource": "types"
+    },
+    {
+      "name": "peripheral",
+      "keyIndexName": "ASM::entityType::resource::peripheral",
+      "vertexType": "entityType",
+      "icon": "undefined",
+      "description": "resource",
+      "databaseSource": "types"
+    },
+    {
+      "name": "person",
+      "keyIndexName": "ASM::entityType::resource::person",
+      "vertexType": "entityType",
+      "icon": "person",
+      "description": "resource",
+      "databaseSource": "types"
+    },
+    {
+      "name": "printer",
+      "keyIndexName": "ASM::entityType::resource::printer",
+      "vertexType": "entityType",
+      "icon": "printer",
+      "description": "resource",
+      "databaseSource": "types"
+    },
+    {
+      "name": "rack",
+      "keyIndexName": "ASM::entityType::resource::rack",
+      "vertexType": "entityType",
+      "icon": "undefined",
+      "description": "resource",
+      "databaseSource": "types"
+    },
+    {
+      "name": "server",
+      "keyIndexName": "ASM::entityType::resource::server",
+      "vertexType": "entityType",
+      "icon": "server",
+      "description": "resource",
+      "databaseSource": "types"
+    },
+    {
+      "name": "service",
+      "keyIndexName": "ASM::entityType::resource::service",
+      "vertexType": "entityType",
+      "icon": "service",
+      "description": "resource",
+      "databaseSource": "types"
+    },
+    {
+      "name": "serviceGroup",
+      "keyIndexName": "ASM::entityType::resource::serviceGroup",
+      "vertexType": "entityType",
+      "icon": "undefined",
+      "description": "resource",
+      "databaseSource": "types"
+    },
+    {
+      "name": "spkg",
+      "keyIndexName": "ASM::entityType::resource::spkg",
+      "vertexType": "entityType",
+      "icon": "undefined",
+      "description": "resource",
+      "databaseSource": "types"
+    },
+    {
+      "name": "storageSwitch",
+      "keyIndexName": "ASM::entityType::resource::storageSwitch",
+      "vertexType": "entityType",
+      "icon": "undefined",
+      "description": "resource",
+      "databaseSource": "types"
+    },
+    {
+      "name": "unixServer",
+      "keyIndexName": "ASM::entityType::resource::unixServer",
+      "vertexType": "entityType",
+      "icon": "undefined",
+      "description": "resource",
+      "databaseSource": "types"
+    },
+    {
+      "name": "ups",
+      "keyIndexName": "ASM::entityType::resource::ups",
+      "vertexType": "entityType",
+      "icon": "battery",
+      "description": "resource",
+      "databaseSource": "types"
+    },
+    {
+      "name": "webServer",
+      "keyIndexName": "ASM::entityType::resource::webServer",
+      "vertexType": "entityType",
+      "icon": "undefined",
+      "description": "resource",
+      "databaseSource": "types"
+    },
+    {
+      "name": "winCluster",
+      "keyIndexName": "ASM::entityType::resource::winCluster",
+      "vertexType": "entityType",
+      "icon": "undefined",
+      "description": "resource",
+      "databaseSource": "types"
+    },
+    {
+      "name": "winClusterNode",
+      "keyIndexName": "ASM::entityType::resource::winClusterNode",
+      "vertexType": "entityType",
+      "icon": "undefined",
+      "description": "resource",
+      "databaseSource": "types"
+    },
+    {
+      "name": "winServer",
+      "keyIndexName": "ASM::entityType::resource::winServer",
+      "vertexType": "entityType",
+      "icon": "undefined",
+      "description": "resource",
+      "databaseSource": "types"
+    },
+    {
+      "name": "zone",
+      "keyIndexName": "ASM::entityType::resource::zone",
+      "vertexType": "entityType",
+      "icon": "undefined",
+      "description": "resource",
+      "databaseSource": "types"
+    },
+    {
+      "keyIndexName": "ASM::edgeType::aggregation::contains",
+      "vertexType": "edgeType",
+      "edgeType": "contains",
+      "edgeLabel": "aggregation",
+      "databaseSource": "edges"
+    },
+    {
+      "keyIndexName": "ASM::edgeType::aggregation::members",
+      "vertexType": "edgeType",
+      "edgeType": "members",
+      "edgeLabel": "aggregation",
+      "databaseSource": "edges"
+    },
+    {
+      "keyIndexName": "ASM::edgeType::association::has",
+      "vertexType": "edgeType",
+      "edgeType": "has",
+      "edgeLabel": "association",
+      "databaseSource": "edges"
+    },
+    {
+      "keyIndexName": "ASM::edgeType::association::manages",
+      "vertexType": "edgeType",
+      "edgeType": "manages",
+      "edgeLabel": "association",
+      "databaseSource": "edges"
+    },
+    {
+      "keyIndexName": "ASM::edgeType::association::owns",
+      "vertexType": "edgeType",
+      "edgeType": "owns",
+      "edgeLabel": "association",
+      "databaseSource": "edges"
+    },
+    {
+      "keyIndexName": "ASM::edgeType::association::realizes",
+      "vertexType": "edgeType",
+      "edgeType": "realizes",
+      "edgeLabel": "association",
+      "databaseSource": "edges"
+    },
+    {
+      "keyIndexName": "ASM::edgeType::dataFlow::connectedTo",
+      "vertexType": "edgeType",
+      "edgeType": "connectedTo",
+      "edgeLabel": "dataFlow",
+      "databaseSource": "edges"
+    },
+    {
+      "keyIndexName": "ASM::edgeType::dataFlow::receives",
+      "vertexType": "edgeType",
+      "edgeType": "receives",
+      "edgeLabel": "dataFlow",
+      "databaseSource": "edges"
+    },
+    {
+      "keyIndexName": "ASM::edgeType::dataFlow::sends",
+      "vertexType": "edgeType",
+      "edgeType": "sends",
+      "edgeLabel": "dataFlow",
+      "databaseSource": "edges"
+    },
+    {
+      "keyIndexName": "ASM::edgeType::dependency::dependsOn",
+      "vertexType": "edgeType",
+      "edgeType": "dependsOn",
+      "edgeLabel": "dependency",
+      "databaseSource": "edges"
+    },
+    {
+      "keyIndexName": "ASM::edgeType::dependency::runsOn",
+      "vertexType": "edgeType",
+      "edgeType": "runsOn",
+      "edgeLabel": "dependency",
+      "databaseSource": "edges"
+    },
+    {
+      "name": "generic-observer-events-metric-anomaly-detection-name",
+      "keyIndexName": "generic-observer-events-metric-anomaly-detection-name",
+      "ruleType": "matchTokensRule",
+      "tokens": [
+        "${name}:::${uniqueId}"
+      ],
+      "ruleStatus": "enabled",
+      "observers": [
+        "generic-observer"
+      ],
+      "providers": [
+        "*"
+      ],
+      "databaseSource": "rules"
+    },
+    {
+      "name": "im-observer-events-process",
+      "keyIndexName": "im-observer-events-process",
+      "ruleType": "matchTokensRule",
+      "entityTypes": [
+        "process"
+      ],
+      "tokens": [
+        "${host}/pid/${steadyId}",
+        "uniqueId"
+      ],
+      "ruleStatus": "enabled",
+      "observers": [
+        "im-observer"
+      ],
+      "providers": [
+        "*"
+      ],
+      "databaseSource": "rules"
+    },
+    {
+      "name": "sevoneInterfaceMACAddressTokens",
+      "keyIndexName": "sevoneInterfaceMACAddressTokens",
+      "ruleType": "matchTokensRule",
+      "entityTypes": [
+        "networkinterface"
+      ],
+      "tokens": [
+        "ipAddress",
+        "macAddress",
+        "name"
+      ],
+      "ruleStatus": "enabled",
+      "observers": [
+        "sevone-observer"
+      ],
+      "providers": [
+        "*"
+      ],
+      "databaseSource": "rules"
+    },
+    {
+      "name": "im-observer-events-host",
+      "keyIndexName": "im-observer-events-host",
+      "ruleType": "matchTokensRule",
+      "entityTypes": [
+        "host"
+      ],
+      "tokens": [
+        "host:${name}"
+      ],
+      "ruleStatus": "enabled",
+      "observers": [
+        "im-observer"
+      ],
+      "providers": [
+        "*"
+      ],
+      "databaseSource": "rules"
+    },
+    {
+      "name": "generic-name",
+      "keyIndexName": "generic-name",
+      "ruleType": "matchTokensRule",
+      "entityTypes": [
+        "*"
+      ],
+      "tokens": [
+        "name"
+      ],
+      "ruleStatus": "enabled",
+      "observers": [
+        "generic-observer"
+      ],
+      "providers": [
+        "*"
+      ],
+      "databaseSource": "rules"
+    },
+    {
+      "name": "im-observer-events-metric-anomaly-detection-name",
+      "keyIndexName": "im-observer-events-metric-anomaly-detection-name",
+      "ruleType": "matchTokensRule",
+      "tokens": [
+        "${name}:::${uniqueId}"
+      ],
+      "ruleStatus": "enabled",
+      "observers": [
+        "im-observer"
+      ],
+      "providers": [
+        "*"
+      ],
+      "databaseSource": "rules"
+    },
+    {
+      "name": "sevoneClassNameEntityTypeTokens",
+      "keyIndexName": "sevoneClassNameEntityTypeTokens",
+      "ruleType": "matchTokensRule",
+      "entityTypes": [
+        "host",
+        "module",
+        "router",
+        "security",
+        "switch",
+        "terminalServer",
+        "wirelessAccessPoint"
+      ],
+      "tokens": [
+        "ipAddress",
+        "name",
+        "sysName"
+      ],
+      "ruleStatus": "enabled",
+      "observers": [
+        "sevone-observer"
+      ],
+      "providers": [
+        "*"
+      ],
+      "databaseSource": "rules"
+    },
+    {
+      "name": "generic-observer-events-process",
+      "keyIndexName": "generic-observer-events-process",
+      "ruleType": "matchTokensRule",
+      "entityTypes": [
+        "process"
+      ],
+      "tokens": [
+        "${host}/pid/${steadyId}",
+        "uniqueId"
+      ],
+      "ruleStatus": "enabled",
+      "observers": [
+        "generic-observer"
+      ],
+      "providers": [
+        "*"
+      ],
+      "databaseSource": "rules"
+    },
+    {
+      "name": "vmvcenterGenericNameMatchTokens",
+      "keyIndexName": "vmvcenterGenericNameMatchTokens",
+      "ruleType": "matchTokensRule",
+      "entityTypes": [
+        "server",
+        "vm"
+      ],
+      "tokens": [
+        "name"
+      ],
+      "ruleStatus": "enabled",
+      "observers": [
+        "vmvcenter-observer"
+      ],
+      "providers": [
+        "*"
+      ],
+      "databaseSource": "rules"
+    },
+    {
+      "name": "sevoneIPNameMatchTokens",
+      "keyIndexName": "sevoneIPNameMatchTokens",
+      "ruleType": "matchTokensRule",
+      "entityTypes": [
+        "ipaddress"
+      ],
+      "tokens": [
+        "name"
+      ],
+      "ruleStatus": "enabled",
+      "observers": [
+        "sevone-observer"
+      ],
+      "providers": [
+        "*"
+      ],
+      "databaseSource": "rules"
+    },
+    {
+      "name": "generic-observer-events-host",
+      "keyIndexName": "generic-observer-events-host",
+      "ruleType": "matchTokensRule",
+      "entityTypes": [
+        "host"
+      ],
+      "tokens": [
+        "host:${name}"
+      ],
+      "ruleStatus": "enabled",
+      "observers": [
+        "generic-observer"
+      ],
+      "providers": [
+        "*"
+      ],
+      "databaseSource": "rules"
+    },
+    {
+      "name": "k8sGenericNameMatchTokens",
+      "keyIndexName": "k8sGenericNameMatchTokens",
+      "ruleType": "matchTokensRule",
+      "entityTypes": [
+        "*"
+      ],
+      "tokens": [
+        "name"
+      ],
+      "ruleStatus": "enabled",
+      "observers": [
+        "kubernetes-observer"
+      ],
+      "providers": [
+        "*"
+      ],
+      "databaseSource": "rules"
+    },
+    {
+      "name": "k8sdataTenantMatchTokens",
+      "keyIndexName": "k8sdataTenantMatchTokens",
+      "ruleType": "matchTokensRule",
+      "entityTypes": [
+        "server"
+      ],
+      "tokens": [
+        "dataCenter"
+      ],
+      "ruleStatus": "enabled",
+      "observers": [
+        "kubernetes-observer"
+      ],
+      "providers": [
+        "*"
+      ],
+      "databaseSource": "rules"
+    },
+    {
+      "name": "generic-observer-events",
+      "keyIndexName": "generic-observer-events",
+      "ruleType": "matchTokensRule",
+      "tokens": [
+        "steadyId",
+        "uniqueId"
+      ],
+      "ruleStatus": "enabled",
+      "observers": [
+        "generic-observer"
+      ],
+      "providers": [
+        "*"
+      ],
+      "databaseSource": "rules"
+    },
+    {
+      "name": "im-name",
+      "keyIndexName": "im-name",
+      "ruleType": "matchTokensRule",
+      "entityTypes": [
+        "*"
+      ],
+      "tokens": [
+        "name"
+      ],
+      "ruleStatus": "enabled",
+      "observers": [
+        "im-observer"
+      ],
+      "providers": [
+        "*"
+      ],
+      "databaseSource": "rules"
+    },
+    {
+      "name": "sevoneHostTokens",
+      "keyIndexName": "sevoneHostTokens",
+      "ruleType": "matchTokensRule",
+      "entityTypes": [
+        "server"
+      ],
+      "tokens": [
+        "ipAddress",
+        "name",
+        "sysName"
+      ],
+      "ruleStatus": "enabled",
+      "observers": [
+        "sevone-observer"
+      ],
+      "providers": [
+        "*"
+      ],
+      "databaseSource": "rules"
+    },
+    {
+      "name": "im-observer-events",
+      "keyIndexName": "im-observer-events",
+      "ruleType": "matchTokensRule",
+      "tokens": [
+        "steadyId",
+        "uniqueId"
+      ],
+      "ruleStatus": "enabled",
+      "observers": [
+        "im-observer"
+      ],
+      "providers": [
+        "*"
+      ],
+      "databaseSource": "rules"
+    },
+    {
+      "name": "snowGenericNameMatchTokens",
+      "keyIndexName": "snowGenericNameMatchTokens",
+      "ruleType": "matchTokensRule",
+      "entityTypes": [
+        "person"
+      ],
+      "tokens": [
+        "name"
+      ],
+      "ruleStatus": "enabled",
+      "observers": [
+        "servicenow-observer"
+      ],
+      "providers": [
+        "*"
+      ],
+      "databaseSource": "rules"
+    },
+    {
+      "name": "vmvcenterVmNameTagRules",
+      "keyIndexName": "vmvcenterVmNameTagRules",
+      "ruleType": "tagsRule",
+      "entityTypes": [
+        "cpu",
+        "disk",
+        "group",
+        "networkaddress",
+        "networkinterface",
+        "operatingsystem"
+      ],
+      "tokens": [
+        "vm_name"
+      ],
+      "ruleStatus": "enabled",
+      "observers": [
+        "vmvcenter-observer"
+      ],
+      "providers": [
+        "*"
+      ],
+      "databaseSource": "rules"
+    },
+    {
+      "name": "vmvcenterDatacenterTagRules",
+      "keyIndexName": "vmvcenterDatacenterTagRules",
+      "ruleType": "tagsRule",
+      "entityTypes": [
+        "cpu",
+        "disk",
+        "group",
+        "networkaddress",
+        "networkinterface",
+        "operatingsystem",
+        "server",
+        "vm"
+      ],
+      "tokens": [
+        "datacenter"
+      ],
+      "ruleStatus": "enabled",
+      "observers": [
+        "vmvcenter-observer"
+      ],
+      "providers": [
+        "*"
+      ],
+      "databaseSource": "rules"
+    },
+    {
+      "keyIndexName": "servicenow-observer:snow",
+      "prevHasState": "FINISHED",
+      "hasStateDescription": "Job imported from backup",
+      "matchTokens": [
+        "servicenow-observer"
+      ],
+      "runtimeTenantName": "cfd95b7e-3bc7-4006-a4a8-a73a79c71255",
+      "description": "Default ServiceNow Observer created by the controller",
+      "observationStart": 1781272457804,
+      "path": "/jobs/load",
+      "overrunning": false,
+      "entityTypes": [
+        "ASM_OBSERVER_JOB"
+      ],
+      "operationCount": 6942,
+      "operationTotal": 6942,
+      "hasState": "FINISHED",
+      "tags": [
+        "OBSERVATION_JOB",
+        "servicenow-observer"
+      ],
+      "schedule": {
+        "lastRunTime": 1781272445693
+      },
+      "vertexType": "mgmtArtifact",
+      "write_file_observer_file": false,
+      "observationCount": 3412,
+      "name": "snow",
+      "observerName": "servicenow-observer",
+      "parameters": {
+        "connect_timeout": 5000,
+        "proxy_auth_schema": "BASIC",
+        "instance_url": "https://dev343737.service-now.com",
+        "fetch_records": 10000,
+        "exclude_entity_edge_modelling": "",
+        "password": {
+          "hiddenString": "9uVpXqjq6a8pxubMHbet1g==",
+          "encrypted": true
+        },
+        "discover_tables": "sys_user, cmdb_ci_acc, cmdb_ci_aix_server, cmdb_ci_hpux_server, cmdb_ci_ip_server, cmdb_ci_linux_server, cmdb_ci_mainframe, cmdb_ci_mainframe_lpar, cmdb_ci_netware_server, cmdb_ci_osx_server, cmdb_ci_server, cmdb_ci_solaris_server, cmdb_ci_storage_server, cmdb_ci_unix_server, cmdb_ci_web_server, cmdb_ci_win_server, cmdb_ci_apache_web_server,cmdb_ci_app_server_domino, cmdb_ci_app_server_java, cmdb_ci_app_server_tomcat, cmdb_ci_app_server_weblogic, cmdb_ci_app_server_websphere, cmdb_ci_directory_server, cmdb_ci_email_server, cmdb_ci_esx_server, cmdb_ci_ftp_server, cmdb_ci_iplanet_web_server, cmdb_ci_microsoft_iis_web_server, cmdb_ci_nginx_web_server, cmdb_ci_appl, cmdb_ci_application_software, cmdb_ci_app_server, cmdb_ci_app_server_jboss, cmdb_ci_infra_service, cmdb_ci_websphere_cell, cmdb_ci_web_application, cmdb_ci_web_service, cmdb_ci_web_site, cmdb_ci_business_process, cmdb_ci_circuit, cmdb_ci_cluster, cmdb_ci_cluster_node, cmdb_ci_cluster_resource, cmdb_ci_cluster_vip, cmdb_ci_win_cluster, cmdb_ci_win_cluster_node, cmdb_ci_win_cluster_resource, cmdb_ci_comm, cmdb_ci_ip_device, cmdb_ci_computer, cmdb_ci_computer_room, cmdb_ci_crac, cmdb_ci_database, cmdb_ci_db_db2_instance, cmdb_ci_db_instance, cmdb_ci_db_mysql_instance, cmdb_ci_db_ora_instance, cmdb_ci_db_syb_instance, cmdb_ci_db_catalog, cmdb_ci_db_db2_catalog, cmdb_ci_db_mssql_catalog, cmdb_ci_db_mysql_catalog, cmdb_ci_db_ora_catalog, cmdb_ci_db_syb_catalog, cmdb_ci_datacenter, cmdb_ci_spkg, cmdb_ci_tomcat_connector, cmdb_ci_disk, cmdb_ci_file_system, cmdb_ci_file_system_nfs, cmdb_ci_file_system_smb, cmdb_ci_group, cmdb_ci_ip_network, cmdb_ci_ip_phone, cmdb_ci_ip_router, cmdb_ci_infra_service_ldap, cmdb_ci_ip_service, cmdb_ci_service, cmdb_ci_unix_daemon, cmdb_ci_windows_service, cmdb_ci_ip_switch, cmdb_ci_storage_switch, cmdb_ci_msd, cmdb_ci_netgear, cmdb_ci_network_adapter, cmdb_ci_net_traffic, cmdb_ci_patches, cmdb_ci_pdu, cmdb_ci_pdu_outlet, cmdb_ci_peripheral, cmdb_ci_printer, cmdb_ci_print_queue, cmdb_ci_rack, cmdb_ci_ups, cmdb_ci_ups_alarm, cmdb_ci_ups_bypass, cmdb_ci_ups_input, cmdb_ci_ups_output, cmdb_ci_vm, cmdb_ci_vm_parallels, cmdb_ci_vm_zones, cmdb_ci_vm_vmware, cmdb_ci_vpn, cmdb_ci_zone",
+        "read_timeout": 5000,
+        "proxy_port": 8080,
+        "no_of_threads": 1,
+        "tables_per_call": 10,
+        "validate_job": false,
+        "connect_retry": 2,
+        "trust_certificate": true,
+        "bulk_load": false,
+        "filter_preference": "include",
+        "std_table_dot_walk": false,
+        "exclude_entity_edge_option": "none",
+        "proxy_secure": false,
+        "connect_retry_delay": 5000,
+        "username": "admin"
+      },
+      "nextHasState": "FINISHED",
+      "databaseSource": "metadata"
+    }
+  ]
+}
