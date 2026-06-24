@@ -102,7 +102,7 @@ validate_cluster() {
 # Set Cluster Variables
 # ============================================
 # Usage: set_cluster_vars "primary|backup"
-# Sets: CLUSTER_API_ENDPOINT, CLUSTER_TOKEN, CLUSTER_NAMESPACE, CLUSTER_CPD_ENDPOINT
+# Sets: CLUSTER_API_ENDPOINT, CLUSTER_TOKEN, CLUSTER_NAMESPACE, CLUSTER_CPD_ENDPOINT, ACCESS_TOKEN
 set_cluster_vars() {
     local cluster="$1"
     
@@ -114,12 +114,14 @@ set_cluster_vars() {
         CLUSTER_NAMESPACE="$BACKUP_CLUSTER_NAMESPACE"
         CLUSTER_CPD_ENDPOINT="$BACKUP_CLUSTER_CPD_ENDPOINT"
         CLUSTER_NAME="$BACKUP_CLUSTER_NAME"
+        ACCESS_TOKEN="$BACKUP_ACCESS_TOKEN"
     else
         CLUSTER_API_ENDPOINT="$PRIMARY_CLUSTER_API_ENDPOINT"
         CLUSTER_TOKEN="$PRIMARY_CLUSTER_TOKEN"
         CLUSTER_NAMESPACE="$PRIMARY_CLUSTER_NAMESPACE"
         CLUSTER_CPD_ENDPOINT="$PRIMARY_CLUSTER_CPD_ENDPOINT"
         CLUSTER_NAME="$PRIMARY_CLUSTER_NAME"
+        ACCESS_TOKEN="$PRIMARY_ACCESS_TOKEN"
     fi
 }
 
@@ -147,19 +149,28 @@ oc_login() {
 # Usage: get_jwt_token
 # Requires: Must be logged into cluster via oc login first
 # Sets: JWT_TOKEN variable
+# Note: If ACCESS_TOKEN is already set (from PRIMARY_ACCESS_TOKEN or BACKUP_ACCESS_TOKEN),
+#       it will be used directly as the JWT token, skipping the authentication flow
 get_jwt_token() {
     echo "Getting JWT token..."
     
-    local CP_ROUTE=$(oc get cm management-ingress-ibmcloud-cluster-info -o jsonpath={.data.cluster_endpoint})
-    local ADMIN_USER=$(oc get secret platform-auth-idp-credentials -o jsonpath={.data.admin_username} | base64 -d)
-    local ADMIN_PASS=$(oc get secret platform-auth-idp-credentials -o jsonpath={.data.admin_password} | base64 -d)
-    local ACCESS_TOKEN=$(curl -k -H "Content-Type: application/x-www-form-urlencoded;charset=UTF-8" \
-        -d "grant_type=password&username=${ADMIN_USER}&password=${ADMIN_PASS}&scope=openid" \
-        ${CP_ROUTE}/idprovider/v1/auth/identitytoken | jq -r '.access_token')
-    
-    JWT_TOKEN=$(curl -k -X GET "${CLUSTER_CPD_ENDPOINT}/v1/preauth/validateAuth" \
-        -H "username: ${ADMIN_USER}" \
-        -H "iam-token: ${ACCESS_TOKEN}" | jq -r .accessToken)
+    # Check if ACCESS_TOKEN is already provided (manual token)
+    if [ -n "$ACCESS_TOKEN" ]; then
+        echo "Using provided access token as JWT token..."
+        JWT_TOKEN="$ACCESS_TOKEN"
+    else
+        echo "Retrieving credentials from platform-auth-idp-credentials secret..."
+        local CP_ROUTE=$(oc get cm management-ingress-ibmcloud-cluster-info -o jsonpath={.data.cluster_endpoint})
+        local ADMIN_USER=$(oc get secret platform-auth-idp-credentials -o jsonpath={.data.admin_username} | base64 -d)
+        local ADMIN_PASS=$(oc get secret platform-auth-idp-credentials -o jsonpath={.data.admin_password} | base64 -d)
+        local IAM_ACCESS_TOKEN=$(curl -k -H "Content-Type: application/x-www-form-urlencoded;charset=UTF-8" \
+            -d "grant_type=password&username=${ADMIN_USER}&password=${ADMIN_PASS}&scope=openid" \
+            ${CP_ROUTE}/idprovider/v1/auth/identitytoken | jq -r '.access_token')
+        
+        JWT_TOKEN=$(curl -k -X GET "${CLUSTER_CPD_ENDPOINT}/v1/preauth/validateAuth" \
+            -H "username: ${ADMIN_USER}" \
+            -H "iam-token: ${IAM_ACCESS_TOKEN}" | jq -r .accessToken)
+    fi
     
     if [ -z "$JWT_TOKEN" ] || [ "$JWT_TOKEN" = "null" ]; then
         echo "Error: Failed to obtain JWT token"

@@ -15,7 +15,11 @@ Before using these scripts, ensure you have the following tools installed:
 
 ### Initial Setup
 1. Copy `geo_config.env.template` to `geo_config.env` and fill it out with the required information for both clusters (API endpoints, tokens, namespaces, etc.). This file can be saved outside of the repository.
-2. Run `./setupMultiCluster.sh` to enable multi-cluster support and perform the necessary token, secret, and encryption key exchanges.
+
+**Note:** if the `cpadmin` user is unavailable, uncomment `PRIMARY_ACCESS_TOKEN` and `BACKUP_ACCESS_TOKEN` and follow the instructions https://www.ibm.com/docs/en/concert-operate/5.1.0?topic=apis-accessing#key__title__1 to get the access token for your username. This username requires administrative privelages in the cluster to write topology or policy changes. An example of getting the two access tokens can be found in [Example For Getting JWT Tokens](#example-for-getting-jwt-tokens)
+
+
+1. Run `./setupMultiCluster.sh` to enable multi-cluster support and perform the necessary token, secret, and encryption key exchanges.
 
 **Examples:**
 ```bash
@@ -163,4 +167,32 @@ If you have multiple environment configurations:
 - **Hardcoded Tenant ID**: The topology export/import scripts use a hardcoded X-TenantID (`cfd95b7e-3bc7-4006-a4a8-a73a79c71255`). You may need to update this value in `exportTopology.sh` and `importTopology.sh` if your environment uses a different tenant ID.
 - **Policy Script Dependencies**: The policy scripts depend on Python scripts located at `../../replicate-policies-scripts/v1/`. Ensure these scripts are available before running policy export/import operations.
 - **Token Expiration**: The tokens configured in `geo_config.env` may expire. The `geo_config.env` needs to be updated with the new token. For example, calling `oc whoami -t` to get the new token.
+
+## Example For Getting JWT Tokens
+Follow the instructions: https://www.ibm.com/docs/en/concert-operate/5.1.0?topic=apis-accessing#key__title__1 to get the API key:
+
+```bash
+PRIMARY_CLUSTER_CPD_ENDPOINT=https://cpd-katamari.concert-op-west.cp.acme.ibm.com
+PRIMARY_API_KEY=API_KEY
+PRIMARY_ADMIN_USER=admin@example.ibm.com
+
+PRIMARY_CLUSTER_TOKEN=$(curl -k -X POST "${PRIMARY_CLUSTER_CPD_ENDPOINT}/icp4d-api/v1/authorize" \
+  -H 'Content-Type: application/json' \
+  -d "{\"username\": \"${PRIMARY_ADMIN_USER}\", \"api_key\": \"${PRIMARY_API_KEY}\"}" | jq -r '.token')
+```
+
+Put `PRIMARY_CLUSTER_TOKEN` into `geo_config.env` file.
+
+
+```bash
+BACKUP_CLUSTER_CPD_ENDPOINT=https://cpd-katamari.concert-op-west.cp.acme.ibm.com
+BACKUP_API_KEY=API_KEY
+BACKUP_ADMIN_USER=admin@example.ibm.com
+
+BACKUP_CLUSTER_TOKEN=$(curl -k -X POST "${BACKUP_CLUSTER_CPD_ENDPOINT}/icp4d-api/v1/authorize" \
+  -H 'Content-Type: application/json' \
+  -d "{\"username\": \"${BACKUP_ADMIN_USER}\", \"api_key\": \"${BACKUP_API_KEY}\"}" | jq -r '.token')
+```
+
+Put `BACKUP_CLUSTER_TOKEN` into `geo_config.env` file.
 
