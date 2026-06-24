@@ -20,7 +20,7 @@ spec:
         - name: workdir
           emptyDir: {}
       containers:
-      - image: "icr.io/cpopen/cp4waiops/cp4aiops-bcdr@sha256:9fb440d169117ece54e7acc8a9d2a20d10c444e49ea23016e3c519ce1be32d24"
+      - image: "icr.io/cpopen/cp4waiops/cp4aiops-bcdr@sha256:7ea4b72ade38a240efabee5fb6f7736b09d0c4a09ac7f5e145ad431e0d8d46da"
         imagePullPolicy: Always
         name: ia-restore
         command: ["/bin/bash", "/bcdr/restore/restore.sh","-ia"]
