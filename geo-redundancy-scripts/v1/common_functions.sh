@@ -185,9 +185,27 @@ get_jwt_token() {
 # ============================================
 # Usage: login_and_get_token "primary|backup"
 # Sets: CLUSTER_* variables and JWT_TOKEN
+# Note: If ACCESS_TOKEN is provided, skips oc login and uses the token directly
 login_and_get_token() {
     local cluster="$1"
     
-    oc_login "$cluster"
-    get_jwt_token
+    # Set cluster variables first to get ACCESS_TOKEN
+    set_cluster_vars "$cluster"
+    
+    # Check if manual access token is provided
+    if [ -n "$ACCESS_TOKEN" ]; then
+        echo "Using provided access token, skipping oc login..."
+        JWT_TOKEN="$ACCESS_TOKEN"
+        
+        if [ -z "$JWT_TOKEN" ] || [ "$JWT_TOKEN" = "null" ]; then
+            echo "Error: Provided access token is invalid"
+            exit 1
+        fi
+        
+        echo "JWT token set successfully from provided access token"
+    else
+        # No manual token, perform normal oc login and get token
+        oc_login "$cluster"
+        get_jwt_token
+    fi
 }
