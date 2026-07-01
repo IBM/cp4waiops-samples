@@ -112,14 +112,14 @@ set_cluster_vars() {
         CLUSTER_API_ENDPOINT="$BACKUP_CLUSTER_API_ENDPOINT"
         CLUSTER_TOKEN="$BACKUP_CLUSTER_TOKEN"
         CLUSTER_NAMESPACE="$BACKUP_CLUSTER_NAMESPACE"
-        CLUSTER_CPD_ENDPOINT="$BACKUP_CLUSTER_CPD_ENDPOINT"
+        CLUSTER_CPD_ENDPOINT="${BACKUP_CLUSTER_CPD_ENDPOINT%/}"
         CLUSTER_NAME="$BACKUP_CLUSTER_NAME"
         ACCESS_TOKEN="${BACKUP_ACCESS_TOKEN:-}"
     else
         CLUSTER_API_ENDPOINT="$PRIMARY_CLUSTER_API_ENDPOINT"
         CLUSTER_TOKEN="$PRIMARY_CLUSTER_TOKEN"
         CLUSTER_NAMESPACE="$PRIMARY_CLUSTER_NAMESPACE"
-        CLUSTER_CPD_ENDPOINT="$PRIMARY_CLUSTER_CPD_ENDPOINT"
+        CLUSTER_CPD_ENDPOINT="${PRIMARY_CLUSTER_CPD_ENDPOINT%/}"
         CLUSTER_NAME="$PRIMARY_CLUSTER_NAME"
         ACCESS_TOKEN="${PRIMARY_ACCESS_TOKEN:-}"
     fi
@@ -160,16 +160,37 @@ get_jwt_token() {
         JWT_TOKEN="$ACCESS_TOKEN"
     else
         echo "Retrieving credentials from platform-auth-idp-credentials secret..."
-        local CP_ROUTE=$(oc get cm management-ingress-ibmcloud-cluster-info -o jsonpath={.data.cluster_endpoint})
-        local ADMIN_USER=$(oc get secret platform-auth-idp-credentials -o jsonpath={.data.admin_username} | base64 -d)
-        local ADMIN_PASS=$(oc get secret platform-auth-idp-credentials -o jsonpath={.data.admin_password} | base64 -d)
-        local IAM_ACCESS_TOKEN=$(curl -k -H "Content-Type: application/x-www-form-urlencoded;charset=UTF-8" \
+        # Declare locals first so 'local' exit-code doesn't mask subshell failures
+        local CP_ROUTE ADMIN_USER ADMIN_PASS IAM_RESPONSE IAM_ACCESS_TOKEN JWT_RESPONSE
+        CP_ROUTE=$(oc get cm management-ingress-ibmcloud-cluster-info -o jsonpath={.data.cluster_endpoint})
+        ADMIN_USER=$(oc get secret platform-auth-idp-credentials -o jsonpath={.data.admin_username} | base64 -d)
+        ADMIN_PASS=$(oc get secret platform-auth-idp-credentials -o jsonpath={.data.admin_password} | base64 -d)
+
+        IAM_RESPONSE=$(curl -sk -H "Content-Type: application/x-www-form-urlencoded;charset=UTF-8" \
             -d "grant_type=password&username=${ADMIN_USER}&password=${ADMIN_PASS}&scope=openid" \
-            ${CP_ROUTE}/idprovider/v1/auth/identitytoken | jq -r '.access_token')
-        
-        JWT_TOKEN=$(curl -k -X GET "${CLUSTER_CPD_ENDPOINT}/v1/preauth/validateAuth" \
+            "${CP_ROUTE}/idprovider/v1/auth/identitytoken")
+        # Use || true so a jq parse failure doesn't kill the script via set -e;
+        # the emptiness check below provides the real error gate.
+        IAM_ACCESS_TOKEN=$(echo "${IAM_RESPONSE}" | jq -r '.access_token // empty' 2>/dev/null || true)
+
+        if [ -z "$IAM_ACCESS_TOKEN" ]; then
+            echo "Error: Failed to obtain IAM access token"
+            echo "IAM endpoint: ${CP_ROUTE}/idprovider/v1/auth/identitytoken"
+            echo "Response: ${IAM_RESPONSE}"
+            exit 1
+        fi
+
+        JWT_RESPONSE=$(curl -sk -X GET "${CLUSTER_CPD_ENDPOINT}/v1/preauth/validateAuth" \
             -H "username: ${ADMIN_USER}" \
-            -H "iam-token: ${IAM_ACCESS_TOKEN}" | jq -r .accessToken)
+            -H "iam-token: ${IAM_ACCESS_TOKEN}")
+        JWT_TOKEN=$(echo "${JWT_RESPONSE}" | jq -r '.accessToken // empty' 2>/dev/null || true)
+
+        if [ -z "$JWT_TOKEN" ] || [ "$JWT_TOKEN" = "null" ]; then
+            echo "Error: Failed to obtain JWT token from validateAuth"
+            echo "validateAuth endpoint: ${CLUSTER_CPD_ENDPOINT}/v1/preauth/validateAuth"
+            echo "Response: ${JWT_RESPONSE}"
+            exit 1
+        fi
     fi
     
     if [ -z "$JWT_TOKEN" ] || [ "$JWT_TOKEN" = "null" ]; then
