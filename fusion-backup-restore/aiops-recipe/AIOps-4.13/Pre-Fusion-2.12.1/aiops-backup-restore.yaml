@@ -57,11 +57,6 @@ spec:
       includedResourceTypes:
         - secrets
       labelSelector: app.kubernetes.io/component=model-secret
-    - name: aiops-ir-analytics-metric-api-service
-      type: resource
-      includedResourceTypes:
-        - services
-      labelSelector: app.kubernetes.io/component=metric-api
     - name: aiops-ai-model-ui-service
       type: resource
       includedResourceTypes:
@@ -247,37 +242,6 @@ spec:
       timeout: 600
       onError: fail
       condition: "{$.status.connectionState.lastObservedState} == {\"READY\"}"
-  - name: opensearch-operator-scale-deployment
-    type: scale
-    namespace: ${GROUP.aiops-volumes.namespace}
-    selectResource: deployment
-    nameSelector: ibm-opensearch-operator-controller-manager
-  - name: remove-label-opensearch-pod
-    type: label
-    nameSelector: filebrowser*
-    namespace: ${GROUP.aiops-volumes.namespace}
-    selectResource: pod
-    labelSelector: cluster.opensearch.cloudpackopen.ibm.com=aiops-opensearch
-    timeout: 60
-    onError: fail
-    ops:
-    - labels: velero.io/exclude-from-backup-
-      name: filebrowser-resources-remove-labels
-      onError: fail
-      timeout: 60
-  - name: remove-label-opensearch-pvc
-    type: label
-    nameSelector: filebrowser*
-    namespace: ${GROUP.aiops-volumes.namespace}
-    selectResource: persistentvolumeclaims
-    labelSelector: cluster.opensearch.cloudpackopen.ibm.com=aiops-opensearch
-    timeout: 60
-    onError: fail
-    ops:
-    - labels: velero.io/exclude-from-backup-
-      name: filebrowser-resources-remove-labels
-      onError: fail
-      timeout: 60
   - name: odlm-pod-exec
     type: exec
     namespace: ${GROUP.aiops-volumes.namespace}
@@ -403,11 +367,11 @@ spec:
     type: check
     selectResource: ai-manager.watson-aiops.ibm.com/v1beta1/aimanagers
     labelSelector: operator.ibm.com/opreq-control=true
-    timeout: 1200
+    timeout: 240
     onError: fail
     chks:
     - name: phaseCompleted
-      timeout: 1200
+      timeout: 240
       onError: fail
       condition: "{$.status.phase} == {\"Completed\"}"
   - name: lifecycleservices-aiops-check
@@ -455,13 +419,8 @@ spec:
   - name: backup
     failOn: essential-error
     sequence:
-    - hook: opensearch-operator-scale-deployment/down
-    - hook: opensearch-operator-scale-deployment/sync
-    - hook: remove-label-opensearch-pod/filebrowser-resources-remove-labels
-    - hook: remove-label-opensearch-pvc/filebrowser-resources-remove-labels
     - group: aiops-catalog-source
     - group: aiops-operatorgroup
-    - group: aiops-ir-analytics-metric-api-service
     - group: aiops-ai-model-ui-service
     - group: aimanager-aio-chatops-slack-integrator-service
     - group: aiops-akora-ui-service
@@ -506,15 +465,12 @@ spec:
     - hook: edb-postgresql-pod-exec/checkpoint
     - hook: cassandra-pod-exec/nodetool-flush
     - group: aiops-volumes
-    - hook: opensearch-operator-scale-deployment/up
-    - hook: opensearch-operator-scale-deployment/sync
   - name: restore
     failOn: essential-error
     sequence:
     - group: aiops-catalog-source
     - hook: ibm-aiops-catalogsource-check/status
     - group: aiops-operatorgroup
-    - group: aiops-ir-analytics-metric-api-service
     - group: aiops-ai-model-ui-service
     - group: aimanager-aio-chatops-slack-integrator-service
     - group: aiops-akora-ui-service
