@@ -212,12 +212,12 @@ fetch_resource \
 
 fetch_resource \
     "Filters" \
-    "/aiops/api/v2/configuration/filters" \
+    "/aiops/api/v2/configuration/filters?all=true" \
     "filters.json"
 
 fetch_resource \
     "Menus" \
-    "/aiops/api/v2/configuration/menus" \
+    "/aiops/api/v2/configuration/menus?all=true" \
     "menus.json"
 
 fetch_resource \
@@ -247,7 +247,7 @@ fetch_resource \
 
 fetch_resource \
     "Views" \
-    "/aiops/api/v2/configuration/views" \
+    "/aiops/api/v2/configuration/views?all=true" \
     "views.json"
 
 # Topology uses a dedicated backup endpoint that returns the full config blob
