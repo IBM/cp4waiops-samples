@@ -9,6 +9,7 @@
 #
 # Resources restored:
 #   - Algorithms
+#   - Connections
 #   - Filters
 #   - Menus
 #   - Policies       (via policy-batches endpoint for efficiency)
@@ -273,6 +274,95 @@ restore_file() {
 }
 
 # ============================================
+# Helper: restore Connections from connections.json
+# Connections use the v1 API. Each item in the backup is a ConnectionsListResponseDto
+# wrapper object (shape: { code, data: [ConnectionDto] }). Individual ConnectionDto
+# objects are nested inside each wrapper's .data[] array.
+# The create endpoint is per-type: POST /connection-types/{type}/connections
+# restore_connections <backup_filename>
+# ============================================
+restore_connections() {
+    local backup_filename="$1"
+    local input_file="${BACKUP_DIR}/${backup_filename}"
+    local label="Connections"
+
+    if [[ ! -f "${input_file}" ]]; then
+        echo "Skipping ${label} — file not found: ${backup_filename}"
+        TOTAL_SKIPPED=$(( TOTAL_SKIPPED + 1 ))
+        return 0
+    fi
+
+    # Flatten all ConnectionDto objects from every wrapper's .data[] array
+    local conn_count
+    conn_count=$(jq '[.items[].data[]] | length' "${input_file}" 2>/dev/null || echo "0")
+
+    if [[ "$conn_count" -eq 0 ]]; then
+        echo "Skipping ${label} — 0 items in backup"
+        TOTAL_SKIPPED=$(( TOTAL_SKIPPED + 1 ))
+        return 0
+    fi
+
+    echo "Restoring ${label} (${conn_count} item(s))..."
+
+    if [[ "$DRY_RUN" == "true" ]]; then
+        echo "  [dry-run] Would POST ${conn_count} connection(s) to /aiops/api/v1/configuration/connection-types/{type}/connections"
+        TOTAL_SKIPPED=$(( TOTAL_SKIPPED + 1 ))
+        return 0
+    fi
+
+    local success=0
+    local failed=0
+
+    for i in $(seq 0 $(( conn_count - 1 ))); do
+        local conn_json conn_type conn_name
+        conn_json=$(jq "[.items[].data[]] | .[$i]" "${input_file}")
+        conn_type=$(echo "${conn_json}" | jq -r '.connectionType // empty')
+        conn_name=$(echo "${conn_json}" | jq -r '.name // "unknown"')
+
+        if [[ -z "$conn_type" ]]; then
+            echo "  Warning: Connection at index ${i} has no connectionType — skipping"
+            failed=$(( failed + 1 ))
+            continue
+        fi
+
+        # Build CreateConnectionDto: pick only the fields the POST endpoint accepts
+        local payload
+        payload=$(echo "${conn_json}" | jq '{
+            name:             .name,
+            displayName:      .displayName,
+            deploymentType:   .deploymentType,
+            connectorState:   .connectorState,
+            connectionConfig: .connectionConfig
+        } | with_entries(select(.value != null))')
+
+        TOTAL_ATTEMPTED=$(( TOTAL_ATTEMPTED + 1 ))
+
+        HTTP_CODE=$(curl -k -X POST \
+            "${CLUSTER_CPD_ENDPOINT}/aiops/api/v1/configuration/connection-types/${conn_type}/connections" \
+            --header "Content-Type: application/json" \
+            --header "Authorization: Bearer ${JWT_TOKEN}" \
+            --header "X-TenantID: cfd95b7e-3bc7-4006-a4a8-a73a79c71255" \
+            --data "${payload}" \
+            --write-out "%{http_code}" \
+            --silent \
+            --output /dev/null)
+
+        if [[ "${HTTP_CODE}" -ge 200 && "${HTTP_CODE}" -lt 300 ]]; then
+            success=$(( success + 1 ))
+            TOTAL_SUCCESS=$(( TOTAL_SUCCESS + 1 ))
+        else
+            failed=$(( failed + 1 ))
+            echo "  Warning: HTTP ${HTTP_CODE} for connection '${conn_name}' (type: ${conn_type})"
+        fi
+    done
+
+    echo "  ${success}/${conn_count} connection(s) restored successfully"
+    if [[ $failed -gt 0 ]]; then
+        echo "  Warning: ${failed} connection(s) failed to restore"
+    fi
+}
+
+# ============================================
 # Restore each resource type
 # ============================================
 
@@ -280,6 +370,8 @@ restore_items \
     "Algorithms" \
     "/aiops/api/v2/configuration/algorithms" \
     "algorithms.json"
+
+restore_connections "connections.json"
 
 restore_items \
     "Filters" \
