@@ -9,6 +9,7 @@
 #
 # Resources exported:
 #   - Algorithms
+#   - Connections
 #   - Filters
 #   - Menus
 #   - Policies
@@ -210,6 +211,16 @@ fetch_resource \
     "/aiops/api/v2/configuration/algorithms" \
     "algorithms.json"
 
+# Connections use the v1 API (issue-resolution API) and require decryptFields=true
+# so that sensitive fields are exported in plaintext and can be re-imported.
+# The response shape is { items: [ { code, data: [ConnectionDto] } ] } — the
+# fetch_resource helper records .items | length which equals the number of
+# ConnectionsListResponseDto wrapper objects (one per connection type queried).
+fetch_resource \
+    "Connections" \
+    "/aiops/api/v1/configuration/connections?decryptFields=true" \
+    "connections.json"
+
 fetch_resource \
     "Filters" \
     "/aiops/api/v2/configuration/filters?all=true" \
@@ -320,6 +331,7 @@ cat > "${METADATA_FILE}" <<EOF
   "cluster_endpoint": "${CLUSTER_CPD_ENDPOINT}",
   "resources": [
     "algorithms",
+    "connections",
     "filters",
     "menus",
     "policies",
