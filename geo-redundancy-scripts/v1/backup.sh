@@ -106,7 +106,8 @@ load_geo_config
 
 CLUSTER_DISPLAY=$(echo "$SOURCE_CLUSTER" | tr '[:lower:]' '[:upper:]')
 echo "NOTE:"
-echo "    If you are using these scripts to replicate data, use aiopsctl’s exchange-token to ensure the connector’s encryption key gets copied over to the other cluster."
+echo "    If you are using these scripts to replicate data, use aiopsctl’s exchange-token (https://github.com/IBM/aiopsctl) to ensure the connector’s encryption key" 
+echo "    gets copied over to the other cluster."
 echo "    Both clusters must have the same key to decrypt all the connectors' encrypted data. If the system is clean installed you must have a backup of the"
 echo "    aiopsedge-config-encryption-key secret and restore it prior to running the restore script."
 echo ""
