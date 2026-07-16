@@ -7,8 +7,6 @@ spec:
   backoffLimit: 0
   template:
     spec:
-      imagePullSecrets:
-        - name: restore-secret
       serviceAccountName: restore-sa
       volumes:
         - name: restore-data-config
