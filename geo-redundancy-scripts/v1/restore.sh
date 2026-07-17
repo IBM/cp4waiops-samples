@@ -13,8 +13,8 @@
 #   - Filters
 #   - Menus
 #   - Policies       (via policy-batches endpoint for efficiency)
-#   - Runbooks
-#   - Tools
+#   - Runbooks       (via RBA v1 bulk import endpoint)
+#   - Actions        (via RBA v1 API; referred to as Tools in the v2 configuration API)
 #   - Topology configuration
 #   - Training definitions
 #   - Views
@@ -236,8 +236,11 @@ restore_file() {
     fi
 
     local payload
-    if [[ -n "$wrap_key" ]]; then
-        # Build { "policies": [ ... ] } from the items array
+    if [[ "$wrap_key" == "__array__" ]]; then
+        # Unwrap the stored { "items": [...] } back to a plain array
+        payload=$(jq '.items' "${input_file}")
+    elif [[ -n "$wrap_key" ]]; then
+        # Build e.g. { "policies": [ ... ] } from the items array
         payload=$(jq "{\"${wrap_key}\": .items}" "${input_file}")
     else
         payload=$(cat "${input_file}")
@@ -391,15 +394,21 @@ restore_file \
     "policies.json" \
     "policies"
 
-restore_items \
+# Runbooks: restore via the RBA v1 bulk import endpoint.
+# The backup file holds { "items": [...] } where each item is an exportFormat runbook.
+# POST /api/v1/rba/runbooks/import accepts a plain array.
+restore_file \
     "Runbooks" \
-    "/aiops/api/v2/configuration/runbooks" \
-    "runbooks.json"
+    "POST" \
+    "/aiops/api/story-manager/rba/v1/runbooks/import" \
+    "runbooks.json" \
+    "__array__"
 
+# Actions (RBA terminology for Tools): restore via the RBA v1 API, one per POST.
 restore_items \
-    "Tools" \
-    "/aiops/api/v2/configuration/tools" \
-    "tools.json"
+    "Actions" \
+    "/aiops/api/story-manager/rba/v1/actions" \
+    "actions.json"
 
 # Topology: restore via dedicated POST endpoint
 restore_file \

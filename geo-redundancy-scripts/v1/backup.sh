@@ -14,7 +14,7 @@
 #   - Menus
 #   - Policies
 #   - Runbooks
-#   - Tools
+#   - Actions
 #   - Topology configuration
 #   - Training definitions
 #   - User preferences
@@ -146,7 +146,7 @@ fetch_resource() {
     # --verbose goes to stderr (the terminal directly) so it never contaminates
     # the HTTP_CODE capture. || true prevents set -e on non-2xx.
     if [[ "$DEBUG" == "true" ]]; then
-        HTTP_CODE=$(curl -k -X GET "${full_url}" \
+        HTTP_CODE=$(curl -k --compressed -X GET "${full_url}" \
             --header "Content-Type: application/json" \
             --header "Authorization: Bearer ${JWT_TOKEN}" \
             --header "X-TenantID: cfd95b7e-3bc7-4006-a4a8-a73a79c71255" \
@@ -154,7 +154,7 @@ fetch_resource() {
             --write-out "%{http_code}" \
             --verbose 2>/dev/tty || true)
     else
-        HTTP_CODE=$(curl -k -X GET "${full_url}" \
+        HTTP_CODE=$(curl -k --compressed -X GET "${full_url}" \
             --header "Content-Type: application/json" \
             --header "Authorization: Bearer ${JWT_TOKEN}" \
             --header "X-TenantID: cfd95b7e-3bc7-4006-a4a8-a73a79c71255" \
@@ -173,11 +173,11 @@ fetch_resource() {
     HTTP_CODE="${HTTP_CODE//[^0-9]/}"
 
     if [[ -z "$HTTP_CODE" ]]; then
-        echo "  Error: No HTTP response received for ${label}"
-        echo "  Response body:"
-        cat "${tmp_file}" 2>/dev/null || true
+        echo "  Warning: No HTTP response received for ${label} — skipping"
+        echo "  Response body: $(cat "${tmp_file}" 2>/dev/null || true)"
         rm -f "${tmp_file}"
-        exit 1
+        SKIPPED_RESOURCES+=("${label} (no response)")
+        return
     fi
 
     if [[ "${HTTP_CODE}" -ge 200 && "${HTTP_CODE}" -lt 300 ]]; then
@@ -238,20 +238,213 @@ fetch_resource \
     "/aiops/api/v2/configuration/menus?all=true" \
     "menus.json"
 
-fetch_resource \
-    "Policies" \
-    "/aiops/api/v2/configuration/policies" \
-    "policies.json"
+# Policies: every endpoint caps at 10,000 items per request. Work around this by
+# fetching each state (draft/enabled/disabled/archived) in pages using
+# paginationFrom offset. States are mutually exclusive so combining them gives
+# the complete set. Each page is written to disk and all are merged at the end.
+echo "Exporting Policies..."
+POLICIES_OUT="${OUTPUT_DIR}/policies.json"
+POLICIES_TMP="${OUTPUT_DIR}/policies.json.tmp"
+POLICIES_PAGES_DIR="${OUTPUT_DIR}/policies-pages"
+POLICIES_BASE_URL="${CLUSTER_CPD_ENDPOINT}/aiops/api/v2/configuration/policies"
+POLICIES_PAGE_SIZE=5000
+policies_skipped=false
+policy_page_num=0
 
-fetch_resource \
-    "Runbooks" \
-    "/aiops/api/v2/configuration/runbooks" \
-    "runbooks.json"
+mkdir -p "${POLICIES_PAGES_DIR}"
 
-fetch_resource \
-    "Tools" \
-    "/aiops/api/v2/configuration/tools" \
-    "tools.json"
+for policy_state in draft enabled disabled archived; do
+    state_offset=0
+    state_total=0
+
+    while true; do
+        state_url="${POLICIES_BASE_URL}?state=${policy_state}&filter%5BpaginationResponseSize%5D=${POLICIES_PAGE_SIZE}&filter%5BpaginationFrom%5D=${state_offset}"
+
+        if [[ "$DEBUG" == "true" ]]; then
+            echo "  [debug] GET ${POLICIES_BASE_URL}?state=${policy_state}&filter[paginationResponseSize]=${POLICIES_PAGE_SIZE}&filter[paginationFrom]=${state_offset}"
+            P_HTTP_CODE=$(curl -k --compressed --globoff -X GET "${state_url}" \
+                --header "Content-Type: application/json" \
+                --header "Authorization: Bearer ${JWT_TOKEN}" \
+                --header "X-TenantID: cfd95b7e-3bc7-4006-a4a8-a73a79c71255" \
+                --output "${POLICIES_TMP}" \
+                --write-out "%{http_code}" \
+                --verbose 2>/dev/tty || true)
+            echo "  [debug] Response body:"
+            cat "${POLICIES_TMP}" 2>/dev/null || true
+            echo ""
+        else
+            P_HTTP_CODE=$(curl -k --compressed --globoff -X GET "${state_url}" \
+                --header "Content-Type: application/json" \
+                --header "Authorization: Bearer ${JWT_TOKEN}" \
+                --header "X-TenantID: cfd95b7e-3bc7-4006-a4a8-a73a79c71255" \
+                --output "${POLICIES_TMP}" \
+                --write-out "%{http_code}" \
+                --silent 2>/dev/null || true)
+        fi
+
+        P_HTTP_CODE="${P_HTTP_CODE//[^0-9]/}"
+
+        if [[ -z "$P_HTTP_CODE" || "${P_HTTP_CODE}" -eq 0 ]]; then
+            echo "  Error: No HTTP response received for Policies (state=${policy_state} offset=${state_offset})"
+            rm -f "${POLICIES_TMP}"; rm -rf "${POLICIES_PAGES_DIR}"; exit 1
+        elif [[ "${P_HTTP_CODE}" -eq 401 || "${P_HTTP_CODE}" -eq 403 ]]; then
+            echo "  Error: HTTP ${P_HTTP_CODE} (auth failure) while exporting Policies — aborting"
+            cat "${POLICIES_TMP}" 2>/dev/null || true
+            rm -f "${POLICIES_TMP}"; rm -rf "${POLICIES_PAGES_DIR}"; exit 1
+        elif [[ "${P_HTTP_CODE}" -lt 200 || "${P_HTTP_CODE}" -ge 300 ]]; then
+            echo "  Warning: HTTP ${P_HTTP_CODE} while exporting Policies (state=${policy_state} offset=${state_offset}) — skipping"
+            rm -f "${POLICIES_TMP}"; rm -rf "${POLICIES_PAGES_DIR}"
+            SKIPPED_RESOURCES+=("Policies (HTTP ${P_HTTP_CODE})")
+            policies_skipped=true
+            break 2
+        fi
+
+        if ! jq '.' "${POLICIES_TMP}" > /dev/null 2>&1; then
+            echo "  Error: Policies API returned non-JSON for state=${policy_state} offset=${state_offset} (HTTP ${P_HTTP_CODE})"
+            head -c 500 "${POLICIES_TMP}"; echo ""
+            rm -f "${POLICIES_TMP}"; rm -rf "${POLICIES_PAGES_DIR}"; exit 1
+        fi
+
+        page_count=$(jq '.items | length' "${POLICIES_TMP}" 2>/dev/null || echo "0")
+        jq '.items' "${POLICIES_TMP}" > "${POLICIES_PAGES_DIR}/page-${policy_page_num}.json"
+        rm -f "${POLICIES_TMP}"
+
+        state_total=$(( state_total + page_count ))
+        state_offset=$(( state_offset + page_count ))
+        policy_page_num=$(( policy_page_num + 1 ))
+
+        if [[ "$page_count" -lt "$POLICIES_PAGE_SIZE" ]]; then
+            break  # last page for this state
+        fi
+    done
+
+    echo "  state=${policy_state}: ${state_total} item(s)"
+done
+
+if [[ "$policies_skipped" != "true" ]]; then
+    jq -s '{"items": add}' "${POLICIES_PAGES_DIR}"/page-*.json > "${POLICIES_OUT}"
+    rm -rf "${POLICIES_PAGES_DIR}"
+    total_count=$(jq '.items | length' "${POLICIES_OUT}" 2>/dev/null || echo "?")
+    echo "  OK — ${total_count} item(s) → policies.json"
+fi
+
+# Runbooks: use the RBA v1 API with exportFormat=true to get importable JSON.
+# The response is a plain JSON array; normalise it to { "items": [...] } on save.
+echo "Exporting Runbooks..."
+RB_TMP="${OUTPUT_DIR}/runbooks.json.tmp"
+RB_OUT="${OUTPUT_DIR}/runbooks.json"
+RB_URL="${CLUSTER_CPD_ENDPOINT}/aiops/api/story-manager/rba/v1/runbooks?exportFormat=true"
+
+if [[ "$DEBUG" == "true" ]]; then
+    echo "  [debug] GET ${RB_URL}"
+    RB_HTTP_CODE=$(curl -k --compressed -X GET "${RB_URL}" \
+        --header "Content-Type: application/json" \
+        --header "Authorization: Bearer ${JWT_TOKEN}" \
+        --header "X-TenantID: cfd95b7e-3bc7-4006-a4a8-a73a79c71255" \
+        --output "${RB_TMP}" \
+        --write-out "%{http_code}" \
+        --verbose 2>/dev/tty || true)
+    echo "  [debug] Response body:"
+    cat "${RB_TMP}" 2>/dev/null || true
+    echo ""
+else
+    RB_HTTP_CODE=$(curl -k --compressed -X GET "${RB_URL}" \
+        --header "Content-Type: application/json" \
+        --header "Authorization: Bearer ${JWT_TOKEN}" \
+        --header "X-TenantID: cfd95b7e-3bc7-4006-a4a8-a73a79c71255" \
+        --output "${RB_TMP}" \
+        --write-out "%{http_code}" \
+        --silent 2>/dev/null || true)
+fi
+
+RB_HTTP_CODE="${RB_HTTP_CODE//[^0-9]/}"
+
+if [[ "${RB_HTTP_CODE}" -ge 200 && "${RB_HTTP_CODE}" -lt 300 ]]; then
+    # Response is a plain array — wrap it as { "items": [...] } for consistency
+    if jq '{"items": .}' "${RB_TMP}" > "${RB_OUT}" 2>/dev/null; then
+        rm -f "${RB_TMP}"
+    else
+        echo "  Error: Runbooks API returned non-JSON (HTTP ${RB_HTTP_CODE})"
+        echo "  Response body (first 500 chars):"
+        head -c 500 "${RB_TMP}"
+        echo ""
+        rm -f "${RB_TMP}"
+        exit 1
+    fi
+    local_item_count=$(jq '.items | length' "${RB_OUT}" 2>/dev/null || echo "?")
+    echo "  OK — ${local_item_count} item(s) → runbooks.json"
+elif [[ "${RB_HTTP_CODE}" -eq 401 || "${RB_HTTP_CODE}" -eq 403 ]]; then
+    echo "  Error: HTTP ${RB_HTTP_CODE} (auth failure) while exporting Runbooks — aborting"
+    echo "  Response body:"
+    cat "${RB_TMP}" 2>/dev/null || true
+    echo ""
+    rm -f "${RB_TMP}"
+    exit 1
+else
+    echo "  Warning: HTTP ${RB_HTTP_CODE} while exporting Runbooks — skipping"
+    echo "  Response body: $(cat "${RB_TMP}" 2>/dev/null || true)"
+    rm -f "${RB_TMP}"
+    SKIPPED_RESOURCES+=("Runbooks (HTTP ${RB_HTTP_CODE})")
+fi
+
+# Actions (RBA terminology for Tools): use the RBA v1 API.
+# The response is { "actions": [...] }; normalise to { "items": [...] } on save.
+echo "Exporting Actions..."
+ACT_TMP="${OUTPUT_DIR}/actions.json.tmp"
+ACT_OUT="${OUTPUT_DIR}/actions.json"
+ACT_URL="${CLUSTER_CPD_ENDPOINT}/aiops/api/story-manager/rba/v1/actions"
+
+if [[ "$DEBUG" == "true" ]]; then
+    echo "  [debug] GET ${ACT_URL}"
+    ACT_HTTP_CODE=$(curl -k --compressed -X GET "${ACT_URL}" \
+        --header "Content-Type: application/json" \
+        --header "Authorization: Bearer ${JWT_TOKEN}" \
+        --header "X-TenantID: cfd95b7e-3bc7-4006-a4a8-a73a79c71255" \
+        --output "${ACT_TMP}" \
+        --write-out "%{http_code}" \
+        --verbose 2>/dev/tty || true)
+    echo "  [debug] Response body:"
+    cat "${ACT_TMP}" 2>/dev/null || true
+    echo ""
+else
+    ACT_HTTP_CODE=$(curl -k --compressed -X GET "${ACT_URL}" \
+        --header "Content-Type: application/json" \
+        --header "Authorization: Bearer ${JWT_TOKEN}" \
+        --header "X-TenantID: cfd95b7e-3bc7-4006-a4a8-a73a79c71255" \
+        --output "${ACT_TMP}" \
+        --write-out "%{http_code}" \
+        --silent 2>/dev/null || true)
+fi
+
+ACT_HTTP_CODE="${ACT_HTTP_CODE//[^0-9]/}"
+
+if [[ "${ACT_HTTP_CODE}" -ge 200 && "${ACT_HTTP_CODE}" -lt 300 ]]; then
+    # Response is { "actions": [...] } — normalise to { "items": [...] }
+    if jq '{"items": .actions}' "${ACT_TMP}" > "${ACT_OUT}" 2>/dev/null; then
+        rm -f "${ACT_TMP}"
+    else
+        echo "  Error: Actions API returned non-JSON (HTTP ${ACT_HTTP_CODE})"
+        echo "  Response body (first 500 chars):"
+        head -c 500 "${ACT_TMP}"
+        echo ""
+        rm -f "${ACT_TMP}"
+        exit 1
+    fi
+    local_item_count=$(jq '.items | length' "${ACT_OUT}" 2>/dev/null || echo "?")
+    echo "  OK — ${local_item_count} item(s) → actions.json"
+elif [[ "${ACT_HTTP_CODE}" -eq 401 || "${ACT_HTTP_CODE}" -eq 403 ]]; then
+    echo "  Error: HTTP ${ACT_HTTP_CODE} (auth failure) while exporting Actions — aborting"
+    echo "  Response body:"
+    cat "${ACT_TMP}" 2>/dev/null || true
+    echo ""
+    rm -f "${ACT_TMP}"
+    exit 1
+else
+    echo "  Warning: HTTP ${ACT_HTTP_CODE} while exporting Actions — skipping"
+    echo "  Response body: $(cat "${ACT_TMP}" 2>/dev/null || true)"
+    rm -f "${ACT_TMP}"
+    SKIPPED_RESOURCES+=("Actions (HTTP ${ACT_HTTP_CODE})")
+fi
 
 fetch_resource \
     "Training definitions" \
@@ -279,7 +472,7 @@ if [[ "$DEBUG" == "true" ]]; then
 fi
 
 if [[ "$DEBUG" == "true" ]]; then
-    TOPO_HTTP_CODE=$(curl -k -X GET "${TOPO_URL}" \
+    TOPO_HTTP_CODE=$(curl -k --compressed -X GET "${TOPO_URL}" \
         --header "Content-Type: application/json" \
         --header "Authorization: Bearer ${JWT_TOKEN}" \
         --header "X-TenantID: cfd95b7e-3bc7-4006-a4a8-a73a79c71255" \
@@ -290,7 +483,7 @@ if [[ "$DEBUG" == "true" ]]; then
     cat "${TOPOLOGY_TMP}" 2>/dev/null || true
     echo ""
 else
-    TOPO_HTTP_CODE=$(curl -k -X GET "${TOPO_URL}" \
+    TOPO_HTTP_CODE=$(curl -k --compressed -X GET "${TOPO_URL}" \
         --header "Content-Type: application/json" \
         --header "Authorization: Bearer ${JWT_TOKEN}" \
         --header "X-TenantID: cfd95b7e-3bc7-4006-a4a8-a73a79c71255" \
@@ -343,7 +536,7 @@ cat > "${METADATA_FILE}" <<EOF
     "menus",
     "policies",
     "runbooks",
-    "tools",
+    "actions",
     "topology",
     "training-definitions",
     "user-preferences",
