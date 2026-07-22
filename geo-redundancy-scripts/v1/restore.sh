@@ -12,7 +12,7 @@
 #   - Connections
 #   - Filters
 #   - Menus
-#   - Policies       (via policy-batches endpoint for efficiency)
+#   - Policies       (via policy-batches endpoint, one item at a time)
 #   - Runbooks       (via RBA v1 bulk import endpoint)
 #   - Actions        (via RBA v1 API; referred to as Tools in the v2 configuration API)
 #   - Topology configuration
@@ -176,20 +176,28 @@ restore_items() {
     local success=0
     local failed=0
 
+    local tmp_item
+    tmp_item=$(mktemp)
+    # shellcheck disable=SC2064
+    trap "rm -f '${tmp_item}'" RETURN
+
     for i in $(seq 0 $(( item_count - 1 ))); do
-        local item_json
-        item_json=$(jq ".items[$i]" "${input_file}")
+        # Strip read-only / server-managed fields that cause 400 on re-POST
+        jq ".items[$i] | del(._id, .id, .createdAt, .updatedAt, .created, .updated, .lastModified, .lastUpdated, .revision, .__v)" \
+            "${input_file}" > "${tmp_item}"
 
         TOTAL_ATTEMPTED=$(( TOTAL_ATTEMPTED + 1 ))
 
+        local resp_body
+        resp_body=$(mktemp)
         HTTP_CODE=$(curl -k -X POST "${CLUSTER_CPD_ENDPOINT}${api_path}" \
             --header "Content-Type: application/json" \
             --header "Authorization: Bearer ${JWT_TOKEN}" \
             --header "X-TenantID: cfd95b7e-3bc7-4006-a4a8-a73a79c71255" \
-            --data "${item_json}" \
+            --data "@${tmp_item}" \
             --write-out "%{http_code}" \
             --silent \
-            --output /dev/null)
+            --output "${resp_body}")
 
         if [[ "${HTTP_CODE}" -ge 200 && "${HTTP_CODE}" -lt 300 ]]; then
             success=$(( success + 1 ))
@@ -197,9 +205,11 @@ restore_items() {
         else
             failed=$(( failed + 1 ))
             local item_name
-            item_name=$(echo "${item_json}" | jq -r '.name // .algorithmName // .definitionName // .id // "unknown"' 2>/dev/null || echo "unknown")
+            item_name=$(jq -r '.name // .algorithmName // .definitionName // .id // "unknown"' "${tmp_item}" 2>/dev/null || echo "unknown")
             echo "  Warning: HTTP ${HTTP_CODE} for item '${item_name}' (index ${i})"
+            echo "    Response: $(cat "${resp_body}" 2>/dev/null | head -c 300)"
         fi
+        rm -f "${resp_body}"
     done
 
     echo "  ${success}/${item_count} item(s) restored successfully"
@@ -235,15 +245,20 @@ restore_file() {
         return 0
     fi
 
-    local payload
+    local tmp_payload
+    tmp_payload=$(mktemp)
+    # Ensure temp file is cleaned up on exit from this function
+    # shellcheck disable=SC2064
+    trap "rm -f '${tmp_payload}'" RETURN
+
     if [[ "$wrap_key" == "__array__" ]]; then
         # Unwrap the stored { "items": [...] } back to a plain array
-        payload=$(jq '.items' "${input_file}")
+        jq '.items' "${input_file}" > "${tmp_payload}"
     elif [[ -n "$wrap_key" ]]; then
         # Build e.g. { "policies": [ ... ] } from the items array
-        payload=$(jq "{\"${wrap_key}\": .items}" "${input_file}")
+        jq "{\"${wrap_key}\": .items}" "${input_file}" > "${tmp_payload}"
     else
-        payload=$(cat "${input_file}")
+        cp "${input_file}" "${tmp_payload}"
     fi
 
     TOTAL_ATTEMPTED=$(( TOTAL_ATTEMPTED + 1 ))
@@ -252,7 +267,7 @@ restore_file() {
         --header "Content-Type: application/json" \
         --header "Authorization: Bearer ${JWT_TOKEN}" \
         --header "X-TenantID: cfd95b7e-3bc7-4006-a4a8-a73a79c71255" \
-        --data "${payload}" \
+        --data "@${tmp_payload}" \
         --write-out "%{http_code}" \
         --silent \
         --output /dev/null)
@@ -269,7 +284,7 @@ restore_file() {
             --header "Content-Type: application/json" \
             --header "Authorization: Bearer ${JWT_TOKEN}" \
             --header "X-TenantID: cfd95b7e-3bc7-4006-a4a8-a73a79c71255" \
-            --data "${payload}" \
+            --data "@${tmp_payload}" \
             --silent
         echo ""
         exit 1
@@ -340,12 +355,12 @@ restore_connections() {
 
         TOTAL_ATTEMPTED=$(( TOTAL_ATTEMPTED + 1 ))
 
-        HTTP_CODE=$(curl -k -X POST \
+        HTTP_CODE=$(echo "${payload}" | curl -k -X POST \
             "${CLUSTER_CPD_ENDPOINT}/aiops/api/v1/configuration/connection-types/${conn_type}/connections" \
             --header "Content-Type: application/json" \
             --header "Authorization: Bearer ${JWT_TOKEN}" \
             --header "X-TenantID: cfd95b7e-3bc7-4006-a4a8-a73a79c71255" \
-            --data "${payload}" \
+            --data @- \
             --write-out "%{http_code}" \
             --silent \
             --output /dev/null)
@@ -366,13 +381,120 @@ restore_connections() {
 }
 
 # ============================================
+# Helper: restore Algorithms
+#
+# The POST /algorithms endpoint re-registers algorithms.  Live API testing shows:
+#   - Only runtimeName "SPARK" or "LUIGI" is accepted by the endpoint
+#   - Required fields: algorithmName, algorithmDescription, isEnabled,
+#                      runtimeName, configBase64, configType
+#   - The backup stores the config as manifestBase64 (YAML) — map it to
+#     configBase64 and set configType="YAML"
+#
+# Algorithms with runtimeName K8s / GENAI / LADGS are system-managed components;
+# the API provides no update path for them.  They are skipped with a notice.
+# ============================================
+restore_algorithms() {
+    local input_file="${BACKUP_DIR}/algorithms.json"
+    local label="Algorithms"
+
+    if [[ ! -f "${input_file}" ]]; then
+        echo "Skipping ${label} — file not found: algorithms.json"
+        TOTAL_SKIPPED=$(( TOTAL_SKIPPED + 1 ))
+        return 0
+    fi
+
+    local item_count
+    item_count=$(jq '.items | length' "${input_file}" 2>/dev/null || echo "0")
+
+    if [[ "$item_count" -eq 0 ]]; then
+        echo "Skipping ${label} — 0 items in backup"
+        TOTAL_SKIPPED=$(( TOTAL_SKIPPED + 1 ))
+        return 0
+    fi
+
+    echo "Restoring ${label} (${item_count} item(s))..."
+
+    if [[ "$DRY_RUN" == "true" ]]; then
+        local spark_count
+        spark_count=$(jq '[.items[] | select(.runtimeName == "SPARK" or .runtimeName == "LUIGI")] | length' "${input_file}")
+        echo "  [dry-run] Would POST ${spark_count} SPARK/LUIGI item(s) to /aiops/api/v2/configuration/algorithms"
+        echo "  [dry-run] Would skip $(( item_count - spark_count )) system-managed item(s) (K8s/GENAI/LADGS/…)"
+        TOTAL_SKIPPED=$(( TOTAL_SKIPPED + 1 ))
+        return 0
+    fi
+
+    local success=0
+    local failed=0
+    local skipped=0
+
+    local tmp_item resp_body
+    tmp_item=$(mktemp)
+    resp_body=$(mktemp)
+    # shellcheck disable=SC2064
+    trap "rm -f '${tmp_item}' '${resp_body}'" RETURN
+
+    for i in $(seq 0 $(( item_count - 1 ))); do
+        local alg_name runtime
+        alg_name=$(jq -r ".items[$i].algorithmName // empty" "${input_file}")
+        runtime=$(jq -r ".items[$i].runtimeName // empty" "${input_file}")
+
+        if [[ -z "$alg_name" ]]; then
+            echo "  Warning: item at index ${i} has no algorithmName — skipping"
+            skipped=$(( skipped + 1 ))
+            continue
+        fi
+
+        # Only SPARK and LUIGI can be POSTed; other runtimes are system-managed
+        if [[ "$runtime" != "SPARK" && "$runtime" != "LUIGI" ]]; then
+            echo "  Skipping '${alg_name}' (runtimeName=${runtime} — system-managed, no API update path)"
+            skipped=$(( skipped + 1 ))
+            continue
+        fi
+
+        # Map backup fields to the POST envelope.
+        # manifestBase64 contains YAML; send as configBase64 with configType=YAML.
+        jq ".items[$i] | {
+              algorithmName:        .algorithmName,
+              algorithmDescription: .algorithmDescription,
+              isEnabled:            .isEnabled,
+              runtimeName:          .runtimeName,
+              configBase64:         .manifestBase64,
+              configType:           \"YAML\"
+            }" "${input_file}" > "${tmp_item}"
+
+        TOTAL_ATTEMPTED=$(( TOTAL_ATTEMPTED + 1 ))
+
+        HTTP_CODE=$(curl -k -X POST \
+            "${CLUSTER_CPD_ENDPOINT}/aiops/api/v2/configuration/algorithms" \
+            --header "Content-Type: application/json" \
+            --header "Authorization: Bearer ${JWT_TOKEN}" \
+            --header "X-TenantID: cfd95b7e-3bc7-4006-a4a8-a73a79c71255" \
+            --data "@${tmp_item}" \
+            --write-out "%{http_code}" \
+            --silent \
+            --output "${resp_body}")
+
+        if [[ "${HTTP_CODE}" -ge 200 && "${HTTP_CODE}" -lt 300 ]]; then
+            success=$(( success + 1 ))
+            TOTAL_SUCCESS=$(( TOTAL_SUCCESS + 1 ))
+        else
+            failed=$(( failed + 1 ))
+            echo "  Warning: HTTP ${HTTP_CODE} for item '${alg_name}' (index ${i})"
+            echo "    Response: $(jq -c '.' "${resp_body}" 2>/dev/null | head -c 300)"
+        fi
+    done
+
+    echo "  ${success}/${item_count} item(s) restored successfully (${skipped} system-managed skipped)"
+    if [[ $failed -gt 0 ]]; then
+        echo "  Warning: ${failed} item(s) failed to restore"
+    fi
+}
+
+# ============================================
 # Restore each resource type
 # ============================================
 
-restore_items \
-    "Algorithms" \
-    "/aiops/api/v2/configuration/algorithms" \
-    "algorithms.json"
+restore_algorithms
 
 restore_connections "connections.json"
 
@@ -386,13 +508,73 @@ restore_items \
     "/aiops/api/v2/configuration/menus" \
     "menus.json"
 
-# Policies: use the batch endpoint for efficiency (POST /policy-batches)
-restore_file \
-    "Policies" \
-    "POST" \
-    "/aiops/api/v2/configuration/policy-batches" \
-    "policies.json" \
-    "policies"
+# Policies: POST one policy at a time wrapped as {"policies":[<item>]}.
+# Batching causes 413 because policies can be very large; one at a time is the
+# only reliable approach when item size is unbounded.
+POLICY_FILE="${BACKUP_DIR}/policies.json"
+
+if [[ ! -f "${POLICY_FILE}" ]]; then
+    echo "Skipping Policies — file not found: policies.json"
+    TOTAL_SKIPPED=$(( TOTAL_SKIPPED + 1 ))
+else
+    policy_count=$(jq '.items | length' "${POLICY_FILE}" 2>/dev/null || echo "0")
+
+    if [[ "$policy_count" -eq 0 ]]; then
+        echo "Skipping Policies — 0 items in backup"
+        TOTAL_SKIPPED=$(( TOTAL_SKIPPED + 1 ))
+    else
+        echo "Restoring Policies (${policy_count} item(s))..."
+
+        if [[ "$DRY_RUN" == "true" ]]; then
+            echo "  [dry-run] Would POST ${policy_count} policy/policies to /aiops/api/v2/configuration/policy-batches"
+            TOTAL_SKIPPED=$(( TOTAL_SKIPPED + 1 ))
+        else
+            policy_success=0
+            policy_failed=0
+            policy_tmp=$(mktemp)
+            policy_resp=$(mktemp)
+            # shellcheck disable=SC2064
+            trap "rm -f '${policy_tmp}' '${policy_resp}'" RETURN
+
+            for i in $(seq 0 $(( policy_count - 1 ))); do
+                # Wrap single policy in the envelope the batch endpoint expects.
+                # Strip server-managed fields (id, status, hash, revision) that the
+                # create endpoint rejects.  Keep spec, metadata, executionPriority, state.
+                jq --argjson i "$i" \
+                    '{"policies": [.items[$i] | del(.id, .status, .hash, .revision)]}' \
+                    "${POLICY_FILE}" > "${policy_tmp}"
+
+                TOTAL_ATTEMPTED=$(( TOTAL_ATTEMPTED + 1 ))
+
+                POLICY_HTTP=$(curl -k -X POST \
+                    "${CLUSTER_CPD_ENDPOINT}/aiops/api/v2/configuration/policy-batches" \
+                    --header "Content-Type: application/json" \
+                    --header "Authorization: Bearer ${JWT_TOKEN}" \
+                    --header "X-TenantID: cfd95b7e-3bc7-4006-a4a8-a73a79c71255" \
+                    --data "@${policy_tmp}" \
+                    --write-out "%{http_code}" \
+                    --silent \
+                    --output "${policy_resp}")
+
+                if [[ "${POLICY_HTTP}" -ge 200 && "${POLICY_HTTP}" -lt 300 ]]; then
+                    policy_success=$(( policy_success + 1 ))
+                    TOTAL_SUCCESS=$(( TOTAL_SUCCESS + 1 ))
+                else
+                    policy_failed=$(( policy_failed + 1 ))
+                    policy_name=$(jq -r '.policies[0].name // .policies[0].id // "unknown"' "${policy_tmp}" 2>/dev/null || echo "unknown")
+                    echo "  Warning: HTTP ${POLICY_HTTP} for policy '${policy_name}' (index ${i})"
+                    echo "    Response: $(cat "${policy_resp}" 2>/dev/null | head -c 300)"
+                fi
+            done
+
+            rm -f "${policy_tmp}" "${policy_resp}"
+            echo "  ${policy_success}/${policy_count} item(s) restored successfully"
+            if [[ $policy_failed -gt 0 ]]; then
+                echo "  Warning: ${policy_failed} item(s) failed to restore"
+            fi
+        fi
+    fi
+fi
 
 # Runbooks: restore via the RBA v1 bulk import endpoint.
 # The backup file holds { "items": [...] } where each item is an exportFormat runbook.
