@@ -70,72 +70,72 @@ ______________________________________________________________
 ZenService instances:
 
 KIND         NAME                 NAMESPACE   VERSION   STATUS      PROGRESS   MESSAGE
-ZenService   iaf-zen-cpdservice   katamari    6.10.0    Completed   <none>     <none>
+ZenService   iaf-zen-cpdservice   concert-operate    6.10.0    Completed   <none>     <none>
 
 ______________________________________________________________
 Kafka and Elasticsearch instances:
 
 KIND    NAMESPACE   NAME         STATUS
-Kafka   katamari    iaf-system   True
+Kafka   concert-operate    iaf-system   True
 
 KIND      NAMESPACE   NAME               STATUS
-Cluster   katamari    aiops-opensearch   Available
+Cluster   concert-operate    aiops-opensearch   Available
 
 ______________________________________________________________
 IRCore and AIOpsAnalyticsOrchestrator instances:
 
 KIND                  NAMESPACE   NAME    VERSION   STATUS   MESSAGE
-IssueResolutionCore   katamari    aiops   5.1.5     Ready    All Services Ready
+IssueResolutionCore   concert-operate    aiops   5.1.5     Ready    All Services Ready
 
 KIND                         NAMESPACE   NAME    VERSION   STATUS   MESSAGE
-AIOpsAnalyticsOrchestrator   katamari    aiops   5.1.5     Ready    All Services Ready
+AIOpsAnalyticsOrchestrator   concert-operate    aiops   5.1.5     Ready    All Services Ready
 
 ______________________________________________________________
 LifecycleService instances:
 
 KIND               NAMESPACE   NAME    VERSION   STATUS   MESSAGE
-LifecycleService   katamari    aiops   5.1.5     <none>   All Services Ready
+LifecycleService   concert-operate    aiops   5.1.5     <none>   All Services Ready
 
 ______________________________________________________________
 BaseUI instances:
 
 KIND     NAMESPACE   NAME              VERSION   STATUS   MESSAGE
-BaseUI   katamari    baseui-instance   5.1.5     True     Ready
+BaseUI   concert-operate    baseui-instance   5.1.5     True     Ready
 
 ______________________________________________________________
 AIManager, ASM, AIOpsEdge, and AIOpsUI instances:
 
 KIND        NAMESPACE   NAME        VERSION   STATUS      MESSAGE
-AIManager   katamari    aimanager   5.1.5     Completed   AI Manager is ready
+AIManager   concert-operate    aimanager   5.1.5     Completed   AI Manager is ready
 
 KIND   NAMESPACE   NAME             VERSION   STATUS
-ASM    katamari    aiops-topology   3.0.5     OK
+ASM    concert-operate    aiops-topology   3.0.5     OK
 
 KIND        NAMESPACE   NAME        STATUS       MESSAGE
-AIOpsEdge   katamari    aiopsedge   Configured   all critical components are reporting healthy
+AIOpsEdge   concert-operate    aiopsedge   Configured   all critical components are reporting healthy
 
 KIND      NAMESPACE   NAME               VERSION   STATUS   MESSAGE
-AIOpsUI   katamari    aiopsui-instance   5.1.5     True     Ready
+AIOpsUI   concert-operate    aiopsui-instance   5.1.5     True     Ready
 
 ______________________________________________________________
 Postgres instances:
 
 KIND      NAMESPACE   NAME                          STATUS
-Cluster   katamari    aiops-ir-analytics-postgres   Cluster in healthy state
-Cluster   katamari    aiops-ir-core-postgres        Cluster in healthy state
-Cluster   katamari    aiops-orchestrator-postgres   Cluster in healthy state
-Cluster   katamari    aiops-topology-postgres       Cluster in healthy state
-Cluster   katamari    common-service-db             Cluster in healthy state
-Cluster   katamari    zen-metastore                 Cluster in healthy state
+Cluster   concert-operate    aiops-ir-analytics-postgres   Cluster in healthy state
+Cluster   concert-operate    aiops-ir-core-postgres        Cluster in healthy state
+Cluster   concert-operate    aiops-orchestrator-postgres   Cluster in healthy state
+Cluster   concert-operate    aiops-topology-postgres       Cluster in healthy state
+Cluster   concert-operate    common-service-db             Cluster in healthy state
+Cluster   concert-operate    zen-metastore                 Cluster in healthy state
 
 ______________________________________________________________
 Secure Tunnel instances:
 
 KIND     NAMESPACE   NAME         STATUS
-Tunnel   katamari    sre-tunnel   True
+Tunnel   concert-operate    sre-tunnel   True
 
 ______________________________________________________________
-CSVs from katamari namespace:
+CSVs from concert-operate namespace:
 
 NAME                                     DISPLAY                VERSION              REPLACES   PHASE
 aimanager-operator.v5.1.5-202607201445   IBM AIOps AI Manager   5.1.5-202607201445              Succeeded
@@ -198,7 +198,7 @@ NAME                                          DISPLAY                           
 operand-deployment-lifecycle-manager.v4.5.9   Operand Deployment Lifecycle Manager   4.5.9                Succeeded
 
 ______________________________________________________________
-Subscriptions from katamari namespace:
+Subscriptions from concert-operate namespace:
 
 NAME                 PACKAGE              SOURCE                  CHANNEL
 aimanager-operator   aimanager-operator   ibm-cp-waiops-catalog   v5.1
@@ -261,16 +261,16 @@ ______________________________________________________________
 OperandRequest instances:
 
 NAMESPACE   NAME                   PHASE     CREATED AT
-katamari    ibm-aiops-ai-manager   Running   2026-07-21T15:12:07Z
+concert-operate    ibm-aiops-ai-manager   Running   2026-07-21T15:12:07Z
 
 NAMESPACE   NAME                         PHASE     CREATED AT
-katamari    ibm-aiops-aiops-foundation   Running   2026-07-21T15:12:07Z
+concert-operate    ibm-aiops-aiops-foundation   Running   2026-07-21T15:12:07Z
 
 NAMESPACE   NAME                   PHASE     CREATED AT
-katamari    ibm-aiops-connection   Running   2026-07-21T15:12:07Z
+concert-operate    ibm-aiops-connection   Running   2026-07-21T15:12:07Z
 
 NAMESPACE   NAME              PHASE     CREATED AT
-katamari    ibm-iam-service   Running   2026-07-21T15:13:53Z
+concert-operate    ibm-iam-service   Running   2026-07-21T15:13:53Z
 
 ______________________________________________________________
 AIOps certificate status:
@@ -647,11 +647,11 @@ zen-minio-certificate   2027-07-21T15:17:32Z   True    Certificate is up to date
 ______________________________________________________________
 ODLM pod current status:
 
-katamari                                           operand-deployment-lifecycle-manager-5487899fd5-bqshw                     1/1     Running     0              66m
+concert-operate                                           operand-deployment-lifecycle-manager-5487899fd5-bqshw                     1/1     Running     0              66m
 ______________________________________________________________
 Orchestrator pod current status:
 
-katamari                                           ibm-aiops-orchestrator-controller-manager-f6bf78587-tgqlm                 1/1     Running     0              69m
+concert-operate                                           ibm-aiops-orchestrator-controller-manager-f6bf78587-tgqlm                 1/1     Running     0              69m
 ```
 
 ## How to use
