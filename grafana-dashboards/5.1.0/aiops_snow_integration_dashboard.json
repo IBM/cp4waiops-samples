@@ -145,7 +145,7 @@
             "h": 3,
             "w": 24,
             "x": 0,
-            "y": 5
+            "y": 21
           },
           "id": 327,
           "options": {
@@ -225,7 +225,7 @@
             "h": 10,
             "w": 10,
             "x": 0,
-            "y": 8
+            "y": 24
           },
           "id": 93,
           "options": {
@@ -366,7 +366,7 @@
             "h": 10,
             "w": 14,
             "x": 10,
-            "y": 8
+            "y": 24
           },
           "id": 95,
           "options": {
@@ -1075,7 +1075,7 @@
               }
             ]
           },
-          "unit": "short"
+          "unit": "bytes"
         },
         "overrides": [
           {
@@ -1406,7 +1406,7 @@
               }
             ]
           },
-          "unit": "short"
+          "unit": "bytes"
         },
         "overrides": [
           {
@@ -1525,13 +1525,13 @@
     "list": []
   },
   "time": {
-    "from": "now-24h",
+    "from": "now-3h",
     "to": "now"
   },
   "timepicker": {},
   "timezone": "browser",
   "title": "ServiceNow Integration",
   "uid": "712d9a40-d89a-4546-8060-cfc58c293733",
-  "version": 5,
+  "version": 6,
   "weekStart": ""
 }
