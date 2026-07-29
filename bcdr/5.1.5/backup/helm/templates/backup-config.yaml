@@ -399,7 +399,7 @@ data:
       "oadpNamespace": "{{ .Values.oadpNamespace }}",
       "backupNameSuffix": "{{ .Values.backupNameSuffix }}",
       "rwxStorageClass": "{{ .Values.rwxStorageClass}}",
-      "aiopsVersion": "0.1.0"
+      "aiopsVersion": "5.1.5"
     }
 kind: ConfigMap
 metadata:

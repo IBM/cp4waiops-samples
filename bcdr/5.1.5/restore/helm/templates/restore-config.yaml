@@ -10,7 +10,7 @@ data:
       "csNamespace": "{{ .Values.csNamespace }}",
       "oadpNamespace": "{{ .Values.oadpNamespace }}",
       "rwxStorageClass": "{{ .Values.rwxStorageClass}}",
-      "aiopsVersion": "0.1.0"
+      "aiopsVersion": "5.1.5"
     }
 kind: ConfigMap
 metadata:
