@@ -126,12 +126,20 @@ SKIPPED_RESOURCES=()
 
 # ============================================
 # Helper: fetch a resource collection and save to file
-# fetch_resource <label> <api_path> <output_filename>
+# fetch_resource <label> <api_path> <output_filename> [<jq_items_expr>]
+#
+# <jq_items_expr> is a jq expression that extracts the items array from the
+# raw API response.  It defaults to ".items" which suits most v2 endpoints.
+# Override it for endpoints whose response uses a different top-level key,
+# e.g. ".filters" for the filters API or ".menus" for menus.
+# The file is always saved as { "items": [...] } so restore.sh can rely on
+# a consistent shape regardless of what the individual API returns.
 # ============================================
 fetch_resource() {
     local label="$1"
     local api_path="$2"
     local output_filename="$3"
+    local jq_items_expr="${4:-.items}"
     local tmp_file="${OUTPUT_DIR}/${output_filename}.tmp"
     local out_file="${OUTPUT_DIR}/${output_filename}"
     local full_url="${CLUSTER_CPD_ENDPOINT}${api_path}"
@@ -181,7 +189,8 @@ fetch_resource() {
     fi
 
     if [[ "${HTTP_CODE}" -ge 200 && "${HTTP_CODE}" -lt 300 ]]; then
-        if jq '.' "${tmp_file}" > "${out_file}" 2>/dev/null; then
+        # Normalise to { "items": [...] } so restore.sh always sees a consistent shape.
+        if jq "{\"items\": (${jq_items_expr})}" "${tmp_file}" > "${out_file}" 2>/dev/null; then
             rm -f "${tmp_file}"
         else
             echo "  Error: API returned non-JSON for ${label} (HTTP ${HTTP_CODE})"
@@ -231,12 +240,14 @@ fetch_resource \
 fetch_resource \
     "Filters" \
     "/aiops/api/v2/configuration/filters?all=true" \
-    "filters.json"
+    "filters.json" \
+    ".filters"
 
 fetch_resource \
     "Menus" \
     "/aiops/api/v2/configuration/menus?all=true" \
-    "menus.json"
+    "menus.json" \
+    ".menus"
 
 # Policies: every endpoint caps at 10,000 items per request. Work around this by
 # fetching each state (draft/enabled/disabled/archived) in pages using
@@ -454,12 +465,14 @@ fetch_resource \
 fetch_resource \
     "User preferences" \
     "/aiops/api/v2/configuration/user-preferences" \
-    "user-preferences.json"
+    "user-preferences.json" \
+    ".preferences"
 
 fetch_resource \
     "Views" \
     "/aiops/api/v2/configuration/views?all=true" \
-    "views.json"
+    "views.json" \
+    ".views"
 
 # Topology uses a dedicated backup endpoint that returns the full config blob
 echo "Exporting Topology configuration..."
