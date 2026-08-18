@@ -491,64 +491,33 @@ echo
 
 
 cat <<EOF | oc apply --validate -f -
-apiVersion: odf.openshift.io/v1alpha1
-kind: StorageSystem
-metadata:
-  name: ocs-storagecluster-storagesystem
-  namespace: openshift-storage
-spec:
-  kind: storagecluster.ocs.openshift.io/v1
-  name: ocs-storagecluster
-  namespace: openshift-storage
----
 apiVersion: ocs.openshift.io/v1
 kind: StorageCluster
 metadata:
+  name: ocs-storagecluster
+  namespace: openshift-storage
   annotations:
     cluster.ocs.openshift.io/local-devices: "true"
     uninstall.ocs.openshift.io/cleanup-policy: delete
     uninstall.ocs.openshift.io/mode: graceful
-  name: ocs-storagecluster
-  namespace: openshift-storage
 spec:
-  arbiter: {}
-  encryption:
-    kms: {}
-  externalStorage: {}
   flexibleScaling: true
-  managedResources:
-    cephBlockPools: {}
-    cephCluster: {}
-    cephConfig: {}
-    cephDashboard: {}
-    cephFilesystems: {}
-    cephNonResilientPools: {}
-    cephObjectStoreUsers: {}
-    cephObjectStores: {}
-    cephToolbox: {}
-  mirroring: {}
   monDataDirHostPath: /var/lib/rook
-  nodeTopologies: {}
-  multiCloudGateway:
-    reconcileStrategy: ignore   #"Disable" MultiCloud/NOOBAA
+  multiCloudGateway:              # Correctly placed at the root level of spec
+    reconcileStrategy: ignore     # Tells the operator not to deploy or manage NooBaa
   storageDeviceSets:
-  - config: {}
-    count: ${pv_cnt}
-    dataPVCTemplate:
-      metadata: {}
-      spec:
-        accessModes:
-        - ReadWriteOnce
-        resources:
-          requests:
-            storage: "1"
-        storageClassName: ocs-local-block
-        volumeMode: Block
-    name: ocs-deviceset-localblock
-    placement: {}
-    preparePlacement: {}
-    replica: 1   #ODF replicates to 3 under the covers
-    resources: {}
+    - name: ocs-deviceset-localblock
+      count: ${pv_cnt}                    # Hardcoded integer to avoid variable decoding bugs
+      replica: 1
+      dataPVCTemplate:
+        spec:
+          accessModes:
+            - ReadWriteOnce
+          volumeMode: Block
+          storageClassName: ocs-local-block
+          resources:
+            requests:
+              storage: 1      # Ensure this matches your disk provisions
 EOF
 
 #TODO:
@@ -695,8 +664,8 @@ EOF
 
 echo -n Waiting for ODF test pod to be ready...
 n=0
-while [[ $n -lt 180 ]]; do
-  s=$(oc get po -n openshift-storage test-odf -o jsonpath='{.status.containerStatuses[0].ready}')
+while [[ $n -lt 280 ]]; do
+  s=$(oc get pod -n openshift-storage test-odf -o jsonpath='{.status.containerStatuses[0].ready}')
   if [ "${s}" == "true" ]; then break; fi
   sleep 5
   echo -n .
@@ -704,7 +673,7 @@ while [[ $n -lt 180 ]]; do
 done
 echo done
 
-s=$(oc get po -n openshift-storage test-odf -o jsonpath='{.status.containerStatuses[0].ready}')
+s=$(oc get pod -n openshift-storage test-odf -o jsonpath='{.status.containerStatuses[0].ready}')
 if [[ "${s}" == "true" ]]; then
   oc delete pod -n openshift-storage test-odf
   oc delete pvc -n openshift-storage test-cephfs
