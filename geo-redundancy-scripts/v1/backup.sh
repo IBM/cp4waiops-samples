@@ -346,14 +346,12 @@ fi
 fetch_resource \
     "Filters" \
     "/aiops/api/v2/configuration/filters?all=true" \
-    "filters.json" \
-    ".filters"
+    "filters.json"
 
 fetch_resource \
     "Menus" \
     "/aiops/api/v2/configuration/menus?all=true" \
-    "menus.json" \
-    ".menus"
+    "menus.json"
 
 # Policies: every endpoint caps at 10,000 items per request. Work around this by
 # fetching each state (draft/enabled/disabled/archived) in pages using
@@ -577,8 +575,7 @@ fetch_resource \
 fetch_resource \
     "Views" \
     "/aiops/api/v2/configuration/views?all=true" \
-    "views.json" \
-    ".views"
+    "views.json"
 
 # Topology uses a dedicated backup endpoint that returns the full config blob
 echo "Exporting Topology configuration..."
