@@ -9,7 +9,7 @@
 #
 # Resources exported:
 #   - Algorithms
-#   - Connections
+#   - Connections (v1 external API, and connections via rb endpoint using oc exec into aimanager-aio-controller pod)
 #   - Filters
 #   - Menus
 #   - Policies
@@ -125,6 +125,87 @@ echo ""
 SKIPPED_RESOURCES=()
 
 # ============================================
+# Helper: fetch a resource from inside a pod via oc exec and save to file
+# fetch_exec_resource <label> <pod_name> <namespace> <internal_path> <output_filename>
+#
+# Runs curl against https://localhost:9443<internal_path> from within the pod.
+# The response is normalised to { "items": [...] } using the same logic as
+# fetch_resource — arrays are wrapped directly, objects have .items extracted,
+# and anything else is wrapped in a single-element array.
+# ============================================
+fetch_exec_resource() {
+    local label="$1"
+    local pod_name="$2"
+    local namespace="$3"
+    local internal_path="$4"
+    local output_filename="$5"
+    local tmp_file="${OUTPUT_DIR}/${output_filename}.tmp"
+    local out_file="${OUTPUT_DIR}/${output_filename}"
+
+    echo "Exporting ${label}..."
+
+    if [[ "$DEBUG" == "true" ]]; then
+        echo "  [debug] oc exec ${pod_name} -- curl -sk GET https://localhost:9443${internal_path}"
+    fi
+
+    # Append a unique delimiter + HTTP code after the body so we can split portably
+    # without relying on GNU head -n -1 (unavailable on macOS).
+    local delimiter="HTTPCODE"
+    local raw_output
+    raw_output=$(oc -n "${namespace}" exec "${pod_name}" -- \
+        curl -sk -X GET "https://localhost:9443${internal_path}" \
+        -H "x-tenantid: cfd95b7e-3bc7-4006-a4a8-a73a79c71255" \
+        -H "authorization: Bearer ${JWT_TOKEN}" \
+        -H "Cache-Control: no-cache, no-store" \
+        -w "HTTPCODE%{http_code}" 2>/dev/null || true)
+
+    local HTTP_CODE
+    HTTP_CODE="${raw_output##*HTTPCODE}"
+    HTTP_CODE="${HTTP_CODE//[^0-9]/}"
+    local response_body
+    response_body="${raw_output%%HTTPCODE*}"
+
+    if [[ "$DEBUG" == "true" ]]; then
+        echo "  [debug] HTTP ${HTTP_CODE} — Response body:"
+        echo "${response_body}"
+        echo ""
+    fi
+
+    if [[ -z "$HTTP_CODE" ]]; then
+        echo "  Warning: No HTTP response received for ${label} — skipping"
+        SKIPPED_RESOURCES+=("${label} (no response)")
+        return
+    fi
+
+    if [[ "${HTTP_CODE}" -eq 401 || "${HTTP_CODE}" -eq 403 ]]; then
+        echo "  Error: HTTP ${HTTP_CODE} (auth failure) while exporting ${label} — aborting"
+        echo "  Response body: ${response_body}"
+        exit 1
+    fi
+
+    if [[ "${HTTP_CODE}" -ge 200 && "${HTTP_CODE}" -lt 300 ]]; then
+        echo "${response_body}" > "${tmp_file}"
+        # Normalise: array → wrap directly; object → extract .items; fallback → single-element array
+        if jq '{"items": (if type == "array" then . else .items // [.] end)}' \
+                "${tmp_file}" > "${out_file}" 2>/dev/null; then
+            rm -f "${tmp_file}"
+        else
+            echo "  Error: ${label} returned non-JSON (HTTP ${HTTP_CODE})"
+            echo "  Response body (first 500 chars): $(echo "${response_body}" | head -c 500)"
+            rm -f "${tmp_file}"
+            exit 1
+        fi
+        local item_count
+        item_count=$(jq '.items | length' "${out_file}" 2>/dev/null || echo "?")
+        echo "  OK — ${item_count} item(s) → ${output_filename}"
+    else
+        echo "  Warning: HTTP ${HTTP_CODE} while exporting ${label} — skipping"
+        echo "  Response body: ${response_body}"
+        SKIPPED_RESOURCES+=("${label} (HTTP ${HTTP_CODE})")
+    fi
+}
+
+# ============================================
 # Helper: fetch a resource collection and save to file
 # fetch_resource <label> <api_path> <output_filename> [<jq_items_expr>]
 #
@@ -236,6 +317,31 @@ fetch_resource \
     "Connections" \
     "/aiops/api/v1/configuration/connections?decryptFields=true" \
     "connections.json"
+
+AIOPS_CONTROLLER_POD=$(oc get pods -n "${CLUSTER_NAMESPACE}" --no-headers \
+    -o custom-columns=":metadata.name" | grep "aimanager-aio-controller" | head -1)
+
+if [[ -z "$AIOPS_CONTROLLER_POD" ]]; then
+    echo "Warning: No aimanager-aio-controller pod found in namespace ${CLUSTER_NAMESPACE} — skipping internal connections"
+    SKIPPED_RESOURCES+=("Internal Connections v3 (pod not found)")
+    SKIPPED_RESOURCES+=("Internal Connections runbooks (pod not found)")
+else
+    echo "Using pod for internal connections: ${AIOPS_CONTROLLER_POD}"
+
+    fetch_exec_resource \
+        "Internal Connections (v3)" \
+        "${AIOPS_CONTROLLER_POD}" \
+        "${CLUSTER_NAMESPACE}" \
+        "/v3/connections" \
+        "connections-internal.json"
+
+    fetch_exec_resource \
+        "Internal Connections (runbooks)" \
+        "${AIOPS_CONTROLLER_POD}" \
+        "${CLUSTER_NAMESPACE}" \
+        "/v1/runbooks/connections" \
+        "connections-runbooks.json"
+fi
 
 fetch_resource \
     "Filters" \
@@ -545,6 +651,8 @@ cat > "${METADATA_FILE}" <<EOF
   "resources": [
     "algorithms",
     "connections",
+    "connections-internal",
+    "connections-runbooks",
     "filters",
     "menus",
     "policies",

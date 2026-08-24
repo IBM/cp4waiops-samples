@@ -9,7 +9,7 @@
 #
 # Resources restored:
 #   - Algorithms
-#   - Connections
+#   - Connections (v1 external API, and connections via rb endpoint using oc exec into aimanager-aio-controller pod)
 #   - Filters
 #   - Menus
 #   - Policies       (via policy-batches endpoint, one item at a time)
@@ -175,6 +175,7 @@ restore_items() {
 
     local success=0
     local failed=0
+    local skipped=0
 
     local tmp_item
     tmp_item=$(mktemp)
@@ -185,6 +186,18 @@ restore_items() {
         # Strip read-only / server-managed fields that cause 400 on re-POST
         jq ".items[$i] | del(._id, .id, .createdAt, .updatedAt, .created, .updated, .lastModified, .lastUpdated, .revision, .__v)" \
             "${input_file}" > "${tmp_item}"
+
+        # Skip predefined system actions — they exist on every cluster and
+        # have no script field, so the API rejects them with 400.
+        local action_type
+        action_type=$(jq -r '._actionType // empty' "${tmp_item}" 2>/dev/null || true)
+        if [[ "$action_type" == "predefined" ]]; then
+            local action_name
+            action_name=$(jq -r '.name // "unknown"' "${tmp_item}" 2>/dev/null || echo "unknown")
+            echo "  Skipping '${action_name}' (predefined system action)"
+            skipped=$(( skipped + 1 ))
+            continue
+        fi
 
         TOTAL_ATTEMPTED=$(( TOTAL_ATTEMPTED + 1 ))
 
@@ -212,7 +225,7 @@ restore_items() {
         rm -f "${resp_body}"
     done
 
-    echo "  ${success}/${item_count} item(s) restored successfully"
+    echo "  ${success}/${item_count} item(s) restored successfully (${skipped} predefined skipped)"
     if [[ $failed -gt 0 ]]; then
         echo "  Warning: ${failed} item(s) failed to restore"
     fi
@@ -254,6 +267,14 @@ restore_file() {
     if [[ "$wrap_key" == "__array__" ]]; then
         # Unwrap the stored { "items": [...] } back to a plain array
         jq '.items' "${input_file}" > "${tmp_payload}"
+        # Skip if the array is empty — endpoints reject an empty array body
+        local arr_len
+        arr_len=$(jq 'length' "${tmp_payload}" 2>/dev/null || echo "0")
+        if [[ "$arr_len" -eq 0 ]]; then
+            echo "Skipping ${label} — 0 items in backup"
+            TOTAL_SKIPPED=$(( TOTAL_SKIPPED + 1 ))
+            return 0
+        fi
     elif [[ -n "$wrap_key" ]]; then
         # Build e.g. { "policies": [ ... ] } from the items array
         jq "{\"${wrap_key}\": .items}" "${input_file}" > "${tmp_payload}"
@@ -288,6 +309,216 @@ restore_file() {
             --silent
         echo ""
         exit 1
+    fi
+}
+
+# ============================================
+# Helper: restore internal connections (v3) from connections-internal.json
+# Each item is POSTed individually to POST /v3/connections via oc exec.
+# restore_exec_connections <pod_name> <namespace> <backup_filename>
+# ============================================
+restore_exec_connections() {
+    local pod_name="$1"
+    local namespace="$2"
+    local backup_filename="$3"
+    local input_file="${BACKUP_DIR}/${backup_filename}"
+    local label="Internal Connections (v3)"
+
+    if [[ ! -f "${input_file}" ]]; then
+        echo "Skipping ${label} — file not found: ${backup_filename}"
+        TOTAL_SKIPPED=$(( TOTAL_SKIPPED + 1 ))
+        return 0
+    fi
+
+    local item_count
+    item_count=$(jq '.items | length' "${input_file}" 2>/dev/null || echo "0")
+
+    if [[ "$item_count" -eq 0 ]]; then
+        echo "Skipping ${label} — 0 items in backup"
+        TOTAL_SKIPPED=$(( TOTAL_SKIPPED + 1 ))
+        return 0
+    fi
+
+    echo "Restoring ${label} (${item_count} item(s))..."
+
+    if [[ "$DRY_RUN" == "true" ]]; then
+        echo "  [dry-run] Would POST ${item_count} item(s) via oc exec to https://localhost:9443/v3/connections"
+        TOTAL_SKIPPED=$(( TOTAL_SKIPPED + 1 ))
+        return 0
+    fi
+
+    local success=0
+    local failed=0
+
+    for i in $(seq 0 $(( item_count - 1 ))); do
+        local item_json item_name
+        item_json=$(jq ".items[$i]" "${input_file}")
+        item_name=$(echo "${item_json}" | jq -r '.connection_config.display_name // .name // "unknown"' 2>/dev/null || echo "unknown")
+
+        TOTAL_ATTEMPTED=$(( TOTAL_ATTEMPTED + 1 ))
+
+        # Copy JSON into the pod and curl from the in-pod file — avoids all
+        # shell quoting issues that occur when piping through oc exec stdin.
+        local tmp_json pod_tmp
+        tmp_json=$(mktemp)
+        pod_tmp="/tmp/v3_conn_restore_${i}.json"
+        echo "${item_json}" > "${tmp_json}"
+        oc -n "${namespace}" cp "${tmp_json}" "${pod_name}:${pod_tmp}" 2>/dev/null || true
+        rm -f "${tmp_json}"
+
+        local raw_output
+        raw_output=$(oc -n "${namespace}" exec "${pod_name}" -- \
+            curl -sk -X POST "https://localhost:9443/v3/connections" \
+            -H "x-tenantid: cfd95b7e-3bc7-4006-a4a8-a73a79c71255" \
+            -H "authorization: Bearer ${JWT_TOKEN}" \
+            -H "Content-Type: application/json" \
+            -H "Cache-Control: no-cache, no-store" \
+            --data "@${pod_tmp}" \
+            -w "HTTPCODE%{http_code}" 2>/dev/null || true)
+
+        oc -n "${namespace}" exec "${pod_name}" -- rm -f "${pod_tmp}" 2>/dev/null || true
+
+        local HTTP_CODE
+        HTTP_CODE="${raw_output##*HTTPCODE}"
+        HTTP_CODE="${HTTP_CODE//[^0-9]/}"
+        local resp_body="${raw_output%%HTTPCODE*}"
+
+        if [[ "${HTTP_CODE}" -ge 200 && "${HTTP_CODE}" -lt 300 ]]; then
+            success=$(( success + 1 ))
+            TOTAL_SUCCESS=$(( TOTAL_SUCCESS + 1 ))
+        else
+            failed=$(( failed + 1 ))
+            echo "  Warning: HTTP ${HTTP_CODE} for connection '${item_name}' (index ${i})"
+            echo "    Response: $(echo "${resp_body}" | head -c 300)"
+        fi
+    done
+
+    echo "  ${success}/${item_count} item(s) restored successfully"
+    if [[ $failed -gt 0 ]]; then
+        echo "  Warning: ${failed} item(s) failed to restore"
+    fi
+}
+
+# ============================================
+# Helper: restore runbooks connections from connections-runbooks.json
+# Each item is POSTed to a type-specific path via oc exec:
+#   SCRIPT → POST /v1/runbooks/connections/ssh
+#   AWX    → POST /v1/runbooks/connections/ansible
+# Note: private keys are not backed up; users must re-add them after restore.
+# restore_exec_runbooks_connections <pod_name> <namespace> <backup_filename>
+# ============================================
+restore_exec_runbooks_connections() {
+    local pod_name="$1"
+    local namespace="$2"
+    local backup_filename="$3"
+    local input_file="${BACKUP_DIR}/${backup_filename}"
+    local label="Internal Connections (runbooks)"
+
+    if [[ ! -f "${input_file}" ]]; then
+        echo "Skipping ${label} — file not found: ${backup_filename}"
+        TOTAL_SKIPPED=$(( TOTAL_SKIPPED + 1 ))
+        return 0
+    fi
+
+    local item_count
+    item_count=$(jq '.items | length' "${input_file}" 2>/dev/null || echo "0")
+
+    if [[ "$item_count" -eq 0 ]]; then
+        echo "Skipping ${label} — 0 items in backup"
+        TOTAL_SKIPPED=$(( TOTAL_SKIPPED + 1 ))
+        return 0
+    fi
+
+    echo "Restoring ${label} (${item_count} item(s))..."
+    echo "  Note: private keys are not restored — re-add them manually after restore"
+
+    if [[ "$DRY_RUN" == "true" ]]; then
+        echo "  [dry-run] Would POST ${item_count} item(s) via oc exec to /v1/runbooks/connections/{type}"
+        TOTAL_SKIPPED=$(( TOTAL_SKIPPED + 1 ))
+        return 0
+    fi
+
+    local success=0
+    local failed=0
+
+    for i in $(seq 0 $(( item_count - 1 ))); do
+        local item_json conn_type path_segment
+        item_json=$(jq ".items[$i]" "${input_file}")
+        conn_type=$(echo "${item_json}" | jq -r '.type // empty')
+
+        # Map connection type to path segment
+        case "${conn_type}" in
+            SCRIPT) path_segment="ssh" ;;
+            AWX)    path_segment="ansible" ;;
+            *)
+                echo "  Warning: Unknown runbooks connection type '${conn_type}' at index ${i} — skipping"
+                failed=$(( failed + 1 ))
+                continue
+                ;;
+        esac
+
+        TOTAL_ATTEMPTED=$(( TOTAL_ATTEMPTED + 1 ))
+
+        # Write JSON to a host temp file, copy it into the pod, curl from there,
+        # then remove it — avoids all shell quoting issues with oc exec stdin pipes.
+        local tmp_json pod_tmp
+        tmp_json=$(mktemp)
+        pod_tmp="/tmp/rba_conn_restore_${i}.json"
+        echo "${item_json}" > "${tmp_json}"
+        oc -n "${namespace}" cp "${tmp_json}" "${pod_name}:${pod_tmp}" 2>/dev/null || true
+        rm -f "${tmp_json}"
+
+        local raw_output
+        raw_output=$(oc -n "${namespace}" exec "${pod_name}" -- \
+            curl -sk -X POST "https://localhost:9443/v1/runbooks/connections/${path_segment}" \
+            -H "x-tenantid: cfd95b7e-3bc7-4006-a4a8-a73a79c71255" \
+            -H "authorization: Bearer ${JWT_TOKEN}" \
+            -H "Content-Type: application/json" \
+            -H "Cache-Control: no-cache, no-store" \
+            --data "@${pod_tmp}" \
+            -w "HTTPCODE%{http_code}" 2>/dev/null || true)
+
+        oc -n "${namespace}" exec "${pod_name}" -- rm -f "${pod_tmp}" 2>/dev/null || true
+
+        local HTTP_CODE
+        HTTP_CODE="${raw_output##*HTTPCODE}"
+        HTTP_CODE="${HTTP_CODE//[^0-9]/}"
+        local resp_body="${raw_output%%HTTPCODE*}"
+
+        # Always verify via GET — the POST may return a spurious non-2xx from a
+        # gateway even when the connection was created successfully. The GET is
+        # the authoritative source of truth.
+        local verify_output verify_code
+        verify_output=$(oc -n "${namespace}" exec "${pod_name}" -- \
+            curl -sk -X GET "https://localhost:9443/v1/runbooks/connections" \
+            -H "x-tenantid: cfd95b7e-3bc7-4006-a4a8-a73a79c71255" \
+            -H "authorization: Bearer ${JWT_TOKEN}" \
+            -H "Cache-Control: no-cache, no-store" \
+            -w "HTTPCODE%{http_code}" 2>/dev/null || true)
+        verify_code="${verify_output##*HTTPCODE}"
+        verify_code="${verify_code//[^0-9]/}"
+        local verify_body="${verify_output%%HTTPCODE*}"
+        local found
+        found=$(echo "${verify_body}" | jq --arg t "${conn_type}" '[.[] | select(.type == $t)] | length' 2>/dev/null || echo "0")
+
+        if [[ "${verify_code}" -ge 200 && "${verify_code}" -lt 300 && "${found}" -gt 0 ]]; then
+            success=$(( success + 1 ))
+            TOTAL_SUCCESS=$(( TOTAL_SUCCESS + 1 ))
+        else
+            failed=$(( failed + 1 ))
+            echo "  Warning: Failed to restore connection type '${conn_type}' (index ${i})"
+            if [[ -z "${verify_code}" || "${verify_code}" -lt 200 || "${verify_code}" -ge 300 ]]; then
+                echo "    Verification GET failed (HTTP ${verify_code}): $(echo "${verify_body}" | head -c 300)"
+            else
+                echo "    Connection not found after POST — it may already exist or the POST was rejected"
+                echo "    POST HTTP ${HTTP_CODE}: $(echo "${resp_body}" | head -c 300)"
+            fi
+        fi
+    done
+
+    echo "  ${success}/${item_count} item(s) restored successfully"
+    if [[ $failed -gt 0 ]]; then
+        echo "  Warning: ${failed} item(s) failed to restore"
     fi
 }
 
@@ -497,6 +728,28 @@ restore_algorithms() {
 restore_algorithms
 
 restore_connections "connections.json"
+
+# Internal connections are only reachable via localhost:9443 inside the controller
+# pod. We locate the pod once and reuse it for both endpoints.
+AIOPS_CONTROLLER_POD=$(oc get pods -n "${CLUSTER_NAMESPACE}" --no-headers \
+    -o custom-columns=":metadata.name" | grep "aimanager-aio-controller" | head -1)
+
+if [[ -z "$AIOPS_CONTROLLER_POD" ]]; then
+    echo "Warning: No aimanager-aio-controller pod found in namespace ${CLUSTER_NAMESPACE} — skipping internal connections restore"
+    TOTAL_SKIPPED=$(( TOTAL_SKIPPED + 2 ))
+else
+    echo "Using pod for internal connections restore: ${AIOPS_CONTROLLER_POD}"
+
+    restore_exec_connections \
+        "${AIOPS_CONTROLLER_POD}" \
+        "${CLUSTER_NAMESPACE}" \
+        "connections-internal.json"
+
+    restore_exec_runbooks_connections \
+        "${AIOPS_CONTROLLER_POD}" \
+        "${CLUSTER_NAMESPACE}" \
+        "connections-runbooks.json"
+fi
 
 restore_items \
     "Filters" \
