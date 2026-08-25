@@ -12,7 +12,7 @@
 #   - Connections (v1 external API, and connections via rb endpoint using oc exec into aimanager-aio-controller pod)
 #   - Filters
 #   - Menus
-#   - Policies       (via policy-batches endpoint, one item at a time)
+#   - Policies       (via policy-batches endpoint, in configurable chunks with 429 retry)
 #   - Runbooks       (via RBA v1 bulk import endpoint)
 #   - Actions        (via RBA v1 API; referred to as Tools in the v2 configuration API)
 #   - Topology configuration
@@ -761,10 +761,99 @@ restore_items \
     "/aiops/api/v2/configuration/menus" \
     "menus.json"
 
-# Policies: POST one policy at a time wrapped as {"policies":[<item>]}.
-# Batching causes 413 because policies can be very large; one at a time is the
-# only reliable approach when item size is unbounded.
+# ============================================
+# Helper: POST a slice of policies [slice_start, slice_end] (inclusive, 0-based)
+# from POLICY_FILE to the policy-batches endpoint.
+#
+# Handles two transient error cases automatically:
+#   HTTP 429 — rate limited: sleep for retryAfter ms (from response body) then
+#               retry the same slice once.
+#   HTTP 413 — payload too large: split the slice in half and recurse into each
+#               half so that oversized individual policies are still sent 1-at-a-time.
+#
+# Updates the caller's policy_success / policy_failed counters via nameref.
+# Usage: post_policy_slice <slice_start> <slice_end>
+# ============================================
+post_policy_slice() {
+    local slice_start="$1"
+    local slice_end="$2"
+    local chunk_size=$(( slice_end - slice_start + 1 ))
+
+    local p_tmp p_resp
+    p_tmp=$(mktemp)
+    p_resp=$(mktemp)
+    # shellcheck disable=SC2064
+    trap "rm -f '${p_tmp}' '${p_resp}'" RETURN
+
+    jq --argjson s "$slice_start" --argjson e "$slice_end" \
+        '{"policies": [.items[$s:($e+1)][] | del(.id, .status, .hash, .revision)]}' \
+        "${POLICY_FILE}" > "${p_tmp}"
+
+    local http_code
+    http_code=$(curl -k -X POST \
+        "${CLUSTER_CPD_ENDPOINT}/aiops/api/v2/configuration/policy-batches" \
+        --header "Content-Type: application/json" \
+        --header "Authorization: Bearer ${JWT_TOKEN}" \
+        --header "X-TenantID: cfd95b7e-3bc7-4006-a4a8-a73a79c71255" \
+        --data "@${p_tmp}" \
+        --write-out "%{http_code}" \
+        --silent \
+        --output "${p_resp}")
+
+    if [[ "${http_code}" -eq 429 ]]; then
+        # Honour the retryAfter delay (milliseconds) from the response body,
+        # then retry this same slice once before giving up.
+        local retry_after_ms retry_after_s
+        retry_after_ms=$(jq -r '.retryAfter // 0' "${p_resp}" 2>/dev/null || echo "0")
+        retry_after_s=$(( (retry_after_ms + 999) / 1000 ))
+        if [[ $retry_after_s -lt 1 ]]; then retry_after_s=1; fi
+        echo "  Rate limited (HTTP 429) at index ${slice_start}–${slice_end}; waiting ${retry_after_s}s before retry..."
+        sleep "${retry_after_s}"
+
+        http_code=$(curl -k -X POST \
+            "${CLUSTER_CPD_ENDPOINT}/aiops/api/v2/configuration/policy-batches" \
+            --header "Content-Type: application/json" \
+            --header "Authorization: Bearer ${JWT_TOKEN}" \
+            --header "X-TenantID: cfd95b7e-3bc7-4006-a4a8-a73a79c71255" \
+            --data "@${p_tmp}" \
+            --write-out "%{http_code}" \
+            --silent \
+            --output "${p_resp}")
+    fi
+
+    if [[ "${http_code}" -eq 413 ]]; then
+        # Payload too large — split in half and recurse.
+        # If the slice is already a single item there is nothing to split; give up.
+        if [[ $chunk_size -eq 1 ]]; then
+            policy_failed=$(( policy_failed + 1 ))
+            local policy_name
+            policy_name=$(jq -r '.policies[0].name // .policies[0].id // "unknown"' "${p_tmp}" 2>/dev/null || echo "unknown")
+            echo "  Warning: HTTP 413 for single policy '${policy_name}' (index ${slice_start}) — policy too large to send"
+            echo "    Response: $(cat "${p_resp}" 2>/dev/null | head -c 300)"
+            return
+        fi
+        local mid=$(( (slice_start + slice_end) / 2 ))
+        echo "  Payload too large (HTTP 413) at index ${slice_start}–${slice_end}; splitting into [${slice_start}–${mid}] and [$(( mid + 1 ))–${slice_end}]..."
+        post_policy_slice "${slice_start}" "${mid}"
+        post_policy_slice "$(( mid + 1 ))" "${slice_end}"
+        return
+    fi
+
+    if [[ "${http_code}" -ge 200 && "${http_code}" -lt 300 ]]; then
+        policy_success=$(( policy_success + chunk_size ))
+        TOTAL_SUCCESS=$(( TOTAL_SUCCESS + chunk_size ))
+    else
+        policy_failed=$(( policy_failed + chunk_size ))
+        echo "  Warning: HTTP ${http_code} for policies at index ${slice_start}–${slice_end}"
+        echo "    Response: $(cat "${p_resp}" 2>/dev/null | head -c 300)"
+    fi
+}
+
+# Policies: POST in chunks of POLICY_BATCH_SIZE to the policy-batches endpoint.
+# 413 (payload too large) is handled by splitting the chunk in half recursively.
+# 429 (rate limited) is handled by sleeping retryAfter ms then retrying once.
 POLICY_FILE="${BACKUP_DIR}/policies.json"
+POLICY_BATCH_SIZE=50
 
 if [[ ! -f "${POLICY_FILE}" ]]; then
     echo "Skipping Policies — file not found: policies.json"
@@ -776,51 +865,30 @@ else
         echo "Skipping Policies — 0 items in backup"
         TOTAL_SKIPPED=$(( TOTAL_SKIPPED + 1 ))
     else
-        echo "Restoring Policies (${policy_count} item(s))..."
+        echo "Restoring Policies (${policy_count} item(s), batch size ${POLICY_BATCH_SIZE})..."
 
         if [[ "$DRY_RUN" == "true" ]]; then
-            echo "  [dry-run] Would POST ${policy_count} policy/policies to /aiops/api/v2/configuration/policy-batches"
+            batch_count=$(( (policy_count + POLICY_BATCH_SIZE - 1) / POLICY_BATCH_SIZE ))
+            echo "  [dry-run] Would POST ${policy_count} policy/policies in ${batch_count} batch(es) to /aiops/api/v2/configuration/policy-batches"
             TOTAL_SKIPPED=$(( TOTAL_SKIPPED + 1 ))
         else
             policy_success=0
             policy_failed=0
-            policy_tmp=$(mktemp)
-            policy_resp=$(mktemp)
-            # shellcheck disable=SC2064
-            trap "rm -f '${policy_tmp}' '${policy_resp}'" RETURN
 
-            for i in $(seq 0 $(( policy_count - 1 ))); do
-                # Wrap single policy in the envelope the batch endpoint expects.
-                # Strip server-managed fields (id, status, hash, revision) that the
-                # create endpoint rejects.  Keep spec, metadata, executionPriority, state.
-                jq --argjson i "$i" \
-                    '{"policies": [.items[$i] | del(.id, .status, .hash, .revision)]}' \
-                    "${POLICY_FILE}" > "${policy_tmp}"
+            TOTAL_ATTEMPTED=$(( TOTAL_ATTEMPTED + policy_count ))
 
-                TOTAL_ATTEMPTED=$(( TOTAL_ATTEMPTED + 1 ))
-
-                POLICY_HTTP=$(curl -k -X POST \
-                    "${CLUSTER_CPD_ENDPOINT}/aiops/api/v2/configuration/policy-batches" \
-                    --header "Content-Type: application/json" \
-                    --header "Authorization: Bearer ${JWT_TOKEN}" \
-                    --header "X-TenantID: cfd95b7e-3bc7-4006-a4a8-a73a79c71255" \
-                    --data "@${policy_tmp}" \
-                    --write-out "%{http_code}" \
-                    --silent \
-                    --output "${policy_resp}")
-
-                if [[ "${POLICY_HTTP}" -ge 200 && "${POLICY_HTTP}" -lt 300 ]]; then
-                    policy_success=$(( policy_success + 1 ))
-                    TOTAL_SUCCESS=$(( TOTAL_SUCCESS + 1 ))
-                else
-                    policy_failed=$(( policy_failed + 1 ))
-                    policy_name=$(jq -r '.policies[0].name // .policies[0].id // "unknown"' "${policy_tmp}" 2>/dev/null || echo "unknown")
-                    echo "  Warning: HTTP ${POLICY_HTTP} for policy '${policy_name}' (index ${i})"
-                    echo "    Response: $(cat "${policy_resp}" 2>/dev/null | head -c 300)"
+            start=0
+            while [[ $start -lt $policy_count ]]; do
+                end=$(( start + POLICY_BATCH_SIZE - 1 ))
+                if [[ $end -ge $policy_count ]]; then
+                    end=$(( policy_count - 1 ))
                 fi
+
+                post_policy_slice "${start}" "${end}"
+
+                start=$(( end + 1 ))
             done
 
-            rm -f "${policy_tmp}" "${policy_resp}"
             echo "  ${policy_success}/${policy_count} item(s) restored successfully"
             if [[ $policy_failed -gt 0 ]]; then
                 echo "  Warning: ${policy_failed} item(s) failed to restore"
