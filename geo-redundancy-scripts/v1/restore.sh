@@ -849,11 +849,13 @@ post_policy_slice() {
     fi
 }
 
-# Policies: POST in chunks of POLICY_BATCH_SIZE to the policy-batches endpoint.
+# Policies: POST in chunks of POLICY_BATCH_SIZE to the policy-batches endpoint,
+# using up to POLICY_PARALLEL_JOBS concurrent background jobs for speed.
 # 413 (payload too large) is handled by splitting the chunk in half recursively.
 # 429 (rate limited) is handled by sleeping retryAfter ms then retrying once.
 POLICY_FILE="${BACKUP_DIR}/policies.json"
 POLICY_BATCH_SIZE=50
+POLICY_PARALLEL_JOBS=16
 
 if [[ ! -f "${POLICY_FILE}" ]]; then
     echo "Skipping Policies — file not found: policies.json"
@@ -865,10 +867,10 @@ else
         echo "Skipping Policies — 0 items in backup"
         TOTAL_SKIPPED=$(( TOTAL_SKIPPED + 1 ))
     else
-        echo "Restoring Policies (${policy_count} item(s), batch size ${POLICY_BATCH_SIZE})..."
+        batch_count=$(( (policy_count + POLICY_BATCH_SIZE - 1) / POLICY_BATCH_SIZE ))
+        echo "Restoring Policies (${policy_count} item(s), batch size ${POLICY_BATCH_SIZE}, parallel jobs ${POLICY_PARALLEL_JOBS})..."
 
         if [[ "$DRY_RUN" == "true" ]]; then
-            batch_count=$(( (policy_count + POLICY_BATCH_SIZE - 1) / POLICY_BATCH_SIZE ))
             echo "  [dry-run] Would POST ${policy_count} policy/policies in ${batch_count} batch(es) to /aiops/api/v2/configuration/policy-batches"
             TOTAL_SKIPPED=$(( TOTAL_SKIPPED + 1 ))
         else
@@ -877,6 +879,32 @@ else
 
             TOTAL_ATTEMPTED=$(( TOTAL_ATTEMPTED + policy_count ))
 
+            # Temporary directory for per-batch result files written by background jobs.
+            # Each job writes "<success_count> <failed_count>" plus any warning lines.
+            policy_tmp_dir=$(mktemp -d)
+            # shellcheck disable=SC2064
+            trap "rm -rf '${policy_tmp_dir}'" EXIT
+
+            # Array of in-flight PIDs and their associated result files, used as a
+            # fixed-width semaphore: when POLICY_PARALLEL_JOBS slots are full we wait
+            # for the oldest job before launching the next one.
+            declare -a _job_pids=()
+            declare -a _job_result_files=()
+
+            # ----------------------------------------
+            # _wait_for_oldest_job
+            # Wait for the PID at index 0 of _job_pids, then remove it (and its
+            # corresponding result-file entry) from both arrays.
+            # ----------------------------------------
+            _wait_for_oldest_job() {
+                wait "${_job_pids[0]}" 2>/dev/null || true
+                unset '_job_pids[0]'
+                unset '_job_result_files[0]'
+                _job_pids=( "${_job_pids[@]+"${_job_pids[@]}"}" )
+                _job_result_files=( "${_job_result_files[@]+"${_job_result_files[@]}"}" )
+            }
+
+            batch_index=0
             start=0
             while [[ $start -lt $policy_count ]]; do
                 end=$(( start + POLICY_BATCH_SIZE - 1 ))
@@ -884,10 +912,43 @@ else
                     end=$(( policy_count - 1 ))
                 fi
 
-                post_policy_slice "${start}" "${end}"
+                # If the parallel window is full, drain the oldest job first.
+                if [[ ${#_job_pids[@]} -ge $POLICY_PARALLEL_JOBS ]]; then
+                    _wait_for_oldest_job
+                fi
 
+                # Launch this batch slice in a background subshell.
+                # The subshell inherits post_policy_slice, POLICY_FILE,
+                # CLUSTER_CPD_ENDPOINT, JWT_TOKEN, and all globals it needs.
+                result_file="${policy_tmp_dir}/batch_${batch_index}.result"
+                (
+                    # Subshell-local counters; post_policy_slice updates them.
+                    policy_success=0
+                    policy_failed=0
+                    post_policy_slice "${start}" "${end}"
+                    echo "${policy_success} ${policy_failed}" > "${result_file}"
+                ) &
+                _job_pids+=( $! )
+                _job_result_files+=( "${result_file}" )
+
+                batch_index=$(( batch_index + 1 ))
                 start=$(( end + 1 ))
             done
+
+            # Wait for all remaining in-flight jobs.
+            for pid in "${_job_pids[@]+"${_job_pids[@]}"}"; do
+                wait "${pid}" 2>/dev/null || true
+            done
+
+            # Aggregate results from every batch result file.
+            for result_file in "${policy_tmp_dir}"/batch_*.result; do
+                [[ -f "$result_file" ]] || continue
+                read -r batch_ok batch_err < "${result_file}"
+                policy_success=$(( policy_success + batch_ok ))
+                policy_failed=$(( policy_failed  + batch_err ))
+            done
+
+            rm -rf "${policy_tmp_dir}"
 
             echo "  ${policy_success}/${policy_count} item(s) restored successfully"
             if [[ $policy_failed -gt 0 ]]; then
