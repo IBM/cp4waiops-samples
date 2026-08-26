@@ -1,0 +1,8 @@
+{
+  "aiopsNamespace": "cp4waiops",
+  "csNamespace": "ibm-common-services",
+  "oadpNamespace": "velero",
+  "backupNameSuffix": "1",
+  "rwxStorageClass": "rook-cephfs",
+  "aiopsVersion": "0.1.0"
+}
