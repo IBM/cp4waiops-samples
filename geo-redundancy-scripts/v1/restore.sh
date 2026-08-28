@@ -17,12 +17,12 @@
 #   - Actions        (via RBA v1 API; referred to as Tools in the v2 configuration API)
 #   - Topology configuration
 #   - Training definitions
+#   - User preferences  (via PUT /user-preferences/me/keys/{key} — one PUT per preference key)
 #   - Views
 #
 # Resources deliberately excluded from restore:
 #   - Alerts / Events / Incidents / Metering (runtime / operational data)
 #   - Runbook executions                     (runtime state)
-#   - User preferences                       (personal per-user data; restored as informational only)
 #
 # IMPORTANT: This script CREATES resources.  It does not check for duplicates first.
 #            Run against an empty or freshly provisioned instance, or pair with
@@ -854,8 +854,8 @@ post_policy_slice() {
 # 413 (payload too large) is handled by splitting the chunk in half recursively.
 # 429 (rate limited) is handled by sleeping retryAfter ms then retrying once.
 POLICY_FILE="${BACKUP_DIR}/policies.json"
-POLICY_BATCH_SIZE=50
-POLICY_PARALLEL_JOBS=16
+POLICY_BATCH_SIZE=20
+POLICY_PARALLEL_JOBS=4
 
 if [[ ! -f "${POLICY_FILE}" ]]; then
     echo "Skipping Policies — file not found: policies.json"
@@ -985,6 +985,100 @@ restore_items \
     "Training definitions" \
     "/aiops/api/v2/configuration/training-definitions" \
     "training-definitions.json"
+
+# ============================================
+# User preferences: one PUT per key per user item in the backup.
+# Endpoint: PUT /aiops/api/v2/configuration/user-preferences/{user-id}/keys/{key}
+# Body:     { "value": { "<key>": <value> } }
+# This is a server-side upsert — the user-id and key are created if absent.
+# The backup file stores { "items": [...] } where each item is a flat object of
+# preference key/value pairs (e.g. { "fontSize": 16, "useRowColoring": true }).
+# The GET response from the downstream user-config service does not include a
+# userId field, so we use "me" as the user-id for all items (REST convention
+# for the token-bearing authenticated user).
+# ============================================
+restore_user_preferences() {
+    local input_file="${BACKUP_DIR}/user-preferences.json"
+    local label="User preferences"
+
+    if [[ ! -f "${input_file}" ]]; then
+        echo "Skipping ${label} — file not found: user-preferences.json"
+        TOTAL_SKIPPED=$(( TOTAL_SKIPPED + 1 ))
+        return 0
+    fi
+
+    local item_count
+    item_count=$(jq '.items | length' "${input_file}" 2>/dev/null || echo "0")
+
+    if [[ "$item_count" -eq 0 ]]; then
+        echo "Skipping ${label} — 0 items in backup"
+        TOTAL_SKIPPED=$(( TOTAL_SKIPPED + 1 ))
+        return 0
+    fi
+
+    # Count total keys across all items for the progress line
+    local total_keys
+    total_keys=$(jq '[.items[] | keys | length] | add // 0' "${input_file}" 2>/dev/null || echo "0")
+
+    echo "Restoring ${label} (${item_count} item(s), ${total_keys} key(s))..."
+
+    if [[ "$DRY_RUN" == "true" ]]; then
+        echo "  [dry-run] Would PUT ${total_keys} key(s) to /aiops/api/v2/configuration/user-preferences/me/keys/{key}"
+        TOTAL_SKIPPED=$(( TOTAL_SKIPPED + 1 ))
+        return 0
+    fi
+
+    local success=0
+    local failed=0
+
+    local tmp_payload
+    tmp_payload=$(mktemp)
+    # shellcheck disable=SC2064
+    trap "rm -f '${tmp_payload}'" RETURN
+
+    for i in $(seq 0 $(( item_count - 1 ))); do
+        local keys
+        keys=$(jq -r ".items[$i] | keys[]" "${input_file}" 2>/dev/null || true)
+
+        while IFS= read -r key; do
+            # Build body: { "value": { "<key>": <value> } }
+            jq --arg k "$key" --argjson idx "$i" \
+                '{"value": {($k): .items[$idx][$k]}}' \
+                "${input_file}" > "${tmp_payload}"
+
+            TOTAL_ATTEMPTED=$(( TOTAL_ATTEMPTED + 1 ))
+
+            local resp_body
+            resp_body=$(mktemp)
+            HTTP_CODE=$(curl -k -X PUT \
+                "${CLUSTER_CPD_ENDPOINT}/aiops/api/v2/configuration/user-preferences/me/keys/${key}" \
+                --header "Content-Type: application/json" \
+                --header "Authorization: Bearer ${JWT_TOKEN}" \
+                --header "X-TenantID: cfd95b7e-3bc7-4006-a4a8-a73a79c71255" \
+                --data "@${tmp_payload}" \
+                --write-out "%{http_code}" \
+                --silent \
+                --output "${resp_body}")
+
+            if [[ "${HTTP_CODE}" -ge 200 && "${HTTP_CODE}" -lt 300 ]]; then
+                success=$(( success + 1 ))
+                TOTAL_SUCCESS=$(( TOTAL_SUCCESS + 1 ))
+            else
+                failed=$(( failed + 1 ))
+                echo "  Warning: HTTP ${HTTP_CODE} for key '${key}' (item index ${i})"
+                echo "    Response: $(cat "${resp_body}" 2>/dev/null | head -c 300)"
+            fi
+            rm -f "${resp_body}"
+        done <<< "$keys"
+    done
+
+    echo "  ${success}/${total_keys} key(s) restored successfully"
+    if [[ $failed -gt 0 ]]; then
+        echo "  Warning: ${failed} key(s) failed to restore"
+    fi
+}
+
+restore_user_preferences
 
 restore_items \
     "Views" \

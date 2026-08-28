@@ -570,7 +570,7 @@ fetch_resource \
     "User preferences" \
     "/aiops/api/v2/configuration/user-preferences" \
     "user-preferences.json" \
-    ".preferences"
+    ".items"
 
 fetch_resource \
     "Views" \
