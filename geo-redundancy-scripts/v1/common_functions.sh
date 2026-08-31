@@ -181,6 +181,48 @@ get_jwt_token() {
 }
 
 # ============================================
+# Resolve Topology API Base Path
+# ============================================
+# Usage: resolve_topology_endpoint
+# Requires: CLUSTER_CPD_ENDPOINT and JWT_TOKEN must be set (call after login_and_get_token)
+# Sets: TOPOLOGY_API_BASE — the base path prefix used for topology backup/restore calls.
+#
+# Tries the new endpoint first:
+#   /aiops/api/v2/topology/service/info
+# Falls back to the legacy endpoint on a 404 response:
+#   /aiops/api/v2/configuration/topology/config
+#
+# The result is cached in TOPOLOGY_API_BASE so this probe runs only once per
+# script execution regardless of how many topology calls follow.
+resolve_topology_endpoint() {
+    # Return immediately if already resolved
+    if [ -n "${TOPOLOGY_API_BASE:-}" ]; then
+        return 0
+    fi
+
+    # New endpoint is for version 5.2.0 of Concert Operate and after
+    local new_base="/aiops/api/v2/topology/service/info"
+
+    # Legacy endpoint is for version 5.1.x of Concert Operate
+    local legacy_base="/aiops/api/v2/configuration/topology/config"
+
+    echo "Detecting topology API endpoint..."
+    local http_code
+    http_code=$(curl -k -s -o /dev/null -w "%{http_code}" \
+        -X GET "${CLUSTER_CPD_ENDPOINT}${new_base}/backup" \
+        --header "Authorization: Bearer ${JWT_TOKEN}" \
+        --header "X-TenantID: cfd95b7e-3bc7-4006-a4a8-a73a79c71255")
+
+    if [ "${http_code}" -eq 404 ]; then
+        echo "New topology endpoint not available (HTTP ${http_code}), falling back to: ${legacy_base}"
+        TOPOLOGY_API_BASE="${legacy_base}"
+    else
+        echo "Topology endpoint detected (HTTP ${http_code}): ${new_base}"
+        TOPOLOGY_API_BASE="${new_base}"
+    fi
+}
+
+# ============================================
 # Login and Get Token (Combined)
 # ============================================
 # Usage: login_and_get_token "primary|backup"
