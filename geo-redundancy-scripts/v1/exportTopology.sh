@@ -58,6 +58,7 @@ load_geo_config
 CLUSTER_DISPLAY=$(echo "$SOURCE_CLUSTER" | tr '[:lower:]' '[:upper:]')
 echo "Exporting topology from ${CLUSTER_DISPLAY} cluster..."
 login_and_get_token "$SOURCE_CLUSTER"
+resolve_topology_endpoint
 
 # ============================================
 # Export Topology Configuration
@@ -66,7 +67,7 @@ OUTPUT_FILE="topology-export.json"
 OUTPUT_FILE_TMP="${OUTPUT_FILE}.tmp"
 echo "Exporting topology configuration to ${OUTPUT_FILE}..."
 
-curl -k -X GET "${CLUSTER_CPD_ENDPOINT}/aiops/api/v2/configuration/topology/config/backup" \
+curl -k -X GET "${CLUSTER_CPD_ENDPOINT}${TOPOLOGY_API_BASE}/backup" \
   --header "Content-Type: application/json" \
   --header "Authorization: Bearer ${JWT_TOKEN}" \
   --header "X-TenantID: cfd95b7e-3bc7-4006-a4a8-a73a79c71255" \

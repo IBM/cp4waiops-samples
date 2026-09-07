@@ -79,6 +79,7 @@ load_geo_config
 CLUSTER_DISPLAY=$(echo "$TARGET_CLUSTER" | tr '[:lower:]' '[:upper:]')
 echo "Importing topology to ${CLUSTER_DISPLAY} cluster..."
 login_and_get_token "$TARGET_CLUSTER"
+resolve_topology_endpoint
 
 # ============================================
 # Import Topology Configuration
@@ -89,7 +90,7 @@ echo "Importing topology configuration from ${INPUT_FILE}..."
 TOPOLOGY_DATA=$(cat "${INPUT_FILE}")
 
 # Import topology configuration
-HTTP_CODE=$(curl -k -X POST "${CLUSTER_CPD_ENDPOINT}/aiops/api/v2/configuration/topology/config/restore" \
+HTTP_CODE=$(curl -k -X POST "${CLUSTER_CPD_ENDPOINT}${TOPOLOGY_API_BASE}/restore" \
   --header "Content-Type: application/json" \
   --header "Authorization: Bearer ${JWT_TOKEN}" \
   --header "X-TenantID: cfd95b7e-3bc7-4006-a4a8-a73a79c71255" \
@@ -109,7 +110,7 @@ else
   # Try to get error details
   echo ""
   echo "Attempting to get error details..."
-  curl -k -X POST "${CLUSTER_CPD_ENDPOINT}/aiops/api/v2/configuration/topology/config/restore" \
+  curl -k -X POST "${CLUSTER_CPD_ENDPOINT}${TOPOLOGY_API_BASE}/restore" \
     --header "Content-Type: application/json" \
     --header "Authorization: Bearer ${JWT_TOKEN}" \
     --header "X-TenantID: cfd95b7e-3bc7-4006-a4a8-a73a79c71255" \
