@@ -762,16 +762,40 @@ restore_items \
     "menus.json"
 
 # ============================================
-# Helper: POST a slice of policies [slice_start, slice_end] (inclusive, 0-based)
-# from POLICY_FILE to the policy-batches endpoint.
+# Helper: POST one batch of policies [slice_start, slice_end] (0-based, inclusive)
+# to the policy-batches endpoint.
 #
-# Handles two transient error cases automatically:
-#   HTTP 429 — rate limited: sleep for retryAfter ms (from response body) then
-#               retry the same slice once.
-#   HTTP 413 — payload too large: split the slice in half and recurse into each
-#               half so that oversized individual policies are still sent 1-at-a-time.
+# Endpoint constraints (confirmed with API team):
+#   - POST /policy-batches hard limit: 2 MB per request
+#   - Application timeout: 300s (set in common-api-server config)
+#   - Effective timeout: ~60s from the OpenShift/nginx ingress gateway sitting in
+#     front of the app, which has its own proxy_read_timeout (nginx default: 60s).
+#     The 504 "upstream request timeout" responses come from nginx, not the app.
+#   - Rate limit: 200 requests/hr — designed assuming ~5000 small (~4 KB) policies
+#     per batch (i.e. ~9 requests total).  When policies are 30–341 KB each, far
+#     fewer fit per batch, so the request count rises and rate-limit headroom shrinks.
 #
-# Updates the caller's policy_success / policy_failed counters via nameref.
+# Error handling — only ONE retry path fires per invocation (elif chain):
+#
+#   HTTP 429 — rate limited: sleep for `reset` seconds (the actual window expiry;
+#               `retryAfter` is a hardcoded 3600 boilerplate and is ignored),
+#               then retry once.
+#
+#   HTTP 504 / curl timeout (empty / "000") — nginx gateway cut the connection
+#               before the app finished (payload too large to index within ~60s).
+#               Fall back to individual POSTs via POST /policies (one per policy).
+#               Each request carries exactly one policy so the nginx timeout is
+#               only a concern for policies individually >~60s to index (~341 KB).
+#               Does not re-POST the whole batch, so no duplicates are created.
+#
+#   HTTP 413 — payload too large (> 2 MB hard limit): split in half and recurse.
+#               Byte-budget batching (POLICY_MAX_BATCH_BYTES) prevents this in
+#               normal operation.
+#
+# curl --max-time: POLICY_CURL_TIMEOUT_S (60s) for normal-sized batch payloads;
+#   POLICY_CURL_TIMEOUT_LARGE_S (180s) for large payloads and all individual POSTs.
+#
+# Updates the caller's policy_success / policy_failed counters directly (serial).
 # Usage: post_policy_slice <slice_start> <slice_end>
 # ============================================
 post_policy_slice() {
@@ -785,10 +809,22 @@ post_policy_slice() {
     # shellcheck disable=SC2064
     trap "rm -f '${p_tmp}' '${p_resp}'" RETURN
 
-    jq --argjson s "$slice_start" --argjson e "$slice_end" \
+    jq -c --argjson s "$slice_start" --argjson e "$slice_end" \
         '{"policies": [.items[$s:($e+1)][] | del(.id, .status, .hash, .revision)]}' \
         "${POLICY_FILE}" > "${p_tmp}"
 
+    # Choose timeout based on payload size: large single-policy batches need more
+    # time than the gateway's default timeout allows.
+    local payload_bytes curl_timeout
+    payload_bytes=$(wc -c < "${p_tmp}" | tr -d ' ')
+    if [[ $payload_bytes -gt $POLICY_LARGE_THRESHOLD_BYTES ]]; then
+        curl_timeout=$POLICY_CURL_TIMEOUT_LARGE_S
+    else
+        curl_timeout=$POLICY_CURL_TIMEOUT_S
+    fi
+
+    # || true: curl exit 28 (timeout) must not abort under set -euo pipefail.
+    # An empty/000 http_code is treated as a gateway timeout by the branch below.
     local http_code
     http_code=$(curl -k -X POST \
         "${CLUSTER_CPD_ENDPOINT}/aiops/api/v2/configuration/policy-batches" \
@@ -797,19 +833,18 @@ post_policy_slice() {
         --header "X-TenantID: cfd95b7e-3bc7-4006-a4a8-a73a79c71255" \
         --data "@${p_tmp}" \
         --write-out "%{http_code}" \
+        --max-time "${curl_timeout}" \
         --silent \
-        --output "${p_resp}")
+        --output "${p_resp}") || true
 
     if [[ "${http_code}" -eq 429 ]]; then
-        # Honour the retryAfter delay (milliseconds) from the response body,
-        # then retry this same slice once before giving up.
-        local retry_after_ms retry_after_s
-        retry_after_ms=$(jq -r '.retryAfter // 0' "${p_resp}" 2>/dev/null || echo "0")
-        retry_after_s=$(( (retry_after_ms + 999) / 1000 ))
-        if [[ $retry_after_s -lt 1 ]]; then retry_after_s=1; fi
-        echo "  Rate limited (HTTP 429) at index ${slice_start}–${slice_end}; waiting ${retry_after_s}s before retry..."
-        sleep "${retry_after_s}"
-
+        # Use `reset` — the actual seconds until the window expires.
+        # `retryAfter` is a boilerplate 3600 and is ignored.
+        local wait_s
+        wait_s=$(jq -r '.reset // 0' "${p_resp}" 2>/dev/null || echo "0")
+        if [[ $wait_s -lt 1 ]]; then wait_s=1; fi
+        echo "  Rate limited (HTTP 429) at index ${slice_start}..${slice_end}; waiting ${wait_s}s for window reset..."
+        sleep "${wait_s}"
         http_code=$(curl -k -X POST \
             "${CLUSTER_CPD_ENDPOINT}/aiops/api/v2/configuration/policy-batches" \
             --header "Content-Type: application/json" \
@@ -817,23 +852,69 @@ post_policy_slice() {
             --header "X-TenantID: cfd95b7e-3bc7-4006-a4a8-a73a79c71255" \
             --data "@${p_tmp}" \
             --write-out "%{http_code}" \
+            --max-time "${curl_timeout}" \
             --silent \
-            --output "${p_resp}")
-    fi
+            --output "${p_resp}") || true
 
-    if [[ "${http_code}" -eq 413 ]]; then
+    elif [[ "${http_code}" -eq 504 ]] || [[ -z "${http_code}" ]] || [[ "${http_code}" == "000" ]]; then
+        # Batch endpoint timed out (gateway 504 or curl timeout).
+        # Fall back to individual POSTs: one policy at a time via
+        # POST /aiops/api/v2/configuration/policies.
+        # This avoids the combined-payload timeout problem — each request
+        # carries exactly one policy regardless of its size — and avoids
+        # creating duplicates since we never re-POST the whole batch.
+        echo "  Batch timeout at index ${slice_start}..${slice_end} (payload ${payload_bytes} bytes) — falling back to individual POSTs..."
+        local i_tmp i_resp i_code i_name
+        i_tmp=$(mktemp)
+        i_resp=$(mktemp)
+        # shellcheck disable=SC2064
+        trap "rm -f '${i_tmp}' '${i_resp}'" RETURN
+        local i _first_individual=true
+        for i in $(seq "${slice_start}" "${slice_end}"); do
+            # Brief pause between individual POSTs to avoid 502 gateway overload
+            # from rapid-fire requests when a large batch falls back.
+            if [[ "${_first_individual}" == "true" ]]; then
+                _first_individual=false
+            else
+                sleep 2
+            fi
+            jq -c --argjson i "$i" \
+                '.items[$i] | del(.id, .status, .hash, .revision)' \
+                "${POLICY_FILE}" > "${i_tmp}"
+            i_name=$(jq -r '.metadata.name // .id // "unknown"' "${i_tmp}" 2>/dev/null || echo "unknown")
+            i_code=$(curl -k -X POST \
+                "${CLUSTER_CPD_ENDPOINT}/aiops/api/v2/configuration/policies" \
+                --header "Content-Type: application/json" \
+                --header "Authorization: Bearer ${JWT_TOKEN}" \
+                --header "X-TenantID: cfd95b7e-3bc7-4006-a4a8-a73a79c71255" \
+                --data "@${i_tmp}" \
+                --write-out "%{http_code}" \
+                --max-time "${POLICY_CURL_TIMEOUT_LARGE_S}" \
+                --silent \
+                --output "${i_resp}") || true
+            if [[ "${i_code}" -ge 200 && "${i_code}" -lt 300 ]]; then
+                policy_success=$(( policy_success + 1 ))
+                TOTAL_SUCCESS=$(( TOTAL_SUCCESS + 1 ))
+            else
+                policy_failed=$(( policy_failed + 1 ))
+                echo "    Warning: HTTP ${i_code} for policy '${i_name}' (index ${i})"
+                echo "      Response: $(cat "${i_resp}" 2>/dev/null | head -c 300)"
+            fi
+        done
+        return
+
+    elif [[ "${http_code}" -eq 413 ]]; then
         # Payload too large — split in half and recurse.
-        # If the slice is already a single item there is nothing to split; give up.
         if [[ $chunk_size -eq 1 ]]; then
             policy_failed=$(( policy_failed + 1 ))
             local policy_name
-            policy_name=$(jq -r '.policies[0].name // .policies[0].id // "unknown"' "${p_tmp}" 2>/dev/null || echo "unknown")
+            policy_name=$(jq -r '.policies[0].metadata.name // .policies[0].id // "unknown"' "${p_tmp}" 2>/dev/null || echo "unknown")
             echo "  Warning: HTTP 413 for single policy '${policy_name}' (index ${slice_start}) — policy too large to send"
             echo "    Response: $(cat "${p_resp}" 2>/dev/null | head -c 300)"
             return
         fi
         local mid=$(( (slice_start + slice_end) / 2 ))
-        echo "  Payload too large (HTTP 413) at index ${slice_start}–${slice_end}; splitting into [${slice_start}–${mid}] and [$(( mid + 1 ))–${slice_end}]..."
+        echo "  Payload too large (HTTP 413) at index ${slice_start}..${slice_end}; splitting into [${slice_start}..${mid}] and [$(( mid + 1 ))..${slice_end}]..."
         post_policy_slice "${slice_start}" "${mid}"
         post_policy_slice "$(( mid + 1 ))" "${slice_end}"
         return
@@ -844,18 +925,46 @@ post_policy_slice() {
         TOTAL_SUCCESS=$(( TOTAL_SUCCESS + chunk_size ))
     else
         policy_failed=$(( policy_failed + chunk_size ))
-        echo "  Warning: HTTP ${http_code} for policies at index ${slice_start}–${slice_end}"
+        echo "  Warning: HTTP ${http_code} for policies at index ${slice_start}..${slice_end}"
         echo "    Response: $(cat "${p_resp}" 2>/dev/null | head -c 300)"
     fi
 }
 
-# Policies: POST in chunks of POLICY_BATCH_SIZE to the policy-batches endpoint,
-# using up to POLICY_PARALLEL_JOBS concurrent background jobs for speed.
-# 413 (payload too large) is handled by splitting the chunk in half recursively.
-# 429 (rate limited) is handled by sleeping retryAfter ms then retrying once.
+# ============================================
+# Policies: POST to the policy-batches endpoint.
+#
+# Batching strategy — two hard limits applied simultaneously:
+#   POLICY_MAX_BATCH_BYTES (1 MB)  — prevents HTTP 413 payload-too-large errors.
+#   POLICY_MAX_BATCH_COUNT (50)    — keeps per-request indexing work bounded.
+# Batches are built greedily: a new batch starts whenever the next policy would
+# exceed either limit.  A single policy larger than the byte budget is sent alone.
+#
+# Pacing — POLICY_BATCH_SLEEP_S between batches (serial, POLICY_PARALLEL_JOBS=1):
+#   The policy engine indexes synchronously.  Firing batches continuously saturates
+#   the indexer and causes sustained HTTP 504 gateway timeouts.  A sleep between
+#   batches lets the queue drain before the next request arrives.
+#   Sleep also controls the API request rate vs the 200-req/hr rate limit:
+#   with ~170 batches (8205 policies at 50/batch) a 20s sleep = ~170 req/hr < 200.
+#
+# Pre-flight rate-limit check: before entering the loop a probe request is made.
+#   If the server is already rate-limited (429) we sleep for `reset` seconds once
+#   so the loop starts with a full quota.
+#
+# 504 / timeout: nginx gateway cut the connection — fall back to individual POSTs.
+# 429 mid-loop:  sleep for `reset` seconds (actual window expiry), retry once.
+# 413:           byte-budget batching prevents this; recursive split as safety net.
+# ============================================
 POLICY_FILE="${BACKUP_DIR}/policies.json"
-POLICY_BATCH_SIZE=20
-POLICY_PARALLEL_JOBS=4
+POLICY_MAX_BATCH_BYTES=1048576       # 1 MB — well under the 2 MB hard limit; leaves headroom
+POLICY_MAX_BATCH_COUNT=50            # max policies per batch; ~170 batches for large-policy datasets
+                                     # (rate limit designed for 5K policies/batch at ~4 KB each = 9
+                                     # requests; at 30 KB avg a 50-policy batch = ~1.5 MB, so count
+                                     # matters more than bytes for staying under the nginx timeout)
+POLICY_BATCH_SLEEP_S=20              # sleep between batches — paces indexer + keeps req/hr < 200
+POLICY_CURL_TIMEOUT_S=60             # curl timeout for normal-sized batches (matches nginx timeout)
+POLICY_CURL_TIMEOUT_LARGE_S=180      # curl timeout for large payloads and individual POST fallbacks
+POLICY_LARGE_THRESHOLD_BYTES=51200   # 50 KB — batches above this use the large timeout
+POLICY_PARALLEL_JOBS=1               # serial: parallel jobs cause indexer saturation (504s)
 
 if [[ ! -f "${POLICY_FILE}" ]]; then
     echo "Skipping Policies — file not found: policies.json"
@@ -867,88 +976,89 @@ else
         echo "Skipping Policies — 0 items in backup"
         TOTAL_SKIPPED=$(( TOTAL_SKIPPED + 1 ))
     else
-        batch_count=$(( (policy_count + POLICY_BATCH_SIZE - 1) / POLICY_BATCH_SIZE ))
-        echo "Restoring Policies (${policy_count} item(s), batch size ${POLICY_BATCH_SIZE}, parallel jobs ${POLICY_PARALLEL_JOBS})..."
+        # Build batch boundaries respecting both byte-budget and count limits.
+        # Output: newline-separated "start end" pairs written to a temp file.
+        policy_boundaries_file=$(mktemp)
+        # shellcheck disable=SC2064
+        trap "rm -f '${policy_boundaries_file}'" RETURN
+
+        jq --argjson max_bytes "$POLICY_MAX_BATCH_BYTES" \
+           --argjson max_count "$POLICY_MAX_BATCH_COUNT" -r '
+          def OVERHEAD: 16;
+          def SEP: 1;
+          .items | to_entries |
+          reduce .[] as $entry (
+            { batch_start: 0, batch_bytes: OVERHEAD, batch_count: 0, idx: 0, out: [] };
+            ($entry.value | del(.id, .status, .hash, .revision) | tojson | length) as $sz |
+            if ((.batch_bytes + $sz + (if .idx > .batch_start then SEP else 0 end)) > $max_bytes
+                   and .idx > .batch_start)
+               or (.batch_count >= $max_count)
+            then
+              .out += ["\(.batch_start) \(.idx - 1)"] |
+              .batch_start = .idx | .batch_bytes = OVERHEAD + $sz |
+              .batch_count = 1   | .idx += 1
+            else
+              .batch_bytes += $sz + (if .idx > .batch_start then SEP else 0 end) |
+              .batch_count += 1  | .idx += 1
+            end
+          ) |
+          .out += ["\(.batch_start) \(.idx - 1)"] | .out[]
+        ' "${POLICY_FILE}" > "${policy_boundaries_file}"
+
+        batch_count=$(wc -l < "${policy_boundaries_file}" | tr -d ' ')
+        echo "Restoring Policies (${policy_count} item(s), max ${POLICY_MAX_BATCH_COUNT}/batch, ${batch_count} batch(es))..."
 
         if [[ "$DRY_RUN" == "true" ]]; then
             echo "  [dry-run] Would POST ${policy_count} policy/policies in ${batch_count} batch(es) to /aiops/api/v2/configuration/policy-batches"
             TOTAL_SKIPPED=$(( TOTAL_SKIPPED + 1 ))
         else
+            # Pre-flight: if already rate-limited, sleep once before the loop so
+            # all batches start with a full quota.
+            _pf_resp=$(mktemp)
+            _pf_code=$(jq -c --argjson s 0 --argjson e 0 \
+                '{"policies": [.items[0:1][] | del(.id, .status, .hash, .revision)]}' \
+                "${POLICY_FILE}" | \
+                curl -k -X POST \
+                    "${CLUSTER_CPD_ENDPOINT}/aiops/api/v2/configuration/policy-batches" \
+                    --header "Content-Type: application/json" \
+                    --header "Authorization: Bearer ${JWT_TOKEN}" \
+                    --header "X-TenantID: cfd95b7e-3bc7-4006-a4a8-a73a79c71255" \
+                    --data @- \
+                    --write-out "%{http_code}" \
+                    --max-time 60 \
+                    --silent \
+                    --output "${_pf_resp}") || true
+            if [[ "${_pf_code}" -eq 429 ]]; then
+                _pf_wait=$(jq -r '.reset // 0' "${_pf_resp}" 2>/dev/null || echo "0")
+                if [[ $_pf_wait -lt 1 ]]; then _pf_wait=1; fi
+                echo "  Rate limited before batch loop; waiting ${_pf_wait}s for rate-limit window to reset..."
+                sleep "${_pf_wait}"
+            fi
+            rm -f "${_pf_resp}"
+
             policy_success=0
             policy_failed=0
-
             TOTAL_ATTEMPTED=$(( TOTAL_ATTEMPTED + policy_count ))
 
-            # Temporary directory for per-batch result files written by background jobs.
-            # Each job writes "<success_count> <failed_count>" plus any warning lines.
-            policy_tmp_dir=$(mktemp -d)
-            # shellcheck disable=SC2064
-            trap "rm -rf '${policy_tmp_dir}'" EXIT
-
-            # Array of in-flight PIDs and their associated result files, used as a
-            # fixed-width semaphore: when POLICY_PARALLEL_JOBS slots are full we wait
-            # for the oldest job before launching the next one.
-            declare -a _job_pids=()
-            declare -a _job_result_files=()
-
-            # ----------------------------------------
-            # _wait_for_oldest_job
-            # Wait for the PID at index 0 of _job_pids, then remove it (and its
-            # corresponding result-file entry) from both arrays.
-            # ----------------------------------------
-            _wait_for_oldest_job() {
-                wait "${_job_pids[0]}" 2>/dev/null || true
-                unset '_job_pids[0]'
-                unset '_job_result_files[0]'
-                _job_pids=( "${_job_pids[@]+"${_job_pids[@]}"}" )
-                _job_result_files=( "${_job_result_files[@]+"${_job_result_files[@]}"}" )
-            }
-
             batch_index=0
-            start=0
-            while [[ $start -lt $policy_count ]]; do
-                end=$(( start + POLICY_BATCH_SIZE - 1 ))
-                if [[ $end -ge $policy_count ]]; then
-                    end=$(( policy_count - 1 ))
+            while IFS= read -r boundary; do
+                read -r b_start b_end <<< "${boundary}"
+
+                # Sleep between batches (skip before the very first).
+                if [[ $batch_index -gt 0 && $POLICY_BATCH_SLEEP_S -gt 0 ]]; then
+                    sleep "${POLICY_BATCH_SLEEP_S}"
                 fi
 
-                # If the parallel window is full, drain the oldest job first.
-                if [[ ${#_job_pids[@]} -ge $POLICY_PARALLEL_JOBS ]]; then
-                    _wait_for_oldest_job
-                fi
+                echo "  Batch $(( batch_index + 1 ))/${batch_count}: policies ${b_start}..${b_end} ($(( b_end - b_start + 1 )) items)..."
 
-                # Launch this batch slice in a background subshell.
-                # The subshell inherits post_policy_slice, POLICY_FILE,
-                # CLUSTER_CPD_ENDPOINT, JWT_TOKEN, and all globals it needs.
-                result_file="${policy_tmp_dir}/batch_${batch_index}.result"
-                (
-                    # Subshell-local counters; post_policy_slice updates them.
-                    policy_success=0
-                    policy_failed=0
-                    post_policy_slice "${start}" "${end}"
-                    echo "${policy_success} ${policy_failed}" > "${result_file}"
-                ) &
-                _job_pids+=( $! )
-                _job_result_files+=( "${result_file}" )
+                # Run serially in the current shell so policy_success/policy_failed
+                # are updated directly (no subshell, no result files needed).
+                post_policy_slice "${b_start}" "${b_end}"
 
                 batch_index=$(( batch_index + 1 ))
-                start=$(( end + 1 ))
-            done
+            done < "${policy_boundaries_file}"
 
-            # Wait for all remaining in-flight jobs.
-            for pid in "${_job_pids[@]+"${_job_pids[@]}"}"; do
-                wait "${pid}" 2>/dev/null || true
-            done
-
-            # Aggregate results from every batch result file.
-            for result_file in "${policy_tmp_dir}"/batch_*.result; do
-                [[ -f "$result_file" ]] || continue
-                read -r batch_ok batch_err < "${result_file}"
-                policy_success=$(( policy_success + batch_ok ))
-                policy_failed=$(( policy_failed  + batch_err ))
-            done
-
-            rm -rf "${policy_tmp_dir}"
+            rm -f "${policy_boundaries_file}"
 
             echo "  ${policy_success}/${policy_count} item(s) restored successfully"
             if [[ $policy_failed -gt 0 ]]; then
