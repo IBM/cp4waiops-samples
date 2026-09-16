@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# © Copyright IBM Corp. 2022, 2025
+# © Copyright IBM Corp. 2022, 2026
 # SPDX-License-Identifier: Apache2.0
 #
 # This reference script can be used to quickly install ODF as publicly
@@ -49,8 +49,9 @@
 #         - ODF uses more CPU and memory for each path found. Consider using an LVM
 #           or some other means of presenting a single path to OCP local storage.
 #           For example, if you have 2 block devices available (/dev/vdb /dev/vdc):
-#             # pvcreate /dev/vdb /dev/vdc
-#             # vgcreate localstorage /dev/vdb /dev/vdc
+#             # disks="/dev/vdb /dev/vdc"
+#             # pvcreate $disks
+#             # vgcreate localstorage $disks
 #             # lvcreate localstorage -n odf -l 100%FREE
 #             # lvs -a
 #           then:
@@ -233,7 +234,7 @@ EOF
 
 echo -n 'Waiting for the Local Storage operator to be installed...'
 while true; do
-  sleep 5;
+  sleep 5
   s=$(oc get csvs -n openshift-local-storage -o jsonpath='{.items[?(@.spec.displayName=="Local Storage")].status.phase}')
   if [[ "${s}" == "Succeeded" ]]; then break; fi
   echo -n .
@@ -246,6 +247,9 @@ echo
 
 echo Installing ODF...
 OCP_CH=$(oc version -o yaml | sed -n 's/^openshiftVersion:  *\([^.]*\.[^.]*\)\..*/\1/p')
+OCP_MAJ=$(echo $OCP_CH | cut -d. -f1)
+OCP_MIN=$(echo $OCP_CH | cut -d. -f2)
+
 
 cat << EOF | oc apply --validate -f -
 apiVersion: project.openshift.io/v1
@@ -286,7 +290,7 @@ EOF
 
 echo -n 'Waiting for the ODF operator to be installed...'
 while true; do
-  sleep 5;
+  sleep 5
   s=$(oc get csvs -n openshift-storage -o jsonpath='{.items[?(@.spec.displayName=="OpenShift Data Foundation")].status.phase}')
   if [[ "${s}" == "Succeeded" ]]; then break; fi
   echo -n .
@@ -347,7 +351,7 @@ EOF
     s=$(oc get localvolumediscovery auto-discover-devices -n openshift-local-storage -o jsonpath='{.status.conditions[?(@.type=="Available")].status}')
     if [[ "${s}" == "True" ]]; then break; fi
     echo -n .
-    sleep 5;
+    sleep 5
   done
   echo done
   oc get -n openshift-local-storage -o wide localvolumediscoveryresults
@@ -490,7 +494,10 @@ oc get pv -l storage.openshift.com/owner-name=ocs-local-block -o wide
 echo
 
 
-cat <<EOF | oc apply --validate -f -
+if [[ "${OCP_MAJ}" -eq 4  &&  "${OCP_MIN}" -lt 19 ]]; then
+  #StorageSystem was removed in 4.19
+  #https://docs.redhat.com/en/documentation/red_hat_openshift_data_foundation/4.19/html/4.19_release_notes/deprecated_features
+  cat <<EOF | oc apply --validate -f -
 apiVersion: odf.openshift.io/v1alpha1
 kind: StorageSystem
 metadata:
@@ -500,7 +507,20 @@ spec:
   kind: storagecluster.ocs.openshift.io/v1
   name: ocs-storagecluster
   namespace: openshift-storage
----
+EOF
+fi
+
+#FlexibleScaling forces node only failure domain, turn off in a multizone cluster.
+#https://access.redhat.com/solutions/7120689
+#TODO: Investigate if this is necessary hostname failure domain seems to work in zone outage.
+c=$(oc get no -ltopology.kubernetes.io/zone,cluster.ocs.openshift.io/openshift-storage --no-headers --ignore-not-found | wc -l)
+if [[ $c -gt 0 ]]; then
+  flex=false
+else
+  flex=true
+fi
+
+cat <<EOF | oc apply --validate -f -
 apiVersion: ocs.openshift.io/v1
 kind: StorageCluster
 metadata:
@@ -511,87 +531,63 @@ metadata:
   name: ocs-storagecluster
   namespace: openshift-storage
 spec:
-  arbiter: {}
-  encryption:
-    kms: {}
-  externalStorage: {}
-  flexibleScaling: true
-  managedResources:
-    cephBlockPools: {}
-    cephCluster: {}
-    cephConfig: {}
-    cephDashboard: {}
-    cephFilesystems: {}
-    cephNonResilientPools: {}
-    cephObjectStoreUsers: {}
-    cephObjectStores: {}
-    cephToolbox: {}
-  mirroring: {}
+  flexibleScaling: $flex
   monDataDirHostPath: /var/lib/rook
-  nodeTopologies: {}
   multiCloudGateway:
     reconcileStrategy: ignore   #"Disable" MultiCloud/NOOBAA
   storageDeviceSets:
-  - config: {}
+  - name: ocs-deviceset-localblock
     count: ${pv_cnt}
     dataPVCTemplate:
-      metadata: {}
       spec:
         accessModes:
         - ReadWriteOnce
         resources:
           requests:
-            storage: "1"
+            storage: "1"   #ODF will consume all of ocs-local-block size found not 1
         storageClassName: ocs-local-block
         volumeMode: Block
-    name: ocs-deviceset-localblock
-    placement: {}
-    preparePlacement: {}
     replica: 1   #ODF replicates to 3 under the covers
-    resources: {}
 EOF
 
-#TODO:
-#    placement:
-#      all:
-#        nodeAffinity:
-#          preferredDuringSchedulingIgnoredDuringExecution:
-#          - weight: 100
-#            preference:
-#              matchExpressions:
-#              - key: ${OCP_LOCAL_STORAGE_NODE_LABEL}
-#                operator: Exists
-#        tolerations:
-#        - effect: NoSchedule
-#          key: node.ocs.openshift.io/storage
-#          value: "true"
-#      mds:
-#        tolerations:
-#        - effect: NoSchedule
-#          key: node.ocs.openshift.io/storage
-#          value: "true"
-#      noobaa-core:
-#        tolerations:
-#        - effect: NoSchedule
-#          key: node.ocs.openshift.io/storage
-#          value: "true"
-#      rgw:
-#        tolerations:
-#        - effect: NoSchedule
-#          key: node.ocs.openshift.io/storage
-#          value: "true"
-      
-#TODO: patch placement with control-plane toleration
-
-echo -n Waiting for the StorageCluster to be ready and define StorageClasses...
-#StorageClasses will show up as the storagecluster progresses through it's status
+echo -n Waiting for the StorageCluster to be ready...
 while true; do
   s=$(oc get storagecluster --ignore-not-found -n openshift-storage ocs-storagecluster -o jsonpath='{.status.phase}')
   if [[ "${s}" == "Ready" ]]; then break; fi
-  sleep 5;
+  sleep 5
   echo -n .
 done
 echo done
+
+
+#Constrain ctrlplugin pods to ODF storage nodes via the Driver CR (csi.ceph.io/v1)
+#The ctrlplugin deployments are owned by Driver CRs, not the StorageCluster or rook-ceph-operator-config.
+#Patching the Driver CR is the only way to set nodeAffinity that survives operator reconciliation.
+echo -n "Waiting for Driver CRs to be created..."
+while true; do
+  c=$(oc get driver.csi.ceph.io -n openshift-storage --no-headers --ignore-not-found openshift-storage.cephfs.csi.ceph.com openshift-storage.rbd.csi.ceph.com | wc -l)
+  if [[ "${c}" -eq 2 ]]; then break; fi
+  sleep 5
+  echo -n .
+done
+echo done
+
+for d in openshift-storage.cephfs.csi.ceph.com openshift-storage.rbd.csi.ceph.com; do
+  oc patch driver.csi.ceph.io $d -n openshift-storage --type=merge -p '{"spec":{"controllerPlugin":{"affinity":{"nodeAffinity":{"requiredDuringSchedulingIgnoredDuringExecution":{"nodeSelectorTerms":[{"matchExpressions":[{"key":"cluster.ocs.openshift.io/openshift-storage","operator":"Exists"}]}]}}}}}}'
+done
+
+
+#Some versions of ODF StorageCluster say Ready when StorageClasses don't actually exist yet
+echo -n Waiting for ODF StorageClasses to be created...
+while true; do
+  sc="ocs-storagecluster-ceph-rgw ocs-storagecluster-ceph-rbd ocs-storagecluster-cephfs"
+  s=$(oc get storageclass $sc --no-headers --ignore-not-found | wc -l)
+  if [[ "${s}" -eq 3 ]]; then break; fi
+    sleep 5
+    echo -n .
+done
+echo done
+
 
 #Make block/RWO the default
 oc patch storageclass ocs-storagecluster-ceph-rbd -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}'
@@ -695,8 +691,8 @@ EOF
 
 echo -n Waiting for ODF test pod to be ready...
 n=0
-while [[ $n -lt 180 ]]; do
-  s=$(oc get po -n openshift-storage test-odf -o jsonpath='{.status.containerStatuses[0].ready}')
+while [[ $n -lt 300 ]]; do   #5 mins seems ridiculous, but someone's cluster took >3
+  s=$(oc get pod -n openshift-storage test-odf -o jsonpath='{.status.containerStatuses[0].ready}')
   if [ "${s}" == "true" ]; then break; fi
   sleep 5
   echo -n .
@@ -704,7 +700,7 @@ while [[ $n -lt 180 ]]; do
 done
 echo done
 
-s=$(oc get po -n openshift-storage test-odf -o jsonpath='{.status.containerStatuses[0].ready}')
+s=$(oc get pod -n openshift-storage test-odf -o jsonpath='{.status.containerStatuses[0].ready}')
 if [[ "${s}" == "true" ]]; then
   oc delete pod -n openshift-storage test-odf
   oc delete pvc -n openshift-storage test-cephfs
