@@ -1,0 +1,68 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: backup-job
+  namespace: {{ .Values.oadpNamespace }}
+spec:
+  jobTemplate:
+    metadata:
+      name: backup-job
+    spec:
+      backoffLimit: 0
+      template:
+        metadata:
+        spec:
+          serviceAccountName: backup-sa
+          volumes:
+            - name: backup-config
+              configMap:
+                name: backup-config
+            - name: pod-annotation-config
+              configMap:
+                name: backup-config
+            - name: resource-label-config
+              configMap:
+                name: backup-config
+            - name: enabled-namespaces-config
+              configMap:
+                name: backup-config
+            - name: enabled-components-config
+              configMap:
+                name: backup-config
+            - name: aiops-config
+              configMap:
+                name: backup-config
+            - name: workdir
+              emptyDir: {}
+          containers:
+          - image: "{{ .Values.image.repository }}"
+            imagePullPolicy: {{ .Values.image.pullPolicy }}
+            name: backup-job
+            command: ["/bin/bash", "/bcdr/backup/scripts/main.sh"]
+            resources: {}
+            env:
+            - name: WORKDIR
+              value: "/bcdr"
+            volumeMounts:
+              - name: backup-config
+                mountPath: /bcdr/backup/scripts/backup_original.yaml
+                subPath: backup_original.yaml
+              - name: pod-annotation-config
+                mountPath: /bcdr/backup/scripts/pod-annotation-details.json
+                subPath: pod-annotation-details.json
+              - name: resource-label-config
+                mountPath: /bcdr/backup/scripts/resource-label-details.json
+                subPath: resource-label-details.json
+              - name: enabled-namespaces-config
+                mountPath: /bcdr/backup/scripts/enabled-namespaces.json
+                subPath: enabled-namespaces.json
+              - name: enabled-components-config
+                mountPath: /bcdr/backup/scripts/enabled-components.json
+                subPath: enabled-components.json
+              - name: aiops-config
+                mountPath: /bcdr/common/aiops-config.json
+                subPath: aiops-config.json
+              - mountPath: /workdir
+                name: workdir
+          restartPolicy: Never
+  schedule: {{ .Values.schedule | quote }}
