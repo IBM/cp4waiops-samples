@@ -534,8 +534,9 @@ fi
 ACT_HTTP_CODE="${ACT_HTTP_CODE//[^0-9]/}"
 
 if [[ "${ACT_HTTP_CODE}" -ge 200 && "${ACT_HTTP_CODE}" -lt 300 ]]; then
-    # Response is { "actions": [...] } — normalise to { "items": [...] }
-    if jq '{"items": .actions}' "${ACT_TMP}" > "${ACT_OUT}" 2>/dev/null; then
+    # Response is { "actions": [...] } — normalise to { "items": [...] } and strip
+    # server-computed fields that the POST /actions endpoint rejects on restore.
+    if jq '{"items": [.actions[] | del(.stats)]}' "${ACT_TMP}" > "${ACT_OUT}" 2>/dev/null; then
         rm -f "${ACT_TMP}"
     else
         echo "  Error: Actions API returned non-JSON (HTTP ${ACT_HTTP_CODE})"
@@ -545,6 +546,54 @@ if [[ "${ACT_HTTP_CODE}" -ge 200 && "${ACT_HTTP_CODE}" -lt 300 ]]; then
         rm -f "${ACT_TMP}"
         exit 1
     fi
+
+    # Enrich HTTP actions that have hasPassword=true with password from CouchDB
+    action_ids_with_pwd=$(jq -r '.items[] | select(.http.hasPassword == true) | ._actionId' "${ACT_OUT}" 2>/dev/null || true)
+    if [[ -n "$action_ids_with_pwd" ]]; then
+        echo "  Enriching HTTP action passwords from CouchDB..."
+        couch_pod=$(oc get pods -n "${CLUSTER_NAMESPACE}" -l app.kubernetes.io/name=IssueResolutionCoreCouchDB \
+            --no-headers -o custom-columns=":metadata.name" 2>/dev/null | head -1 || true)
+        if [[ -z "$couch_pod" ]]; then
+            couch_pod=$(oc get pods -n "${CLUSTER_NAMESPACE}" --no-headers \
+                -o custom-columns=":metadata.name" 2>/dev/null | grep "couchdb" | head -1 || true)
+        fi
+
+        couch_pass=$(oc get secret -n "${CLUSTER_NAMESPACE}" aiops-ir-core-couchdb \
+            -o go-template='{{.data.admin_password | base64decode}}' 2>/dev/null || true)
+
+        if [[ -n "$couch_pod" && -n "$couch_pass" ]]; then
+            couch_db=$(oc exec -n "${CLUSTER_NAMESPACE}" "${couch_pod}" -c db -- \
+                curl -sk -u "admin:${couch_pass}" 'https://localhost:6984/_all_dbs' 2>/dev/null \
+                | jq -r '.[] | select(endswith("rba-as"))' 2>/dev/null | head -1 || true)
+
+            if [[ -n "$couch_db" ]]; then
+                for action_id in ${action_ids_with_pwd}; do
+                    doc=$(oc exec -n "${CLUSTER_NAMESPACE}" "${couch_pod}" -c db -- curl -sk \
+                        -u "admin:${couch_pass}" \
+                        -H "Content-Type: application/json" \
+                        "https://localhost:6984/${couch_db}/_find" \
+                        -d "{\"selector\":{\"automationId\":\"${action_id}\",\"version\":{\"\$gt\":0}}}" 2>/dev/null \
+                        | jq '.docs | max_by(.version)' 2>/dev/null || true)
+
+                    extracted_pwd=$(echo "$doc" | jq -r '.fields[]? | select(.name == "authen").value | fromjson? | .password // empty' 2>/dev/null || true)
+
+                    if [[ -n "$extracted_pwd" ]]; then
+                        jq --arg aid "$action_id" --arg pwd "$extracted_pwd" \
+                            '(.items[] | select(._actionId == $aid).http) |= ({"password": $pwd} + .)' \
+                            "${ACT_OUT}" > "${ACT_OUT}.tmp" && mv "${ACT_OUT}.tmp" "${ACT_OUT}"
+                        echo "    Added password for action: ${action_id}"
+                    else
+                        echo "    Warning: Could not extract password for action: ${action_id}"
+                    fi
+                done
+            else
+                echo "    Warning: Could not find rba-as database in CouchDB"
+            fi
+        else
+            echo "    Warning: CouchDB pod or credentials not found — passwords not backed up"
+        fi
+    fi
+
     local_item_count=$(jq '.items | length' "${ACT_OUT}" 2>/dev/null || echo "?")
     echo "  OK — ${local_item_count} item(s) → actions.json"
 elif [[ "${ACT_HTTP_CODE}" -eq 401 || "${ACT_HTTP_CODE}" -eq 403 ]]; then

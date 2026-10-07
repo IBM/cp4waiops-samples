@@ -187,8 +187,7 @@ restore_items() {
         jq ".items[$i] | del(._id, .id, .createdAt, .updatedAt, .created, .updated, .lastModified, .lastUpdated, .revision, .__v)" \
             "${input_file}" > "${tmp_item}"
 
-        # Skip predefined system actions — they exist on every cluster and
-        # have no script field, so the API rejects them with 400.
+        # Handle Actions routing and stripping
         local action_type
         action_type=$(jq -r '._actionType // empty' "${tmp_item}" 2>/dev/null || true)
         if [[ "$action_type" == "predefined" ]]; then
@@ -197,6 +196,13 @@ restore_items() {
             echo "  Skipping '${action_name}' (predefined system action)"
             skipped=$(( skipped + 1 ))
             continue
+        elif [[ -n "$action_type" ]]; then
+            # For RBA actions, strip server-managed fields.
+            # The POST /actions endpoint accepts the type-specific config key as-is
+            # (e.g. "http": {...} for HTTP actions) — confirmed from API example.
+            # "stats" is a server-computed read-only field that must also be removed.
+            jq 'del(._actionId, ._actionType, ._type, ._createdAt, ._modifiedAt, ._createdBy, ._modifiedBy, ._version, ._state, ._isLatest, .stats)' \
+                "${tmp_item}" > "${tmp_item}.clean" && mv "${tmp_item}.clean" "${tmp_item}"
         fi
 
         TOTAL_ATTEMPTED=$(( TOTAL_ATTEMPTED + 1 ))
@@ -1068,21 +1074,25 @@ else
     fi
 fi
 
-# Runbooks: restore via the RBA v1 bulk import endpoint.
-# The backup file holds { "items": [...] } where each item is an exportFormat runbook.
-# POST /api/v1/rba/runbooks/import accepts a plain array.
-restore_file \
-    "Runbooks" \
-    "POST" \
-    "/aiops/api/story-manager/rba/v1/runbooks/import" \
-    "runbooks.json" \
-    "__array__"
 
 # Actions (RBA terminology for Tools): restore via the RBA v1 API, one per POST.
 restore_items \
     "Actions" \
     "/aiops/api/story-manager/rba/v1/actions" \
     "actions.json"
+
+
+# Runbooks: restore via the RBA v1 bulk import endpoint.
+# The backup file holds { "items": [...] } where each item is an exportFormat runbook.
+# POST /api/v1/rba/runbooks/import accepts a plain array.
+# ignoreEncryptedData=true: skip any connection credentials encrypted at export time
+# rather than failing the entire import when no encryption token is available.
+restore_file \
+    "Runbooks" \
+    "POST" \
+    "/aiops/api/story-manager/rba/v1/runbooks/import?ignoreEncryptedData=true" \
+    "runbooks.json" \
+    "__array__"
 
 # Topology: restore via dedicated POST endpoint
 restore_file \
