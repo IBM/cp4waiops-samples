@@ -445,9 +445,14 @@ fi
 
 # Runbooks: use the RBA v1 API with exportFormat=true to get importable JSON.
 # The response is a plain JSON array; normalise it to { "items": [...] } on save.
+# Sensitive fields (e.g. HTTP action credentials) are exported encrypted. The key is
+# returned in the x-rba-encryption-token response header and is required by the
+# import endpoint (?encryption=<token>), so it is saved next to runbooks.json.
 echo "Exporting Runbooks..."
 RB_TMP="${OUTPUT_DIR}/runbooks.json.tmp"
 RB_OUT="${OUTPUT_DIR}/runbooks.json"
+RB_HDR="${OUTPUT_DIR}/runbooks.headers.tmp"
+RB_TOKEN_OUT="${OUTPUT_DIR}/runbooks-encryption-token.txt"
 RB_URL="${CLUSTER_CPD_ENDPOINT}/aiops/api/story-manager/rba/v1/runbooks?exportFormat=true"
 
 if [[ "$DEBUG" == "true" ]]; then
@@ -456,6 +461,7 @@ if [[ "$DEBUG" == "true" ]]; then
         --header "Content-Type: application/json" \
         --header "Authorization: Bearer ${JWT_TOKEN}" \
         --header "X-TenantID: cfd95b7e-3bc7-4006-a4a8-a73a79c71255" \
+        --dump-header "${RB_HDR}" \
         --output "${RB_TMP}" \
         --write-out "%{http_code}" \
         --verbose 2>/dev/tty || true)
@@ -467,6 +473,7 @@ else
         --header "Content-Type: application/json" \
         --header "Authorization: Bearer ${JWT_TOKEN}" \
         --header "X-TenantID: cfd95b7e-3bc7-4006-a4a8-a73a79c71255" \
+        --dump-header "${RB_HDR}" \
         --output "${RB_TMP}" \
         --write-out "%{http_code}" \
         --silent 2>/dev/null || true)
@@ -474,7 +481,19 @@ fi
 
 RB_HTTP_CODE="${RB_HTTP_CODE//[^0-9]/}"
 
+# Extract the encryption token (header name is case-insensitive; strip CR/LF)
+RB_ENCRYPTION_TOKEN=$(grep -i '^x-rba-encryption-token:' "${RB_HDR}" 2>/dev/null \
+    | head -1 | sed 's/^[^:]*:[[:space:]]*//' | tr -d '\r\n' || true)
+rm -f "${RB_HDR}"
+
 if [[ "${RB_HTTP_CODE}" -ge 200 && "${RB_HTTP_CODE}" -lt 300 ]]; then
+    if [[ -n "${RB_ENCRYPTION_TOKEN}" ]]; then
+        printf '%s' "${RB_ENCRYPTION_TOKEN}" > "${RB_TOKEN_OUT}"
+        chmod 600 "${RB_TOKEN_OUT}"
+        echo "  Encryption token saved → runbooks-encryption-token.txt"
+    else
+        echo "  Note: no x-rba-encryption-token header returned — encrypted runbook data (if any) cannot be restored"
+    fi
     # Response is a plain array — wrap it as { "items": [...] } for consistency
     if jq '{"items": .}' "${RB_TMP}" > "${RB_OUT}" 2>/dev/null; then
         rm -f "${RB_TMP}"

@@ -140,6 +140,10 @@ TOTAL_ATTEMPTED=0
 TOTAL_SUCCESS=0
 TOTAL_SKIPPED=0
 
+# Newline-separated names of the custom actions already on the target cluster.
+# Filled in just before the Actions restore; restore_items skips actions in this list.
+EXISTING_ACTION_NAMES=""
+
 # ============================================
 # Helper: POST each item in an items array individually
 # restore_items <label> <api_path> <backup_filename>
@@ -203,6 +207,17 @@ restore_items() {
             # "stats" is a server-computed read-only field that must also be removed.
             jq 'del(._actionId, ._actionType, ._type, ._createdAt, ._modifiedAt, ._createdBy, ._modifiedBy, ._version, ._state, ._isLatest, .stats)' \
                 "${tmp_item}" > "${tmp_item}.clean" && mv "${tmp_item}.clean" "${tmp_item}"
+
+            # The runbook import already created the actions its runbooks embed.
+            # Skip any action whose name is on the target, so no same-name duplicate is made.
+            local custom_action_name
+            custom_action_name=$(jq -r '.name // empty' "${tmp_item}" 2>/dev/null || true)
+            if [[ -n "$custom_action_name" ]] && \
+               printf '%s\n' "${EXISTING_ACTION_NAMES}" | grep -Fxq -- "${custom_action_name}"; then
+                echo "  Skipping '${custom_action_name}' (already exists on target)"
+                skipped=$(( skipped + 1 ))
+                continue
+            fi
         fi
 
         TOTAL_ATTEMPTED=$(( TOTAL_ATTEMPTED + 1 ))
@@ -231,7 +246,7 @@ restore_items() {
         rm -f "${resp_body}"
     done
 
-    echo "  ${success}/${item_count} item(s) restored successfully (${skipped} predefined skipped)"
+    echo "  ${success}/${item_count} item(s) restored successfully (${skipped} skipped)"
     if [[ $failed -gt 0 ]]; then
         echo "  Warning: ${failed} item(s) failed to restore"
     fi
@@ -239,8 +254,10 @@ restore_items() {
 
 # ============================================
 # Helper: POST a whole-file payload (e.g. topology restore, policy-batches)
-# restore_file <label> <method> <api_path> <backup_filename> [<wrap_key>]
+# restore_file <label> <method> <api_path> <backup_filename> [<wrap_key>] [<skip_names_json>]
 # If wrap_key is provided the file contents are wrapped as: { "<wrap_key>": <items_array> }
+# With wrap_key "__array__", <skip_names_json> (a JSON array of names, default []) lists
+# items already on the target; any item whose .name is in it is left out of the POST.
 # ============================================
 restore_file() {
     local label="$1"
@@ -248,6 +265,7 @@ restore_file() {
     local api_path="$3"
     local backup_filename="$4"
     local wrap_key="${5:-}"
+    local skip_names_json="${6:-[]}"
     local input_file="${BACKUP_DIR}/${backup_filename}"
 
     if [[ ! -f "${input_file}" ]]; then
@@ -259,7 +277,8 @@ restore_file() {
     echo "Restoring ${label}..."
 
     if [[ "$DRY_RUN" == "true" ]]; then
-        echo "  [dry-run] Would ${method} to ${api_path}"
+        # Print the path without its query string (it can carry the encryption token)
+        echo "  [dry-run] Would ${method} to ${api_path%%\?*}"
         TOTAL_SKIPPED=$(( TOTAL_SKIPPED + 1 ))
         return 0
     fi
@@ -271,15 +290,25 @@ restore_file() {
     trap "rm -f '${tmp_payload}'" RETURN
 
     if [[ "$wrap_key" == "__array__" ]]; then
-        # Unwrap the stored { "items": [...] } back to a plain array
-        jq '.items' "${input_file}" > "${tmp_payload}"
+        # Unwrap the stored { "items": [...] } back to a plain array, leaving out items
+        # whose name is already on the target (re-importing them would duplicate them).
+        local total_len arr_len
+        total_len=$(jq '.items | length' "${input_file}" 2>/dev/null || echo "0")
+        jq --argjson existing "${skip_names_json}" \
+            '.items | map(select(.name as $n | ($existing | index($n)) == null))' \
+            "${input_file}" > "${tmp_payload}"
         # Skip if the array is empty — endpoints reject an empty array body
-        local arr_len
         arr_len=$(jq 'length' "${tmp_payload}" 2>/dev/null || echo "0")
         if [[ "$arr_len" -eq 0 ]]; then
-            echo "Skipping ${label} — 0 items in backup"
+            if [[ "$total_len" -gt 0 ]]; then
+                echo "Skipping ${label} — all ${total_len} item(s) already exist on target"
+            else
+                echo "Skipping ${label} — 0 items in backup"
+            fi
             TOTAL_SKIPPED=$(( TOTAL_SKIPPED + 1 ))
             return 0
+        elif [[ "$arr_len" -lt "$total_len" ]]; then
+            echo "  Skipping $(( total_len - arr_len )) item(s) already on target; importing ${arr_len}"
         fi
     elif [[ -n "$wrap_key" ]]; then
         # Build e.g. { "policies": [ ... ] } from the items array
@@ -1074,25 +1103,96 @@ else
     fi
 fi
 
-
-# Actions (RBA terminology for Tools): restore via the RBA v1 API, one per POST.
-restore_items \
-    "Actions" \
-    "/aiops/api/story-manager/rba/v1/actions" \
-    "actions.json"
-
-
 # Runbooks: restore via the RBA v1 bulk import endpoint.
 # The backup file holds { "items": [...] } where each item is an exportFormat runbook.
 # POST /api/v1/rba/runbooks/import accepts a plain array.
-# ignoreEncryptedData=true: skip any connection credentials encrypted at export time
-# rather than failing the entire import when no encryption token is available.
-restore_file \
-    "Runbooks" \
-    "POST" \
-    "/aiops/api/story-manager/rba/v1/runbooks/import?ignoreEncryptedData=true" \
-    "runbooks.json" \
-    "__array__"
+# Sensitive fields (e.g. HTTP action credentials) are exported encrypted; backup.sh saves
+# the key from the x-rba-encryption-token header to runbooks-encryption-token.txt.
+# With the token the import decrypts them (?encryption=<token>).  Without it (older
+# backups) fall back to ignoreEncryptedData=true, which drops the encrypted data.
+RB_TOKEN_FILE="${BACKUP_DIR}/runbooks-encryption-token.txt"
+RB_IMPORT_PATH="/aiops/api/story-manager/rba/v1/runbooks/import"
+if [[ -s "${RB_TOKEN_FILE}" ]]; then
+    RB_IMPORT_PATH="${RB_IMPORT_PATH}?encryption=$(tr -d '\r\n' < "${RB_TOKEN_FILE}")"
+else
+    echo "Note: no runbooks-encryption-token.txt in backup — encrypted runbook data will be ignored"
+    RB_IMPORT_PATH="${RB_IMPORT_PATH}?ignoreEncryptedData=true"
+fi
+
+# The import does not check for duplicates: a runbook that already exists on the target
+# would be created again, along with another copy of every action it embeds.  List the
+# runbooks on the target first (same export endpoint backup.sh uses, so the response is
+# a known array of runbooks with a .name) and leave those out of the import.
+RB_EXISTING_NAMES_JSON="[]"
+RB_LIST_OK=true
+if [[ "$DRY_RUN" != "true" ]]; then
+    rb_list_file=$(mktemp)
+    rb_list_code=$(curl -k --compressed -X GET \
+        "${CLUSTER_CPD_ENDPOINT}/aiops/api/story-manager/rba/v1/runbooks?exportFormat=true" \
+        --header "Content-Type: application/json" \
+        --header "Authorization: Bearer ${JWT_TOKEN}" \
+        --header "X-TenantID: cfd95b7e-3bc7-4006-a4a8-a73a79c71255" \
+        --write-out "%{http_code}" \
+        --silent \
+        --output "${rb_list_file}" 2>/dev/null || true)
+    rb_list_code="${rb_list_code//[^0-9]/}"
+    if [[ -n "$rb_list_code" && "$rb_list_code" -ge 200 && "$rb_list_code" -lt 300 ]] \
+       && RB_EXISTING_NAMES_JSON=$(jq -c 'if type == "array" then [.[].name | select(. != null)] else error("not an array") end' "${rb_list_file}" 2>/dev/null); then
+        :
+    else
+        RB_LIST_OK=false
+    fi
+    rm -f "${rb_list_file}"
+fi
+
+if [[ "$RB_LIST_OK" == "true" ]]; then
+    restore_file \
+        "Runbooks" \
+        "POST" \
+        "${RB_IMPORT_PATH}" \
+        "runbooks.json" \
+        "__array__" \
+        "${RB_EXISTING_NAMES_JSON}"
+else
+    echo "Warning: could not list existing runbooks on the target — skipping Runbooks restore to avoid duplicates"
+    TOTAL_SKIPPED=$(( TOTAL_SKIPPED + 1 ))
+fi
+
+# Actions (RBA terminology for Tools): restore via the RBA v1 API, one per POST.
+# Importing the runbooks above already created every action they embed (with their
+# credentials when the encryption token was used).  Fetch the names of the custom
+# actions now on the target so restore_items skips them instead of creating a second
+# action with the same name.  Only actions no runbook uses are created here.
+ACTIONS_LIST_OK=true
+if [[ "$DRY_RUN" != "true" ]]; then
+    act_list_file=$(mktemp)
+    act_list_code=$(curl -k --compressed -X GET \
+        "${CLUSTER_CPD_ENDPOINT}/aiops/api/story-manager/rba/v1/actions" \
+        --header "Content-Type: application/json" \
+        --header "Authorization: Bearer ${JWT_TOKEN}" \
+        --header "X-TenantID: cfd95b7e-3bc7-4006-a4a8-a73a79c71255" \
+        --write-out "%{http_code}" \
+        --silent \
+        --output "${act_list_file}" 2>/dev/null || true)
+    act_list_code="${act_list_code//[^0-9]/}"
+    if [[ -n "$act_list_code" && "$act_list_code" -ge 200 && "$act_list_code" -lt 300 ]] \
+       && EXISTING_ACTION_NAMES=$(jq -r '.actions[]? | select(._actionType != "predefined") | .name' "${act_list_file}" 2>/dev/null); then
+        :
+    else
+        ACTIONS_LIST_OK=false
+    fi
+    rm -f "${act_list_file}"
+fi
+
+if [[ "$ACTIONS_LIST_OK" == "true" ]]; then
+    restore_items \
+        "Actions" \
+        "/aiops/api/story-manager/rba/v1/actions" \
+        "actions.json"
+else
+    echo "Warning: could not list existing actions on the target — skipping Actions restore to avoid duplicates"
+    TOTAL_SKIPPED=$(( TOTAL_SKIPPED + 1 ))
+fi
 
 # Topology: restore via dedicated POST endpoint
 restore_file \
