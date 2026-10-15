@@ -387,7 +387,8 @@ restore_exec_connections() {
 
     for i in $(seq 0 $(( item_count - 1 ))); do
         local item_json item_name
-        item_json=$(jq ".items[$i]" "${input_file}")
+        # The v3 API rejects items without connection_updated_at; default it to "null" if missing
+        item_json=$(jq ".items[$i] | (if has(\"connection_updated_at\") then . else . + {connection_updated_at: \"null\"} end)" "${input_file}")
         item_name=$(echo "${item_json}" | jq -r '.connection_config.display_name // .name // "unknown"' 2>/dev/null || echo "unknown")
 
         TOTAL_ATTEMPTED=$(( TOTAL_ATTEMPTED + 1 ))
