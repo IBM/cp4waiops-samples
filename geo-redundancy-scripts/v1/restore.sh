@@ -435,10 +435,87 @@ restore_exec_connections() {
 }
 
 # ============================================
+# Helper: create the SSH (SCRIPT) connector and regenerate its key pair.
+# POSTs the backup item to aiops-ir-core-rba-rbs, then calls keypair?refresh=true
+# to generate a new public key (the private key never leaves the source cluster).
+# restore_ssh_connector_keypair <namespace> <item_json>
+# ============================================
+restore_ssh_connector_keypair() {
+    local namespace="$1"
+    local item_json="$2"
+    local local_port="${RBS_LOCAL_PORT:-3005}"
+    local base="https://localhost:${local_port}/api-gateway/as/as/agent"
+
+    oc -n "${namespace}" port-forward service/aiops-ir-core-rba-rbs "${local_port}:3005" >/dev/null 2>&1 &
+    local pf_pid=$!
+
+    # Wait for the port-forward to accept connections
+    local ready=false code
+    for _ in $(seq 1 15); do
+        code=$(curl -sk -o /dev/null --max-time 2 -w "%{http_code}" "${base}/" \
+            -H "Authorization: Bearer ${JWT_TOKEN}" 2>/dev/null || true)
+        if [[ -n "${code}" && "${code}" != "000" ]]; then
+            ready=true
+            break
+        fi
+        sleep 1
+    done
+
+    if [[ "$ready" != "true" ]]; then
+        echo "    Could not port-forward to aiops-ir-core-rba-rbs on local port ${local_port}"
+        kill "${pf_pid}" 2>/dev/null || true
+        wait "${pf_pid}" 2>/dev/null || true
+        return 1
+    fi
+
+    # Step 1: create the connector record from the backup item
+    local create_raw create_code create_body
+    create_raw=$(curl -sk -X POST "${base}" \
+        -H "Authorization: Bearer ${JWT_TOKEN}" \
+        -H "Content-Type: application/json" \
+        -d "${item_json}" \
+        -w "HTTPCODE%{http_code}" 2>/dev/null || true)
+    create_code="${create_raw##*HTTPCODE}"
+    create_code="${create_code//[^0-9]/}"
+    create_body="${create_raw%%HTTPCODE*}"
+
+    if [[ -z "${create_code}" || "${create_code}" -lt 200 || "${create_code}" -ge 300 ]]; then
+        echo "    SSH connector create failed (HTTP ${create_code}): $(echo "${create_body}" | head -c 300)"
+        kill "${pf_pid}" 2>/dev/null || true
+        wait "${pf_pid}" 2>/dev/null || true
+        return 1
+    fi
+
+    # Step 2: replace the backed-up public key with a newly generated one
+    local raw
+    raw=$(curl -sk -X POST "${base}/SCRIPT/keypair?refresh=true" \
+        -H "Authorization: Bearer ${JWT_TOKEN}" \
+        -w "HTTPCODE%{http_code}" 2>/dev/null || true)
+
+    kill "${pf_pid}" 2>/dev/null || true
+    wait "${pf_pid}" 2>/dev/null || true
+
+    local http_code body pub_key
+    http_code="${raw##*HTTPCODE}"
+    http_code="${http_code//[^0-9]/}"
+    body="${raw%%HTTPCODE*}"
+    pub_key=$(echo "${body}" | jq -r '.publicKeys.default // empty' 2>/dev/null || true)
+
+    if [[ -n "${http_code}" && "${http_code}" -ge 200 && "${http_code}" -lt 300 && -n "${pub_key}" ]]; then
+        echo "    SSH connector created with a new public key (HTTP ${http_code})."
+        echo "    Copy this key to your SSH target hosts (or use 'Copy key to clipboard' in the UI):"
+        echo "    ${pub_key}"
+        return 0
+    fi
+
+    echo "    SSH connector was created but keypair refresh failed (HTTP ${http_code}): $(echo "${body}" | head -c 300)"
+    return 1
+}
+
+# ============================================
 # Helper: restore runbooks connections from connections-runbooks.json
-# Each item is POSTed to a type-specific path via oc exec:
-#   SCRIPT → POST /v1/runbooks/connections/ssh
-#   AWX    → POST /v1/runbooks/connections/ansible
+#   SCRIPT → regenerated via the RBA service keypair endpoint (see above)
+#   AWX    → POST /v1/runbooks/connections/ansible via oc exec
 # Note: private keys are not backed up; users must re-add them after restore.
 # restore_exec_runbooks_connections <pod_name> <namespace> <backup_filename>
 # ============================================
@@ -465,7 +542,7 @@ restore_exec_runbooks_connections() {
     fi
 
     echo "Restoring ${label} (${item_count} item(s))..."
-    echo "  Note: private keys are not restored — re-add them manually after restore"
+    echo "  Note: private keys are not restored — SSH connectors get a newly generated key pair"
 
     if [[ "$DRY_RUN" == "true" ]]; then
         echo "  [dry-run] Would POST ${item_count} item(s) via oc exec to /v1/runbooks/connections/{type}"
@@ -493,6 +570,17 @@ restore_exec_runbooks_connections() {
         esac
 
         TOTAL_ATTEMPTED=$(( TOTAL_ATTEMPTED + 1 ))
+
+        if [[ "${conn_type}" == "SCRIPT" ]]; then
+            if restore_ssh_connector_keypair "${namespace}" "$(echo "${item_json}" | jq -c '.')"; then
+                success=$(( success + 1 ))
+                TOTAL_SUCCESS=$(( TOTAL_SUCCESS + 1 ))
+            else
+                failed=$(( failed + 1 ))
+                echo "  Warning: Failed to restore connection type 'SCRIPT' (index ${i})"
+            fi
+            continue
+        fi
 
         # Write JSON to a host temp file, copy it into the pod, curl from there,
         # then remove it — avoids all shell quoting issues with oc exec stdin pipes.
