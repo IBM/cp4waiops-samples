@@ -387,7 +387,8 @@ restore_exec_connections() {
 
     for i in $(seq 0 $(( item_count - 1 ))); do
         local item_json item_name
-        item_json=$(jq ".items[$i]" "${input_file}")
+        # The v3 API rejects items without connection_updated_at; default it to "null" if missing
+        item_json=$(jq ".items[$i] | (if has(\"connection_updated_at\") then . else . + {connection_updated_at: \"null\"} end)" "${input_file}")
         item_name=$(echo "${item_json}" | jq -r '.connection_config.display_name // .name // "unknown"' 2>/dev/null || echo "unknown")
 
         TOTAL_ATTEMPTED=$(( TOTAL_ATTEMPTED + 1 ))
@@ -697,6 +698,20 @@ restore_connections() {
             continue
         fi
 
+        # Skip log collector types — they are restored exclusively via the v3
+        # internal connections path (restore_exec_connections).
+        local is_log_collector=false
+        for lc_type in "${LOG_COLLECTOR_TYPES[@]}"; do
+            if [[ "${conn_type}" == "${lc_type}" ]]; then
+                is_log_collector=true
+                break
+            fi
+        done
+        if [[ "${is_log_collector}" == "true" ]]; then
+            echo "  Skipping '${conn_name}' (type: ${conn_type}) — handled by v3 internal path"
+            continue
+        fi
+
         # Build CreateConnectionDto: pick only the fields the POST endpoint accepts
         local payload
         payload=$(echo "${conn_json}" | jq '{
@@ -847,6 +862,11 @@ restore_algorithms() {
 # ============================================
 # Restore each resource type
 # ============================================
+
+# Log collector connection types handled exclusively by the v3 internal
+# endpoint (restore_exec_connections). These are skipped in restore_connections
+# to avoid duplicates and to let the v3 path be the single source of truth.
+LOG_COLLECTOR_TYPES=("logdna" "humio" "elk" "custom" "splunk")
 
 restore_algorithms
 
