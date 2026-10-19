@@ -19,6 +19,7 @@ const TARGET_URL = process.env.TARGET_URL;
 const JWKS_URI = process.env.JWKS_URI;
 const JWKS_CACHE_TTL = parseInt(process.env.JWKS_CACHE_TTL || '3600000', 10);
 const TRUST_CERTS_DIR = process.env.TRUST_CERTS_DIR || '';
+const SECURE_TLS = process.env.ALLOW_INSECURE_TLS !== 'true';
 const {
   LTPA_PASSWORD,
   LTPA_EXPIRY,
@@ -48,15 +49,14 @@ if (TRUST_CERTS_DIR) {
       return context;
     };
   } else {
-    console.warn('No trusted certificates found in the specified directory');
-    // Fallback to disabling certificate validation if no certs are found
-    process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
-    console.warn('WARNING: SSL certificate validation is disabled. This should only be used in development environments.');
+    console.warn('No trusted certificates found in the specified directory. Using default system trust store.');
   }
-} else {
-  // Disable certificate validation for Node.js if no trust directory is specified
+}
+
+// Explicit opt-in to disable certificate validation for development / test environments only
+if (!SECURE_TLS) {
   process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
-  console.warn('WARNING: SSL certificate validation is disabled. This should only be used in development environments.');
+  console.warn('WARNING: SSL certificate validation is disabled via ALLOW_INSECURE_TLS. This should only be used in development/testing environments.');
 }
 
 const jwt = require('jsonwebtoken');
@@ -138,7 +138,7 @@ async function createLtpa2Token(ltpaContent) {
 const proxy = httpProxy.createProxyServer({
   target: TARGET_URL,
   changeOrigin: true,
-  secure: trustCerts ? true : false // Enable certificate validation if we have trusted certs
+  secure: SECURE_TLS // Validate TLS certificates unless disabled for dev/test
 });
 
 // Handle proxy errors
