@@ -8,7 +8,7 @@ A Node.js proxy server that validates JWT tokens, generates an Ltpa token, and f
 - JWKS key caching for improved performance
 - Ltpa token creation with shared keys file
 - SSL/HTTPS support for secure communication
-- SSL certificate validation disabled for development environments
+- Optional SSL certificate validation bypass for development and testing environments (`ALLOW_INSECURE_TLS=true`)
 
 ## Prerequisites
 1) LDAP server setup and both AIOps and Impact connected to it
@@ -69,6 +69,9 @@ The suggestion is to run the proxy alongside Impact on the same VM. The proxy ca
 
    # Directory to store trusted certificates for JWKS endpoint and Impact
    TRUST_CERTS_DIR=trusted-certs
+
+   # (Optional) Disable SSL certificate validation for development/testing only (defaults to false)
+   # ALLOW_INSECURE_TLS=true
 
 ## SSL Configuration
 
