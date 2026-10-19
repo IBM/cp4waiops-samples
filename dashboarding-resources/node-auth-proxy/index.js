@@ -1,5 +1,6 @@
 require('dotenv').config();
 const express = require('express');
+const rateLimit = require('express-rate-limit');
 const httpProxy = require('http-proxy');
 const { ltpa2Factory } = require('oniyi-ltpa');
 const url = require('url');
@@ -153,8 +154,16 @@ proxy.on('proxyRes', function (proxyRes, req, res) {
   delete proxyRes.headers['www-authenticate'];
 });
 
+// Rate limiter: max 100 requests per 15 minutes per IP
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 100,
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
 // API route with JWT validation and LTPA token creation
-app.use('/api', validateJwt, async (req, res) => {
+app.use('/api', apiLimiter, validateJwt, async (req, res) => {
   try {
     // Create LTPA token if configured
     if (LTPA_PASSWORD) {
