@@ -310,9 +310,9 @@ fetch_resource \
 
 # Connections use the v1 API (issue-resolution API) and require decryptFields=true
 # so that sensitive fields are exported in plaintext and can be re-imported.
-# The response shape is { items: [ { code, data: [ConnectionDto] } ] } — the
-# fetch_resource helper records .items | length which equals the number of
-# ConnectionsListResponseDto wrapper objects (one per connection type queried).
+# The API returns { items: [ConnectionDto, ...] } — a flat array of ConnectionDto
+# objects.  fetch_resource normalises this to { "items": [...] } in the saved file,
+# so restore.sh reads each ConnectionDto directly from .items[].
 fetch_resource \
     "Connections" \
     "/aiops/api/v1/configuration/connections?decryptFields=true" \

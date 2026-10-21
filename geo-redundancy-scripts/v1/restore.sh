@@ -665,9 +665,10 @@ restore_connections() {
         return 0
     fi
 
-    # Flatten all ConnectionDto objects from every wrapper's .data[] array
+    # The backup stores a flat array of ConnectionDto objects: { "items": [ConnectionDto, ...] }
+    # (the v1 API returns them directly; backup.sh normalises the response to { "items": [...] }).
     local conn_count
-    conn_count=$(jq '[.items[].data[]] | length' "${input_file}" 2>/dev/null || echo "0")
+    conn_count=$(jq '.items | length' "${input_file}" 2>/dev/null || echo "0")
 
     if [[ "$conn_count" -eq 0 ]]; then
         echo "Skipping ${label} — 0 items in backup"
@@ -688,7 +689,7 @@ restore_connections() {
 
     for i in $(seq 0 $(( conn_count - 1 ))); do
         local conn_json conn_type conn_name
-        conn_json=$(jq "[.items[].data[]] | .[$i]" "${input_file}")
+        conn_json=$(jq ".items[$i]" "${input_file}")
         conn_type=$(echo "${conn_json}" | jq -r '.connectionType // empty')
         conn_name=$(echo "${conn_json}" | jq -r '.name // "unknown"')
 
