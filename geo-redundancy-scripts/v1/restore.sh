@@ -12,6 +12,7 @@
 #   - Connections (v1 external API, and connections via rb endpoint using oc exec into aimanager-aio-controller pod)
 #   - Filters
 #   - Menus
+#   - Tools
 #   - Policies       (via policy-batches endpoint, in configurable chunks with 429 retry)
 #   - Runbooks       (via RBA v1 bulk import endpoint)
 #   - Actions        (via RBA v1 API; referred to as Tools in the v2 configuration API)
@@ -904,6 +905,11 @@ restore_items \
     "Menus" \
     "/aiops/api/v2/configuration/menus" \
     "menus.json"
+
+restore_items \
+    "Tools" \
+    "/aiops/api/v2/configuration/tools" \
+    "tools.json"
 
 # ============================================
 # Helper: POST one batch of policies [slice_start, slice_end] (0-based, inclusive)
