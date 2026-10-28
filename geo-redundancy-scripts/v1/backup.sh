@@ -12,6 +12,7 @@
 #   - Connections (v1 external API, and connections via rb endpoint using oc exec into aimanager-aio-controller pod)
 #   - Filters
 #   - Menus
+#   - Tools
 #   - Policies
 #   - Runbooks
 #   - Actions
@@ -352,6 +353,11 @@ fetch_resource \
     "Menus" \
     "/aiops/api/v2/configuration/menus?all=true" \
     "menus.json"
+
+fetch_resource \
+    "Tools" \
+    "/aiops/api/v2/configuration/tools?all=true" \
+    "tools.json"
 
 # Policies: every endpoint caps at 10,000 items per request. Work around this by
 # fetching each state (draft/enabled/disabled/archived) in pages using
@@ -720,6 +726,7 @@ cat > "${METADATA_FILE}" <<EOF
     "connections-runbooks",
     "filters",
     "menus",
+    "tools",
     "policies",
     "runbooks",
     "actions",
