@@ -4,10 +4,14 @@
 #
 #
 #
-# Restores all restorable configuration data from a backup directory to a cluster.
+# Restores configuration data from a backup directory to a cluster.
 # The backup directory should have been produced by backup.sh.
+# By default only the resources known to restore reliably in 5.4.0 are restored
+# (connections, filters, menus, policies, runbooks, actions, topology, views).
+# Use --include / --exclude to change the selection and --list-resources to print
+# the valid resource IDs.
 #
-# Resources restored:
+# Resources that can be restored:
 #   - Algorithms
 #   - Connections (v1 external API, and connections via rb endpoint using oc exec into aimanager-aio-controller pod)
 #   - Filters
@@ -43,11 +47,17 @@ source "${SCRIPT_DIR}/common_functions.sh"
 show_usage() {
     echo "Usage: $0 [OPTIONS] [BACKUP_DIR]"
     echo ""
-    echo "Restore all configuration data from a backup directory to the specified cluster."
+    echo "Restore configuration data from a backup directory to the specified cluster."
+    echo "By default only the resources known to restore reliably are restored"
+    echo "(run --list-resources to see them)."
     echo ""
     echo "Options:"
     echo "  --cluster CLUSTER    Specify cluster: backup (default) or primary"
     echo "  --config FILE        Path to config file (default: ./geo_config.env)"
+    echo "  --include LIST       Comma-separated resource IDs to restore (only these)"
+    echo "  --exclude LIST       Comma-separated resource IDs to leave out of the default set"
+    echo "                       --include and --exclude cannot be used together"
+    echo "  --list-resources     Print the valid resource IDs and exit"
     echo "  --dry-run            Print what would be sent without making any API calls"
     echo "  -h, --help           Show this help message"
     echo ""
@@ -59,6 +69,9 @@ show_usage() {
     echo "  $0 ./backup-20250101-120000                  # Restore from specific backup directory"
     echo "  $0 --cluster primary ./backup-20250101-120000"
     echo "  $0 --dry-run ./backup-20250101-120000        # Preview without making changes"
+    echo "  $0 --include filters,views ./backup-20250101-120000"
+    echo "  $0 --exclude policies ./backup-20250101-120000"
+    echo "  $0 --list-resources                          # Show valid resource IDs"
     exit 0
 }
 
@@ -76,10 +89,25 @@ fi
 
 TARGET_CLUSTER="$SELECTED_CLUSTER"
 
+# Resource selection: --include / --exclude / --list-resources
+selection_result=0
+parse_selection_arguments ${REMAINING_ARGS[@]+"${REMAINING_ARGS[@]}"} || selection_result=$?
+if [[ $selection_result -ne 0 ]]; then
+    exit 1
+fi
+
+if [[ "$LIST_RESOURCES" == "true" ]]; then
+    list_resources
+    exit 0
+fi
+
+# Validate the selection before any login or API call. Restore default is the known-working set.
+resolve_resource_selection "$RESTORE_DEFAULT_RESOURCES" || exit 1
+
 # Check REMAINING_ARGS for --dry-run flag and backup directory
 DRY_RUN=false
 BACKUP_DIR=""
-for arg in "${REMAINING_ARGS[@]}"; do
+for arg in ${REMAINING_ARGS[@]+"${REMAINING_ARGS[@]}"}; do
     if [[ "$arg" == "--dry-run" ]]; then
         DRY_RUN=true
     elif [[ -z "$BACKUP_DIR" ]]; then
@@ -111,6 +139,7 @@ load_geo_config
 CLUSTER_DISPLAY=$(echo "$TARGET_CLUSTER" | tr '[:lower:]' '[:upper:]')
 echo "Restoring configuration to ${CLUSTER_DISPLAY} cluster..."
 echo "Backup directory: ${BACKUP_DIR}"
+echo "Selected resources: ${SELECTED_RESOURCES}"
 
 if [[ "$DRY_RUN" == "true" ]]; then
     echo ""
@@ -665,10 +694,9 @@ restore_connections() {
         return 0
     fi
 
-    # The backup stores a flat array of ConnectionDto objects: { "items": [ConnectionDto, ...] }
-    # (the v1 API returns them directly; backup.sh normalises the response to { "items": [...] }).
+    # Flatten all ConnectionDto objects from every wrapper's .data[] array
     local conn_count
-    conn_count=$(jq '.items | length' "${input_file}" 2>/dev/null || echo "0")
+    conn_count=$(jq '[.items[].data[]] | length' "${input_file}" 2>/dev/null || echo "0")
 
     if [[ "$conn_count" -eq 0 ]]; then
         echo "Skipping ${label} — 0 items in backup"
@@ -689,7 +717,7 @@ restore_connections() {
 
     for i in $(seq 0 $(( conn_count - 1 ))); do
         local conn_json conn_type conn_name
-        conn_json=$(jq ".items[$i]" "${input_file}")
+        conn_json=$(jq "[.items[].data[]] | .[$i]" "${input_file}")
         conn_type=$(echo "${conn_json}" | jq -r '.connectionType // empty')
         conn_name=$(echo "${conn_json}" | jq -r '.name // "unknown"')
 
@@ -869,42 +897,34 @@ restore_algorithms() {
 # to avoid duplicates and to let the v3 path be the single source of truth.
 LOG_COLLECTOR_TYPES=("logdna" "humio" "elk" "custom" "splunk")
 
-restore_algorithms
+# Connections are always restored as one group (never split into sub-types): the
+# internal Zeno connection manager must run before the gRPC connection manager so
+# that log collector Kafka topics are generated correctly.
+restore_connections_group() {
+    restore_connections "connections.json"
 
-restore_connections "connections.json"
+    # Internal connections are only reachable via localhost:9443 inside the controller
+    # pod. We locate the pod once and reuse it for both endpoints.
+    AIOPS_CONTROLLER_POD=$(oc get pods -n "${CLUSTER_NAMESPACE}" --no-headers \
+        -o custom-columns=":metadata.name" | grep "aimanager-aio-controller" | head -1)
 
-# Internal connections are only reachable via localhost:9443 inside the controller
-# pod. We locate the pod once and reuse it for both endpoints.
-AIOPS_CONTROLLER_POD=$(oc get pods -n "${CLUSTER_NAMESPACE}" --no-headers \
-    -o custom-columns=":metadata.name" | grep "aimanager-aio-controller" | head -1)
+    if [[ -z "$AIOPS_CONTROLLER_POD" ]]; then
+        echo "Warning: No aimanager-aio-controller pod found in namespace ${CLUSTER_NAMESPACE} — skipping internal connections restore"
+        TOTAL_SKIPPED=$(( TOTAL_SKIPPED + 2 ))
+    else
+        echo "Using pod for internal connections restore: ${AIOPS_CONTROLLER_POD}"
 
-if [[ -z "$AIOPS_CONTROLLER_POD" ]]; then
-    echo "Warning: No aimanager-aio-controller pod found in namespace ${CLUSTER_NAMESPACE} — skipping internal connections restore"
-    TOTAL_SKIPPED=$(( TOTAL_SKIPPED + 2 ))
-else
-    echo "Using pod for internal connections restore: ${AIOPS_CONTROLLER_POD}"
+        restore_exec_connections \
+            "${AIOPS_CONTROLLER_POD}" \
+            "${CLUSTER_NAMESPACE}" \
+            "connections-internal.json"
 
-    restore_exec_connections \
-        "${AIOPS_CONTROLLER_POD}" \
-        "${CLUSTER_NAMESPACE}" \
-        "connections-internal.json"
-
-    restore_exec_runbooks_connections \
-        "${AIOPS_CONTROLLER_POD}" \
-        "${CLUSTER_NAMESPACE}" \
-        "connections-runbooks.json"
-fi
-
-restore_items \
-    "Filters" \
-    "/aiops/api/v2/configuration/filters" \
-    "filters.json"
-
-restore_items \
-    "Menus" \
-    "/aiops/api/v2/configuration/menus" \
-    "menus.json"
-
+        restore_exec_runbooks_connections \
+            "${AIOPS_CONTROLLER_POD}" \
+            "${CLUSTER_NAMESPACE}" \
+            "connections-runbooks.json"
+    fi
+}
 # ============================================
 # Helper: POST one batch of policies [slice_start, slice_end] (0-based, inclusive)
 # to the policy-batches endpoint.
@@ -1098,222 +1118,216 @@ post_policy_slice() {
 # 429 mid-loop:  sleep for `reset` seconds (actual window expiry), retry once.
 # 413:           byte-budget batching prevents this; recursive split as safety net.
 # ============================================
-POLICY_FILE="${BACKUP_DIR}/policies.json"
-POLICY_MAX_BATCH_BYTES=1048576       # 1 MB — well under the 2 MB hard limit; leaves headroom
-POLICY_MAX_BATCH_COUNT=50            # max policies per batch; ~170 batches for large-policy datasets
-                                     # (rate limit designed for 5K policies/batch at ~4 KB each = 9
-                                     # requests; at 30 KB avg a 50-policy batch = ~1.5 MB, so count
-                                     # matters more than bytes for staying under the nginx timeout)
-POLICY_BATCH_SLEEP_S=20              # sleep between batches — paces indexer + keeps req/hr < 200
-POLICY_CURL_TIMEOUT_S=60             # curl timeout for normal-sized batches (matches nginx timeout)
-POLICY_CURL_TIMEOUT_LARGE_S=180      # curl timeout for large payloads and individual POST fallbacks
-POLICY_LARGE_THRESHOLD_BYTES=51200   # 50 KB — batches above this use the large timeout
-POLICY_PARALLEL_JOBS=1               # serial: parallel jobs cause indexer saturation (504s)
+restore_policies() {
+    POLICY_FILE="${BACKUP_DIR}/policies.json"
+    POLICY_MAX_BATCH_BYTES=1048576       # 1 MB — well under the 2 MB hard limit; leaves headroom
+    POLICY_MAX_BATCH_COUNT=50            # max policies per batch; ~170 batches for large-policy datasets
+                                         # (rate limit designed for 5K policies/batch at ~4 KB each = 9
+                                         # requests; at 30 KB avg a 50-policy batch = ~1.5 MB, so count
+                                         # matters more than bytes for staying under the nginx timeout)
+    POLICY_BATCH_SLEEP_S=20              # sleep between batches — paces indexer + keeps req/hr < 200
+    POLICY_CURL_TIMEOUT_S=60             # curl timeout for normal-sized batches (matches nginx timeout)
+    POLICY_CURL_TIMEOUT_LARGE_S=180      # curl timeout for large payloads and individual POST fallbacks
+    POLICY_LARGE_THRESHOLD_BYTES=51200   # 50 KB — batches above this use the large timeout
+    POLICY_PARALLEL_JOBS=1               # serial: parallel jobs cause indexer saturation (504s)
 
-if [[ ! -f "${POLICY_FILE}" ]]; then
-    echo "Skipping Policies — file not found: policies.json"
-    TOTAL_SKIPPED=$(( TOTAL_SKIPPED + 1 ))
-else
-    policy_count=$(jq '.items | length' "${POLICY_FILE}" 2>/dev/null || echo "0")
-
-    if [[ "$policy_count" -eq 0 ]]; then
-        echo "Skipping Policies — 0 items in backup"
+    if [[ ! -f "${POLICY_FILE}" ]]; then
+        echo "Skipping Policies — file not found: policies.json"
         TOTAL_SKIPPED=$(( TOTAL_SKIPPED + 1 ))
     else
-        # Build batch boundaries respecting both byte-budget and count limits.
-        # Output: newline-separated "start end" pairs written to a temp file.
-        policy_boundaries_file=$(mktemp)
-        # shellcheck disable=SC2064
-        trap "rm -f '${policy_boundaries_file}'" RETURN
+        policy_count=$(jq '.items | length' "${POLICY_FILE}" 2>/dev/null || echo "0")
 
-        jq --argjson max_bytes "$POLICY_MAX_BATCH_BYTES" \
-           --argjson max_count "$POLICY_MAX_BATCH_COUNT" -r '
-          def OVERHEAD: 16;
-          def SEP: 1;
-          .items | to_entries |
-          reduce .[] as $entry (
-            { batch_start: 0, batch_bytes: OVERHEAD, batch_count: 0, idx: 0, out: [] };
-            ($entry.value | del(.id, .status, .hash, .revision) | tojson | length) as $sz |
-            if ((.batch_bytes + $sz + (if .idx > .batch_start then SEP else 0 end)) > $max_bytes
-                   and .idx > .batch_start)
-               or (.batch_count >= $max_count)
-            then
-              .out += ["\(.batch_start) \(.idx - 1)"] |
-              .batch_start = .idx | .batch_bytes = OVERHEAD + $sz |
-              .batch_count = 1   | .idx += 1
-            else
-              .batch_bytes += $sz + (if .idx > .batch_start then SEP else 0 end) |
-              .batch_count += 1  | .idx += 1
-            end
-          ) |
-          .out += ["\(.batch_start) \(.idx - 1)"] | .out[]
-        ' "${POLICY_FILE}" > "${policy_boundaries_file}"
-
-        batch_count=$(wc -l < "${policy_boundaries_file}" | tr -d ' ')
-        echo "Restoring Policies (${policy_count} item(s), max ${POLICY_MAX_BATCH_COUNT}/batch, ${batch_count} batch(es))..."
-
-        if [[ "$DRY_RUN" == "true" ]]; then
-            echo "  [dry-run] Would POST ${policy_count} policy/policies in ${batch_count} batch(es) to /aiops/api/v2/configuration/policy-batches"
+        if [[ "$policy_count" -eq 0 ]]; then
+            echo "Skipping Policies — 0 items in backup"
             TOTAL_SKIPPED=$(( TOTAL_SKIPPED + 1 ))
         else
-            # Pre-flight: if already rate-limited, sleep once before the loop so
-            # all batches start with a full quota.
-            _pf_resp=$(mktemp)
-            _pf_code=$(jq -c --argjson s 0 --argjson e 0 \
-                '{"policies": [.items[0:1][] | del(.id, .status, .hash, .revision)]}' \
-                "${POLICY_FILE}" | \
-                curl -k -X POST \
-                    "${CLUSTER_CPD_ENDPOINT}/aiops/api/v2/configuration/policy-batches" \
-                    --header "Content-Type: application/json" \
-                    --header "Authorization: Bearer ${JWT_TOKEN}" \
-                    --header "X-TenantID: cfd95b7e-3bc7-4006-a4a8-a73a79c71255" \
-                    --data @- \
-                    --write-out "%{http_code}" \
-                    --max-time 60 \
-                    --silent \
-                    --output "${_pf_resp}") || true
-            if [[ "${_pf_code}" -eq 429 ]]; then
-                _pf_wait=$(jq -r '.reset // 0' "${_pf_resp}" 2>/dev/null || echo "0")
-                if [[ $_pf_wait -lt 1 ]]; then _pf_wait=1; fi
-                echo "  Rate limited before batch loop; waiting ${_pf_wait}s for rate-limit window to reset..."
-                sleep "${_pf_wait}"
-            fi
-            rm -f "${_pf_resp}"
+            # Build batch boundaries respecting both byte-budget and count limits.
+            # Output: newline-separated "start end" pairs written to a temp file.
+            policy_boundaries_file=$(mktemp)
+            # shellcheck disable=SC2064
+            trap "rm -f '${policy_boundaries_file}'" RETURN
 
-            policy_success=0
-            policy_failed=0
-            TOTAL_ATTEMPTED=$(( TOTAL_ATTEMPTED + policy_count ))
+            jq --argjson max_bytes "$POLICY_MAX_BATCH_BYTES" \
+               --argjson max_count "$POLICY_MAX_BATCH_COUNT" -r '
+              def OVERHEAD: 16;
+              def SEP: 1;
+              .items | to_entries |
+              reduce .[] as $entry (
+                { batch_start: 0, batch_bytes: OVERHEAD, batch_count: 0, idx: 0, out: [] };
+                ($entry.value | del(.id, .status, .hash, .revision) | tojson | length) as $sz |
+                if ((.batch_bytes + $sz + (if .idx > .batch_start then SEP else 0 end)) > $max_bytes
+                       and .idx > .batch_start)
+                   or (.batch_count >= $max_count)
+                then
+                  .out += ["\(.batch_start) \(.idx - 1)"] |
+                  .batch_start = .idx | .batch_bytes = OVERHEAD + $sz |
+                  .batch_count = 1   | .idx += 1
+                else
+                  .batch_bytes += $sz + (if .idx > .batch_start then SEP else 0 end) |
+                  .batch_count += 1  | .idx += 1
+                end
+              ) |
+              .out += ["\(.batch_start) \(.idx - 1)"] | .out[]
+            ' "${POLICY_FILE}" > "${policy_boundaries_file}"
 
-            batch_index=0
-            while IFS= read -r boundary; do
-                read -r b_start b_end <<< "${boundary}"
+            batch_count=$(wc -l < "${policy_boundaries_file}" | tr -d ' ')
+            echo "Restoring Policies (${policy_count} item(s), max ${POLICY_MAX_BATCH_COUNT}/batch, ${batch_count} batch(es))..."
 
-                # Sleep between batches (skip before the very first).
-                if [[ $batch_index -gt 0 && $POLICY_BATCH_SLEEP_S -gt 0 ]]; then
-                    sleep "${POLICY_BATCH_SLEEP_S}"
+            if [[ "$DRY_RUN" == "true" ]]; then
+                echo "  [dry-run] Would POST ${policy_count} policy/policies in ${batch_count} batch(es) to /aiops/api/v2/configuration/policy-batches"
+                TOTAL_SKIPPED=$(( TOTAL_SKIPPED + 1 ))
+            else
+                # Pre-flight: if already rate-limited, sleep once before the loop so
+                # all batches start with a full quota.
+                _pf_resp=$(mktemp)
+                _pf_code=$(jq -c --argjson s 0 --argjson e 0 \
+                    '{"policies": [.items[0:1][] | del(.id, .status, .hash, .revision)]}' \
+                    "${POLICY_FILE}" | \
+                    curl -k -X POST \
+                        "${CLUSTER_CPD_ENDPOINT}/aiops/api/v2/configuration/policy-batches" \
+                        --header "Content-Type: application/json" \
+                        --header "Authorization: Bearer ${JWT_TOKEN}" \
+                        --header "X-TenantID: cfd95b7e-3bc7-4006-a4a8-a73a79c71255" \
+                        --data @- \
+                        --write-out "%{http_code}" \
+                        --max-time 60 \
+                        --silent \
+                        --output "${_pf_resp}") || true
+                if [[ "${_pf_code}" -eq 429 ]]; then
+                    _pf_wait=$(jq -r '.reset // 0' "${_pf_resp}" 2>/dev/null || echo "0")
+                    if [[ $_pf_wait -lt 1 ]]; then _pf_wait=1; fi
+                    echo "  Rate limited before batch loop; waiting ${_pf_wait}s for rate-limit window to reset..."
+                    sleep "${_pf_wait}"
                 fi
+                rm -f "${_pf_resp}"
 
-                echo "  Batch $(( batch_index + 1 ))/${batch_count}: policies ${b_start}..${b_end} ($(( b_end - b_start + 1 )) items)..."
+                policy_success=0
+                policy_failed=0
+                TOTAL_ATTEMPTED=$(( TOTAL_ATTEMPTED + policy_count ))
 
-                # Run serially in the current shell so policy_success/policy_failed
-                # are updated directly (no subshell, no result files needed).
-                post_policy_slice "${b_start}" "${b_end}"
+                batch_index=0
+                while IFS= read -r boundary; do
+                    read -r b_start b_end <<< "${boundary}"
 
-                batch_index=$(( batch_index + 1 ))
-            done < "${policy_boundaries_file}"
+                    # Sleep between batches (skip before the very first).
+                    if [[ $batch_index -gt 0 && $POLICY_BATCH_SLEEP_S -gt 0 ]]; then
+                        sleep "${POLICY_BATCH_SLEEP_S}"
+                    fi
 
-            rm -f "${policy_boundaries_file}"
+                    echo "  Batch $(( batch_index + 1 ))/${batch_count}: policies ${b_start}..${b_end} ($(( b_end - b_start + 1 )) items)..."
 
-            echo "  ${policy_success}/${policy_count} item(s) restored successfully"
-            if [[ $policy_failed -gt 0 ]]; then
-                echo "  Warning: ${policy_failed} item(s) failed to restore"
+                    # Run serially in the current shell so policy_success/policy_failed
+                    # are updated directly (no subshell, no result files needed).
+                    post_policy_slice "${b_start}" "${b_end}"
+
+                    batch_index=$(( batch_index + 1 ))
+                done < "${policy_boundaries_file}"
+
+                rm -f "${policy_boundaries_file}"
+
+                echo "  ${policy_success}/${policy_count} item(s) restored successfully"
+                if [[ $policy_failed -gt 0 ]]; then
+                    echo "  Warning: ${policy_failed} item(s) failed to restore"
+                fi
             fi
         fi
     fi
-fi
+}
 
-# Runbooks: restore via the RBA v1 bulk import endpoint.
-# The backup file holds { "items": [...] } where each item is an exportFormat runbook.
-# POST /api/v1/rba/runbooks/import accepts a plain array.
-# Sensitive fields (e.g. HTTP action credentials) are exported encrypted; backup.sh saves
-# the key from the x-rba-encryption-token header to runbooks-encryption-token.txt.
-# With the token the import decrypts them (?encryption=<token>).  Without it (older
-# backups) fall back to ignoreEncryptedData=true, which drops the encrypted data.
-RB_TOKEN_FILE="${BACKUP_DIR}/runbooks-encryption-token.txt"
-RB_IMPORT_PATH="/aiops/api/story-manager/rba/v1/runbooks/import"
-if [[ -s "${RB_TOKEN_FILE}" ]]; then
-    RB_IMPORT_PATH="${RB_IMPORT_PATH}?encryption=$(tr -d '\r\n' < "${RB_TOKEN_FILE}")"
-else
-    echo "Note: no runbooks-encryption-token.txt in backup — encrypted runbook data will be ignored"
-    RB_IMPORT_PATH="${RB_IMPORT_PATH}?ignoreEncryptedData=true"
-fi
-
-# The import does not check for duplicates: a runbook that already exists on the target
-# would be created again, along with another copy of every action it embeds.  List the
-# runbooks on the target first (same export endpoint backup.sh uses, so the response is
-# a known array of runbooks with a .name) and leave those out of the import.
-RB_EXISTING_NAMES_JSON="[]"
-RB_LIST_OK=true
-if [[ "$DRY_RUN" != "true" ]]; then
-    rb_list_file=$(mktemp)
-    rb_list_code=$(curl -k --compressed -X GET \
-        "${CLUSTER_CPD_ENDPOINT}/aiops/api/story-manager/rba/v1/runbooks?exportFormat=true" \
-        --header "Content-Type: application/json" \
-        --header "Authorization: Bearer ${JWT_TOKEN}" \
-        --header "X-TenantID: cfd95b7e-3bc7-4006-a4a8-a73a79c71255" \
-        --write-out "%{http_code}" \
-        --silent \
-        --output "${rb_list_file}" 2>/dev/null || true)
-    rb_list_code="${rb_list_code//[^0-9]/}"
-    if [[ -n "$rb_list_code" && "$rb_list_code" -ge 200 && "$rb_list_code" -lt 300 ]] \
-       && RB_EXISTING_NAMES_JSON=$(jq -c 'if type == "array" then [.[].name | select(. != null)] else error("not an array") end' "${rb_list_file}" 2>/dev/null); then
-        :
+restore_runbooks() {
+    # Runbooks: restore via the RBA v1 bulk import endpoint.
+    # The backup file holds { "items": [...] } where each item is an exportFormat runbook.
+    # POST /api/v1/rba/runbooks/import accepts a plain array.
+    # Sensitive fields (e.g. HTTP action credentials) are exported encrypted; backup.sh saves
+    # the key from the x-rba-encryption-token header to runbooks-encryption-token.txt.
+    # With the token the import decrypts them (?encryption=<token>).  Without it (older
+    # backups) fall back to ignoreEncryptedData=true, which drops the encrypted data.
+    RB_TOKEN_FILE="${BACKUP_DIR}/runbooks-encryption-token.txt"
+    RB_IMPORT_PATH="/aiops/api/story-manager/rba/v1/runbooks/import"
+    if [[ -s "${RB_TOKEN_FILE}" ]]; then
+        RB_IMPORT_PATH="${RB_IMPORT_PATH}?encryption=$(tr -d '\r\n' < "${RB_TOKEN_FILE}")"
     else
-        RB_LIST_OK=false
+        echo "Note: no runbooks-encryption-token.txt in backup — encrypted runbook data will be ignored"
+        RB_IMPORT_PATH="${RB_IMPORT_PATH}?ignoreEncryptedData=true"
     fi
-    rm -f "${rb_list_file}"
-fi
 
-if [[ "$RB_LIST_OK" == "true" ]]; then
-    restore_file \
-        "Runbooks" \
-        "POST" \
-        "${RB_IMPORT_PATH}" \
-        "runbooks.json" \
-        "__array__" \
-        "${RB_EXISTING_NAMES_JSON}"
-else
-    echo "Warning: could not list existing runbooks on the target — skipping Runbooks restore to avoid duplicates"
-    TOTAL_SKIPPED=$(( TOTAL_SKIPPED + 1 ))
-fi
+    # The import does not check for duplicates: a runbook that already exists on the target
+    # would be created again, along with another copy of every action it embeds.  List the
+    # runbooks on the target first (same export endpoint backup.sh uses, so the response is
+    # a known array of runbooks with a .name) and leave those out of the import.
+    RB_EXISTING_NAMES_JSON="[]"
+    RB_LIST_OK=true
+    if [[ "$DRY_RUN" != "true" ]]; then
+        rb_list_file=$(mktemp)
+        rb_list_code=$(curl -k --compressed -X GET \
+            "${CLUSTER_CPD_ENDPOINT}/aiops/api/story-manager/rba/v1/runbooks?exportFormat=true" \
+            --header "Content-Type: application/json" \
+            --header "Authorization: Bearer ${JWT_TOKEN}" \
+            --header "X-TenantID: cfd95b7e-3bc7-4006-a4a8-a73a79c71255" \
+            --write-out "%{http_code}" \
+            --silent \
+            --output "${rb_list_file}" 2>/dev/null || true)
+        rb_list_code="${rb_list_code//[^0-9]/}"
+        if [[ -n "$rb_list_code" && "$rb_list_code" -ge 200 && "$rb_list_code" -lt 300 ]] \
+           && RB_EXISTING_NAMES_JSON=$(jq -c 'if type == "array" then [.[].name | select(. != null)] else error("not an array") end' "${rb_list_file}" 2>/dev/null); then
+            :
+        else
+            RB_LIST_OK=false
+        fi
+        rm -f "${rb_list_file}"
+    fi
 
-# Actions (RBA terminology for Tools): restore via the RBA v1 API, one per POST.
-# Importing the runbooks above already created every action they embed (with their
-# credentials when the encryption token was used).  Fetch the names of the custom
-# actions now on the target so restore_items skips them instead of creating a second
-# action with the same name.  Only actions no runbook uses are created here.
-ACTIONS_LIST_OK=true
-if [[ "$DRY_RUN" != "true" ]]; then
-    act_list_file=$(mktemp)
-    act_list_code=$(curl -k --compressed -X GET \
-        "${CLUSTER_CPD_ENDPOINT}/aiops/api/story-manager/rba/v1/actions" \
-        --header "Content-Type: application/json" \
-        --header "Authorization: Bearer ${JWT_TOKEN}" \
-        --header "X-TenantID: cfd95b7e-3bc7-4006-a4a8-a73a79c71255" \
-        --write-out "%{http_code}" \
-        --silent \
-        --output "${act_list_file}" 2>/dev/null || true)
-    act_list_code="${act_list_code//[^0-9]/}"
-    if [[ -n "$act_list_code" && "$act_list_code" -ge 200 && "$act_list_code" -lt 300 ]] \
-       && EXISTING_ACTION_NAMES=$(jq -r '.actions[]? | select(._actionType != "predefined") | .name' "${act_list_file}" 2>/dev/null); then
-        :
+    if [[ "$RB_LIST_OK" == "true" ]]; then
+        restore_file \
+            "Runbooks" \
+            "POST" \
+            "${RB_IMPORT_PATH}" \
+            "runbooks.json" \
+            "__array__" \
+            "${RB_EXISTING_NAMES_JSON}"
     else
-        ACTIONS_LIST_OK=false
+        echo "Warning: could not list existing runbooks on the target — skipping Runbooks restore to avoid duplicates"
+        TOTAL_SKIPPED=$(( TOTAL_SKIPPED + 1 ))
     fi
-    rm -f "${act_list_file}"
-fi
+}
 
-if [[ "$ACTIONS_LIST_OK" == "true" ]]; then
-    restore_items \
-        "Actions" \
-        "/aiops/api/story-manager/rba/v1/actions" \
-        "actions.json"
-else
-    echo "Warning: could not list existing actions on the target — skipping Actions restore to avoid duplicates"
-    TOTAL_SKIPPED=$(( TOTAL_SKIPPED + 1 ))
-fi
+restore_actions() {
+    # Actions (RBA terminology for Tools): restore via the RBA v1 API, one per POST.
+    # Importing the runbooks above already created every action they embed (with their
+    # credentials when the encryption token was used).  Fetch the names of the custom
+    # actions now on the target so restore_items skips them instead of creating a second
+    # action with the same name.  Only actions no runbook uses are created here.
+    ACTIONS_LIST_OK=true
+    if [[ "$DRY_RUN" != "true" ]]; then
+        act_list_file=$(mktemp)
+        act_list_code=$(curl -k --compressed -X GET \
+            "${CLUSTER_CPD_ENDPOINT}/aiops/api/story-manager/rba/v1/actions" \
+            --header "Content-Type: application/json" \
+            --header "Authorization: Bearer ${JWT_TOKEN}" \
+            --header "X-TenantID: cfd95b7e-3bc7-4006-a4a8-a73a79c71255" \
+            --write-out "%{http_code}" \
+            --silent \
+            --output "${act_list_file}" 2>/dev/null || true)
+        act_list_code="${act_list_code//[^0-9]/}"
+        if [[ -n "$act_list_code" && "$act_list_code" -ge 200 && "$act_list_code" -lt 300 ]] \
+           && EXISTING_ACTION_NAMES=$(jq -r '.actions[]? | select(._actionType != "predefined") | .name' "${act_list_file}" 2>/dev/null); then
+            :
+        else
+            ACTIONS_LIST_OK=false
+        fi
+        rm -f "${act_list_file}"
+    fi
 
-# Topology: restore via dedicated POST endpoint
-restore_file \
-    "Topology configuration" \
-    "POST" \
-    "/aiops/api/v2/configuration/topology/config/restore" \
-    "topology.json"
-
-restore_items \
-    "Training definitions" \
-    "/aiops/api/v2/configuration/training-definitions" \
-    "training-definitions.json"
+    if [[ "$ACTIONS_LIST_OK" == "true" ]]; then
+        restore_items \
+            "Actions" \
+            "/aiops/api/story-manager/rba/v1/actions" \
+            "actions.json"
+    else
+        echo "Warning: could not list existing actions on the target — skipping Actions restore to avoid duplicates"
+        TOTAL_SKIPPED=$(( TOTAL_SKIPPED + 1 ))
+    fi
+}
 
 # ============================================
 # User preferences: one PUT per key per user item in the backup.
@@ -1407,12 +1421,47 @@ restore_user_preferences() {
     fi
 }
 
-restore_user_preferences
+# ============================================
+# Run the selected resources, in registry order
+# ============================================
+# A resource is "in the backup" when it appears in backup-metadata.json
+# (.resources). Backups without a manifest fall back to file presence.
+resource_in_backup() {
+    local id="$1" f
+    if [[ -f "${METADATA_FILE}" ]] && jq -e '.resources | type == "array"' "${METADATA_FILE}" >/dev/null 2>&1; then
+        jq -e --arg r "$id" '.resources | index($r) != null' "${METADATA_FILE}" >/dev/null 2>&1
+        return $?
+    fi
+    for f in $(resource_files "$id"); do
+        if [[ -f "${BACKUP_DIR}/${f}" ]]; then
+            return 0
+        fi
+    done
+    return 1
+}
 
-restore_items \
-    "Views" \
-    "/aiops/api/v2/configuration/views" \
-    "views.json"
+NOT_IN_BACKUP=()
+for resource_id in ${ALL_RESOURCES}; do
+    resource_selected "$resource_id" || continue
+    if ! resource_in_backup "$resource_id"; then
+        echo "Skipping $(resource_description "$resource_id") — not in backup"
+        NOT_IN_BACKUP+=("$resource_id")
+        continue
+    fi
+    case "$resource_id" in
+        algorithms)           restore_algorithms ;;
+        connections)          restore_connections_group ;;
+        filters)              restore_items "Filters" "/aiops/api/v2/configuration/filters" "filters.json" ;;
+        menus)                restore_items "Menus" "/aiops/api/v2/configuration/menus" "menus.json" ;;
+        policies)             restore_policies ;;
+        runbooks)             restore_runbooks ;;
+        actions)              restore_actions ;;
+        topology)             restore_file "Topology configuration" "POST" "/aiops/api/v2/configuration/topology/config/restore" "topology.json" ;;
+        training-definitions) restore_items "Training definitions" "/aiops/api/v2/configuration/training-definitions" "training-definitions.json" ;;
+        user-preferences)     restore_user_preferences ;;
+        views)                restore_items "Views" "/aiops/api/v2/configuration/views" "views.json" ;;
+    esac
+done
 
 # ============================================
 # Summary
@@ -1423,6 +1472,10 @@ echo " Restore complete"
 echo "============================================"
 echo " Target cluster  : ${TARGET_CLUSTER}"
 echo " Backup directory: ${BACKUP_DIR}"
+echo " Resources       : ${SELECTED_RESOURCES}"
+if [[ ${#NOT_IN_BACKUP[@]} -gt 0 ]]; then
+    echo " Not in backup   : ${NOT_IN_BACKUP[*]}"
+fi
 
 if [[ "$DRY_RUN" == "true" ]]; then
     echo " Mode            : DRY RUN (no changes made)"

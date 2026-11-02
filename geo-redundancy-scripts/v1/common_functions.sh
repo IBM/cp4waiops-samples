@@ -272,3 +272,188 @@ login_and_get_token() {
         get_jwt_token
     fi
 }
+# ============================================
+# Resource selection (--include / --exclude / --list-resources)
+# ============================================
+# Registry of the resource IDs understood by backup.sh and restore.sh.
+# To add a new resource: add its ID here, describe it in resource_description,
+# list its backup files in resource_files, then add a backup_<id> function to
+# backup.sh and a restore step to restore.sh.
+# Plain strings and case statements are used (no associative arrays) so the
+# scripts keep working with bash 3.2 (the macOS default).
+ALL_RESOURCES="algorithms connections filters menus policies runbooks actions topology training-definitions user-preferences views"
+
+# Resources restored when --include / --exclude are not given. Resources known
+# not to restore reliably in 5.4.0 (algorithms, training definitions, user
+# preferences) are left out; they can still be restored with --include.
+RESTORE_DEFAULT_RESOURCES="connections filters menus policies runbooks actions topology views"
+
+# Usage: resource_description <id>
+resource_description() {
+    case "$1" in
+        algorithms)           echo "Algorithms" ;;
+        connections)          echo "Connections" ;;
+        filters)              echo "Filters" ;;
+        menus)                echo "Menus" ;;
+        policies)             echo "Policies" ;;
+        runbooks)             echo "Runbooks" ;;
+        actions)              echo "Runbook actions" ;;
+        topology)             echo "Topology configuration" ;;
+        training-definitions) echo "Training definitions" ;;
+        user-preferences)     echo "User preferences" ;;
+        views)                echo "Views" ;;
+        *)                    echo "" ;;
+    esac
+}
+
+# Usage: resource_files <id>
+# Prints the backup file name(s) that make up a resource.
+resource_files() {
+    case "$1" in
+        connections) echo "connections.json connections-internal.json connections-runbooks.json" ;;
+        topology)    echo "topology.json" ;;
+        *)           echo "$1.json" ;;
+    esac
+}
+
+# Usage: resource_in_list <id> <space-separated list>
+resource_in_list() {
+    case " $2 " in
+        *" $1 "*) return 0 ;;
+        *)        return 1 ;;
+    esac
+}
+
+# Usage: resource_selected <id>   (after resolve_resource_selection)
+resource_selected() {
+    resource_in_list "$1" "${SELECTED_RESOURCES:-}"
+}
+
+# Usage: list_resources
+list_resources() {
+    local id marker
+    echo "Valid resource IDs:"
+    echo ""
+    printf '  %-22s %-16s %s\n' "ID" "RESTORE DEFAULT" "DESCRIPTION"
+    for id in ${ALL_RESOURCES}; do
+        if resource_in_list "$id" "${RESTORE_DEFAULT_RESOURCES}"; then
+            marker="yes"
+        else
+            marker="no"
+        fi
+        printf '  %-22s %-16s %s\n' "$id" "$marker" "$(resource_description "$id")"
+    done
+    echo ""
+    echo "backup.sh : with no flags every resource is backed up."
+    echo "restore.sh: with no flags only the resources marked 'yes' are restored."
+}
+
+# Usage: parse_selection_arguments "${REMAINING_ARGS[@]}"
+# Consumes --include, --exclude and --list-resources, and sets:
+#   INCLUDE_LIST, EXCLUDE_LIST (comma-separated, may be empty)
+#   INCLUDE_GIVEN, EXCLUDE_GIVEN, LIST_RESOURCES (true|false)
+# REMAINING_ARGS is rebuilt with the other arguments only.
+# Returns 2 on error.
+parse_selection_arguments() {
+    INCLUDE_LIST=""
+    EXCLUDE_LIST=""
+    INCLUDE_GIVEN=false
+    EXCLUDE_GIVEN=false
+    LIST_RESOURCES=false
+    local rest=()
+
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            --include|--exclude)
+                if [[ -z "${2:-}" || "${2}" == --* ]]; then
+                    echo "Error: $1 requires a comma-separated list of resource IDs (see --list-resources)"
+                    return 2
+                fi
+                if [[ "$1" == "--include" ]]; then
+                    INCLUDE_LIST="$2"
+                    INCLUDE_GIVEN=true
+                else
+                    EXCLUDE_LIST="$2"
+                    EXCLUDE_GIVEN=true
+                fi
+                shift 2
+                ;;
+            --list-resources)
+                LIST_RESOURCES=true
+                shift
+                ;;
+            *)
+                rest+=("$1")
+                shift
+                ;;
+        esac
+    done
+
+    if [[ "$INCLUDE_GIVEN" == "true" && "$EXCLUDE_GIVEN" == "true" ]]; then
+        echo "Error: --include and --exclude cannot be used together"
+        return 2
+    fi
+
+    REMAINING_ARGS=()
+    if [[ ${#rest[@]} -gt 0 ]]; then
+        REMAINING_ARGS=("${rest[@]}")
+    fi
+    return 0
+}
+
+# Usage: validate_resource_list <comma-separated list> ; prints an error and returns 2 on unknown IDs
+validate_resource_list() {
+    local csv="$1"
+    local items id invalid=""
+    IFS=',' read -r -a items <<< "$csv"
+    for id in "${items[@]}"; do
+        id="${id// /}"
+        if [[ -z "$id" ]] || ! resource_in_list "$id" "${ALL_RESOURCES}"; then
+            invalid="${invalid} ${id:-<empty>}"
+        fi
+    done
+    if [[ -n "$invalid" ]]; then
+        echo "Error: unknown resource ID(s):${invalid}"
+        echo "Valid resource IDs: ${ALL_RESOURCES}"
+        echo "Run with --list-resources for details."
+        return 2
+    fi
+    return 0
+}
+
+# Usage: resolve_resource_selection <default space-separated resource list>
+# Uses INCLUDE_LIST / EXCLUDE_LIST from parse_selection_arguments and sets
+# SELECTED_RESOURCES (space-separated, registry order). Returns 2 on error.
+# Must run before any login or API call.
+resolve_resource_selection() {
+    local default_set="$1"
+    local id items=() selected=""
+
+    SELECTED_RESOURCES=""
+    if [[ "$INCLUDE_GIVEN" == "true" ]]; then
+        validate_resource_list "$INCLUDE_LIST" || return 2
+        IFS=',' read -r -a items <<< "${INCLUDE_LIST// /}"
+        for id in ${ALL_RESOURCES}; do
+            if resource_in_list "$id" "${items[*]}"; then
+                selected="${selected}${selected:+ }${id}"
+            fi
+        done
+    elif [[ "$EXCLUDE_GIVEN" == "true" ]]; then
+        validate_resource_list "$EXCLUDE_LIST" || return 2
+        IFS=',' read -r -a items <<< "${EXCLUDE_LIST// /}"
+        for id in ${default_set}; do
+            if ! resource_in_list "$id" "${items[*]}"; then
+                selected="${selected}${selected:+ }${id}"
+            fi
+        done
+    else
+        selected="$default_set"
+    fi
+
+    if [[ -z "$selected" ]]; then
+        echo "Error: the selection leaves no resources to process"
+        return 2
+    fi
+    SELECTED_RESOURCES="$selected"
+    return 0
+}
