@@ -7,7 +7,7 @@
 # Restores configuration data from a backup directory to a cluster.
 # The backup directory should have been produced by backup.sh.
 # By default only the resources known to restore reliably in 5.4.0 are restored
-# (connections, filters, menus, policies, runbooks, actions, topology, views).
+# (connections, filters, menus, tools, policies, runbooks, actions, topology, views).
 # Use --include / --exclude to change the selection and --list-resources to print
 # the valid resource IDs.
 #
@@ -16,6 +16,7 @@
 #   - Connections (v1 external API, and connections via rb endpoint using oc exec into aimanager-aio-controller pod)
 #   - Filters
 #   - Menus
+#   - Tools
 #   - Policies       (via policy-batches endpoint, in configurable chunks with 429 retry)
 #   - Runbooks       (via RBA v1 bulk import endpoint)
 #   - Actions        (via RBA v1 API; referred to as Tools in the v2 configuration API)
@@ -1453,6 +1454,7 @@ for resource_id in ${ALL_RESOURCES}; do
         connections)          restore_connections_group ;;
         filters)              restore_items "Filters" "/aiops/api/v2/configuration/filters" "filters.json" ;;
         menus)                restore_items "Menus" "/aiops/api/v2/configuration/menus" "menus.json" ;;
+        tools)                restore_items "Tools" "/aiops/api/v2/configuration/tools" "tools.json" ;;
         policies)             restore_policies ;;
         runbooks)             restore_runbooks ;;
         actions)              restore_actions ;;

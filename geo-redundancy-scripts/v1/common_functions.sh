@@ -281,12 +281,12 @@ login_and_get_token() {
 # backup.sh and a restore step to restore.sh.
 # Plain strings and case statements are used (no associative arrays) so the
 # scripts keep working with bash 3.2 (the macOS default).
-ALL_RESOURCES="algorithms connections filters menus policies runbooks actions topology training-definitions user-preferences views"
+ALL_RESOURCES="algorithms connections filters menus tools policies runbooks actions topology training-definitions user-preferences views"
 
 # Resources restored when --include / --exclude are not given. Resources known
 # not to restore reliably in 5.4.0 (algorithms, training definitions, user
 # preferences) are left out; they can still be restored with --include.
-RESTORE_DEFAULT_RESOURCES="connections filters menus policies runbooks actions topology views"
+RESTORE_DEFAULT_RESOURCES="connections filters menus tools policies runbooks actions topology views"
 
 # Usage: resource_description <id>
 resource_description() {
@@ -295,6 +295,7 @@ resource_description() {
         connections)          echo "Connections" ;;
         filters)              echo "Filters" ;;
         menus)                echo "Menus" ;;
+        tools)                echo "Tools" ;;
         policies)             echo "Policies" ;;
         runbooks)             echo "Runbooks" ;;
         actions)              echo "Runbook actions" ;;

@@ -15,6 +15,7 @@
 #   - Connections (v1 external API, and connections via rb endpoint using oc exec into aimanager-aio-controller pod)
 #   - Filters
 #   - Menus
+#   - Tools
 #   - Policies
 #   - Runbooks
 #   - Actions
@@ -386,6 +387,13 @@ backup_menus() {
         "Menus" \
         "/aiops/api/v2/configuration/menus?all=true" \
         "menus.json"
+}
+
+backup_tools() {
+    fetch_resource \
+        "Tools" \
+        "/aiops/api/v2/configuration/tools?all=true" \
+        "tools.json"
 }
 
 backup_policies() {
