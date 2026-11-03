@@ -1712,8 +1712,7 @@
     },
     {
       "datasource": {
-        "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "name": "prometheus"
       },
       "description": "Refer to the \"Topology\" dashboard for further details.\n\nCount that tracks the number of pods that were newly created within the time range.\n\nNew pods indicate restarts may have occurred which could result in loss of functionality. Review the pod uptime time graph to see if any gaps in uptime occurred.\n\nNew pods don't always indicate a problem and in some cases are part of routine processing and scaling. ",
       "fieldConfig": {
@@ -1797,8 +1796,7 @@
       "targets": [
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "editorMode": "code",
           "expr": "sum(((sum((time() - kube_pod_start_time{pod=~\".*-topology-.*\", pod!~\".*file-observer.*\", pod!~\".*kubernetes-observer.*\", pod!~\".*observer.*\",pod!~\".*api.*\", pod!~\".*aiopsedge.*\", pod!~\".*job.*\", pod!~\".*schema.*\"}) - $__range_s) by (pod)) < 60) <= bool 0)",
@@ -1916,8 +1914,7 @@
     },
     {
       "datasource": {
-        "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "name": "prometheus"
       },
       "description": "Refer to the \"Event Integrations\" dashboard -> \"Webhook integration\" for further details.\n\nCount of  exceptions, and status failures that occurred within the Webhook integration.",
       "fieldConfig": {
@@ -1984,8 +1981,7 @@
       "targets": [
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "editorMode": "code",
           "expr": "round(\n  sum(increase(connectors_sdk_connectorexceptions_thrown_total{pod=~\".*-webhook-.*\"}[$__range]) or vector(0)) + \n  sum(increase(connector_sdk_status_failed_total{pod=~\".*-webhook-.*\"}[$__range]) or vector(0))\n)\n",
@@ -1999,8 +1995,7 @@
     },
     {
       "datasource": {
-        "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "name": "prometheus"
       },
       "description": "Refer to the \"Analytics\" dashboard for further details.\n\nCount of event classification errors.",
       "fieldConfig": {
@@ -2069,8 +2064,7 @@
       "targets": [
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "editorMode": "code",
           "expr": "sum(increase(ibm_aiops_mime_classfier_http_requests_errors_total[$__range])) + \nsum(increase(ibm_aiops_mime_classfier_kafka_errors_total[$__range]))\n",
@@ -2364,8 +2358,7 @@
     },
     {
       "datasource": {
-        "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "name": "prometheus"
       },
       "description": "Refer to the \"Analytics\" dashboard for further details.\n\nCount of AI training errors.",
       "fieldConfig": {
@@ -2433,8 +2426,7 @@
       "targets": [
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "editorMode": "code",
           "expr": "round(\n  sum(increase(ibm_aiops_training_spark_cluster_drivers_FAILED_count[$__range])) + \n  sum(increase(ibm_aiops_training_spark_lack_of_resource_failure_total[$__range])) + \n  sum(increase(ibm_aiops_training_spark_cluster_drivers_KILLED_count[$__range])) + \n  sum(increase(ibm_aiops_training_spark_submission_failed_total[$__range]))\n)\n",
@@ -2700,8 +2692,7 @@
     },
     {
       "datasource": {
-        "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "name": "prometheus"
       },
       "description": "Refer to the \"Topology\" dashboard for further details.\n\nCount of database query failures made by the Topology Services within the time range",
       "fieldConfig": {
@@ -2756,8 +2747,7 @@
       "targets": [
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "editorMode": "code",
           "expr": "round(\n  sum(increase(ibm_aiops_topo_janusgraph_query_graph_exceptions{service=\"aiops-topology-merge\"}[$__range]) or vector(0)) + \n  sum(increase(ibm_aiops_topo_janusgraph_query_graph_exceptions{service=\"aiops-topology-status\"}[$__range]) or vector(0)) +\n  sum(increase(ibm_aiops_topo_janusgraph_query_graph_exceptions{service=\"aiops-topology-layout\"}[$__range]) or vector(0)) +\n  sum(increase(ibm_aiops_topo_janusgraph_query_graph_exceptions{service=\"aiops-topology-topology\"}[$__range]) or vector(0))\n)\n",
@@ -3141,8 +3131,7 @@
         "allowCustomValue": true,
         "current": {},
         "datasource": {
-          "type": "prometheus",
-          "uid": "${DS_PROMETHEUS}"
+          "name": "prometheus"
         },
         "definition": "label_values(kube_namespace_status_phase{job=\"kube-state-metrics\"},namespace)",
         "includeAll": false,

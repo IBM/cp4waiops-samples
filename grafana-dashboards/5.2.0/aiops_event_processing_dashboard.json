@@ -2912,8 +2912,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "This panel displays the number of active pods for each dependency of Policy Automation (Kafka, Postgres, and Topology Status Service). Any issues with these dependencies can impact Policy Automation's functionality. Pods stuck in \"Pending\" or \"Unknown\" states for prolonged periods of time are problematic and may result in loss of functionality to the component.\n\n",
           "fieldConfig": {
@@ -2960,8 +2959,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "disableTextWrap": false,
               "editorMode": "code",
@@ -3027,8 +3025,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Pod Uptimes for Policy Automation dependency pods",
           "fieldConfig": {
@@ -3110,8 +3107,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "time() -sum(kube_pod_start_time{pod=~\".*core-postgres.*|iaf-system-kafka.*|aiops-topology-status.*\", pod!~\".*job.*\"}) by (pod)",
@@ -3125,8 +3121,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Count of pods that have exceeded 80% of their CPU limits within the time range. This will result in CPU throttling and potentially temporary loss of functionality\n\nThis will only compare against the ***current*** CPU limit of each pod. If the limits were updated within the time range, the count may be inaccurate.",
           "fieldConfig": {
@@ -3220,8 +3215,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum((((max(kube_pod_container_resource_limits{pod=~\".*core-postgres.*|iaf-system-kafka.*|aiops-topology-status.*\", pod!~\".*job.*\", container!=\"\", container!=\"POD\", resource=\"cpu\"}) by (pod)) * 0.8 <= max(max_over_time(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{pod=~\".*core-postgres.*|iaf-system-kafka.*|aiops-topology-status.*\", pod!~\".*job.*\"}[$__range])) by (pod)) or vector(0)) > bool 0)",
@@ -3235,8 +3229,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Count of pods that have exceeded 80% of their memory limits within the time range.\n\nThis will only compare against the ***current*** memory limit of each pod. If the limits were updated within the time range, the count may be inaccurate.",
           "fieldConfig": {
@@ -3330,8 +3323,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum((((max(kube_pod_container_resource_limits{pod=~\".*core-postgres.*|iaf-system-kafka.*|aiops-topology-status.*\", pod!~\".*job.*\", resource=\"memory\"}) by (pod)) * 0.8 <= max(max_over_time(container_memory_working_set_bytes{pod=~\".*core-postgres.*|iaf-system-kafka.*|aiops-topology-status.*\", pod!~\".*job.*\", container!=\"\", container!=\"POD\"}[$__range])) by (pod)) or vector(0)) > bool 0)",
@@ -3345,8 +3337,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Count of pods that have exceeded their CPU limits within the time range. This will result in CPU throttling and potentially temporary loss of functionality.\n\nThis will only compare against the ***current*** CPU limit of each pod. If the limits were updated within the time range, the count may be inaccurate.",
           "fieldConfig": {
@@ -3440,8 +3431,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum((((max(kube_pod_container_resource_limits{pod=~\".*core-postgres.*|iaf-system-kafka.*|aiops-topology-status.*\", pod!~\".*job.*\", container!=\"\", container!=\"POD\", resource=\"cpu\"}) by (pod)) <= max(max_over_time(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{pod=~\".*core-postgres.*|iaf-system-kafka.*|aiops-topology-status.*\", pod!~\".*job.*\"}[$__range])) by (pod)) or vector(0)) > bool 0)",
@@ -3455,8 +3445,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Count of component pods that have exceeded their memory limits within the time range.\n\nThis will only compare against the ***current*** memory limit of each pod. If the limits were updated within the time range, the count may be inaccurate.",
           "fieldConfig": {
@@ -3549,8 +3538,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum((((max(kube_pod_container_resource_limits{pod=~\".*core-postgres.*|iaf-system-kafka.*|aiops-topology-status.*\", pod!~\".*job.*\", resource=\"memory\"}) by (pod)) <= max(max_over_time(container_memory_working_set_bytes{pod=~\".*core-postgres.*|iaf-system-kafka.*|aiops-topology-status.*\", pod!~\".*job.*\", container!=\"\", container!=\"POD\", container!=\"POD\"}[$__range])) by (name)) or vector(0)) > bool 0)",
@@ -6996,8 +6984,7 @@
       "panels": [
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Count that tracks the number of pods that were newly created within the time range.\n\nNew pods indicate restarts may have occurred which could result in loss of functionality. Review the pod uptime graph to see if any gaps in uptime occurred.\n\nNew pods don't always indicate a problem and in some cases are part of routine processing and scaling. ",
           "fieldConfig": {
@@ -7141,8 +7128,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum(((sum((time() - kube_pod_start_time{pod=~\".*core-postgres.*|iaf-system-kafka.*|aiops-opensearch.*\", pod!~\".*job.*\"}) - $__range_s) by (pod)) < 60) <= bool 0)",
@@ -7156,8 +7142,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "This panel displays the number of active pods for each dependency of Datalayer Component (Postgres, Kafka, and ElasticSearch). Any issues with these dependencies can impact the Datalayer's functionality. Pods stuck in \"Pending\" or \"Unknown\" states for prolonged periods of time are problematic and may result in loss of functionality to the component\n",
           "fieldConfig": {
@@ -7204,8 +7189,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "disableTextWrap": false,
               "editorMode": "code",
@@ -7271,8 +7255,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Pod Uptimes for Datalayer dependency pods",
           "fieldConfig": {
@@ -7354,8 +7337,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "time() -sum(kube_pod_start_time{pod=~\".*core-postgres.*|iaf-system-kafka.*|aiops-opensearch.*\", pod!~\".*job.*\"}) by (pod)",
@@ -7798,8 +7780,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Count of pods that have exceeded 80% of their CPU limits within the time range. This will result in CPU throttling and potentially temporary loss of functionality\n\nThis will only compare against the ***current*** CPU limit of each pod. If the limits were updated within the time range, the count may be inaccurate.",
           "fieldConfig": {
@@ -7893,8 +7874,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum((((max(kube_pod_container_resource_limits{pod=~\".*core-postgres.*|iaf-system-kafka.*|aiops-opensearch.*\", pod!~\".*job.*\", container!=\"\", container!=\"POD\", resource=\"cpu\"}) by (pod)) * 0.8 <= max(max_over_time(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{pod=~\".*core-postgres.*|iaf-system-kafka.*|aiops-opensearch.*\", pod!~\".*job.*\", container!=\"\", container!=\"POD\"}[$__range])) by (pod)) or vector(0)) > bool 0)",
@@ -7908,8 +7888,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Count of pods that have exceeded 80% of their memory limits within the time range.\n\nThis will only compare against the ***current*** memory limit of each pod. If the limits were updated within the time range, the count may be inaccurate.",
           "fieldConfig": {
@@ -8003,8 +7982,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum((((max(kube_pod_container_resource_limits{pod=~\".*core-postgres.*|iaf-system-kafka.*|aiops-opensearch.*\", pod!~\".*job.*\", container!=\"\", container!=\"POD\", resource=\"memory\"}) by (pod)) * 0.8 <= max(max_over_time(container_memory_working_set_bytes{pod=~\".*core-postgres.*|iaf-system-kafka.*|aiops-opensearch.*\", pod!~\".*job.*\", container!=\"\", container!=\"POD\"}[$__range])) by (pod)) or vector(0)) > bool 0)",
@@ -8018,8 +7996,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Count of pods that have exceeded their CPU limits within the time range. This will result in CPU throttling and potentially temporary loss of functionality.\n\nThis will only compare against the ***current*** CPU limit of each pod. If the limits were updated within the time range, the count may be inaccurate.",
           "fieldConfig": {
@@ -8113,8 +8090,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum((((max(kube_pod_container_resource_limits{pod=~\".*core-postgres.*|iaf-system-kafka.*|aiops-opensearch.*\", pod!~\".*job.*\", container!=\"\", container!=\"POD\", resource=\"cpu\"}) by (pod)) <= max(max_over_time(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{pod=~\".*core-postgres.*|iaf-system-kafka.*|aiops-opensearch.*\", pod!~\".*job.*\", container!=\"\", container!=\"POD\"}[$__range])) by (pod)) or vector(0)) > bool 0)",
@@ -8128,8 +8104,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Count of component pods that have exceeded their memory limits within the time range.\n\nThis will only compare against the ***current*** memory limit of each pod. If the limits were updated within the time range, the count may be inaccurate.",
           "fieldConfig": {
@@ -8222,8 +8197,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum((((max(kube_pod_container_resource_limits{pod=~\".*core-postgres.*|iaf-system-kafka.*|aiops-opensearch.*\", pod!~\".*job.*\", container!=\"\", container!=\"POD\", resource=\"memory\"}) by (pod)) <= max(max_over_time(container_memory_working_set_bytes{pod=~\".*core-postgres.*|iaf-system-kafka.*|aiops-opensearch.*\", pod!~\".*job.*\", container!=\"\", container!=\"POD\"}[$__range])) by (pod)) or vector(0)) > bool 0)",

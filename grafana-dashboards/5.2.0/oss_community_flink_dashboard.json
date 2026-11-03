@@ -1761,8 +1761,7 @@
       "panels": [
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "58c45976-0226-4b10-b795-13d480f90d98"
+            "name": "prometheus"
           },
           "fieldConfig": {
             "defaults": {
@@ -1830,8 +1829,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "58c45976-0226-4b10-b795-13d480f90d98"
+                "name": "prometheus"
               },
               "exemplar": true,
               "expr": "delta(flink_jobmanager_job_totalNumberOfCheckpoints{job_name=~\"$job_name\", instance=~\"$jm_instance\"}[1m])",
@@ -1845,8 +1843,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "58c45976-0226-4b10-b795-13d480f90d98"
+            "name": "prometheus"
           },
           "fieldConfig": {
             "defaults": {
@@ -1914,8 +1911,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "58c45976-0226-4b10-b795-13d480f90d98"
+                "name": "prometheus"
               },
               "exemplar": true,
               "expr": "delta(flink_jobmanager_job_numberOfCompletedCheckpoints{job_name=~\"$job_name\", instance=~\"$jm_instance\"}[1m])",
@@ -1929,8 +1925,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "58c45976-0226-4b10-b795-13d480f90d98"
+            "name": "prometheus"
           },
           "fieldConfig": {
             "defaults": {
@@ -1998,8 +1993,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "58c45976-0226-4b10-b795-13d480f90d98"
+                "name": "prometheus"
               },
               "exemplar": true,
               "expr": "delta(flink_jobmanager_job_numberOfInProgressCheckpoints{job_name=~\"$job_name\", instance=~\"$jm_instance\"}[1m])",
@@ -2013,8 +2007,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "58c45976-0226-4b10-b795-13d480f90d98"
+            "name": "prometheus"
           },
           "fieldConfig": {
             "defaults": {
@@ -2082,8 +2075,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "58c45976-0226-4b10-b795-13d480f90d98"
+                "name": "prometheus"
               },
               "exemplar": true,
               "expr": "delta(flink_jobmanager_job_numberOfFailedCheckpoints{job_name=~\"$job_name\", instance=~\"$jm_instance\"}[1m])",
@@ -2097,8 +2089,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "58c45976-0226-4b10-b795-13d480f90d98"
+            "name": "prometheus"
           },
           "fieldConfig": {
             "defaults": {
@@ -2167,8 +2158,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "58c45976-0226-4b10-b795-13d480f90d98"
+                "name": "prometheus"
               },
               "exemplar": true,
               "expr": "flink_jobmanager_job_lastCheckpointSize{job_name=~\"$job_name\", instance=~\"$jm_instance\"}",
@@ -2182,8 +2172,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "58c45976-0226-4b10-b795-13d480f90d98"
+            "name": "prometheus"
           },
           "fieldConfig": {
             "defaults": {
@@ -2252,8 +2241,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "58c45976-0226-4b10-b795-13d480f90d98"
+                "name": "prometheus"
               },
               "exemplar": true,
               "expr": "flink_jobmanager_job_lastCheckpointDuration{job_name=~\"$job_name\", instance=~\"$jm_instance\"}",
@@ -2267,8 +2255,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "58c45976-0226-4b10-b795-13d480f90d98"
+            "name": "prometheus"
           },
           "fieldConfig": {
             "defaults": {
@@ -2337,8 +2324,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "58c45976-0226-4b10-b795-13d480f90d98"
+                "name": "prometheus"
               },
               "exemplar": true,
               "expr": "xx{job_name=~\"$job_name\", instance=~\"$jm_instance\"}",
@@ -3271,8 +3257,7 @@
       "panels": [
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "58c45976-0226-4b10-b795-13d480f90d98"
+            "name": "prometheus"
           },
           "fieldConfig": {
             "defaults": {
@@ -3344,8 +3329,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "58c45976-0226-4b10-b795-13d480f90d98"
+                "name": "prometheus"
               },
               "exemplar": true,
               "expr": "flink_taskmanager_Status_Flink_Memory_Managed_Used{tm_id=~\"$tm_id\"}",
@@ -4230,8 +4214,7 @@
       "panels": [
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "58c45976-0226-4b10-b795-13d480f90d98"
+            "name": "prometheus"
           },
           "fieldConfig": {
             "defaults": {
@@ -4303,8 +4286,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "58c45976-0226-4b10-b795-13d480f90d98"
+                "name": "prometheus"
               },
               "exemplar": true,
               "expr": "flink_taskmanager_job_task_numBuffersInLocal{tm_id=~\"$tm_id\", job_name=~\"$job_name\", task_name=~\"$task_name\"}",
@@ -4318,8 +4300,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "58c45976-0226-4b10-b795-13d480f90d98"
+            "name": "prometheus"
           },
           "fieldConfig": {
             "defaults": {
@@ -4392,8 +4373,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "58c45976-0226-4b10-b795-13d480f90d98"
+                "name": "prometheus"
               },
               "exemplar": true,
               "expr": "rate(flink_taskmanager_job_task_numBuffersInLocalPerSecond{tm_id=~\"$tm_id\", job_name=~\"$job_name\", task_name=~\"$task_name\"}[1m])",
@@ -4407,8 +4387,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "58c45976-0226-4b10-b795-13d480f90d98"
+            "name": "prometheus"
           },
           "fieldConfig": {
             "defaults": {
@@ -4480,8 +4459,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "58c45976-0226-4b10-b795-13d480f90d98"
+                "name": "prometheus"
               },
               "exemplar": true,
               "expr": "flink_taskmanager_job_task_numBuffersInRemote{tm_id=~\"$tm_id\", job_name=~\"$job_name\", task_name=~\"$task_name\"}",
@@ -4495,8 +4473,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "58c45976-0226-4b10-b795-13d480f90d98"
+            "name": "prometheus"
           },
           "fieldConfig": {
             "defaults": {
@@ -4569,8 +4546,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "58c45976-0226-4b10-b795-13d480f90d98"
+                "name": "prometheus"
               },
               "exemplar": true,
               "expr": "rate(flink_taskmanager_job_task_numBuffersInRemotePerSecond{tm_id=~\"$tm_id\", job_name=~\"$job_name\", task_name=~\"$task_name\"}[1m])",
@@ -4584,8 +4560,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "58c45976-0226-4b10-b795-13d480f90d98"
+            "name": "prometheus"
           },
           "fieldConfig": {
             "defaults": {
@@ -4657,8 +4632,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "58c45976-0226-4b10-b795-13d480f90d98"
+                "name": "prometheus"
               },
               "exemplar": true,
               "expr": "delta(flink_taskmanager_job_task_numBuffersOut{tm_id=~\"$tm_id\", job_name=~\"$job_name\", task_name=~\"$task_name\"}[1m])",
@@ -4672,8 +4646,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "58c45976-0226-4b10-b795-13d480f90d98"
+            "name": "prometheus"
           },
           "fieldConfig": {
             "defaults": {
@@ -4746,8 +4719,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "58c45976-0226-4b10-b795-13d480f90d98"
+                "name": "prometheus"
               },
               "exemplar": true,
               "expr": "rate(flink_taskmanager_job_task_numBuffersOutPerSecond{tm_id=~\"$tm_id\", job_name=~\"$job_name\", task_name=~\"$task_name\"}[1m])",
@@ -4761,8 +4733,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "58c45976-0226-4b10-b795-13d480f90d98"
+            "name": "prometheus"
           },
           "fieldConfig": {
             "defaults": {
@@ -4835,8 +4806,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "58c45976-0226-4b10-b795-13d480f90d98"
+                "name": "prometheus"
               },
               "exemplar": true,
               "expr": "delta(flink_taskmanager_job_task_numBytesIn{tm_id=~\"$tm_id\", job_name=~\"$job_name\", task_name=~\"$task_name\"}[1m])",
@@ -4850,8 +4820,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "58c45976-0226-4b10-b795-13d480f90d98"
+            "name": "prometheus"
           },
           "fieldConfig": {
             "defaults": {
@@ -4924,8 +4893,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "58c45976-0226-4b10-b795-13d480f90d98"
+                "name": "prometheus"
               },
               "exemplar": true,
               "expr": "rate(flink_taskmanager_job_task_numBytesInPerSecond{tm_id=~\"$tm_id\", job_name=~\"$job_name\", task_name=~\"$task_name\"}[1m])",
@@ -4939,8 +4907,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "58c45976-0226-4b10-b795-13d480f90d98"
+            "name": "prometheus"
           },
           "fieldConfig": {
             "defaults": {
@@ -5013,8 +4980,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "58c45976-0226-4b10-b795-13d480f90d98"
+                "name": "prometheus"
               },
               "exemplar": true,
               "expr": "delta(flink_taskmanager_job_task_numBytesInLocal{tm_id=~\"$tm_id\", job_name=~\"$job_name\", task_name=~\"$task_name\"}[1m])",
@@ -5028,8 +4994,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "58c45976-0226-4b10-b795-13d480f90d98"
+            "name": "prometheus"
           },
           "fieldConfig": {
             "defaults": {
@@ -5102,8 +5067,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "58c45976-0226-4b10-b795-13d480f90d98"
+                "name": "prometheus"
               },
               "exemplar": true,
               "expr": "rate(flink_taskmanager_job_task_numBytesInLocalPerSecond{tm_id=~\"$tm_id\", job_name=~\"$job_name\", task_name=~\"$task_name\"}[1m])",
@@ -5117,8 +5081,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "58c45976-0226-4b10-b795-13d480f90d98"
+            "name": "prometheus"
           },
           "fieldConfig": {
             "defaults": {
@@ -5191,8 +5154,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "58c45976-0226-4b10-b795-13d480f90d98"
+                "name": "prometheus"
               },
               "exemplar": true,
               "expr": "delta(flink_taskmanager_job_task_numBytesInRemote{tm_id=~\"$tm_id\", job_name=~\"$job_name\", task_name=~\"$task_name\"}[1m])",
@@ -5206,8 +5168,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "58c45976-0226-4b10-b795-13d480f90d98"
+            "name": "prometheus"
           },
           "fieldConfig": {
             "defaults": {
@@ -5280,8 +5241,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "58c45976-0226-4b10-b795-13d480f90d98"
+                "name": "prometheus"
               },
               "exemplar": true,
               "expr": "rate(flink_taskmanager_job_task_numBytesInRemotePerSecond{tm_id=~\"$tm_id\", job_name=~\"$job_name\", task_name=~\"$task_name\"}[1m])",
@@ -5295,8 +5255,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "58c45976-0226-4b10-b795-13d480f90d98"
+            "name": "prometheus"
           },
           "fieldConfig": {
             "defaults": {
@@ -5369,8 +5328,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "58c45976-0226-4b10-b795-13d480f90d98"
+                "name": "prometheus"
               },
               "exemplar": true,
               "expr": "delta(flink_taskmanager_job_task_numBytesOut{tm_id=~\"$tm_id\", job_name=~\"$job_name\", task_name=~\"$task_name\"}[1m])",
@@ -5384,8 +5342,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "58c45976-0226-4b10-b795-13d480f90d98"
+            "name": "prometheus"
           },
           "fieldConfig": {
             "defaults": {
@@ -5458,8 +5415,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "58c45976-0226-4b10-b795-13d480f90d98"
+                "name": "prometheus"
               },
               "exemplar": true,
               "expr": "rate(flink_taskmanager_job_task_numBytesOutPerSecond{tm_id=~\"$tm_id\", job_name=~\"$job_name\", task_name=~\"$task_name\"}[1m])",
@@ -5473,8 +5429,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "58c45976-0226-4b10-b795-13d480f90d98"
+            "name": "prometheus"
           },
           "fieldConfig": {
             "defaults": {
@@ -5547,8 +5502,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "58c45976-0226-4b10-b795-13d480f90d98"
+                "name": "prometheus"
               },
               "exemplar": true,
               "expr": "delta(flink_taskmanager_job_task_numRecordsIn{tm_id=~\"$tm_id\", job_name=~\"$job_name\", task_name=~\"$task_name\"}[1m])",
@@ -5562,8 +5516,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "58c45976-0226-4b10-b795-13d480f90d98"
+            "name": "prometheus"
           },
           "fieldConfig": {
             "defaults": {
@@ -5636,8 +5589,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "58c45976-0226-4b10-b795-13d480f90d98"
+                "name": "prometheus"
               },
               "exemplar": true,
               "expr": "rate(flink_taskmanager_job_task_numRecordsInPerSecond{tm_id=~\"$tm_id\", job_name=~\"$job_name\", task_name=~\"$task_name\"}[1m])",
@@ -5651,8 +5603,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "58c45976-0226-4b10-b795-13d480f90d98"
+            "name": "prometheus"
           },
           "fieldConfig": {
             "defaults": {
@@ -5725,8 +5676,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "58c45976-0226-4b10-b795-13d480f90d98"
+                "name": "prometheus"
               },
               "exemplar": true,
               "expr": "delta(flink_taskmanager_job_task_numRecordsOut{tm_id=~\"$tm_id\", job_name=~\"$job_name\", task_name=~\"$task_name\"}[1m])",
@@ -5740,8 +5690,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "58c45976-0226-4b10-b795-13d480f90d98"
+            "name": "prometheus"
           },
           "fieldConfig": {
             "defaults": {
@@ -5814,8 +5763,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "58c45976-0226-4b10-b795-13d480f90d98"
+                "name": "prometheus"
               },
               "exemplar": true,
               "expr": "rate(flink_taskmanager_job_task_numRecordsOutPerSecond{tm_id=~\"$tm_id\", job_name=~\"$job_name\", task_name=~\"$task_name\"}[1m])",
