@@ -59,6 +59,7 @@ Run `./backup.sh --list-resources` or `./restore.sh --list-resources` to print t
 | `connections` | yes | yes | All connections as one group: external connections, log collector connections (internal v3) and runbook connections (SSH and Ansible AWX) |
 | `filters` | yes | yes | Filters |
 | `menus` | yes | yes | Menus |
+| `tools` | yes | yes | Tools |
 | `policies` | yes | yes | Policies, all states (draft, enabled, disabled, archived) |
 | `runbooks` | yes | yes | Runbooks, plus the encryption token needed to import them |
 | `actions` | yes | yes | Runbook actions (called Tools in the v2 configuration API) |
@@ -100,7 +101,7 @@ Rules:
 - Unknown IDs are rejected **before** any login or API call. The error lists the valid IDs, and nothing is written or changed.
 - A selection that ends up empty (for example excluding every default resource) is an error.
 - The backup and restore selections are independent. You can back up everything and restore only a subset.
-- Order on the command line does not matter. Resources are always processed in a fixed order: algorithms, connections, filters, menus, policies, runbooks, actions, topology, training definitions, user preferences, views.
+- Order on the command line does not matter. Resources are always processed in a fixed order: algorithms, connections, filters, menus, tools, policies, runbooks, actions, topology, training definitions, user preferences, views.
 - The selection works with `--cluster`, `--config`, `--output`, `--dry-run` and `--debug`.
 - To restore something that is not in the restore default set (for example `algorithms`), name it with `--include`. `--exclude` can never add resources.
 
@@ -190,6 +191,7 @@ What to expect:
 | `connections-runbooks.json` | `connections` | SSH and Ansible AWX connections. Private keys are not stored |
 | `filters.json` | `filters` | |
 | `menus.json` | `menus` | |
+| `tools.json` | `tools` | |
 | `policies.json` | `policies` | |
 | `runbooks.json` | `runbooks` | |
 | `runbooks-encryption-token.txt` | `runbooks` | Key needed to decrypt runbook secrets on import. Mode `600` |
