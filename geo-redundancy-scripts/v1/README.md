@@ -27,6 +27,16 @@ Before using these scripts, ensure you have the following tools installed:
 ./setupMultiCluster.sh --config ~/clusters/geo_config.env # Example custom config path
 ```
 
+### Backup and Restore
+
+`backup.sh` and `restore.sh` export and re-create cluster configuration (connections, filters, policies, runbooks, views and more), and support selecting resources with `--include`, `--exclude` and `--list-resources`. See [README-backup-restore.md](README-backup-restore.md) for full usage.
+
+```bash
+./backup.sh --list-resources
+./backup.sh --include filters,views
+./restore.sh --exclude policies ./backup-20261027-101500
+```
+
 ### Optional: Replicate Policies
 
 The export and import scripts support specifying which cluster to use and which config file to load using command-line flags.
