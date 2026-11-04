@@ -151,6 +151,7 @@ echo "Output directory: ${OUTPUT_DIR}"
 echo ""
 
 SKIPPED_RESOURCES=()
+TOPOLOGY_FAILED="false"
 
 # ============================================
 # Helper: fetch a resource from inside a pod via oc exec and save to file
@@ -705,7 +706,9 @@ backup_topology() {
     echo "Exporting Topology configuration..."
     TOPOLOGY_TMP="${OUTPUT_DIR}/topology.json.tmp"
     TOPOLOGY_OUT="${OUTPUT_DIR}/topology.json"
-    TOPO_URL="${CLUSTER_CPD_ENDPOINT}/aiops/api/v2/configuration/topology/config/backup"
+    # Path differs by release (5.1.x vs 5.2.0+); sets TOPOLOGY_API_BASE
+    resolve_topology_endpoint
+    TOPO_URL="${CLUSTER_CPD_ENDPOINT}${TOPOLOGY_API_BASE}/backup"
 
     if [[ "$DEBUG" == "true" ]]; then
         echo "  [debug] GET ${TOPO_URL}"
@@ -758,6 +761,8 @@ backup_topology() {
         echo "  Response body: $(cat "${TOPOLOGY_TMP}" 2>/dev/null || true)"
         rm -f "${TOPOLOGY_TMP}"
         SKIPPED_RESOURCES+=("Topology (HTTP ${TOPO_HTTP_CODE})")
+        # A backup silently missing topology is easy to overlook — fail the run at the end
+        TOPOLOGY_FAILED="true"
     fi
 }
 
@@ -823,3 +828,9 @@ echo ""
 echo "To commit to git:"
 echo "  git add ${OUTPUT_DIR}"
 echo "  git commit -m \"chore: config backup from ${SOURCE_CLUSTER} $(date -u +%Y-%m-%dT%H:%M:%SZ)\""
+
+if [[ "${TOPOLOGY_FAILED}" == "true" ]]; then
+    echo ""
+    echo "ERROR: backup is INCOMPLETE — Topology configuration could not be exported." >&2
+    exit 1
+fi
