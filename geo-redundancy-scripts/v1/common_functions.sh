@@ -655,9 +655,24 @@ is_installation_compatible() {
     fi
 }
 
-# Builds the Installation to apply to the target: only metadata.name/namespace, apiVersion, kind and the
-# allow listed spec fields. Each allow listed field is copied as a whole block. A field that does not exist
-# in the source is fine. Uses INSTALLATION_ALLOWLIST.
+# Builds the Installation to apply to the target.
+#
+# Context on Required Fields & Cluster-Specific Values:
+# The Installation CRD OpenAPI validation schema defines mandatory fields in spec:
+#   - spec.license: Required value
+#   - spec.storageClass: Required value
+#   - spec.storageClassLargeBlock: Required value
+#   - spec.size: Required value
+# Omitting these fields from the manifest causes Kubernetes OpenAPI schema validation to fail
+# and reject the apply request.
+#
+# Safety Policy:
+# 1. Cluster-specific Installation CR settings (such as storage classes and licenses) are preserved
+#    from target_yaml so they are never overwritten or corrupted by the backup.
+# 2. Allowlisted fields existing on the target cluster (e.g. topologyModel) that are NOT defined
+#    in the incoming backup are preserved and NOT deleted for safety.
+# 3. Allowlisted fields explicitly specified in the backup (e.g. pakModules) are overlaid on top.
+#
 # Usage: transform_installation <source installation yaml> <target installation yaml> <target namespace>
 transform_installation() {
     local source_yaml="$1" target_yaml="$2" ns="$3"
@@ -674,12 +689,32 @@ transform_installation() {
     # "spec.license" -> "license"; the allow list holds top level spec fields
     allow_json=$(printf '%s\n' "${INSTALLATION_ALLOWLIST[@]}" | sed 's/^spec\.//' | jq -R . | jq -sc .)
 
-    # The target's own name is used (it can differ between clusters)
+    # 1. Take target cluster's required baseline fields: license, size, storageClass, storageClassLargeBlock
+    # 2. Preserve target's allowlisted fields if absent in the backup (non-destructive safety)
+    # 3. Overlay the source's defined allowlisted fields onto it
     printf '%s\n' "$source_yaml" | yq -o=json '.' | jq \
         --arg name "$target_name" --arg ns "$ns" --arg apiVersion "$api_version" --arg kind "$kind" \
         --argjson allow "$allow_json" \
-        '{apiVersion: $apiVersion, kind: $kind, metadata: {name: $name, namespace: $ns},
-          spec: ((.spec // {}) | with_entries(select(.key as $k | $allow | index($k) != null)))}' \
+        --argjson target "$(printf '%s\n' "$target_yaml" | yq -o=json '.')" \
+        '{
+          apiVersion: $apiVersion,
+          kind: $kind,
+          metadata: {name: $name, namespace: $ns},
+          spec: (
+            (
+              ((($target.spec // {}) | {
+                license: .license,
+                size: .size,
+                storageClass: .storageClass,
+                storageClassLargeBlock: .storageClassLargeBlock
+              }) | with_entries(select(.value != null)))
+              +
+              (($target.spec // {}) | with_entries(select(.key as $k | $allow | index($k) != null)))
+            )
+            +
+            ((.spec // {}) | with_entries(select(.key as $k | $allow | index($k) != null)))
+          )
+        }' \
         | yq -p=json -o=yaml '.' || { installation_error "Could not transform the Installation"; return 1; }
 }
 
@@ -706,9 +741,21 @@ transform_configmap() {
 
 # Server-side apply of one yaml document to the cluster oc is logged in to.
 # Returns 0 on success, 2 if the yaml is empty (skipped), 1 on error. Honors DRY_RUN (restore.sh).
+#
+# Context on SSA Migration Warnings:
+# When resources were previously managed via Client-Side Apply (standard `oc apply`),
+# Kubernetes leaves a `kubectl.kubernetes.io/last-applied-configuration` annotation.
+# When `oc apply --server-side` runs against such resources, the kubectl/oc client attempts
+# an automatic client-side-to-server-side migration. Because we apply a projected/partial
+# manifest containing only allowlisted fields, the client-side migration validator logs a
+# warning complaining about missing CRD-required fields (e.g. spec.license, spec.storageClass).
+# This warning is completely non-fatal: the Kubernetes API server itself accepts the partial
+# Server-Side Apply patch and successfully updates and owns the allowlisted fields.
+# We filter out this benign client-side migration noise to keep output clear.
+#
 # Usage: apply_kube_yaml <label> <yaml>
 apply_kube_yaml() {
-    local label="$1" yaml="$2" out
+    local label="$1" yaml="$2" out rc=0
     if yaml_is_empty "$yaml"; then
         echo "  Skipping ${label} — not present in the backup"
         return 2
@@ -717,29 +764,46 @@ apply_kube_yaml() {
         echo "  [dry-run] Would apply ${label}"
         return 2
     fi
-    if ! out=$(printf '%s\n' "$yaml" | oc apply --server-side --field-manager="${KUBE_SYNC_FIELD_MANAGER}" --force-conflicts -f - 2>&1); then
+    out=$(printf '%s\n' "$yaml" | oc apply --server-side --field-manager="${KUBE_SYNC_FIELD_MANAGER}" --force-conflicts -f - 2>&1) || rc=$?
+    if [[ $rc -ne 0 ]]; then
         installation_error "Failed to apply ${label}: $(printf '%s' "$out" | head -c 300)"
         return 1
     fi
+
+    # Filter out known non-fatal client-side SSA migration warnings for partial manifests
+    out=$(printf '%s\n' "$out" | \
+        grep -v "failed to re-apply configuration after performing Server-Side Apply migration" | \
+        grep -v -E "is invalid: \[.*Required value" | \
+        sed '/^[[:space:]]*$/d')
+
     echo "  Applied ${label}: ${out}"
 }
 
-# True when two yaml documents are identical once keys are sorted.
+# Normalizes YAML documents by sorting keys recursively and sorting object sequences by .name.
+# Usage: normalize_yaml <yaml string>
+normalize_yaml() {
+    printf '%s\n' "$1" | yq -P '
+      sort_keys(..) |
+      (.. | select(tag == "!!seq" and length > 0 and (.[0] | (tag == "!!map" and has("name"))))) |= sort_by(.name)
+    '
+}
+
+# True when two yaml documents are identical once keys and keyed lists are normalized.
 # Usage: yaml_equal <yaml a> <yaml b>
 yaml_equal() {
     local a b
-    a=$(printf '%s\n' "$1" | yq -P 'sort_keys(..)') || return 1
-    b=$(printf '%s\n' "$2" | yq -P 'sort_keys(..)') || return 1
+    a=$(normalize_yaml "$1") || return 1
+    b=$(normalize_yaml "$2") || return 1
     [[ "$a" == "$b" ]]
 }
 
-# Prints a unified diff of two yaml documents (keys sorted so only real changes show).
+# Prints a unified diff of two yaml documents (keys and keyed lists sorted so only real changes show).
 # Usage: diff_yaml <current yaml> <new yaml>
 diff_yaml() {
     local a b rc=0
     a=$(mktemp); b=$(mktemp)
-    printf '%s\n' "$1" | yq -P 'sort_keys(..)' > "$a"
-    printf '%s\n' "$2" | yq -P 'sort_keys(..)' > "$b"
+    normalize_yaml "$1" > "$a"
+    normalize_yaml "$2" > "$b"
     diff -u -L "cluster (before)" -L "restored (after)" "$a" "$b" || rc=$?
     rm -f "$a" "$b"
     if [[ $rc -eq 0 ]]; then

@@ -1530,6 +1530,7 @@ restore_installation() {
     # Project the target's current Installation through the same allow list so only the managed fields are compared
     current_projected=$(transform_installation "$target_installation" "$target_installation" "$ns") || return 0
     echo "  Installation changes (allow listed fields only):"
+    echo "  (Note: Fields present on the target cluster but omitted in the backup are preserved and will not be deleted for safety)"
     diff_yaml "$current_projected" "$new_installation" | sed 's/^/    /'
 
     # --- APPLY ---
