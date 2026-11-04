@@ -24,6 +24,7 @@
 #   - Training definitions
 #   - User preferences  (via PUT /user-preferences/me/keys/{key} — one PUT per preference key)
 #   - Views
+#   - Installation   (Installation CR spec allow list + ConfigMaps, via server-side apply; needs oc and yq)
 #
 # Resources deliberately excluded from restore:
 #   - Alerts / Events / Incidents / Metering (runtime / operational data)
@@ -1423,6 +1424,114 @@ restore_user_preferences() {
 }
 
 # ============================================
+# Installation: Installation CR + ConfigMaps (Kubernetes resources)
+#
+# Unlike the other resources this uses oc / yq, not the REST APIs, and it updates
+# in place with server-side apply; nothing is deleted on the target.
+# Everything is read, verified and transformed BEFORE anything is applied, so an
+# error in those steps leaves the cluster untouched. Blockers (product version or
+# spec.size mismatch) stop the installation resource as a whole. An error only
+# skips this resource: it is logged, the other resources continue and the exit
+# code is not changed.
+#
+# PARTIAL APPLY: the applies are separate oc calls and are not atomic. If one fails
+# after an earlier one succeeded, the cluster is left partially updated (no rollback)
+# and the remaining applies are skipped. Re-running is safe because server-side
+# apply is idempotent. For a rollback point run "backup.sh --cluster backup" first.
+# ============================================
+# Usage: apply_installation_yaml <label> <yaml>   (returns 1 to stop the installation resource)
+apply_installation_yaml() {
+    local label="$1" yaml="$2" rc=0
+    if ! yaml_is_empty "$yaml" && [[ "$DRY_RUN" != "true" ]]; then
+        TOTAL_ATTEMPTED=$(( TOTAL_ATTEMPTED + 1 ))
+    fi
+    apply_kube_yaml "$label" "$yaml" || rc=$?
+    case "$rc" in
+        0) TOTAL_SUCCESS=$(( TOTAL_SUCCESS + 1 )) ;;
+        2) TOTAL_SKIPPED=$(( TOTAL_SKIPPED + 1 )) ;;
+        *) return 1 ;;
+    esac
+}
+
+# Reads a backup yaml file into the variable named by $2. The backup always writes all
+# six files (empty when the resource was optional and missing), so a missing file means
+# an incomplete backup.
+read_installation_backup_file() {
+    local file="$1" var="$2"
+    if [[ ! -f "${BACKUP_DIR}/${file}" ]]; then
+        installation_error "${file} is missing from the backup folder (incomplete backup)"
+        return 1
+    fi
+    printf -v "$var" '%s' "$(cat "${BACKUP_DIR}/${file}")"
+}
+
+restore_installation() {
+    echo "Restoring Installation resources..."
+    local ns="${CLUSTER_NAMESPACE}"
+    local source_installation source_product source_ncodl source_size_profile source_ui_config source_feature_flag
+    local target_installation target_product
+    local new_installation current_projected new_ncodl new_size_profile new_ui_config new_feature_flag
+
+    # --- VERIFICATION (nothing is changed) ---
+    installation_check_tools || return 0
+    load_installation_allowlist || return 0
+
+    target_installation=$(get_installation_cr "$ns") || return 0
+    if yaml_is_empty "$target_installation"; then
+        installation_error "The target cluster's Installation could not be found"
+        return 0
+    fi
+    target_product=$(get_configmap "$ns" "product-configmap") || return 0
+    if yaml_is_empty "$target_product"; then
+        installation_error "The target cluster's product ConfigMap could not be found"
+        return 0
+    fi
+
+    read_installation_backup_file "${INSTALLATION_PRODUCT_FILE}" source_product || return 0
+    if yaml_is_empty "$source_product"; then
+        installation_error "The backup's product ConfigMap is missing"
+        return 0
+    fi
+    read_installation_backup_file "${INSTALLATION_FILE}" source_installation || return 0
+    if yaml_is_empty "$source_installation"; then
+        installation_error "The backup's Installation is missing"
+        return 0
+    fi
+
+    # Blockers: these stop the installation resource only (not filters, views, and so on)
+    is_product_version_compatible "$source_product" "$target_product" || return 0
+    is_installation_compatible "$source_installation" "$target_installation" || return 0
+
+    # --- LOAD the ConfigMaps from the backup ---
+    read_installation_backup_file "${INSTALLATION_NCODL_FILE}" source_ncodl || return 0
+    read_installation_backup_file "${INSTALLATION_SIZE_PROFILE_FILE}" source_size_profile || return 0
+    read_installation_backup_file "${INSTALLATION_UI_CONFIG_FILE}" source_ui_config || return 0
+    read_installation_backup_file "${INSTALLATION_FEATURE_FLAG_FILE}" source_feature_flag || return 0
+
+    # --- TRANSFORMATION ---
+    new_installation=$(transform_installation "$source_installation" "$target_installation" "$ns") || return 0
+    new_ncodl=$(transform_configmap "$ns" "$source_ncodl") || return 0
+    new_size_profile=$(transform_configmap "$ns" "$source_size_profile") || return 0
+    new_ui_config=$(transform_configmap "$ns" "$source_ui_config") || return 0
+    new_feature_flag=$(transform_configmap "$ns" "$source_feature_flag") || return 0
+
+    # --- DIFF FOR LOGS ---
+    # Project the target's current Installation through the same allow list so only the managed fields are compared
+    current_projected=$(transform_installation "$target_installation" "$target_installation" "$ns") || return 0
+    echo "  Installation changes (allow listed fields only):"
+    diff_yaml "$current_projected" "$new_installation" | sed 's/^/    /'
+
+    # --- APPLY ---
+    # The Custom Properties ConfigMap is applied first because the Installation refers to it
+    apply_installation_yaml "ConfigMap (Custom Properties)" "$new_ncodl" || return 0
+    apply_installation_yaml "Installation" "$new_installation" || return 0
+    # These do not depend on the Installation. If the Installation apply failed they are not attempted
+    apply_installation_yaml "ConfigMap aiops-custom-size-profile" "$new_size_profile" || return 0
+    apply_installation_yaml "ConfigMap aiops-ui-configurations" "$new_ui_config" || return 0
+    apply_installation_yaml "ConfigMap feature-flag-configmap" "$new_feature_flag" || return 0
+}
+
+# ============================================
 # Run the selected resources, in registry order
 # ============================================
 # A resource is "in the backup" when it appears in backup-metadata.json
@@ -1462,6 +1571,7 @@ for resource_id in ${ALL_RESOURCES}; do
         training-definitions) restore_items "Training definitions" "/aiops/api/v2/configuration/training-definitions" "training-definitions.json" ;;
         user-preferences)     restore_user_preferences ;;
         views)                restore_items "Views" "/aiops/api/v2/configuration/views" "views.json" ;;
+        installation)         restore_installation ;;
     esac
 done
 

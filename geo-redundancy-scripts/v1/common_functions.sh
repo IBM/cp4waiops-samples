@@ -281,12 +281,23 @@ login_and_get_token() {
 # backup.sh and a restore step to restore.sh.
 # Plain strings and case statements are used (no associative arrays) so the
 # scripts keep working with bash 3.2 (the macOS default).
-ALL_RESOURCES="algorithms connections filters menus tools policies runbooks actions topology training-definitions user-preferences views"
+ALL_RESOURCES="algorithms connections filters menus tools policies runbooks actions topology training-definitions user-preferences views installation"
 
 # Resources restored when --include / --exclude are not given. Resources known
 # not to restore reliably in 5.4.0 (algorithms, training definitions, user
 # preferences) are left out; they can still be restored with --include.
-RESTORE_DEFAULT_RESOURCES="connections filters menus tools policies runbooks actions topology views"
+RESTORE_DEFAULT_RESOURCES="connections filters menus tools policies runbooks actions topology views installation"
+
+# Files that make up the "installation" resource (Kubernetes resources saved as yaml).
+# The names are fixed, even if the Installation CR or the Custom Properties ConfigMap
+# have a different name on the cluster. An optional ConfigMap that does not exist is
+# saved as an empty file, so a missing file always means an incomplete backup.
+INSTALLATION_FILE="installation.yaml"
+INSTALLATION_NCODL_FILE="ncodl-properties.yaml"
+INSTALLATION_SIZE_PROFILE_FILE="aiops-custom-size-profile.yaml"
+INSTALLATION_UI_CONFIG_FILE="aiops-ui-configurations.yaml"
+INSTALLATION_FEATURE_FLAG_FILE="feature-flag-configmap.yaml"
+INSTALLATION_PRODUCT_FILE="product-configmap.yaml"
 
 # Usage: resource_description <id>
 resource_description() {
@@ -303,6 +314,7 @@ resource_description() {
         training-definitions) echo "Training definitions" ;;
         user-preferences)     echo "User preferences" ;;
         views)                echo "Views" ;;
+        installation)         echo "Installation CR and ConfigMaps (Kubernetes resources)" ;;
         *)                    echo "" ;;
     esac
 }
@@ -313,6 +325,7 @@ resource_files() {
     case "$1" in
         connections) echo "connections.json connections-internal.json connections-runbooks.json" ;;
         topology)    echo "topology.json" ;;
+        installation) echo "${INSTALLATION_FILE} ${INSTALLATION_NCODL_FILE} ${INSTALLATION_SIZE_PROFILE_FILE} ${INSTALLATION_UI_CONFIG_FILE} ${INSTALLATION_FEATURE_FLAG_FILE} ${INSTALLATION_PRODUCT_FILE}" ;;
         *)           echo "$1.json" ;;
     esac
 }
@@ -456,5 +469,260 @@ resolve_resource_selection() {
         return 2
     fi
     SELECTED_RESOURCES="$selected"
+    return 0
+}
+
+# ============================================
+# Installation resource (Kubernetes resources, synced with oc / yq)
+# ============================================
+# Shared by backup.sh (backup_installation) and restore.sh (restore_installation).
+# See kube-syncing.md for the design. In short:
+#   - backup saves the Installation CR and its ConfigMaps as yaml, unvalidated
+#   - restore applies only the Installation spec fields on the allow list, and the
+#     ConfigMap data, with server-side apply. Nothing is ever deleted on the target
+#
+# Errors: every helper that can fail prints "  ERROR: <message>" to stderr and returns 1.
+# The caller (backup_installation / restore_installation) stops processing the
+# installation resource only, so the other resources continue and the exit code is
+# not changed (as with the other resources, failures are only logged).
+
+INSTALLATION_CRD="installations.orchestrator.aiops.ibm.com"
+KUBE_SYNC_FIELD_MANAGER="backup-restore-sync"
+
+# A customer allowlist entry that is not in this list is rejected.
+SUPPORTED_INSTALLATION_SPEC_FIELDS=(
+    "spec.license"
+    "spec.topologyModel"
+    "spec.enableConnectionModule"
+    "spec.groupProfiles"
+    "spec.monitoring"
+    "spec.pakModules"
+    "spec.automationFoundation"
+    "spec.resourceOverrides"
+    "spec.customPropertiesConfigMap"
+    "spec.size"
+    "spec.storageClass"
+    "spec.storageClassLargeBlock"
+    "spec.storage"
+    "spec.zones"
+    "spec.multiCluster"
+    "spec.proxyServer"
+    "spec.imagePullSecret"
+)
+
+# Used when INSTALLATION_SPEC_ALLOWLIST is not defined in geo_config.env.
+DEFAULT_INSTALLATION_SPEC_ALLOWLIST=(
+    "spec.license"
+    "spec.topologyModel"
+    "spec.enableConnectionModule"
+    "spec.groupProfiles"
+    "spec.monitoring"
+    "spec.pakModules"
+    "spec.automationFoundation"
+    "spec.resourceOverrides"
+    "spec.customPropertiesConfigMap"
+)
+
+installation_error() {
+    echo "  ERROR: $*" >&2
+}
+
+# Usage: yaml_is_empty <yaml string>   (true for an empty or whitespace-only string)
+# A regex match is used on purpose: "${1//[[:space:]]/}" is quadratic on bash 3.2 and hangs on large yaml.
+yaml_is_empty() {
+    [[ ! "$1" =~ [^[:space:]] ]]
+}
+
+# Usage: yaml_get <yaml string> <yq expression>
+yaml_get() {
+    printf '%s\n' "$1" | yq "$2"
+}
+
+# Checks oc, jq and the mikefarah yq (v4) are available.
+installation_check_tools() {
+    local tool
+    for tool in oc jq yq; do
+        if ! command -v "$tool" >/dev/null 2>&1; then
+            installation_error "'${tool}' is required for the installation resource but was not found on the PATH"
+            return 1
+        fi
+    done
+    if ! yq --version 2>&1 | grep -q "mikefarah"; then
+        installation_error "The installation resource requires yq v4 from https://github.com/mikefarah/yq"
+        return 1
+    fi
+}
+
+# Prints the Installation CR yaml (the first item), nothing if the namespace has none.
+# Usage: get_installation_cr <namespace>
+get_installation_cr() {
+    local ns="$1" raw
+    # The Installation name is dynamic and only one exists per namespace
+    if ! raw=$(oc get "${INSTALLATION_CRD}" -n "${ns}" -o yaml 2>&1); then
+        installation_error "Could not read the Installation in namespace ${ns}: $(printf '%s' "$raw" | head -c 300)"
+        return 1
+    fi
+    if ! yaml_get "$raw" '(.items // [])[0] // ""'; then
+        installation_error "Could not parse the Installation returned by the cluster"
+        return 1
+    fi
+}
+
+# Prints the ConfigMap yaml, nothing if it does not exist.
+# Usage: get_configmap <namespace> <name>
+get_configmap() {
+    local ns="$1" name="$2" raw
+    if ! raw=$(oc get configmap "${name}" -n "${ns}" --ignore-not-found -o yaml 2>&1); then
+        installation_error "Could not read ConfigMap ${name} in namespace ${ns}: $(printf '%s' "$raw" | head -c 300)"
+        return 1
+    fi
+    printf '%s\n' "$raw"
+}
+
+# Prints the name of the Custom Properties ConfigMap referenced by the Installation, nothing if not configured.
+# Usage: get_properties_configmap_name <installation yaml>
+get_properties_configmap_name() {
+    if ! yaml_get "$1" '[.spec.pakModules[]?.config[]? | select(.name == "ir-core-operator") | .spec.issueresolutioncore.ncodl.propertiesConfigMapName][0] // ""'; then
+        installation_error "Could not read the Custom Properties ConfigMap name from the Installation"
+        return 1
+    fi
+}
+
+# Sets INSTALLATION_ALLOWLIST (array) from geo_config.env or the default list.
+# Call after load_geo_config.
+load_installation_allowlist() {
+    local field
+    INSTALLATION_ALLOWLIST=()
+
+    if ! declare -p INSTALLATION_SPEC_ALLOWLIST >/dev/null 2>&1; then
+        INSTALLATION_ALLOWLIST=("${DEFAULT_INSTALLATION_SPEC_ALLOWLIST[@]}")
+        return 0
+    fi
+    if [[ ${#INSTALLATION_SPEC_ALLOWLIST[@]} -eq 0 ]]; then
+        installation_error "INSTALLATION_SPEC_ALLOWLIST is empty. Add at least one field or remove the property to use the default list"
+        return 1
+    fi
+    for field in "${INSTALLATION_SPEC_ALLOWLIST[@]}"; do
+        if ! resource_in_list "$field" "${SUPPORTED_INSTALLATION_SPEC_FIELDS[*]}"; then
+            installation_error "Unsupported field ${field} found in INSTALLATION_SPEC_ALLOWLIST"
+            return 1
+        fi
+    done
+    INSTALLATION_ALLOWLIST=("${INSTALLATION_SPEC_ALLOWLIST[@]}")
+}
+
+# The product versions of both clusters must match exactly (for example 5.3.0 vs 5.3.1 is not compatible).
+# Usage: is_product_version_compatible <source product-configmap yaml> <target product-configmap yaml>
+is_product_version_compatible() {
+    local source_version target_version
+    source_version=$(yaml_get "$1" '.data.PRODUCT_VERSION // ""') || { installation_error "Could not parse the product ConfigMap"; return 1; }
+    target_version=$(yaml_get "$2" '.data.PRODUCT_VERSION // ""') || { installation_error "Could not parse the product ConfigMap"; return 1; }
+    if [[ -z "$source_version" || -z "$target_version" ]]; then
+        installation_error "PRODUCT_VERSION could not be read from the product ConfigMap"
+        return 1
+    fi
+    if [[ "$source_version" != "$target_version" ]]; then
+        installation_error "Product versions are incompatible (backup: ${source_version}, cluster: ${target_version})"
+        return 1
+    fi
+}
+
+# The sizes must match: the size cannot change after install and the target needs enough resources.
+# Usage: is_installation_compatible <source installation yaml> <target installation yaml>
+is_installation_compatible() {
+    local source_size target_size
+    source_size=$(yaml_get "$1" '.spec.size // ""') || { installation_error "Could not parse the Installation"; return 1; }
+    target_size=$(yaml_get "$2" '.spec.size // ""') || { installation_error "Could not parse the Installation"; return 1; }
+    if [[ -z "$source_size" || -z "$target_size" ]]; then
+        installation_error "spec.size could not be read from the Installation"
+        return 1
+    fi
+    if [[ "$source_size" != "$target_size" ]]; then
+        installation_error "Size mismatch detected and are incompatible (backup: ${source_size}, cluster: ${target_size})"
+        return 1
+    fi
+}
+
+# Builds the Installation to apply to the target: only metadata.name/namespace, apiVersion, kind and the
+# allow listed spec fields. Each allow listed field is copied as a whole block. A field that does not exist
+# in the source is fine. Uses INSTALLATION_ALLOWLIST.
+# Usage: transform_installation <source installation yaml> <target installation yaml> <target namespace>
+transform_installation() {
+    local source_yaml="$1" target_yaml="$2" ns="$3"
+    local target_name api_version kind allow_json
+
+    target_name=$(yaml_get "$target_yaml" '.metadata.name // ""') || { installation_error "Could not parse the Installation"; return 1; }
+    api_version=$(yaml_get "$source_yaml" '.apiVersion // ""') || { installation_error "Could not parse the Installation"; return 1; }
+    kind=$(yaml_get "$source_yaml" '.kind // ""') || { installation_error "Could not parse the Installation"; return 1; }
+    if [[ -z "$target_name" || -z "$api_version" || -z "$kind" ]]; then
+        installation_error "The Installation yaml is missing a required field"
+        return 1
+    fi
+
+    # "spec.license" -> "license"; the allow list holds top level spec fields
+    allow_json=$(printf '%s\n' "${INSTALLATION_ALLOWLIST[@]}" | sed 's/^spec\.//' | jq -R . | jq -sc .)
+
+    # The target's own name is used (it can differ between clusters)
+    printf '%s\n' "$source_yaml" | yq -o=json '.' | jq \
+        --arg name "$target_name" --arg ns "$ns" --arg apiVersion "$api_version" --arg kind "$kind" \
+        --argjson allow "$allow_json" \
+        '{apiVersion: $apiVersion, kind: $kind, metadata: {name: $name, namespace: $ns},
+          spec: ((.spec // {}) | with_entries(select(.key as $k | $allow | index($k) != null)))}' \
+        | yq -p=json -o=yaml '.' || { installation_error "Could not transform the Installation"; return 1; }
+}
+
+# Builds the ConfigMap to apply to the target: name, namespace, apiVersion, kind and data.
+# An empty input (the ConfigMap did not exist at the source) prints nothing, so it is not applied
+# and the target's ConfigMap is left as is.
+# Usage: transform_configmap <target namespace> <configmap yaml>
+transform_configmap() {
+    local ns="$1" cm_yaml="$2" name api_version kind
+    if yaml_is_empty "$cm_yaml"; then
+        return 0
+    fi
+    name=$(yaml_get "$cm_yaml" '.metadata.name // ""') || { installation_error "Could not parse the ConfigMap"; return 1; }
+    api_version=$(yaml_get "$cm_yaml" '.apiVersion // ""') || { installation_error "Could not parse the ConfigMap"; return 1; }
+    kind=$(yaml_get "$cm_yaml" '.kind // ""') || { installation_error "Could not parse the ConfigMap"; return 1; }
+    if [[ -z "$name" || -z "$api_version" || -z "$kind" ]]; then
+        installation_error "The ConfigMap yaml is missing a required field"
+        return 1
+    fi
+    printf '%s\n' "$cm_yaml" | NS="$ns" yq \
+        '{"apiVersion": .apiVersion, "kind": .kind, "metadata": {"name": .metadata.name, "namespace": strenv(NS)}, "data": (.data // {})}' \
+        || { installation_error "Could not transform the ConfigMap"; return 1; }
+}
+
+# Server-side apply of one yaml document to the cluster oc is logged in to.
+# Returns 0 on success, 2 if the yaml is empty (skipped), 1 on error. Honors DRY_RUN (restore.sh).
+# Usage: apply_kube_yaml <label> <yaml>
+apply_kube_yaml() {
+    local label="$1" yaml="$2" out
+    if yaml_is_empty "$yaml"; then
+        echo "  Skipping ${label} — not present in the backup"
+        return 2
+    fi
+    if [[ "${DRY_RUN:-false}" == "true" ]]; then
+        echo "  [dry-run] Would apply ${label}"
+        return 2
+    fi
+    if ! out=$(printf '%s\n' "$yaml" | oc apply --server-side --field-manager="${KUBE_SYNC_FIELD_MANAGER}" --force-conflicts -f - 2>&1); then
+        installation_error "Failed to apply ${label}: $(printf '%s' "$out" | head -c 300)"
+        return 1
+    fi
+    echo "  Applied ${label}: ${out}"
+}
+
+# Prints a unified diff of two yaml documents (keys sorted so only real changes show).
+# Usage: diff_yaml <current yaml> <new yaml>
+diff_yaml() {
+    local a b rc=0
+    a=$(mktemp); b=$(mktemp)
+    printf '%s\n' "$1" | yq -P 'sort_keys(..)' > "$a"
+    printf '%s\n' "$2" | yq -P 'sort_keys(..)' > "$b"
+    diff -u -L "cluster (before)" -L "restored (after)" "$a" "$b" || rc=$?
+    rm -f "$a" "$b"
+    if [[ $rc -eq 0 ]]; then
+        echo "  (no changes to the allow listed Installation fields)"
+    fi
     return 0
 }

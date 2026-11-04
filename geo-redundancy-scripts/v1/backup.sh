@@ -23,6 +23,7 @@
 #   - Training definitions
 #   - User preferences
 #   - Views
+#   - Installation (Installation CR and its ConfigMaps, saved as yaml; needs oc and yq)
 #
 # Resources deliberately excluded:
 #   - Alerts     (runtime operational data)
@@ -761,6 +762,81 @@ backup_topology() {
     fi
 }
 
+backup_installation() {
+    # Kubernetes resources, read with oc. Nothing is validated here; restore.sh does that.
+    # Everything is collected first and the files are written at the end, so an error
+    # leaves no installation files behind (and it is not listed in backup-metadata.json).
+    # An error only skips this resource; the other resources continue.
+    echo "Exporting Installation resources..."
+
+    local ns="${CLUSTER_NAMESPACE}"
+    local installation_yaml product_yaml size_profile_yaml ui_config_yaml feature_flag_yaml
+    local ncodl_name ncodl_yaml=""
+
+    if ! installation_check_tools; then
+        SKIPPED_RESOURCES+=("Installation (missing tool)")
+        return 0
+    fi
+
+    installation_yaml=$(get_installation_cr "$ns") || { SKIPPED_RESOURCES+=("Installation (read failed)"); return 0; }
+    if yaml_is_empty "$installation_yaml"; then
+        installation_error "The Installation could not be found"
+        SKIPPED_RESOURCES+=("Installation (not found)")
+        return 0
+    fi
+
+    product_yaml=$(get_configmap "$ns" "product-configmap") || { SKIPPED_RESOURCES+=("Installation (read failed)"); return 0; }
+    if yaml_is_empty "$product_yaml"; then
+        installation_error "The product ConfigMap could not be found"
+        SKIPPED_RESOURCES+=("Installation (product ConfigMap not found)")
+        return 0
+    fi
+
+    # These ConfigMaps are optional: not found is allowed (saved as an empty file), an error is not
+    size_profile_yaml=$(get_configmap "$ns" "aiops-custom-size-profile") || { SKIPPED_RESOURCES+=("Installation (read failed)"); return 0; }
+    ui_config_yaml=$(get_configmap "$ns" "aiops-ui-configurations") || { SKIPPED_RESOURCES+=("Installation (read failed)"); return 0; }
+    feature_flag_yaml=$(get_configmap "$ns" "feature-flag-configmap") || { SKIPPED_RESOURCES+=("Installation (read failed)"); return 0; }
+
+    ncodl_name=$(get_properties_configmap_name "$installation_yaml") || { SKIPPED_RESOURCES+=("Installation (read failed)"); return 0; }
+    if [[ -n "$ncodl_name" ]]; then
+        ncodl_yaml=$(get_configmap "$ns" "$ncodl_name") || { SKIPPED_RESOURCES+=("Installation (read failed)"); return 0; }
+        # The Installation points at this ConfigMap, so it must exist or the restored Installation would break
+        if yaml_is_empty "$ncodl_yaml"; then
+            installation_error "The ConfigMap ${ncodl_name} is missing"
+            SKIPPED_RESOURCES+=("Installation (ConfigMap ${ncodl_name} missing)")
+            return 0
+        fi
+    fi
+
+    # Hard coded file names. Optional files that have no content are still written (empty)
+    local file content
+    for file in \
+        "${INSTALLATION_FILE}" "${INSTALLATION_NCODL_FILE}" "${INSTALLATION_SIZE_PROFILE_FILE}" \
+        "${INSTALLATION_UI_CONFIG_FILE}" "${INSTALLATION_FEATURE_FLAG_FILE}" "${INSTALLATION_PRODUCT_FILE}"; do
+        case "$file" in
+            "${INSTALLATION_FILE}")              content="$installation_yaml" ;;
+            "${INSTALLATION_NCODL_FILE}")        content="$ncodl_yaml" ;;
+            "${INSTALLATION_SIZE_PROFILE_FILE}") content="$size_profile_yaml" ;;
+            "${INSTALLATION_UI_CONFIG_FILE}")    content="$ui_config_yaml" ;;
+            "${INSTALLATION_FEATURE_FLAG_FILE}") content="$feature_flag_yaml" ;;
+            *)                                   content="$product_yaml" ;;
+        esac
+        if yaml_is_empty "$content"; then
+            : > "${OUTPUT_DIR}/${file}" || true
+        else
+            printf '%s\n' "$content" > "${OUTPUT_DIR}/${file}" || true
+        fi
+        if [[ ! -f "${OUTPUT_DIR}/${file}" ]]; then
+            installation_error "Could not write ${file} to the backup folder"
+            local cleanup_file
+            for cleanup_file in $(resource_files installation); do rm -f "${OUTPUT_DIR}/${cleanup_file}"; done
+            SKIPPED_RESOURCES+=("Installation (write failed)")
+            return 0
+        fi
+    done
+    echo "  OK → $(resource_files installation | tr ' ' ',' | sed 's/,/, /g')"
+}
+
 # ============================================
 # Run the selected resource exports
 # ============================================
@@ -809,8 +885,10 @@ echo "============================================"
 echo " Source cluster  : ${SOURCE_CLUSTER}"
 echo " Output directory: ${OUTPUT_DIR}"
 echo " Files created:"
-for f in "${OUTPUT_DIR}"/*.json; do
-    echo "   $(basename "${f}")"
+for f in "${OUTPUT_DIR}"/*.json "${OUTPUT_DIR}"/*.yaml; do
+    if [[ -f "${f}" ]]; then
+        echo "   $(basename "${f}")"
+    fi
 done
 if [[ ${#SKIPPED_RESOURCES[@]} -gt 0 ]]; then
     echo ""
