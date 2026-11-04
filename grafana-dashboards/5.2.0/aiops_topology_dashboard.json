@@ -106,8 +106,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "The 5 lowest uptimes within the component pods. Pod restarts can impact functionality, review the pod table and uptime graph for more details.",
           "fieldConfig": {
@@ -171,8 +170,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "time() -topk(5, sum(kube_pod_start_time{pod=~\".*-topology-.*\", pod!~\".*file-observer.*\", pod!~\".*kubernetes-observer.*\", pod!~\".*observer.*\",pod!~\".*api.*\", pod!~\".*aiopsedge.*\", pod!~\".*job.*\", pod!~\".*schema.*\"}) by (pod))",
@@ -186,8 +184,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "fieldConfig": {
             "defaults": {
@@ -231,8 +228,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "kube_pod_status_phase{pod=~\".*-topology-.*\", pod!~\".*file-observer.*\", pod!~\".*kubernetes-observer.*\", pod!~\".*observer.*\",pod!~\".*api.*\", pod!~\".*aiopsedge.*\", pod!~\".*job.*\", pod!~\".*schema.*\", phase=~\"Running|Pending|Unknown\"} == 1",
@@ -286,8 +282,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "fieldConfig": {
             "defaults": {
@@ -368,8 +363,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "time() -sum(kube_pod_start_time{pod=~\".*-topology-.*\", pod!~\".*file-observer.*\", pod!~\".*kubernetes-observer.*\", pod!~\".*observer.*\",pod!~\".*api.*\", pod!~\".*aiopsedge.*\", pod!~\".*job.*\", pod!~\".*schema.*\"}) by (pod)",
@@ -397,8 +391,7 @@
       "panels": [
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Count of pods that have exceeded 80% of their CPU limits within the time range. This will result in CPU throttling and potentially temporary loss of functionality\n\nThis will only compare against the ***current*** CPU limit of each pod. If the limits were updated within the time range, the count may be inaccurate.",
           "fieldConfig": {
@@ -492,8 +485,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum((((max(kube_pod_container_resource_limits{pod=~\".*-topology-.*\", pod!~\".*file-observer.*\", pod!~\".*kubernetes-observer.*\", pod!~\".*observer.*\",pod!~\".*api.*\", pod!~\".*aiopsedge.*\", pod!~\".*job.*\", pod!~\".*schema.*\", container!=\"\", container!=\"POD\", resource=\"cpu\"}) by (pod)) * 0.8 <= max(max_over_time(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{pod=~\".*-topology-.*\", pod!~\".*file-observer.*\", pod!~\".*kubernetes-observer.*\", pod!~\".*observer.*\",pod!~\".*api.*\", pod!~\".*aiopsedge.*\", pod!~\".*job.*\", pod!~\".*schema.*\", container!=\"\", container!=\"POD\"}[$__range])) by (pod)) or vector(0)) > bool 0)",
@@ -507,8 +499,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Count of pods that have exceeded 80% of their memory limits within the time range.\n\nThis will only compare against the ***current*** memory limit of each pod. If the limits were updated within the time range, the count may be inaccurate.",
           "fieldConfig": {
@@ -602,8 +593,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum((((max(kube_pod_container_resource_limits{pod=~\".*-topology-.*\", pod!~\".*file-observer.*\", pod!~\".*kubernetes-observer.*\", pod!~\".*observer.*\",pod!~\".*api.*\", pod!~\".*aiopsedge.*\", pod!~\".*job.*\", pod!~\".*schema.*\", container!=\"\", container!=\"POD\", resource=\"memory\"}) by (pod)) * 0.8 <= max(max_over_time(container_memory_working_set_bytes{pod=~\".*-topology-.*\", pod!~\".*file-observer.*\", pod!~\".*kubernetes-observer.*\", pod!~\".*observer.*\",pod!~\".*api.*\", pod!~\".*aiopsedge.*\", pod!~\".*job.*\", pod!~\".*schema.*\", container!=\"\", container!=\"POD\"}[$__range])) by (pod)) or vector(0)) > bool 0)",
@@ -617,8 +607,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Count of pods that have exceeded their CPU limits within the time range. This will result in CPU throttling and potentially temporary loss of functionality.\n\nThis will only compare against the ***current*** CPU limit of each pod. If the limits were updated within the time range, the count may be inaccurate.",
           "fieldConfig": {
@@ -712,8 +701,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum((((max(kube_pod_container_resource_limits{pod=~\".*-topology-.*\", pod!~\".*file-observer.*\", pod!~\".*kubernetes-observer.*\", pod!~\".*observer.*\",pod!~\".*api.*\", pod!~\".*aiopsedge.*\", pod!~\".*job.*\", pod!~\".*schema.*\", container!=\"\", container!=\"POD\", resource=\"cpu\"}) by (pod)) <= max(max_over_time(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{pod=~\".*-topology-.*\", pod!~\".*file-observer.*\", pod!~\".*kubernetes-observer.*\", pod!~\".*observer.*\",pod!~\".*api.*\", pod!~\".*aiopsedge.*\", pod!~\".*job.*\", pod!~\".*schema.*\", container!=\"\", container!=\"POD\"}[$__range])) by (pod)) or vector(0)) > bool 0)",
@@ -727,8 +715,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Count of component pods that have exceeded their memory limits within the time range.\n\nThis will only compare against the ***current*** memory limit of each pod. If the limits were updated within the time range, the count may be inaccurate.",
           "fieldConfig": {
@@ -821,8 +808,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum((((max(kube_pod_container_resource_limits{pod=~\".*-topology-.*\", pod!~\".*file-observer.*\", pod!~\".*kubernetes-observer.*\", pod!~\".*observer.*\",pod!~\".*api.*\", pod!~\".*aiopsedge.*\", pod!~\".*job.*\", resource=\"memory\"}) by (pod)) <= max(max_over_time(container_memory_working_set_bytes{pod=~\".*-topology-.*\", pod!~\".*file-observer.*\", pod!~\".*kubernetes-observer.*\", pod!~\".*observer.*\",pod!~\".*api.*\", pod!~\".*aiopsedge.*\", pod!~\".*job.*\", container!=\"\", container!=\"POD\"}[$__range])) by (pod)) or vector(0)) > bool 0)",
@@ -2554,8 +2540,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "fieldConfig": {
             "defaults": {
@@ -2601,8 +2586,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "disableTextWrap": false,
               "editorMode": "code",
@@ -2668,8 +2652,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Pod Uptimes for Policy Automation dependency pods",
           "fieldConfig": {
@@ -2751,8 +2734,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "time() -sum(kube_pod_start_time{pod=~\".*topology-postgres.*|iaf-system-kafka.*\", pod!~\".*job.*\"}) by (pod)",
@@ -2766,8 +2748,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Count of pods that have exceeded 80% of their CPU limits within the time range. This will result in CPU throttling and potentially temporary loss of functionality\n\nThis will only compare against the ***current*** CPU limit of each pod. If the limits were updated within the time range, the count may be inaccurate.",
           "fieldConfig": {
@@ -2861,8 +2842,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum((((max(kube_pod_container_resource_limits{pod=~\".*topology-postgres.*|iaf-system-kafka.*\", pod!~\".*job.*\", container!=\"\", container!=\"POD\", resource=\"cpu\"}) by (pod)) * 0.8 <= max(max_over_time(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{pod=~\".*topology-postgres.*|iaf-system-kafka.*\", pod!~\".*job.*\", container!=\"\", container!=\"POD\"}[$__range])) by (pod)) or vector(0)) > bool 0)",
@@ -2876,8 +2856,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Count of pods that have exceeded 80% of their memory limits within the time range.\n\nThis will only compare against the ***current*** memory limit of each pod. If the limits were updated within the time range, the count may be inaccurate.",
           "fieldConfig": {
@@ -2971,8 +2950,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum((((max(kube_pod_container_resource_limits{pod=~\".*topology-postgres.*|iaf-system-kafka.*\", pod!~\".*job.*\", container!=\"\", container!=\"POD\", resource=\"memory\"}) by (pod)) * 0.8 <= max(max_over_time(container_memory_working_set_bytes{pod=~\".*topology-postgres.*|iaf-system-kafka.*\", pod!~\".*job.*\", container!=\"\", container!=\"POD\", container!=\"\", container!=\"POD\"}[$__range])) by (pod)) or vector(0)) > bool 0)",
@@ -2986,8 +2964,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Count of pods that have exceeded their CPU limits within the time range. This will result in CPU throttling and potentially temporary loss of functionality.\n\nThis will only compare against the ***current*** CPU limit of each pod. If the limits were updated within the time range, the count may be inaccurate.",
           "fieldConfig": {
@@ -3081,8 +3058,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum((((max(kube_pod_container_resource_limits{pod=~\".*topology-postgres.*|iaf-system-kafka.*\", pod!~\".*job.*\", container!=\"\", container!=\"POD\", resource=\"cpu\"}) by (pod)) <= max(max_over_time(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{pod=~\".*topology-postgres.*|iaf-system-kafka.*\", pod!~\".*job.*\", container!=\"\", container!=\"POD\"}[$__range])) by (pod)) or vector(0)) > bool 0)",
@@ -3096,8 +3072,7 @@
         },
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "name": "prometheus"
           },
           "description": "Count of component pods that have exceeded their memory limits within the time range.\n\nThis will only compare against the ***current*** memory limit of each pod. If the limits were updated within the time range, the count may be inaccurate.",
           "fieldConfig": {
@@ -3190,8 +3165,7 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "name": "prometheus"
               },
               "editorMode": "code",
               "expr": "sum((((max(kube_pod_container_resource_limits{pod=~\".*topology-postgres.*|iaf-system-kafka.*\", pod!~\".*job.*\", container!=\"\", container!=\"POD\", resource=\"memory\"}) by (pod)) <= max(max_over_time(container_memory_working_set_bytes{pod=~\".*topology-postgres.*|iaf-system-kafka.*\", pod!~\".*job.*\", container!=\"\", container!=\"POD\"}[$__range])) by (pod)) or vector(0)) > bool 0)",
