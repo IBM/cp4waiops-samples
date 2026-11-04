@@ -1471,6 +1471,7 @@ restore_installation() {
     local source_installation source_product source_ncodl source_size_profile source_ui_config source_feature_flag
     local target_installation target_product
     local new_installation current_projected new_ncodl new_size_profile new_ui_config new_feature_flag
+    local source_overrides new_overrides overrides_name
 
     # --- VERIFICATION (nothing is changed) ---
     installation_check_tools || return 0
@@ -1507,6 +1508,15 @@ restore_installation() {
     read_installation_backup_file "${INSTALLATION_SIZE_PROFILE_FILE}" source_size_profile || return 0
     read_installation_backup_file "${INSTALLATION_UI_CONFIG_FILE}" source_ui_config || return 0
     read_installation_backup_file "${INSTALLATION_FEATURE_FLAG_FILE}" source_feature_flag || return 0
+    read_installation_backup_file "${INSTALLATION_RESOURCE_OVERRIDES_FILE}" source_overrides || return 0
+
+    # spec.resourceOverrides is optional, but when the backed up Installation sets it the ConfigMap
+    # must be in the backup. Otherwise stop before anything is applied.
+    overrides_name=$(get_resource_overrides_configmap_name "$source_installation") || return 0
+    if [[ -n "$overrides_name" ]] && yaml_is_empty "$source_overrides"; then
+        installation_error "The ConfigMap ${overrides_name} referenced by spec.resourceOverrides is missing from the backup"
+        return 0
+    fi
 
     # --- TRANSFORMATION ---
     new_installation=$(transform_installation "$source_installation" "$target_installation" "$ns") || return 0
@@ -1514,6 +1524,7 @@ restore_installation() {
     new_size_profile=$(transform_configmap "$ns" "$source_size_profile") || return 0
     new_ui_config=$(transform_configmap "$ns" "$source_ui_config") || return 0
     new_feature_flag=$(transform_configmap "$ns" "$source_feature_flag") || return 0
+    new_overrides=$(transform_configmap "$ns" "$source_overrides") || return 0
 
     # --- DIFF FOR LOGS ---
     # Project the target's current Installation through the same allow list so only the managed fields are compared
@@ -1524,7 +1535,15 @@ restore_installation() {
     # --- APPLY ---
     # The Custom Properties ConfigMap is applied first because the Installation refers to it
     apply_installation_yaml "ConfigMap (Custom Properties)" "$new_ncodl" || return 0
-    apply_installation_yaml "Installation" "$new_installation" || return 0
+    # The resource overrides ConfigMap is also referenced by the Installation, so it goes before it
+    apply_installation_yaml "ConfigMap (Resource Overrides)" "$new_overrides" || return 0
+    # Nothing to change on the Installation: do not call the API at all
+    if yaml_equal "$current_projected" "$new_installation"; then
+        echo "  Skipping Installation — no changes to the allow listed fields"
+        TOTAL_SKIPPED=$(( TOTAL_SKIPPED + 1 ))
+    else
+        apply_installation_yaml "Installation" "$new_installation" || return 0
+    fi
     # These do not depend on the Installation. If the Installation apply failed they are not attempted
     apply_installation_yaml "ConfigMap aiops-custom-size-profile" "$new_size_profile" || return 0
     apply_installation_yaml "ConfigMap aiops-ui-configurations" "$new_ui_config" || return 0

@@ -772,6 +772,7 @@ backup_installation() {
     local ns="${CLUSTER_NAMESPACE}"
     local installation_yaml product_yaml size_profile_yaml ui_config_yaml feature_flag_yaml
     local ncodl_name ncodl_yaml=""
+    local overrides_name overrides_yaml=""
 
     if ! installation_check_tools; then
         SKIPPED_RESOURCES+=("Installation (missing tool)")
@@ -808,17 +809,30 @@ backup_installation() {
         fi
     fi
 
+    # spec.resourceOverrides is optional, but when set the ConfigMap it names must exist
+    overrides_name=$(get_resource_overrides_configmap_name "$installation_yaml") || { SKIPPED_RESOURCES+=("Installation (read failed)"); return 0; }
+    if [[ -n "$overrides_name" ]]; then
+        overrides_yaml=$(get_configmap "$ns" "$overrides_name") || { SKIPPED_RESOURCES+=("Installation (read failed)"); return 0; }
+        if yaml_is_empty "$overrides_yaml"; then
+            installation_error "The ConfigMap ${overrides_name} referenced by spec.resourceOverrides is missing"
+            SKIPPED_RESOURCES+=("Installation (ConfigMap ${overrides_name} missing)")
+            return 0
+        fi
+    fi
+
     # Hard coded file names. Optional files that have no content are still written (empty)
     local file content
     for file in \
         "${INSTALLATION_FILE}" "${INSTALLATION_NCODL_FILE}" "${INSTALLATION_SIZE_PROFILE_FILE}" \
-        "${INSTALLATION_UI_CONFIG_FILE}" "${INSTALLATION_FEATURE_FLAG_FILE}" "${INSTALLATION_PRODUCT_FILE}"; do
+        "${INSTALLATION_UI_CONFIG_FILE}" "${INSTALLATION_FEATURE_FLAG_FILE}" "${INSTALLATION_PRODUCT_FILE}" \
+        "${INSTALLATION_RESOURCE_OVERRIDES_FILE}"; do
         case "$file" in
             "${INSTALLATION_FILE}")              content="$installation_yaml" ;;
             "${INSTALLATION_NCODL_FILE}")        content="$ncodl_yaml" ;;
             "${INSTALLATION_SIZE_PROFILE_FILE}") content="$size_profile_yaml" ;;
             "${INSTALLATION_UI_CONFIG_FILE}")    content="$ui_config_yaml" ;;
             "${INSTALLATION_FEATURE_FLAG_FILE}") content="$feature_flag_yaml" ;;
+            "${INSTALLATION_RESOURCE_OVERRIDES_FILE}") content="$overrides_yaml" ;;
             *)                                   content="$product_yaml" ;;
         esac
         if yaml_is_empty "$content"; then

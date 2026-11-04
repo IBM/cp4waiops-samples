@@ -298,6 +298,8 @@ INSTALLATION_SIZE_PROFILE_FILE="aiops-custom-size-profile.yaml"
 INSTALLATION_UI_CONFIG_FILE="aiops-ui-configurations.yaml"
 INSTALLATION_FEATURE_FLAG_FILE="feature-flag-configmap.yaml"
 INSTALLATION_PRODUCT_FILE="product-configmap.yaml"
+# ConfigMap named by the optional Installation spec.resourceOverrides
+INSTALLATION_RESOURCE_OVERRIDES_FILE="resource-overrides.yaml"
 
 # Usage: resource_description <id>
 resource_description() {
@@ -325,7 +327,7 @@ resource_files() {
     case "$1" in
         connections) echo "connections.json connections-internal.json connections-runbooks.json" ;;
         topology)    echo "topology.json" ;;
-        installation) echo "${INSTALLATION_FILE} ${INSTALLATION_NCODL_FILE} ${INSTALLATION_SIZE_PROFILE_FILE} ${INSTALLATION_UI_CONFIG_FILE} ${INSTALLATION_FEATURE_FLAG_FILE} ${INSTALLATION_PRODUCT_FILE}" ;;
+        installation) echo "${INSTALLATION_FILE} ${INSTALLATION_NCODL_FILE} ${INSTALLATION_SIZE_PROFILE_FILE} ${INSTALLATION_UI_CONFIG_FILE} ${INSTALLATION_FEATURE_FLAG_FILE} ${INSTALLATION_PRODUCT_FILE} ${INSTALLATION_RESOURCE_OVERRIDES_FILE}" ;;
         *)           echo "$1.json" ;;
     esac
 }
@@ -490,6 +492,9 @@ INSTALLATION_CRD="installations.orchestrator.aiops.ibm.com"
 KUBE_SYNC_FIELD_MANAGER="backup-restore-sync"
 
 # A customer allowlist entry that is not in this list is rejected.
+# Although these specs are supported, not all of them should be synchronized. In special cases
+# where both clusters have the same value, the Administrator can select it. Otherwise the safest
+# fields are the ones defined in DEFAULT_INSTALLATION_SPEC_ALLOWLIST
 SUPPORTED_INSTALLATION_SPEC_FIELDS=(
     "spec.license"
     "spec.topologyModel"
@@ -512,7 +517,6 @@ SUPPORTED_INSTALLATION_SPEC_FIELDS=(
 
 # Used when INSTALLATION_SPEC_ALLOWLIST is not defined in geo_config.env.
 DEFAULT_INSTALLATION_SPEC_ALLOWLIST=(
-    "spec.license"
     "spec.topologyModel"
     "spec.enableConnectionModule"
     "spec.groupProfiles"
@@ -520,7 +524,6 @@ DEFAULT_INSTALLATION_SPEC_ALLOWLIST=(
     "spec.pakModules"
     "spec.automationFoundation"
     "spec.resourceOverrides"
-    "spec.customPropertiesConfigMap"
 )
 
 installation_error() {
@@ -584,6 +587,15 @@ get_configmap() {
 get_properties_configmap_name() {
     if ! yaml_get "$1" '[.spec.pakModules[]?.config[]? | select(.name == "ir-core-operator") | .spec.issueresolutioncore.ncodl.propertiesConfigMapName][0] // ""'; then
         installation_error "Could not read the Custom Properties ConfigMap name from the Installation"
+        return 1
+    fi
+}
+
+# Prints the name of the ConfigMap in spec.resourceOverrides (optional), nothing if not set.
+# Usage: get_resource_overrides_configmap_name <installation yaml>
+get_resource_overrides_configmap_name() {
+    if ! yaml_get "$1" '.spec.resourceOverrides // ""'; then
+        installation_error "Could not read spec.resourceOverrides from the Installation"
         return 1
     fi
 }
@@ -710,6 +722,15 @@ apply_kube_yaml() {
         return 1
     fi
     echo "  Applied ${label}: ${out}"
+}
+
+# True when two yaml documents are identical once keys are sorted.
+# Usage: yaml_equal <yaml a> <yaml b>
+yaml_equal() {
+    local a b
+    a=$(printf '%s\n' "$1" | yq -P 'sort_keys(..)') || return 1
+    b=$(printf '%s\n' "$2" | yq -P 'sort_keys(..)') || return 1
+    [[ "$a" == "$b" ]]
 }
 
 # Prints a unified diff of two yaml documents (keys sorted so only real changes show).
