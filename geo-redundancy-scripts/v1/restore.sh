@@ -1458,7 +1458,8 @@ for resource_id in ${ALL_RESOURCES}; do
         policies)             restore_policies ;;
         runbooks)             restore_runbooks ;;
         actions)              restore_actions ;;
-        topology)             restore_file "Topology configuration" "POST" "/aiops/api/v2/configuration/topology/config/restore" "topology.json" ;;
+        topology)             resolve_topology_endpoint
+                              restore_file "Topology configuration" "POST" "${TOPOLOGY_API_BASE}/restore" "topology.json" ;;
         training-definitions) restore_items "Training definitions" "/aiops/api/v2/configuration/training-definitions" "training-definitions.json" ;;
         user-preferences)     restore_user_preferences ;;
         views)                restore_items "Views" "/aiops/api/v2/configuration/views" "views.json" ;;
